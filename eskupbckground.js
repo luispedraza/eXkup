@@ -1,5 +1,4 @@
-﻿<html>
-<script>
+﻿
 // Perform the callback when a request is received from the content script
 var callbackFunc;
 
@@ -61,6 +60,3 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 		chrome.tabs.executeScript(null, { file: "twitter2eskup.js" });	
 	}
 });
-
-</script>
-</html>
