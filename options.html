@@ -1,57 +1,21 @@
-﻿<html>
-<head><title>Opciones de la extensión de Chrome para Eskup</title></head>
-<script type="text/javascript">
-// Saves options to localStorage.
-function save_options() {
-  var key = document.getElementById("key");
-  localStorage["eskupkey"] = key.value;  
-  
-  // Update status to let user know options were saved.
-  var status = document.getElementById("status");
-  status.innerHTML = "Options Saved.";
-  setTimeout(function() {
-    status.innerHTML = "";
-  }, 750);
-}
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Opciones de la extensión de Chrome para Eskup</title>
+  <script type="text/javascript" src="js/options.js"></script>
+</head>
 
-// Restores select box state to saved value from localStorage.
-function restore_options() {
-  var key = document.getElementById("key");
-  key.value = localStorage["eskupkey"];
-  if(key.value == 'undefined')
-  {key.value = 'no definida';}
-}
-
-function test_save() {
-	var a = new Array;
-	a[0] = "primera palabra";
-	a[1] = "segunda palabra";
-	localStorage["a"] = JSON.stringify(a);
-}
-
-function test_load() {
-	a = JSON.parse(localStorage["a"]);
-	for (cont = 0; cont < a.length; cont ++)
-	{
-		alert (a[cont]);
-	}
-}
-
-</script>
-
-<body onLoad="restore_options()">
-<form id="key_form" name="key_form" method="post" action="">
-<label> Introduce aquí tu clave pública de Eskup:
-    <input type="text" name="key" id="key" />
-</label>
-</form>
-<button onClick="save_options()">Guardar</button>
-
-<!--
-<button onClick="test_save()">Test save</button>
-<button onClick="test_load()">Test load</button>
--->
-
-<br />
+<body>
+<div class="login_message" id ="login_message">
+  <p>Para poder usar este complemento, antes debes <b>introducir tu <span style="color:FF3300">CLAVE PÚBLICA</span> de Eskup en las opciones de la extensión</b>. Pincha sobre la imagen e inicia sesión en Eskup para obtener tu clave:</p>
+  <a href="http://eskup.elpais.com/Auth/moduser.html" target="_blank"><img src="img/pasos_previos.png" /></a>
+  <form id="key_form" name="key_form" method="post">
+  <label> Introduce aquí tu clave pública de Eskup:
+  <input type="text" name="key" id="key" />
+  </label>
+  <button id="save">Guardar</button>
+  </form>
+  <div id="status"></div>
+</div>
 </body>
 </html>

@@ -95,14 +95,13 @@ function SendRTpopup()
 function InsertRTlinks()
 {
 	// para los RT
-	
+	console.log('rts');
 	var RTlinks = document.getElementsByClassName('retweet-link');
 	for (var cont = 0; cont < RTlinks.length; cont++)
 	{
 		RTlinks[cont].onclick = SendRTpopup;
 	}
 	var RTlinksNew = document.getElementsByClassName('tweet-actions');
-	console.log('rts');
 	for (var contNew = 0; contNew < RTlinksNew.length; contNew++)
 	{
 		console.log('rt2eskup inserted');
@@ -115,6 +114,7 @@ function InsertRTlinks()
 
 function InsertEskupElements()
 {
+	// para los tweets
 	var divwhere = null;
 	divwhere = document.getElementById('tweeting_controls');
 	if (divwhere == null) 
@@ -143,7 +143,8 @@ function InsertEskupElements()
 		diveskupimg.style.marginBottom="6px";
 		//diveskup.innerHTML = "Enviar a Eskup";
 		diveskup.appendChild(diveskupimg);	
-		divwhere.appendChild(diveskup);		
+		divwhere.appendChild(diveskup);
+		
 		var sendbutton;
 		sendbutton =  document.getElementById('tweeting_button');
 		if (sendbutton != null) sendbutton.addEventListener("click", Send, false);
@@ -157,5 +158,5 @@ function InsertEskupElements()
 
 if (document.getElementById('send2eskup') == null)
 {	
-	InsertEskupElements();
+	//InsertEskupElements();
 }

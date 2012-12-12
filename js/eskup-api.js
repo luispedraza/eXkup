@@ -7,10 +7,39 @@
 // nota: http://www.nsftools.com/misc/SearchAndHighlight.htm
 // nota: https://developer.mozilla.org/En/DragDrop/Drag_Operations
 
-var my_id = null;
+// Comprobación de configuración
+
+function redirectConfig() {
+	window.close();
+	chrome.tabs.create({url:"options.html"});
+}
+
+var publickey = localStorage["eskupkey"];
+if (!publickey) {
+	redirectConfig();
+}
+
+// URLs API: Ineskup, Outeskup y Profileeskup
+var INESKUP = "http://eskup.elpais.com/Ineskup";
+var OUTESKUP = "http://eskup.elpais.com/Outeskup";
+var PROFILEESKUP = "http://eskup.elpais.com/Profileeskup";
+var PROFILE_PARAMS = {
+	id: publickey,
+	action: "",
+	f: "json",
+	pag: ""
+}
+
+var API_PARAMS = {
+	mios: { t: "t1", npag: 1 },
+	sigo: { t: "t2", npag: 1 },
+	priv: { t: "t3", npag: 1 },
+	todo: { t: "t1-ULTIMOSMENSAJES", npag: 1 }
+}
+
+var my_id = "";
 var xmlsigo;
 var xmlmios;
-var xmlmyinfo;
 var xmlprivado;
 var xmltodos;
 var nummsg = 12;
@@ -22,19 +51,39 @@ var numpagtodo = 1;
 var numpagmios = 1;
 var numpagtema = 1;
 var temaactual = "";
-var listatemas = new Array();	// lista de temas que sigo en Eskup
-var listamsgfav = new Array();	// lista de temas favoritos que se almacena en localStorage
+var listatemas = new Array();		// lista de temas que sigo en Eskup
+var listamsgfav = new Array();		// lista de temas favoritos que se almacena en localStorage
 var listatemasblock = new Array();	// lista de temas bloqueados en la pestaña "todo"
 var listatemasblockN = new Array();	// nombres de temas bloqueados en la pestaña "todo"
 
-if (typeof(localStorage["msg_fav"]) != "undefined") listamsgfav = JSON.parse(localStorage["msg_fav"]);
+// Mensajes guardados como favoritos:
+if (localStorage["msg_fav"] != "undefined") 
+	listamsgfav = JSON.parse(localStorage["msg_fav"]);
 
 var maxchar = 280;
 var twitter = 0;
 var facebook = 0;
 
-var publickey = localStorage["eskupkey"];
-window.onload = function() {	
+function scroller(div_id) {
+	div = document.getElementById(div_id);
+	if (div.scrollTop+400 >= div.scrollHeight) {
+		numpagsigo++;
+		LoadXmlData(div_id);
+	}
+}
+
+window.onload = function() {
+	LoadProfile();
+	// Eventos
+	document.getElementById("send").addEventListener("click", Update);
+	document.getElementById("setitalic").addEventListener("click", SetItalic);
+	document.getElementById("setbold").addEventListener("click", SetBold);
+	document.getElementById("newtext").addEventListener("keydown", Counter);
+	document.getElementById("insertvideo").addEventListener("click", insertVideo);
+	document.getElementById("insertimage").addEventListener("click", insertImage);
+	document.getElementById("insertlink").addEventListener("click", insertLink);
+	document.getElementById("imagecancel").addEventListener("click", insertImageCancel);
+
 	divmios = document.getElementById("mios");
 	divmios.onscroll = function() {
 		if (divmios.scrollTop+400 >= divmios.scrollHeight)
@@ -78,83 +127,129 @@ window.onload = function() {
 	LoadTemasBlock();
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Obtengo mi propia información de usuario
-////////////////////////////////////////////////////////////////////////////////////////
-var profileAPI = "http://eskup.elpais.com/Profileeskup";
-var eskuprequser =  new XMLHttpRequest();
-eskuprequser.open("GET", profileAPI + 
-	"?action=info_usuarios&f=xml&id=" + publickey, 
-	true);
-eskuprequser.onreadystatechange = function getMyInfo()
+function Update()
 {
-	xmlmyinfo = eskuprequser.responseXML;
-	if (xmlmyinfo == null)
+	command = "add";
+	extra = "";
+	tablon = "";
+	var content = document.new_message.newtext.innerTex;	
+	var destino = "";
+	// if (twitter) destino = "1";
+	// if (facebook) destino = "2";
+	// if (twitter && facebook) destino = "1|2";
+	apiCall("GET", INESKUP, "c="+command+"&m="+content+"&x="+extra+"&id="+publickey+"&d="+destino+"&t="+tablon)
+	document.new_message.newtext.innerText="";
+};
+
+
+
+//////////////////////////
+// Información de usuario
+// ej: http://eskup.elpais.com/Profileeskup?action=info_usuarios&f=xml&id=7gTvFkSaO-pa0342AjhqMg
+//////////////////////////
+function LoadProfile() {
+	PROFILE_PARAMS.action = "info_usuarios";
+	apiCall("GET", PROFILEESKUP, encodeParams(PROFILE_PARAMS), getProfile);
+	function getProfile(req)
 	{
-		// mostrar mensaje de petición de login
-		document.getElementById("login_message").style.display = "block";
-		document.getElementById("main").style.display = "none";
-	}
-	else
-	{
-		// ocultar mensaje de petición de login
-		document.getElementById("login_message").style.display = "none";
-		document.getElementById("main").style.display = "block";
-		var nodousuario = xmlmyinfo.getElementsByTagName("perfilesUsuarios")[0].childNodes[0];
-		my_id = nodousuario.nodeName;
-		var pathphoto = nodousuario.getElementsByTagName("pathfoto")[0].childNodes[0].nodeValue;
-		var nombre = nodousuario.getElementsByTagName("nombre")[0].childNodes[0].nodeValue;
-		var apellidos = nodousuario.getElementsByTagName("apellidos")[0].childNodes[0].nodeValue;
-		var descripcion = nodousuario.getElementsByTagName("descripcion")[0].childNodes[0].nodeValue;
-		var urlwebpersonal = nodousuario.getElementsByTagName("urlwebpersonal")[0].childNodes[0].nodeValue;
-		document.getElementById("nombre").innerHTML = "Nombre: "+ nombre;
-		document.getElementById("apellidos").innerHTML = "Apellidos: "+ apellidos;		
-		document.getElementById("urlpersonal").innerHTML = "P&aacute;gina web: " + "<a href='" + urlwebpersonal + "' target='_blank'>" + urlwebpersonal + "</a>";
-		document.getElementById("descripcion").innerHTML = "Sobre m&iacute;: "+ descripcion;
-		document.getElementById("mifoto").innerHTML = "<img src='" + pathphoto + "' />";
+		var info = req.responseText;
+		if (!info) {
+			redirectConfig();
+			return;
+		}
+		perfiles = JSON.parse(info).perfilesUsuarios;
+		for (var u in perfiles) {
+			my_id = u;
+			var usuario = perfiles[u];
+		}
+		fillProfile(usuario);
 		LoadFollowTo();
 		LoadFollowMe();
-		LoadTemas();
+		LoadThemes();	// no funciona
 		// Una vez obtenida mi info de usuario puedo cargar el resto de datos :)
-		LoadXmlData("completo");
+		//LoadXmlData("completo");
 		LoadFavs();
-	}
-};
-eskuprequser.send(null);
+	};
+}
 
+/////////////////////////
 // Los temas que sigo 
-function LoadTemas(pag)
+// ej.: http://eskup.elpais.com/Profileeskup?action=list_eventos&f=xml&id=7gTvFkSaO-pa0342AjhqMg
+/////////////////////////
+function LoadThemes()
 {
-	if (pag == null) pag = 1;
-	var eskupreqtemas =  new XMLHttpRequest();
-	eskupreqtemas.open("GET",
-						 "http://eskup.elpais.com/Profileeskup?action=list_eventos&f=xml&pag=" + pag + "&id=" + publickey, 
-						 true);
-	eskupreqtemas.onreadystatechange = function getTemasInfo()
-	{		
-		var xmltemas = eskupreqtemas.responseXML;
-		if (xmltemas == null) return;
-		//if (xmltemas.getElementsByTagName("pagina")[0].firstChild.nodeValue != pag)	return;
-		divtemas = document.getElementById("temas_lista");	
-		var temas = xmltemas.getElementsByTagName("perfilesEventos")[0];
-		var nombre = xmltemas.getElementsByTagName("nombre");
-		var descripcion = xmltemas.getElementsByTagName("descripcion");		
-		for (var cont=0; cont in nombre; cont++)
-		{
-			var temaid = temas.childNodes[cont].nodeName;
-			listatemas.push(temaid);
-			temaid = "ev-" + temaid;
- 			var temaitem = document.createElement("li");
-			var temalink = document.createElement("a");
-			temalink.href = "javascript:LoadXmlData('tema', '" + temaid + "', '" + nombre[cont].textContent + "')";
-			temalink.innerHTML = nombre[cont].textContent;
-			temaitem.appendChild(temalink);
-			divtemas.appendChild(temaitem);			
-		}
+	PROFILE_PARAMS.action = "list_eventos";
+	apiCall("GET", PROFILEESKUP, encodeParams(PROFILE_PARAMS), getThemesInfo);
+	function getThemesInfo(req)
+	{
+	// 	var themes = JSON.parse(req.responseText);
+	// 	if (!themes) return;
+	// 	for (var t in themes.perfilesEventos) listatemas.push(t);
+	// 	fillThemes(themes);
+	}
+}
+
+///////////////////////
+// ¿A quiénes sigo?
+// ej: http://eskup.elpais.com/Profileeskup?action=list_usuarios&f=xml&pag=1&id=7gTvFkSaO-pa0342AjhqMg
+///////////////////////
+function LoadFollowTo(pag)
+{
+	if (!pag) pag = 1;
+	PROFILE_PARAMS.action="list_usuarios";
+	PROFILE_PARAMS.pag = pag;
+	apiCall("GET", PROFILEESKUP, encodeParams(PROFILE_PARAMS), getFTInfo);
+	function getFTInfo(req)
+	{
+		var users = JSON.parse(req.responseText);
+		if (!users) return;
+		if (users.pagina != pag) return;
+		fillFollows(document.getElementById("follow-to-users"), users);
 		LoadFollowTo(pag+1);
 	}
-	eskupreqtemas.send(null);
 }
+
+////////////////////////////
+// ¿Quiénes me siguen?
+// // ej: http://eskup.elpais.com/Profileeskup?action=list_seguidores&f=xml&pag=1&id=7gTvFkSaO-pa0342AjhqMg
+////////////////////////////
+function LoadFollowMe(pag)
+{
+	if (!pag) pag = 1;
+	PROFILE_PARAMS.action="list_seguidores";
+	PROFILE_PARAMS.pag = pag;
+	apiCall("GET", PROFILEESKUP, encodeParams(PROFILE_PARAMS), getFMInfo);
+	function getFMInfo(req)
+	{
+		var users = JSON.parse(req.responseText);
+		if (!users) return;
+		if (users.pagina != pag) return;
+		fillFollows(document.getElementById("follow-me-users"), users);
+		LoadFollowMe(pag+1);
+	}
+}
+//////////////////////////////
+// Carga mensajes favoritos
+//////////////////////////////
+function LoadFavs()
+{
+	var favs = document.getElementById("favs");
+	favs.innerHTML = "";
+	for (cont=0; cont < listamsgfav.length; cont++)
+	{
+		var newfav = document.createElement("div");
+		newfav.className = "message";
+		if (localStorage[listamsgfav[cont]]) {
+			newfav.innerHTML = localStorage[listamsgfav[cont]];
+			favs.appendChild(newfav);
+		}
+	}
+	var favicons = favs.getElementsByClassName("msg_fav_on");
+	for (cont=0; cont<favicons.length; cont++) favicons[cont].onclick = SetMsgFav;
+}
+
+
+
 // Comprueba si sigo un tema
 function CheckSigoTema(temaid)
 {
@@ -193,133 +288,9 @@ function CheckMsgFav(msgid)
 	return -1;
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////
-// ¿A quiénes sigo?
-////////////////////////////////////////////////////////////////////////////////////////
-function LoadFollowTo(pag)
+function LoadXmlData(data_id, temaid, temanombre)
 {
-	if (pag == null) pag = 1;
-	var eskupreqfollowto =  new XMLHttpRequest();
-	eskupreqfollowto.open("GET",
-						 "http://eskup.elpais.com/Profileeskup?action=list_usuarios&f=xml&pag=" + pag + "&id=" + publickey, 
-						 true);
-	eskupreqfollowto.onreadystatechange = function getFTInfo()
-	{		
-		var xmlfollowto = eskupreqfollowto.responseXML;
-		if (xmlfollowto == null) return;
-		if (xmlfollowto.getElementsByTagName("pagina")[0].firstChild.nodeValue != pag) return;
-		var divfollowto = document.getElementById("followto");
-		var perfiles = xmlfollowto.getElementsByTagName("perfilesUsuarios")[0];
-		var pathphotos = xmlfollowto.getElementsByTagName("pathfoto");
-		var activos = xmlfollowto.getElementsByTagName("activo");
-		var nusers = xmlfollowto.getElementsByTagName("numeroUsuarios")[0].textContent;
-		document.getElementById("followto_n").innerHTML = nusers;
-		for (var cont=0; cont in perfiles.childNodes; cont++)
-		{
-			var nodousuario = perfiles.childNodes[cont];
-			userid = nodousuario.nodeName;							
-			var useritem = document.createElement("div");
-			if (activos[cont].childNodes[0].nodeValue == 1)
-			{
-				useritem.className = "followitem1";
-			}
-			else
-			{
-				useritem.className = "followitem2";
-			}
-			var usera = document.createElement("a");
-			var userimg = document.createElement("img");
-			userimg.src = CheckUserPhoto(pathphotos[cont].childNodes[0].nodeValue);				
-			useritem.title = userid;
-			useritem.alt = userid;
-			usera.href = "http://eskup.elpais.com/" + userid;
-			usera.target = "_blank";
-			usera.draggable = "false";
-			usera.appendChild(userimg);
-			useritem.appendChild(usera);
-			userimg.draggable = "true";
-			userimg.ondragstart="event.dataTransfer.setData('text/plain', 'informacion transmitida')";
-			divfollowto.appendChild(useritem);
-		}
-		LoadFollowTo(pag+1);
-	}
-	eskupreqfollowto.send(null);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////
-// ¿Quiénes me siguen?
-////////////////////////////////////////////////////////////////////////////////////////
-function LoadFollowMe(pag)
-{
-	if (pag == null) pag = 1;
-	var eskupreqfollowme =  new XMLHttpRequest();
-	eskupreqfollowme.open("GET",
-						 "http://eskup.elpais.com/Profileeskup?action=list_seguidores&f=xml&pag=" + pag + "&id=" + publickey, 
-						 true);
-	eskupreqfollowme.onreadystatechange = function getFMInfo()
-	{
-		var xmlfollowme = eskupreqfollowme.responseXML;
-		if (xmlfollowme == null) return;
-		if (xmlfollowme.getElementsByTagName("pagina")[0].firstChild.nodeValue != pag) return;
-		var divfollowme = document.getElementById("followme");
-		var perfiles = xmlfollowme.getElementsByTagName("perfilesUsuarios")[0];
-		var activos = xmlfollowme.getElementsByTagName("activo");
-		var nusers = xmlfollowme.getElementsByTagName("numeroUsuarios")[0].textContent;
-		document.getElementById("followme_n").innerHTML = nusers;
-		for (var cont=0; cont in perfiles.childNodes; cont++)
-		{
-			var nodousuario = perfiles.childNodes[cont];
-			userid = nodousuario.nodeName;
-			var pathphoto = nodousuario.getElementsByTagName("pathfoto")[0].childNodes[0].nodeValue;
-			var useritem = document.createElement("div");
-			if (activos[cont].childNodes[0].nodeValue == 1)
-			{
-				useritem.className = "followitem1";
-			}
-			else
-			{
-				useritem.className = "followitem2";
-			}
-			var usera = document.createElement("a");
-			var userimg = document.createElement("img");
-			userimg.src = CheckUserPhoto(pathphoto);		
-			useritem.title = userid;
-			useritem.alt = userid;
-			usera.href = "http://eskup.elpais.com/" + userid;
-			usera.target = "_blank";
-			usera.appendChild(userimg);
-			useritem.appendChild(usera);
-			divfollowme.appendChild(useritem);
-		}
-		LoadFollowMe(pag+1);
-	}
-	eskupreqfollowme.send(null);
-}
-	
-	
-function LoadFavs()
-{
-	var location = document.getElementById("favs");
-	location.innerHTML = "";
-	for (cont=0; cont < listamsgfav.length; cont++)
-	{
-		var divmsgfav = document.createElement("div");
-		divmsgfav.className = "message";
-		if (typeof(localStorage[listamsgfav[cont]]) != "undefined") 
-		{
-			divmsgfav.innerHTML = localStorage[listamsgfav[cont]];
-			location.appendChild(divmsgfav);
-		}
-	}
-	var favicons = location.getElementsByClassName("msg_fav_on");
-	for (cont=0; cont<favicons.length; cont++) favicons[cont].onclick = SetMsgFav;
-}
-
-function LoadXmlData(iddata, temaid, temanombre)
-{
-	if (iddata == "completo")
+	if (data_id == "completo")
 	{
 		LoadXmlData("sigo");
 		LoadXmlData("privado");
@@ -329,69 +300,69 @@ function LoadXmlData(iddata, temaid, temanombre)
 	}
 	var tablon;
 	var numpag;	
-	switch (iddata)
+	switch (data_id)
 	{
 		case "sigo":
-			tablon = "2";
-			numpag = numpagsigo;
-			break;
+		tablon = "2";
+		numpag = numpagsigo;
+		break;
 		case "privado":
-			tablon = "3";
-			numpag = numpagprvd;
-			break;
+		tablon = "3";
+		numpag = numpagprvd;
+		break;
 		case "todo":
-			tablon = "t1-ULTIMOSMENSAJES";
-			numpag = numpagtodo;
-			break;
+		tablon = "t1-ULTIMOSMENSAJES";
+		numpag = numpagtodo;
+		break;
 		case "mios":
-			tablon = "t1-" + my_id;
-			numpag = numpagmios;
-			break;
+		tablon = "t1-" + my_id;
+		numpag = numpagmios;
+		break;
 		case "tema":
 		tablon = temaid;
 		temaid = temaid.replace("ev-", "");
-			if (temaid != temaactual)
+		if (temaid != temaactual)
+		{
+			numpagtema = 1;
+			temaactual = temaid;
+			document.getElementById("tema").innerHTML = "";
+		}
+		if (temanombre != null)
+		{
+			document.getElementById("tema_actual").innerHTML = temanombre;
+			document.getElementById("tema_actual").href= "http://eskup.elpais.com/*" + temaid;
+			var seguiropcion = document.getElementById("seguiropcion");
+			if (CheckSigoTema(temaid) == 1)
 			{
-				numpagtema = 1;
-				temaactual = temaid;
-				document.getElementById("tema").innerHTML = "";
+				seguiropcion.innerHTML = "<img src='img/seguido.png' />";					
+				seguiropcion.title = "Dejar de seguirlo";
+				seguiropcion.href = "javascript:SeguirOff('" + temaid + "')";
 			}
-			if (temanombre != null)
+			else
 			{
-				document.getElementById("tema_actual").innerHTML = temanombre;
-				document.getElementById("tema_actual").href= "http://eskup.elpais.com/*" + temaid;
-				var seguiropcion = document.getElementById("seguiropcion");
-				if (CheckSigoTema(temaid) == 1)
-				{
-					seguiropcion.innerHTML = "<img src='img/seguido.png' />";					
-					seguiropcion.title = "Dejar de seguirlo";
-					seguiropcion.href = "javascript:SeguirOff('" + temaid + "')";
-				}
-				else
-				{
-					seguiropcion.innerHTML = "<img src='img/noseguido.png' />";					
-					seguiropcion.title = "Quiero seguirlo";
-					seguiropcion.href = "javascript:SeguirOn('" + temaid + "')";
-				}
-				var blockopcion = document.getElementById("blockopcion");
-				if (CheckBlockTema(temaid) != -1)
-				{
-					blockopcion.innerHTML = "<img src='img/block_on.png' />";
-					blockopcion.title = "Desbloquear tema";
-					blockopcion.href = "javascript:BlockOff('" + temaid + "', '" + temanombre + "')";			
-				}
-				else
-				{				
-					blockopcion.innerHTML = "<img src='img/block_off.png' />";
-					blockopcion.title = "Bloquear tema";
-					blockopcion.href = "javascript:BlockOn('" + temaid + "', '" + temanombre + "')";					
-				}
+				seguiropcion.innerHTML = "<img src='img/noseguido.png' />";					
+				seguiropcion.title = "Quiero seguirlo";
+				seguiropcion.href = "javascript:SeguirOn('" + temaid + "')";
 			}
-			numpag = numpagtema;
-			document.getElementById("temas_lista").style.display = "none";
-			document.getElementById("temas_block_lista").style.display = "none";
-			document.getElementById('tabber').tabber.tabShow(4);
-			break;			
+			var blockopcion = document.getElementById("blockopcion");
+			if (CheckBlockTema(temaid) != -1)
+			{
+				blockopcion.innerHTML = "<img src='img/block_on.png' />";
+				blockopcion.title = "Desbloquear tema";
+				blockopcion.href = "javascript:BlockOff('" + temaid + "', '" + temanombre + "')";			
+			}
+			else
+			{				
+				blockopcion.innerHTML = "<img src='img/block_off.png' />";
+				blockopcion.title = "Bloquear tema";
+				blockopcion.href = "javascript:BlockOn('" + temaid + "', '" + temanombre + "')";					
+			}
+		}
+		numpag = numpagtema;
+		document.getElementById("temas_lista").style.display = "none";
+		document.getElementById("temas_block_lista").style.display = "none";
+		document.getElementById('tabber').tabber.tabShow(4);
+		break;			
 		default:
 			alert('El tablón solicitado no existe');
 	}
@@ -403,7 +374,7 @@ function LoadXmlData(iddata, temaid, temanombre)
 	{
 		var xmldata = eskupreq.responseXML;
 		if (xmldata)
-			showOutEskup(xmldata, iddata);
+			showOutEskup(xmldata, data_id);
 	};	
 	eskupreq.send(null);	
 };
@@ -414,8 +385,8 @@ function SeguirOn (id)
 	if (!confirm('¿Está seguro de querer seguir este tema?')) return;
 	var req =  new XMLHttpRequest();
 	req.open("GET",
-			 "http://eskup.elpais.com/Profileeskup?action=add_eventos&data=" + id + "&id=" + publickey, 
-						 true);
+		"http://eskup.elpais.com/Profileeskup?action=add_eventos&data=" + id + "&id=" + publickey, 
+		true);
 	req.onreadystatechange = function SeguirOnResult()
 	{	
 		var seguiropcion = document.getElementById("seguiropcion");
@@ -431,8 +402,8 @@ function SeguirOff (id)
 	if (!confirm('¿Está seguro de querer dejar de seguir este tema?')) return;
 	var req =  new XMLHttpRequest();
 	req.open("GET",
-			 "http://eskup.elpais.com/Profileeskup?action=del_eventos&data=" + id + "&id=" + publickey, 
-						 true);
+		"http://eskup.elpais.com/Profileeskup?action=del_eventos&data=" + id + "&id=" + publickey, 
+		true);
 	req.onreadystatechange = function SeguirOffResult()
 	{	
 		var seguiropcion = document.getElementById("seguiropcion");
@@ -496,19 +467,19 @@ function LoadTemasBlock ()
 		}
 	}
 }
-/////////////////////////////////////////////////////////////////
+////////////////////////////
 // Reenvío de un mensaje
-/////////////////////////////////////////////////////////////////
+////////////////////////////
 function Resend(user, idmsg, content)
 {
-	var resendtxt = document.getElementById("new_text");
+	var resendtxt = document.getElementById("newtext");
 	resendtxt.value = "fwd @" + user + " " + content
-		.replace(/(<([^>]+)>)/ig,"")
-		.replace(/&aacute;/ig, 'á')
-		.replace(/&eacute;/ig, 'é')
-		.replace(/&iacute;/ig, 'í')
-		.replace(/&oacute;/ig, 'ó')
-		.replace(/&uacute;/ig, 'ú') + " ";
+	.replace(/(<([^>]+)>)/ig,"")
+	.replace(/&aacute;/ig, 'á')
+	.replace(/&eacute;/ig, 'é')
+	.replace(/&iacute;/ig, 'í')
+	.replace(/&oacute;/ig, 'ó')
+	.replace(/&uacute;/ig, 'ú') + " ";
 	extra = idmsg;
 	command = "add";
 	replytext.focus();
@@ -517,7 +488,7 @@ function Resend(user, idmsg, content)
 // Respuesta a un mensaje
 function Reply(user, idmsg, prv)
 {
-	var replytxt = document.getElementById("new_text");
+	var replytxt = document.getElementById("newtext");
 	replytxt.value = "@" + user + " ";
 	extra = idmsg;
 	command = "reply";
@@ -555,7 +526,7 @@ function CancelUpdate ()
 	extra = "";
 	command = "add";
 	tablon = "";
-	document.new_message.new_text.value = "";
+	document.new_message.newtext.innerText = "";
 }
 
 function showOutEskup(xmldata, locationid) {
@@ -575,20 +546,20 @@ function showOutEskup(xmldata, locationid) {
 	var levels = xmldata.getElementsByTagName("level");
 	var borrados = xmldata.getElementsByTagName("borrado");
 	var tablones = xmldata.getElementsByTagName("CopiaEnTablones");
-  	for (var i = 0; i in id_mensajes; i++) 
+	for (var i = 0; i in id_mensajes; i++) 
 	{
 		if (borrados[i].childNodes[0].nodeValue == 1) continue;
 		var idmsg = id_mensajes[i].childNodes[0].nodeValue;
 		var contenido =  contenidos[i].childNodes[0].nodeValue;		
 		var usuarioOrigen  =  usuarios[i].childNodes[0].nodeValue;
 //		var fechaMensaje = new Date(fechas[i].childNodes[0].nodeValue * 1000);
-		var fechaMensaje = fechas[i].childNodes[0].nodeValue;
-		var usuario = xmldata.getElementsByTagName(usuarioOrigen);
-		var pathPhoto = usuario[0].getElementsByTagName("pathfoto")[0].childNodes[0].nodeValue;
-		pathPhoto = CheckUserPhoto(pathPhoto);
+var fechaMensaje = fechas[i].childNodes[0].nodeValue;
+var usuario = xmldata.getElementsByTagName(usuarioOrigen);
+var pathPhoto = usuario[0].getElementsByTagName("pathfoto")[0].childNodes[0].nodeValue;
+pathPhoto = checkUserPhoto(pathPhoto);
 
 		// Se crea div para nuevo mensaje
-	    var divmessage = document.createElement("div");	
+		var divmessage = document.createElement("div");	
 		divmessage.className = "message";
 		divmessage.id = locationid + "_" + idmsg;	// identificador del div del mensaje
 		// Ahora el div para el contenido
@@ -620,11 +591,11 @@ function showOutEskup(xmldata, locationid) {
 		divfav.alt = divmessage.id;
 		divfav.title = "Favorito";
 //		divfav.addEventListener("click",SetMsgFav, false);
-		divfav.onclick = SetMsgFav;
-		divheader.appendChild(divfav);		
-			
-		var msgtext = document.createElement("p");
-		msgtext.innerHTML = contenido;
+divfav.onclick = SetMsgFav;
+divheader.appendChild(divfav);		
+
+var msgtext = document.createElement("p");
+msgtext.innerHTML = contenido;
 		// Data object: toGMTString o toLocaleString
 		Process(msgtext); // para extraer videos...		
 		// Se inserta el contenido del mensaje			
@@ -645,11 +616,11 @@ function showOutEskup(xmldata, locationid) {
 			replybtn.className = "reply";
 			replybtn.innerHTML = "responder";		
 			replybtn.href = "javascript:Reply('" +
-											  usuarioOrigen + "','" + 
-											  idmsg + "'," + 
-											  (locationid == "privado") + ")";
-			divcontrol.appendChild(replybtn);
-		}
+				usuarioOrigen + "','" + 
+				idmsg + "'," + 
+				(locationid == "privado") + ")";
+divcontrol.appendChild(replybtn);
+}
 		if (usuarioOrigen == my_id)	// soy yo
 		{
 			var deletebtn = document.createElement("a");
@@ -684,20 +655,20 @@ function showOutEskup(xmldata, locationid) {
 				idmsg +  "','" +
 				contenido +
 				"')";
-			divcontrol.appendChild(resendbtn);			
-		}
-		divmessage.appendChild(divcontrol);		
-		
-		var imagen = imagenes[i].childNodes[0].nodeValue;
-		if (imagen != 0)
-		{
+divcontrol.appendChild(resendbtn);			
+}
+divmessage.appendChild(divcontrol);		
+
+var imagen = imagenes[i].childNodes[0].nodeValue;
+if (imagen != 0)
+{
 			//imagen = "http://eskup.elpais.com" + imagen;
 			var divimage = document.createElement("img");
 			divimage.src=imagen;
 			divcontent.appendChild(divimage);
 		}
-				
-	
+
+
 		// Mensajes que son respuestas a otros:
 		var reply2user_ = reply2user[i].childNodes[0].nodeValue;
 		var reply2id_ = reply2id[i].childNodes[0].nodeValue;
@@ -721,7 +692,7 @@ function showOutEskup(xmldata, locationid) {
 			divhilo.innerHTML = "Sigue el hilo";
 			divhilo.setAttribute('onclick', "ShowThread('"+ hilos[i].childNodes[0].nodeValue + "')");
 			divfooter.appendChild(divhilo);		
-	
+
 		}	
 		if (locationid != "tema")
 		{
@@ -748,51 +719,51 @@ function showOutEskup(xmldata, locationid) {
 					}
 					var temaname = xmldata.getElementsByTagName(temaid)[0].getElementsByTagName("nombre")[0].childNodes[0].nodeValue;
 				//	divtablones.innerHTML = divtablones.innerHTML + "<p>" + temasTokens[tk] + "</p>";
-					var temali = document.createElement("li");
-					var temalink = document.createElement("a");					
-					temalink.href = "javascript:LoadXmlData('tema', 'ev-" + temaid + "', '" + temaname + "')";
+				var temali = document.createElement("li");
+				var temalink = document.createElement("a");					
+				temalink.href = "javascript:LoadXmlData('tema', 'ev-" + temaid + "', '" + temaname + "')";
 //					temalink.href = "'http://eskup.elpais.com/*" + temaid + "'";
-					temalink.target = "_blank";
-					if (CheckSigoTema(temaid) == 1)
-					{
-						temali.className = "seguido";					
-					}
-					else
-					{
-						temali.className = "noseguido";					
-					}					
-					temalink.innerHTML = temaname;
-					temali.appendChild(temalink);
-					divtablones.appendChild(temali);
+temalink.target = "_blank";
+if (CheckSigoTema(temaid) == 1)
+{
+	temali.className = "seguido";					
+}
+else
+{
+	temali.className = "noseguido";					
+}					
+temalink.innerHTML = temaname;
+temali.appendChild(temalink);
+divtablones.appendChild(temali);
 //					divtablones.innerHTML = divtablones.innerHTML + "<a target='_blank' href='http://eskup.elpais.com/*" + temaid + "'>" + 
 	//				xmldata.getElementsByTagName(temaid)[0].getElementsByTagName("nombre")[0].childNodes[0].nodeValue + " >> </a>";
-				}
-			}		
-			if ((haytemas == 1) && (msgbloqueado) && (locationid == "todo")) continue;
-			if (haytemas)
-			{
-				divtemas = document.createElement("div");
-				divtemas.className = "temas";
-				divtemas.innerHTML = "Temas";
-				divtemas.onmouseover = "this.style.backgroundColor='red'";
-				divtemas.appendChild(divtablones);	
-				divfooter.appendChild(divtemas);
-			}			
-		}
-		divcontent.appendChild(divfooter);			
-		location.appendChild(divmessage);
+}
+}		
+if ((haytemas == 1) && (msgbloqueado) && (locationid == "todo")) continue;
+if (haytemas)
+{
+	divtemas = document.createElement("div");
+	divtemas.className = "temas";
+	divtemas.innerHTML = "Temas";
+	divtemas.onmouseover = "this.style.backgroundColor='red'";
+	divtemas.appendChild(divtablones);	
+	divfooter.appendChild(divtemas);
+}			
+}
+divcontent.appendChild(divfooter);			
+location.appendChild(divmessage);
 		// por si al haber bloqueado mensajes se muestran demasiado pocos:
 		nummsgCargados++;		
-	  }
-	  if ((locationid == "todo") &&(nummsgCargados < nummsg))
-	  {
-		  numpagtodo++;
-		  LoadXmlData(locationid);
-	  }
-	  else
-	  {
-		  nummsgCargados=0;
-	  }
+	}
+	if ((locationid == "todo") &&(nummsgCargados < nummsg))
+	{
+		numpagtodo++;
+		LoadXmlData(locationid);
+	}
+	else
+	{
+		nummsgCargados=0;
+	}
 }
 
 function showEskupThread(xmldata, locationid) {
@@ -817,7 +788,7 @@ function showEskupThread(xmldata, locationid) {
 	var reply2id = xmldata.getElementsByTagName("idMsgRespuesta");
 	var levels = xmldata.getElementsByTagName("level");
 	var borrados = xmldata.getElementsByTagName("borrado");
-  	for (var i = 0; i in id_mensajes; i++) 
+	for (var i = 0; i in id_mensajes; i++) 
 	{
 		if (borrados[i].childNodes[0].nodeValue == 1) continue;
 		var idmsg = id_mensajes[i].childNodes[0].nodeValue;
@@ -826,7 +797,7 @@ function showEskupThread(xmldata, locationid) {
 		var fechaMensaje = fechas[i].childNodes[0].nodeValue;
 		var usuario = xmldata.getElementsByTagName(usuarioOrigen);
 		var pathPhoto = usuario[0].getElementsByTagName("pathfoto")[0].childNodes[0].nodeValue;
-		pathPhoto = CheckUserPhoto(pathPhoto);
+		pathPhoto = checkUserPhoto(pathPhoto);
 		// Se crea div para nuevo mensaje
 		thislevel = levels[i].childNodes[0].nodeValue;
 		if (thislevel > currlevel)
@@ -844,7 +815,7 @@ function showEskupThread(xmldata, locationid) {
 		currlevel = thislevel;
 		
 		limessage = document.createElement("li");
-	    var divmessage = document.createElement("div");		
+		var divmessage = document.createElement("div");		
 		divmessage.className = "message";
 		divmessage.id = locationid + idmsg;	// identificador del div del mensaje
 		// Ahora el div para el contenido
@@ -855,12 +826,12 @@ function showEskupThread(xmldata, locationid) {
 		divheader.className = "msg_header";		
 		
 		divheader.innerHTML = "<b><a target='_blank' href='http://eskup.elpais.com/" + 
-			usuarioOrigen +
-			"'>" + 
-			usuarioOrigen +
-			"</a> " + 
-			FormatDate(fechaMensaje) +
-			":</b>";
+		usuarioOrigen +
+		"'>" + 
+		usuarioOrigen +
+		"</a> " + 
+		FormatDate(fechaMensaje) +
+		":</b>";
 		msgtext = document.createElement("p");
 		msgtext.innerHTML = contenido;
 		// Data object: toGMTString o toLocaleString
@@ -883,7 +854,7 @@ function showEskupThread(xmldata, locationid) {
 		replybtn.href = "javascript:Reply('" +
 			usuarioOrigen + "','" + 
 			idmsg + "')";
-		divcontrol.appendChild(replybtn);
+divcontrol.appendChild(replybtn);
 		if (usuarioOrigen == my_id)	// soy yo
 		{
 			var deletebtn = document.createElement("a");
@@ -918,48 +889,48 @@ function showEskupThread(xmldata, locationid) {
 				idmsg +  "','" +
 				contenido +
 				"')";
-			divcontrol.appendChild(resendbtn);			
-		}
-		divmessage.appendChild(divcontrol);		
-		
-		var imagen = imagenes[i].childNodes[0].nodeValue;
-		if (imagen != 0)
-		{
-			imagen = "http://eskup.elpais.com" + imagen;
-			var divimage = document.createElement("img");
-			divimage.src=imagen;
-			divimage.style.maxWidth="250px !important;"
-			divimage.style.height="auto";
-			divcontent.appendChild(divimage);
-		}		
-		
-		limessage.appendChild(divmessage);
-		currul.appendChild(limessage);
-		
-	  }	  
-	  location.appendChild(ulthread);
-	  $(function() {
-			$("#tree").treeview({
-				collapsed: false,
-				animated: "medium",
-				persist: "location"
-			});
-		});
+divcontrol.appendChild(resendbtn);			
+}
+divmessage.appendChild(divcontrol);		
+
+var imagen = imagenes[i].childNodes[0].nodeValue;
+if (imagen != 0)
+{
+	imagen = "http://eskup.elpais.com" + imagen;
+	var divimage = document.createElement("img");
+	divimage.src=imagen;
+	divimage.style.maxWidth="250px !important;"
+	divimage.style.height="auto";
+	divcontent.appendChild(divimage);
+}		
+
+limessage.appendChild(divmessage);
+currul.appendChild(limessage);
+
+}	  
+location.appendChild(ulthread);
+$(function() {
+	$("#tree").treeview({
+		collapsed: false,
+		animated: "medium",
+		persist: "location"
+	});
+});
 }
 
 function FormatDate(strdate)
 {
 	var thedate = new Date(strdate * 1000);
 	return "<span class='time'>" + PadNumber(thedate.getHours().toString(),2) +
-		":" + 
-		PadNumber(thedate.getMinutes(),2) +
-		" " + 
-		PadNumber(thedate.getDate(),2) +
-		"-" +
-		PadNumber(thedate.getMonth(),2) +
-		"-" + 
-		PadNumber(thedate.getFullYear(),4) +
-		"</span>";
+	":" + 
+	PadNumber(thedate.getMinutes(),2) +
+	" " + 
+	PadNumber(thedate.getDate(),2) +
+	"-" +
+	PadNumber(thedate.getMonth(),2) +
+	"-" + 
+	PadNumber(thedate.getFullYear(),4) +
+	"</span>";
 }
 
 function PadNumber(stdate, stlength)
@@ -976,8 +947,8 @@ function ShowReply2(idmsgA, idmsgBdiv)
 	var eskupreq =  new XMLHttpRequest();
 	var xmlreply;
 	eskupreq.open("POST",
-				  "http://eskup.elpais.com/Outeskup?th=0&f=xml&msg=" + idmsgA + "&id=" + publickey,
-				  false);
+		"http://eskup.elpais.com/Outeskup?th=0&f=xml&msg=" + idmsgA + "&id=" + publickey,
+		false);
 	eskupreq.onreadystatechange = function()
 	{
 		xmlreply = eskupreq.responseXML;
@@ -986,9 +957,9 @@ function ShowReply2(idmsgA, idmsgBdiv)
 //	showOutEskup(xmlreply, idmsgBdiv);
 //	divB = document.getElementById(idmsgBdiv);
 //	divB.style.backgroundColor = "#FDD";
-	document.getElementById("popupWndContent").innerHTML = "";
-	showOutEskup(xmlreply, "popupWndContent");
-	loadPopup();  
+document.getElementById("popupWndContent").innerHTML = "";
+showOutEskup(xmlreply, "popupWndContent");
+loadPopup();  
 }
 
 function ShowThread(idthread)
@@ -998,8 +969,8 @@ function ShowThread(idthread)
 	divthrealist = document.getElementById("thread_message_list");
 	var eskupreqth =  new XMLHttpRequest();
 	eskupreqth.open("POST",
-				"http://eskup.elpais.com/Outeskup?th=1&f=xml&msg=" + idthread + "&id=" + publickey,
-				false);
+		"http://eskup.elpais.com/Outeskup?th=1&f=xml&msg=" + idthread + "&id=" + publickey,
+		false);
 	eskupreqth.onreadystatechange = function()
 	{
 		var xmlth = eskupreqth.responseXML;	
@@ -1022,79 +993,48 @@ function CloseThread()
 	document.getElementById("tabber").style.display = "block";
 }
 
-function HTree()
-{
-}
 
-var command = "add";
-var extra = "";
-var tablon = "";
-function Update()
-{
-	var content = document.new_message.new_text.value;
-	var eskuprequpdate = new XMLHttpRequest();
-	var destino = "";
-	if (twitter) destino = "1";
-	if (facebook) destino = "2";
-	if (twitter && facebook) destino = "1|2";
-	eskuprequpdate.open("POST",
-					   "http://eskup.elpais.com/Ineskup?c="+
-					   command +
-					   "&m=" + 
-					   content +
-					   "&x=" +
-					   extra +
-					   "&id=" + publickey +
-					   "&d=" + destino +
-					   "&pt=" + imsel +
-					   "&t=" + tablon,
-					   true);	
-	eskuprequpdate.send(null);	
-	// limpieza:
-	document.new_message.new_text.value="";
-	command = "add";
-	tablon = "";
-	extra = "";
-	imsel = "";
-};
 
 function RGB(red, green, blue)
 {
-    var decColor = blue + 256 * green + 65536 * red;
-    return decColor.toString(16);
+	var decColor = blue + 256 * green + 65536 * red;
+	return decColor.toString(16);
 }
 
 function Counter()
 {
-	remaining = maxchar - document.new_message.new_text.value.length-1;
+	remaining = maxchar - document.new_message.newtext.innerText.length-1;
 	document.getElementById("counter").innerHTML = String(remaining);
 //	var factor = remaining/240;
 //	document.getElementById("counter").style.backgroundColor = RGB(255,Math.round(255*factor),Math.round(255*factor));
-	
+
 };
 
-
+//////////////////////////////////////
+// Aplica etilo <b> a la selección
+//////////////////////////////////////
 function SetBold()
 {
-	textComponent = document.new_message.new_text;
+	textComponent = document.new_message.newtext;
 	var startPos = textComponent.selectionStart;
-    var endPos = textComponent.selectionEnd;
-    selectedText = textComponent.value.substring(startPos, endPos);
+	var endPos = textComponent.selectionEnd;
+	selectedText = textComponent.value.substring(startPos, endPos);
 	textComponent.value = textComponent.value.slice(0,startPos) +
-			"<b>" + selectedText + "</b>" +
-			textComponent.value.slice(endPos);
-	
+		selectedText.bold() +
+		textComponent.value.slice(endPos);
 }
-
+//////////////////////////////////////
+// Aplica etilo <i> a la selección
+//////////////////////////////////////
 function SetItalic()
 {
-	textComponent = document.new_message.new_text;
+	textComponent = document.new_message.newtext;
 	var startPos = textComponent.selectionStart;
-    var endPos = textComponent.selectionEnd;
-    selectedText = textComponent.value.substring(startPos, endPos);
+	var endPos = textComponent.selectionEnd;
+	selectedText = textComponent.value.substring(startPos, endPos);
 	textComponent.value = textComponent.value.slice(0,startPos) +
-			"<i>" + selectedText + "</i>" +
-			textComponent.value.slice(endPos);
+		selectedText.italics()+
+		textComponent.value.slice(endPos);
 }
 
 // http://www.codetoad.com/javascript_get_selected_text.asp
@@ -1131,10 +1071,10 @@ function Process(msg_content)
 			viddiv = document.createElement("div");
 			viddiv.className = "video";
 			viddiv.innerHTML ="<object width='345' height='320'><param name='movie' value='http://www.youtube.com/v/" +
-					vidid +
-					"'></param><param name='wmode' value='transparent'></param><embed src='http://www.youtube.com/v/" +
-					vidid + 
-					"' type='application/x-shockwave-flash' wmode='transparent' width='345' height='320'></embed></object>";		
+			vidid +
+			"'></param><param name='wmode' value='transparent'></param><embed src='http://www.youtube.com/v/" +
+			vidid + 
+			"' type='application/x-shockwave-flash' wmode='transparent' width='345' height='320'></embed></object>";		
 			msg_content.replaceChild(viddiv, linktext[i]);
 			break;
 		}
@@ -1152,7 +1092,7 @@ function Process(msg_content)
 				viddiv.innerHTML = vimeoxml.getElementsByTagName("html")[0].childNodes[0].nodeValue;
 			};
 			vimeoreq.send(null);
-	
+
 			msg_content.replaceChild(viddiv, linktext[i]);
 			break;
 		}	
@@ -1177,14 +1117,6 @@ function Process(msg_content)
 	}
 	//message.replaceChild(linktext, null);	
 	//http://www.w3schools.com/Dom/dom_nodes_remove.asp	
-}
-
-function CheckUserPhoto(path)
-{
-	if (path == "")
-		return "img/noimage.png";
-	else
-		return path;
 }
 
 function Send2Twitter()
@@ -1244,18 +1176,18 @@ function Search(div)
 	}
 	else if (Nsearch != 0)
 	{	
-	switch(div)
-	{
-		case "mios":
+		switch(div)
+		{
+			case "mios":
 			numpagmios++;
 			break;
-		case "sigo":
+			case "sigo":
 			numpagsigo++;
 			break;
-		case "privado":
+			case "privado":
 			numpagprvd++;
 			break;
-		case "todo":	
+			case "todo":	
 			numpagtodo++;
 			break;			
 		}
@@ -1279,7 +1211,7 @@ function Search(div)
 			if (i < 0) {
 				newText += bodyText;
 				bodyText = "";
-				} else {
+			} else {
 					// skip anything inside an HTML tag
 					if (bodyText.lastIndexOf(">", i) >= bodyText.lastIndexOf("<", i)) {
 						// skip anything inside a <script> block
@@ -1300,21 +1232,21 @@ function Search(div)
 			}
 		}
 		lastmsgsearch=Nsearch;		
-}
+	}
 
-function SetMsgFav(event)
-{
-	var target = event.target;
-	msgid = target.alt.split("_")[1];
-	switch (target.className)
+	function SetMsgFav(event)
 	{
-		case "msg_fav_on":
+		var target = event.target;
+		msgid = target.alt.split("_")[1];
+		switch (target.className)
+		{
+			case "msg_fav_on":
 			delete localStorage[msgid];
 			listamsgfav.splice(CheckMsgFav(msgid), 1);
 			target.className = "msg_fav_off";
 			target.src="/img/star_off.png";
 			break;		
-		case "msg_fav_off":
+			case "msg_fav_off":
 			if (CheckMsgFav(msgid) == -1)
 			{
 				listamsgfav.push(msgid);
@@ -1328,4 +1260,4 @@ function SetMsgFav(event)
 		}
 		localStorage["msg_fav"] = JSON.stringify(listamsgfav);
 		LoadFavs();
-}
+	}

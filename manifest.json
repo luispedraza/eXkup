@@ -1,21 +1,21 @@
 ﻿{
-  "name": "Extensión de Chrome para Eskup",
-  "version": "0.9.98",
+  "name": "[dev] Extensión para Eskup",
+  "version": "0.9.99",
   "description": "Extensión de Chrome no oficial para utilizar Eskup, la red social de EL PAÍS. (http://www.eskup.es)",
   "browser_action": {
     "default_icon": "img/icon.png",
     "default_popup": "eskuppopup.html"
     },
   "permissions": [
-	"http://eskup.elpais.com/Oututoi",
 	"tabs",
 	"http://*/*"
   ],
   "options_page": "options.html",
   "background": {
-    "scripts" : ["eskupbckground.js"]
+    "scripts" : ["js/eskupbckground.js"]
     },  
   "icons": { "48": "img/eskupicon48.png",
           "128": "img/eskupicon128.png" },
+  "content_security_policy": "script-src 'self' https://example.com; object-src 'self' https://vimeo.com",
   "manifest_version" : 2
 }
