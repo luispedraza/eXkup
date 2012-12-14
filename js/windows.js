@@ -1,4 +1,6 @@
-﻿//////////////////////////////////////////////////////////
+﻿// Cargar imagen en canvas http://www.phpied.com/photo-canvas-tag-flip/
+
+//////////////////////////////////////////////////////////
 // recibida lista de imágenes capturadas para insertar
 //////////////////////////////////////////////////////////
 function onImages(result) 
@@ -23,7 +25,16 @@ function onImages(result)
 		newimg.style.maxWidth = "150px";
 		newimg.style.height = "auto";
 		newimg.addEventListener("click", function(){
-
+			var img = new Image();
+			img.onload = function() {
+				var canvas = document.getElementById("canvasimage");
+				var ctx = canvas.getContext("2d");
+				canvas.width = img.width;
+				canvas.height = img.height;
+				ctx.drawImage(img, 0, 0, img.width, img.height);
+				console.log(canvas.toDataURL("image/jpeg", 0.8));
+			}
+			img.src = this.src;
 		});		
 		divimages.appendChild(newimg);
 	}

@@ -7,13 +7,56 @@ function encodeParams(dict) {
 	return params;
 }
 
+function dataURItoBlob(dataURI) {
+	var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    var binary = atob(dataURI.split(',')[1]);
+    var array = [];
+    for(var i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(array)], {type: mimeString});
+}
+
+// Formateo de fechas
+function formatDate(tsDate)
+{
+	var thedate = new Date(tsDate * 1000);
+	return "<span class='time'>" + 
+	padNumber(thedate.getHours().toString(),2) +
+	":" + 
+	padNumber(thedate.getMinutes(),2) +
+	" " + 
+	padNumber(thedate.getDate(),2) +
+	"-" +
+	padNumber(thedate.getMonth(),2) +
+	"-" + 
+	padNumber(thedate.getFullYear(),4) +
+	"</span>";
+	function padNumber(stdate, stlength)
+	{
+		while (stdate.toString().length < stlength) 
+			stdate = "0" + stdate;
+		return stdate;
+	}
+}
+
 // Función general de comunicación con el servidor
 function apiCall(method, url, data, func) {
+	if (method == "GET") 
+		url = url + "?" + encodeParams(data);
 	var req = new XMLHttpRequest();
-	req.open(method, (method == "POST") ? (url) : (url + "?" + data), (func) ? (true) : (false));
-	if(method == "POST") 
-		req.setRequestHeader("Content-type", "application/x-www-form-urlencoded; charset=utf-8");
-	if(func) {
+	req.open((method=="GET") ? "GET" : "POST", url, (func) ? (true) : (false));
+	if(method == "POST") {
+		req.setRequestHeader("content-type", "application/x-www-form-urlencoded; charset=utf-8");
+		data = encodeParams(INPARAMS);
+	} else if (method == "MULTI") {
+		req.setRequestHeader("enctype", "multipart/form-data;");
+		formData = new FormData();
+		for (i in data)
+			formData.append(i, data[i]);
+		data = formData;
+	}
+	if (func) {
 		req.onreadystatechange = function() {
 			if(req.readyState == 4 && req.status == 200) {
 				func(req);
@@ -49,16 +92,15 @@ function fillFollows(div, users) {
 	counter = document.createElement("div");
 	counter.innerText = users.numeroUsuarios;
 	div.appendChild(counter);
-	for (var u in users.perfilesUsuarios) {
-		var user = users.perfilesUsuarios[u];
-		userid = u;							
+	for (var u_id in users.perfilesUsuarios) {
+		var user = users.perfilesUsuarios[u_id];
 		var usera = document.createElement("a");
-		usera.href = "http://eskup.elpais.com/" + userid;
+		usera.href = "http://eskup.elpais.com/" + u_id;
 		usera.target = "_blank";
 		var userimg = document.createElement("img");
 		userimg.src = checkUserPhoto(user.pathfoto);
-		userimg.title = userid;
-		userimg.alt = userid;
+		userimg.title = u_id;
+		userimg.alt = u_id;
 		if (user.activo) userimg.className = "online";
 		usera.appendChild(userimg);
 		div.appendChild(usera);

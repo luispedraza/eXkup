@@ -2,48 +2,48 @@
 <html>
 	<head>
 	<meta charset="utf-8" />
-	<link rel="stylesheet" href="css/tabber.css" type="text/css" />
 	<link rel="stylesheet" href="css/eskupext.css" type="text/css" />
 	<link rel="stylesheet" href="css/popup.css" type="text/css" />
 	<script type="text/javascript" src="js/utils.js"></script>
+	<script type="text/javascript" src="js/editor.js"></script>
+	<script type="text/javascript" src="js/eskup-api-old.js"></script>
 	<script type="text/javascript" src="js/eskup-api.js"></script>
-	<script type="text/javascript" src="js/tabber.js"></script>
 	<script type="text/javascript" src="js/windows.js"></script>
-	<script type="text/javascript" src="js/popup.js"></script>
+	<script type="text/javascript" src="js/dialog.js"></script>
 </head>
 <body>
 
-<iframe src="http://player.vimeo.com/video/55351695" width="WIDTH" height="HEIGHT" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+<div id = "dialog">
+	<div id="dlg_msg">¿está seguro de querer continuar?</div>
+	<div id="dlg_extra"></div>
+	<div id="dlg_ok" class="button">OK</div>
+	<div id="dlg_cancel" class="button">Cancel</div>
+</div>
+
+<!-- <iframe src="http://player.vimeo.com/video/55351695" width="WIDTH" height="HEIGHT" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
 <iframe class="youtube-player" type="text/html" width="300" height="auto" src="http://www.youtube.com/embed/JW5meKfy3fY" frameborder="0">
 </iframe>
-<iframe src="http://www.dailymotion.com/embed/video/xl4oyv_sean-paul-feat-alexis-jordan-got-2-luv-u-clip-officiel_music" width="300" height="auto" frameborder="0"></iframe>
+<iframe src="http://www.dailymotion.com/embed/video/xl4oyv_sean-paul-feat-alexis-jordan-got-2-luv-u-clip-officiel_music" width="300" height="auto" frameborder="0"></iframe> -->
 
 <div class="main" id="main">
 
-<div class="new_message">
-<div><div style="padding-top:40px; padding-left:5px;"></div>
-<div class="counter" id="counter">280</div>
-<div class="commands">
+<div id="editor">
+<div id="commands">
+	<div id="counter">280</div>
 	<div class="send" id="send"><a href="#">mandar</a></div>
-	<div class="cancel" id="cancel"><a href="javascript:CancelUpdate()">cancelar</a></div>
-	
-	<div id="setbold"><a title="Negrita" href="#"><img src="img/bold.png" /></a></div>
-	<div id="setitalic"><a title="Cursiva" href="#"><img src="img/italica.png"  /></a></div>  
-	<div id="insertlink"><a href="#"><img src="img/link.png" /></a></div>
-	<div id="insertvideo"><a href="#" title="Insertar vídeo (experimental)"><img src="img/fotograma.png" /></a></div>
-	<div id="insertimage"><a href="#" title="Insertar imagen (como enlace)"><img src="img/image.png" /></a></div>
-	  
-	<div class="otros_servicios">Enviar también a: 
-	<a href="javascript:Send2Twitter()" title="Facebook"><img id="tw" src="img/twitter_off.png" /></a>
-	<a href="javascript:Send2Facebook()" title="Twitter"><img id = "fb" src="img/facebook_off.png" /></a>   
-	</div>
+	<div class="cancel" id="cancel"><a href="#">cancelar</a></div>
 </div>
-
-<form id="new_message" name="new_message" method="post" action="" onsubmit="javascript: Update()">
-  <label>
-	<div name="newtext" id="newtext" contenteditable></div>
-  </label>
-</form>
+<div id="toolbar">
+	<div id="setbold" class="button"><a title="Negrita" href="#"><img src="img/bold.png" /></a></div>
+	<div id="setitalic" class="button"><a title="Cursiva" href="#"><img src="img/italica.png"  /></a></div>  
+	<div id="insertlink" class="button"><a href="#"><img src="img/link.png" /></a></div>
+	<div id="insertvideo" class="button"><a href="#" title="Insertar vídeo (experimental)"><img src="img/fotograma.png" /></a></div>
+	<div id="insertimage" class="button"><a href="#" title="Insertar imagen (como enlace)"><img src="img/image.png" /></a></div>
+	<div id="send2fb" class="button"><a href="#" title="Facebook"><img src="img/facebook_off.png" /></a></div>
+	<div id="send2tt" class="button"><a href="#" title="Twitter"><img src="img/twitter_off.png" /></a></div>
+</div>
+	<div id="newmessage" contenteditable></div>
+	<div id="newimage"><canvas id="canvasimage"></canvas></div>
 </div>
 
 <div class = "imageselector" id="imageselector">
@@ -53,49 +53,30 @@
 </div>
 
 <div class = "thread" id="thread">
-<a href="javascript:CloseThread()">Cerrar</a>
-<!-- <a href="javascript:HyperTree()">HTree</a> -->
-<div id="thread_message_list"></div>
+	<a id="closethread" href="#">Cerrar</a>
+	<div id="thread_message_list"></div>
 </div>
 
-<div id="popupWnd"><div id="popupWndCtrl"><a href="javascript:disablePopup()" id="popupClose">cerrar [x]</a></div><div id="popupWndContent"></div></div>
+<div id="popupWnd">
+	<div id="popupWndCtrl">
+		<a href="#" id="popupClose">cerrar [x]</a>
+	</div>
+	<div id="popupWndContent"></div>
+</div>
 
-<!-- <div class="drag_here" ondragover="event.preventDefault()" ondrop="event.stopPropagation();event.preventDefault();alert(event.dataTransfer.getData('text/plain'));">arrastra aqui</div> -->
+<div id="navigator">
+	<div id="mios" class="nav">míos</div>
+	<div id="sigo" class="nav">sigo</div>
+	<div id="priv" class="nav">priv</div>
+	<div id="todo" class="nav">todo</div>
+</div>
+<div id="board" class="message-list">
+</div>
 
-<div class="tabber" id="tabber">
-	<div class="tabbertab">       
-	<h3>sigo</h3>        			
-		<div class="section_head">Mensajes que sigo en Eskup</div>	
-		<div class="search"><input name="search" type="text" value="texto a buscar..." size="15" maxlength="25" id="searchtxt_sigo"/><a href="javascript:Search('sigo')">Buscar</a></div>
-		<div class="message_list" id="sigo">
-		</div>
-	</div>
-	
-	<div class="tabbertab">        
-	<h3>prvdo</h3>    
-		<div class="section_head">Mensajes privados que me han enviado en Eskup</div>
-		<div class="search"><input name="search" type="text" value="texto a buscar..." size="15" maxlength="25" id="searchtxt_privado"/><a href="javascript:Search('privado')">Buscar</a></div> 
-		<div class="message_list" id="privado">
-		</div>
-	</div>
+<div class="search"><input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><a id="search" href="#">Buscar</a></div>
 
-	<div class="tabbertab">
-	<h3>todo</h3>    
-		<div class="section_head">Todos los mensajes de Eskup</div>
-		<div class="search"><input name="search" type="text" value="texto a buscar..." size="15" maxlength="25" id="searchtxt_todo"/><a href="javascript:Search('todo')">Buscar</a></div>
-		<div class="message_list" id="todo">       
-		</div>
-	</div>
-	
-	<div class="tabbertab">
-	<h3>míos</h3>    
-		<div class="section_head">Mensajes que yo he enviado a Eskup</div>
-		<div class="search"><input name="search" type="text" value="texto a buscar..." size="15" maxlength="25" id="searchtxt_mios"/><a href="javascript:Search('mios')">Buscar</a></div>
-		<div class="message_list" id="mios">        
-		</div>
-	</div>
-	
-	
+
+<div id="tabber">
 	<div class="tabbertab">
 	<h3>temas </h3>    
 		<div class="section_head">
@@ -108,14 +89,14 @@
 		</div>
 		<div id="temas_head"><a target="_blank" id="tema_actual">Selecciona un tema</a><a id="seguiropcion"></a><a id="blockopcion"></a></div>        
 		</div></div>
-		<div class="message_list" id="tema">        
+		<div class="message_list" id="tema">
 		</div>
 	</div>
 	
 	 <div class="tabbertab">
 	<h3>favs</h3>    
 		<div class="section_head">Mis mensajes favoritos</div>
-		<div class="message_list" id="favs">        
+		<div class="message_list" id="favs">
 		</div>
 	</div>
 	
