@@ -45,30 +45,36 @@ function scroller(ev) {
 		loadData(ev);
 	}
 }
-
+var canvasEditor;
 window.onload = function() {
 	loadProfile();
+	LoadTemasBlock();
+	NEWMESSAGE = document.getElementById("newmessage");
 	// Eventos
 	document.getElementById("send").addEventListener("click", Update);
 	document.getElementById("cancel").addEventListener("click", CancelUpdate);
 	document.getElementById("setitalic").addEventListener("click", SetItalic);
-	document.getElementById("setbold").addEventListener("click", SetBold, true);
+	document.getElementById("setbold").addEventListener("click", SetBold);
 	document.getElementById("newmessage").addEventListener("keydown", Counter);
 	document.getElementById("newmessage").addEventListener("mouseup", Selection);
 	document.getElementById("insertvideo").addEventListener("click", insertVideo);
 	document.getElementById("insertimage").addEventListener("click", insertImage);
 	document.getElementById("insertlink").addEventListener("click", insertLink);
-	document.getElementById("imagecancel").addEventListener("click", insertImageCancel);
-	document.getElementById("closethread").addEventListener("click", closeThread);
+	document.getElementById("insert-cancel").addEventListener("click", insertCancel);
+	document.getElementById("insert-confirm").addEventListener("click", insertConfirm);
+	// Editor canvas
+	document.getElementById("canvas-remove").onclick = canvasRemoveElement;
 	document.getElementById("search").addEventListener("click", Search);
-	document.getElementById("send2fb").addEventListener("click", Send2Facebook);
-	document.getElementById("send2tt").addEventListener("click", Send2Twitter);
-	NEWMESSAGE = document.getElementById("newmessage");
+	
 	document.getElementById("board").addEventListener("scroll", scroller);
-	navs = document.getElementsByClassName("nav");
-	for (var i=0; i< navs.length; i++)
-		navs[i].addEventListener("click", loadData);
-	LoadTemasBlock();
+
+	document.getElementById("sigo").addEventListener("click", loadData);
+	document.getElementById("mios").addEventListener("click", loadData);
+	document.getElementById("priv").addEventListener("click", loadData);
+	document.getElementById("favs").addEventListener("click", LoadFavs);
+	canvasEditor = new fabric.Canvas("selector-canvas-editor");
+
+	document.getElementById("logout").onclick = logOut;
 }
 
 function LoadXmlData(data_id, temaid, temanombre)
@@ -143,7 +149,7 @@ function LoadXmlData(data_id, temaid, temanombre)
 			document.getElementById('tabber').tabber.tabShow(4);
 			break;			
 		default:
-			alert('El tablón solicitado no existe');
+			console.log("el tablón no existe");
 	}
 	// var eskupreq = new XMLHttpRequest();
 	// eskupreq.open("GET",
@@ -703,108 +709,19 @@ function closeThread()
 	document.getElementById("tabber").style.display = "block";
 }
 
-function Process(msg_content)
-{
-	linktext = msg_content.getElementsByTagName("a");
-	for (var i=0; i in linktext ; i++)
-	{ 
-		var rawtext = linktext[i].href;
-		var vidid;
-		if (rawtext.search("http://www.youtube.com") != -1)
-		{
-			vidid = rawtext.split("v=")[1].split("&")[0];
-			viddiv = document.createElement("div");
-			viddiv.className = "video";
-			viddiv.innerHTML ="<object width='345' height='320'><param name='movie' value='http://www.youtube.com/v/" +
-			vidid +
-			"'></param><param name='wmode' value='transparent'></param><embed src='http://www.youtube.com/v/" +
-			vidid + 
-			"' type='application/x-shockwave-flash' wmode='transparent' width='345' height='320'></embed></object>";		
-			msg_content.replaceChild(viddiv, linktext[i]);
-			break;
-		}
-		if (rawtext.search("vimeo.com") != -1)
-		{
-			viddiv = document.createElement("div");
-			viddiv.className = "video";
-			var vimeoreq =  new XMLHttpRequest();
-			vimeoreq.open("POST",
-				"http://vimeo.com/api/oembed.xml?width=345&url=" + rawtext, 
-				false);
-			vimeoreq.onreadystatechange = function()
-			{
-				var vimeoxml = vimeoreq.responseXML;	
-				viddiv.innerHTML = vimeoxml.getElementsByTagName("html")[0].childNodes[0].nodeValue;
-			};
-			vimeoreq.send(null);
-
-			msg_content.replaceChild(viddiv, linktext[i]);
-			break;
-		}	
-		if (rawtext.search("dailymotion.com/video") != -1)
-		{
-			vidid = rawtext.split("dailymotion.com/video/")[1].split("&")[0];
-			viddiv = document.createElement("div");
-			viddiv.className = "video";
-			viddiv.innerHTML ="<object width='345' height='320'><param name='movie' value='http://www.dailymotion.com/swf/video/" + vidid + "'></param><param name='allowFullScreen' value='true'></param></param><embed type='application/x-shockwave-flash' src='http://www.dailymotion.com/swf/video/" + vidid + "' width='345' height='320' allowfullscreen='true' ></embed></object>";		
-			msg_content.replaceChild(viddiv, linktext[i]);
-			break;
-		}
-		if (rawtext.search("dailymotion.com/swf") != -1)
-		{
-			vidid = rawtext.split("dailymotion.com/swf/video")[1].split("#")[0];
-			viddiv = document.createElement("div");
-			viddiv.className = "video";
-			viddiv.innerHTML ="<object width='345' height='320'><param name='movie' value='http://www.dailymotion.com/swf/video/" + vidid + "'></param><param name='allowFullScreen' value='true'></param></param><embed type='application/x-shockwave-flash' src='http://www.dailymotion.com/swf/video/" + vidid + "' width='345' height='320' allowfullscreen='true' ></embed></object>";		
-			msg_content.replaceChild(viddiv, linktext[i]);
-			break;
-		}		
-	}
-	//message.replaceChild(linktext, null);	
-	//http://www.w3schools.com/Dom/dom_nodes_remove.asp	
-}
-
-function Send2Twitter()
-{
-	if (twitter == 1)
-	{
-		document.getElementById("tw").src = "img/twitter_off.png";
-		twitter = 0;
-	}
-	else if (twitter == 0)
-	{
-		document.getElementById("tw").src = "img/twitter_on.png";
-		twitter = 1;
-	}
-}
-
-function Send2Facebook()
-{
-	if (facebook == 1)
-	{
-		document.getElementById("fb").src = "img/facebook_off.png";
-		facebook = 0;
-	}
-	else if (facebook == 0)
-	{
-		document.getElementById("fb").src = "img/facebook_on.png";
-		facebook = 1;
-	}
-}
-
 var Nsearch = 0;	// Número de resultados de la búsqueda
 var isearch = 0;	// Elemento actual de la búsqueda
 var searchTerm = "";
 var lastmsgsearch = 0;
+
 function Search(div)
 {
-	var tempsearchTerm = document.getElementById("searchtxt_" + div).value;	
+	var tempsearchTerm = document.getElementById("searchtxt_" + div).value;
 	if (tempsearchTerm != searchTerm)	// limpieza
 	{		
 		var oldres = document.getElementById(div).getElementsByClassName("search_res");
 		for (ires=oldres.length-1; ires>=0; ires--)
 		{
-			alert(ires);
 			oldres[ires].id = "";
 			oldres[ires].className = "";			
 		}

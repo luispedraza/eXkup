@@ -5,13 +5,13 @@ var SELECTION = [];
 
 function Counter()
 {
-	remaining = maxchar - NEWMESSAGE.innerHTML.length-1;
-	document.getElementById("counter").innerHTML = String(remaining);
+	var remaining = maxchar - NEWMESSAGE.innerText.length-1;
+	document.getElementById("counter").innerText = String(remaining);
 };
 
 function Selection() {
 	SELECTION = [];
-	sel = document.getSelection();
+	var sel = document.getSelection();
 	if (!sel.containsNode(NEWMESSAGE, true))
 		return;
 	for (var s=0; s<sel.rangeCount; s++) {

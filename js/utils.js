@@ -108,14 +108,71 @@ function fillFollows(div, users) {
 }
 
 function fillThemes(themes) {
-	div_themes = document.getElementById("temas_lista");
+	div_themes = document.getElementById("themes-follow");
 	for (var t in themes.perfilesEventos) {
-		temaid = "ev-" + t;
+		temaid = "ev-"+t;
 		var item = document.createElement("li");
-		var link = document.createElement("a");
-		//temalink.href = "javascript:LoadXmlData('tema', '" + temaid + "', '" + nombre[cont].textContent + "')";
-		link.innerText = themes.perfilesEventos[u].nombre;
-		item.appendChild(link);
+		item.id = temaid;
+		item.onclick = loadData;
+		item.innerText = themes.perfilesEventos[t].nombre;
 		div_themes.appendChild(item);			
 	}
+}
+
+function processVideos(msg_content)
+{
+// <iframe src="http://player.vimeo.com/video/55351695" width="WIDTH" height="HEIGHT" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+// <iframe class="youtube-player" type="text/html" width="300" height="auto" src="http://www.youtube.com/embed/JW5meKfy3fY" frameborder="0">
+// </iframe>
+// <iframe src="http://www.dailymotion.com/embed/video/xl4oyv_sean-paul-feat-alexis-jordan-got-2-luv-u-clip-officiel_music" width="300" height="auto" frameborder="0"></iframe>
+	linktext = msg_content.getElementsByTagName("a");
+	for (var i=0; i in linktext ; i++)
+	{ 
+		var rawtext = linktext[i].href;
+		viddiv = document.createElement("div");
+		viddiv.className = "video";
+		if (rawtext.search("www.youtube.com") != -1)
+		{
+			vidid = rawtext.split("v=")[1].split("&")[0];
+			viddiv.innerHTML ='<iframe class="youtube-player" type="text/html" width="345" height="300" src="http://www.youtube.com/embed/' +
+				vidid + '" frameborder="0">';
+			msg_content.replaceChild(viddiv, linktext[i]);
+		}
+		if (rawtext.search("vimeo.com") != -1)
+		{
+			var vimeoreq =  new XMLHttpRequest();
+			vimeoreq.open("POST",
+				"http://vimeo.com/api/oembed.xml?width=345&url=" + rawtext, 
+				false);
+			vimeoreq.onreadystatechange = function()
+			{
+				var vimeoxml = vimeoreq.responseXML;	
+				viddiv.innerHTML = vimeoxml.getElementsByTagName("html")[0].childNodes[0].nodeValue;
+			};
+			vimeoreq.send(null);
+
+			msg_content.replaceChild(viddiv, linktext[i]);
+			break;
+		}	
+		// if (rawtext.search("dailymotion.com/video") != -1)
+		// {
+		// 	vidid = rawtext.split("dailymotion.com/video/")[1].split("&")[0];
+		// 	viddiv = document.createElement("div");
+		// 	viddiv.className = "video";
+		// 	viddiv.innerHTML ="<object width='345' height='320'><param name='movie' value='http://www.dailymotion.com/swf/video/" + vidid + "'></param><param name='allowFullScreen' value='true'></param></param><embed type='application/x-shockwave-flash' src='http://www.dailymotion.com/swf/video/" + vidid + "' width='345' height='320' allowfullscreen='true' ></embed></object>";		
+		// 	msg_content.replaceChild(viddiv, linktext[i]);
+		// 	break;
+		// }
+		// if (rawtext.search("dailymotion.com/swf") != -1)
+		// {
+		// 	vidid = rawtext.split("dailymotion.com/swf/video")[1].split("#")[0];
+		// 	viddiv = document.createElement("div");
+		// 	viddiv.className = "video";
+		// 	viddiv.innerHTML ="<object width='345' height='320'><param name='movie' value='http://www.dailymotion.com/swf/video/" + vidid + "'></param><param name='allowFullScreen' value='true'></param></param><embed type='application/x-shockwave-flash' src='http://www.dailymotion.com/swf/video/" + vidid + "' width='345' height='320' allowfullscreen='true' ></embed></object>";		
+		// 	msg_content.replaceChild(viddiv, linktext[i]);
+		// 	break;
+		// }		
+	}
+	//message.replaceChild(linktext, null);	
+	//http://www.w3schools.com/Dom/dom_nodes_remove.asp	
 }

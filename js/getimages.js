@@ -2,4 +2,4 @@
 images = images.map(function(element) {
 	return element.src;
 });
-images
+images;

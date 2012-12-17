@@ -8,12 +8,18 @@ function redirectConfig() {
 
 function initEskup() {
 	PUBLIC_KEY = localStorage["eskupkey"];
+	console.log(PUBLIC_KEY);
 	if (!PUBLIC_KEY) {
 		redirectConfig();
 	}	
 }
+function logOut() {
+	localStorage["eskupkey"] = "";
+	window.close();
+}
 
 initEskup();
+
 
 var TABLONES = {
 	mios: "t1-",
@@ -21,11 +27,16 @@ var TABLONES = {
 	priv: "3",
 	todo: "t1-ULTIMOSMENSAJES"
 }
+function getBoard(id) {
+	return (TABLONES.hasOwnProperty(id)) ? (TABLONES[id]) : (id);
+}
+
 var INESKUP = "http://eskup.elpais.com/Ineskup";
 var INPARAMS = {
 	c: "",
 	x: "",
 	f: "json",
+	d: "",
 	id: PUBLIC_KEY
 }
 var OUTESKUP = "http://eskup.elpais.com/Outeskup";
@@ -49,7 +60,7 @@ var PROFILEPARAMS = {
 function loadData(ev) {
 	if (ev) {
 		if (ev.type == "click") {
-			board = TABLONES[ev.target.id];
+			board = getBoard(ev.target.id);
 			if (board == OUTPARAMS.t)
 				return;
 			OUTPARAMS.t = board;
@@ -62,7 +73,7 @@ function loadData(ev) {
 	}
 	apiCall("GET", OUTESKUP, OUTPARAMS, getData);
 	function getData(req) {
-		info = JSON.parse(req.responseText);
+		info = JSON.parse(req.responseText.replace(/'/g, "\""));
 		users = info.perfilesUsuarios;
 		messages = info.mensajes;
 		div_board = document.getElementById("board");
@@ -81,6 +92,7 @@ function loadData(ev) {
 			var div_cont = document.createElement("div");
 			div_cont.className = "msg_content";
 			div_cont.innerHTML = cont;
+			processVideos(div_cont);
 			if (msg.cont_adicional) {
 				var img_cont = document.createElement("img");
 				img_cont.src = msg.cont_adicional;
@@ -170,7 +182,7 @@ function loadProfile() {
 			redirectConfig();
 			return;
 		}
-		perfiles = JSON.parse(info).perfilesUsuarios;
+		perfiles = JSON.parse(req.responseText.replace(/'/g, "\"")).perfilesUsuarios;
 		for (var u in perfiles) {
 			USER_ID = u;
 			TABLONES["mios"] = "t1-" + USER_ID;
@@ -179,14 +191,13 @@ function loadProfile() {
 		fillProfile(usuario);
 		LoadFollowTo();
 		LoadFollowMe();
-		LoadThemes();	// no funciona
-		LoadFavs();
+		LoadThemes();
 	};
 }
 
 /////////////////////////
 // Los temas que sigo 
-// ej.: http://eskup.elpais.com/Profileeskup?action=list_eventos&f=xml&id=7gTvFkSaO-pa0342AjhqMg
+// ej.: http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
 /////////////////////////
 function LoadThemes()
 {
@@ -194,10 +205,9 @@ function LoadThemes()
 	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, getThemesInfo);
 	function getThemesInfo(req)
 	{
-	// 	var themes = JSON.parse(req.responseText);
-	// 	if (!themes) return;
-	// 	for (var t in themes.perfilesEventos) listatemas.push(t);
-	// 	fillThemes(themes);
+		var themes = JSON.parse(req.responseText.replace(/\\/g, ""));
+		if (!themes) return;
+		fillThemes(themes);
 	}
 }
 
@@ -246,7 +256,7 @@ function LoadFollowMe(pag)
 //////////////////////////////
 function LoadFavs()
 {
-	var favs = document.getElementById("favs");
+	var favs = document.getElementById("board");
 	favs.innerHTML = "";
 	for (cont=0; cont < listamsgfav.length; cont++)
 	{
@@ -261,16 +271,29 @@ function LoadFavs()
 	for (cont=0; cont<favicons.length; cont++) favicons[cont].onclick = SetMsgFav;
 }
 
+
 function Update()
 {
 	INPARAMS.c = "add";
 	INPARAMS.m = NEWMESSAGE.innerHTML;
-	INPARAMS.d = "";
 	INPARAMS.t = "";
 	method = "";
-	// if (twitter) destino = "1";
-	// if (facebook) destino = "2";
-	// if (twitter && facebook) destino = "1|2";
+	var tt_check = document.getElementById("send2tt");
+	var fb_check = document.getElementById("send2fb");
+	if (tt_check.checked) {
+		if (fb_check.checked) {
+			INPARAMS.d = "1|2";
+			console.log("tt y fb");
+		}
+		else {
+			INPARAMS.d = "1";
+			console.log("tt");
+		}
+	}
+	else if (fb_check.checked) {
+		INPARAMS.d = "2";
+		console.log("tt");
+	}
 	newimg = document.getElementById("canvasimage");
 	if (newimg.width) {
 		INPARAMS.p = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));

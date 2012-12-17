@@ -8,4 +8,4 @@ embeds = objects.map(function(element) {
 	return element.src;
 });
 
-[].concat(objects, embeds)
+[].concat(objects, embeds);

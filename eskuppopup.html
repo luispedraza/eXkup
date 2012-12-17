@@ -3,15 +3,19 @@
 	<head>
 	<meta charset="utf-8" />
 	<link rel="stylesheet" href="css/eskupext.css" type="text/css" />
-	<link rel="stylesheet" href="css/popup.css" type="text/css" />
+	<link rel="stylesheet" href="css/dialog.css" type="text/css" />
 	<script type="text/javascript" src="js/utils.js"></script>
 	<script type="text/javascript" src="js/editor.js"></script>
 	<script type="text/javascript" src="js/eskup-api-old.js"></script>
 	<script type="text/javascript" src="js/eskup-api.js"></script>
 	<script type="text/javascript" src="js/windows.js"></script>
+	<script type="text/javascript" src="js/canvas-editor.js"></script>
 	<script type="text/javascript" src="js/dialog.js"></script>
+	<script type="text/javascript" src="js/fabric.js"></script>
+	<script type="text/javascript" src="js/caman.3.3.0.full.min.js"></script>
 </head>
 <body>
+<!-- <canvas id="canvas-test" style="border: 1px solid black;"></canvas> -->
 
 <div id = "dialog">
 	<div id="dlg_msg">¿está seguro de querer continuar?</div>
@@ -20,113 +24,105 @@
 	<div id="dlg_cancel" class="button">Cancel</div>
 </div>
 
-<!-- <iframe src="http://player.vimeo.com/video/55351695" width="WIDTH" height="HEIGHT" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
-<iframe class="youtube-player" type="text/html" width="300" height="auto" src="http://www.youtube.com/embed/JW5meKfy3fY" frameborder="0">
-</iframe>
-<iframe src="http://www.dailymotion.com/embed/video/xl4oyv_sean-paul-feat-alexis-jordan-got-2-luv-u-clip-officiel_music" width="300" height="auto" frameborder="0"></iframe> -->
-
-<div class="main" id="main">
-
-<div id="editor">
-<div id="commands">
-	<div id="counter">280</div>
-	<div class="send" id="send"><a href="#">mandar</a></div>
-	<div class="cancel" id="cancel"><a href="#">cancelar</a></div>
-</div>
-<div id="toolbar">
-	<div id="setbold" class="button"><a title="Negrita" href="#"><img src="img/bold.png" /></a></div>
-	<div id="setitalic" class="button"><a title="Cursiva" href="#"><img src="img/italica.png"  /></a></div>  
-	<div id="insertlink" class="button"><a href="#"><img src="img/link.png" /></a></div>
-	<div id="insertvideo" class="button"><a href="#" title="Insertar vídeo (experimental)"><img src="img/fotograma.png" /></a></div>
-	<div id="insertimage" class="button"><a href="#" title="Insertar imagen (como enlace)"><img src="img/image.png" /></a></div>
-	<div id="send2fb" class="button"><a href="#" title="Facebook"><img src="img/facebook_off.png" /></a></div>
-	<div id="send2tt" class="button"><a href="#" title="Twitter"><img src="img/twitter_off.png" /></a></div>
-</div>
-	<div id="newmessage" contenteditable></div>
-	<div id="newimage"><canvas id="canvasimage"></canvas></div>
-</div>
-
-<div class = "imageselector" id="imageselector">
-	<p>Selecciona el elemento de la página actual que quieras adjuntar a tu mensaje:</p>
-	<a id="imagecancel" href="">Volver</a>
-	<div id="images"></div>
-</div>
-
-<div class = "thread" id="thread">
-	<a id="closethread" href="#">Cerrar</a>
-	<div id="thread_message_list"></div>
-</div>
-
-<div id="popupWnd">
-	<div id="popupWndCtrl">
-		<a href="#" id="popupClose">cerrar [x]</a>
-	</div>
-	<div id="popupWndContent"></div>
-</div>
-
-<div id="navigator">
-	<div id="mios" class="nav">míos</div>
-	<div id="sigo" class="nav">sigo</div>
-	<div id="priv" class="nav">priv</div>
-	<div id="todo" class="nav">todo</div>
-</div>
-<div id="board" class="message-list">
-</div>
-
-<div class="search"><input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><a id="search" href="#">Buscar</a></div>
-
-
-<div id="tabber">
-	<div class="tabbertab">
-	<h3>temas </h3>    
-		<div class="section_head">
-		<div id="temas">
-		<div id="temas_menu">
-			<span><a href="#" class="list_opener_mistemas">Temas que sigo<em ><img src="img/dropdown.png" alt="dropdown" /></em></a></span>
-			<ul id="temas_lista"></ul>
-			<span><a href="#" class="list_opener_block">Temas bloqueados<em ><img src="img/dropdown.png" alt="dropdown" /></em></a></span>
-			<ul id="temas_block_lista"></ul>
+<div id="selector">
+	<div id="selector-content-editor">
+		<canvas id="selector-canvas-editor" width="420" height="380"></canvas>
+		<div id="selector-canvas-controls">
+			<input id="canvas-remove" type="button" value="borrar"/>
 		</div>
+	</div>
+
+	<div id="selector-content">
+		<div id="selector-content-normal"></div>
+		<div id="selector-content-small" style="display:none;"></div>
+	</div>
+	<div id="selector-footer">
+		<div id="insert-cancel" class="button">cancelar</div>
+		<div id="insert-confirm" class="button">insertar</div>
+
+	</div>
+</div>
+
+
+
+<!-- SECCION. MENSAJES -->
+	<div id="my-favs" class="section-container">
+	<h1>mensajes</h1>
+		<ul id="navigator">
+			<li id="sigo" class="nav">seguidos</li>
+			<li id="mios" class="nav">propios</li>
+			<li id="priv" class="nav">privados</li>
+			<li id="favs" class="nav">favoritos</li>
+		</ul>
+		<div class="search"><input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><a id="search" href="#">Buscar</a></div>
+	</div>
+	<div id="board" class="board message-list"></div>
+<!-- SECCION. EDITOR -->
+	<div id="editor" class="section-container">
+	<h1>nuevo</h1>
+	</div>
+
+	<div class="board">
+		<div id="commands">
+			<div id="counter">280</div>
+			<div class="send" id="send"><a href="#">mandar</a></div>
+			<div class="cancel" id="cancel"><a href="#">cancelar</a></div>
+		</div>
+		<div id="toolbar">
+			<img id="setbold" class="button" title="negrita" src="icon/bold.png" />
+			<img id="setitalic" class="button" title="cursiva" src="icon/italic.png" /> 
+			<img id="insertlink" class="button" title="enlazar esta página" src="icon/link.png" />
+			<img id="insertvideo" class="button" title="insertar vídeo" src="icon/video.png" />
+			<img id="insertimage" class="button" title="insertar imagen" src="icon/photo.png" />
+			<img id="cortas" class="button" title="acortar enlaces" src="icon/cortas.png" />
+			<input id="send2fb" type="checkbox" title="facebook"/>
+			<input id="send2tt" type="checkbox" title="twitter"/>
+		</div>
+		<div id="newmessage" contenteditable></div>
+		<div id="newimage"><canvas id="canvasimage"></canvas></div>
+	</div>
+	
+
+<!-- SECCION. PERFIL -->
+	<div id="my-profile" class="section-container">
+	<h1>perfil</h1>
+	</div>
+
+	<div class="board">
+		<div id="profile" class="profile">
+			<a id="logout" href="#">Cerrar Sesión</a>
+			<div id="mifoto" style="float:left"></div>
+			<div class="profile_item" id="nombre"></div>
+			<div class="profile_item" id="apellidos"></div>
+			<div class="profile_item" id="urlpersonal"></div>
+			<div class="profile_item" id="descripcion"></div>
+			<div class="profile_item" id="blog"></div>
+			
+			<div id="follows">
+			<div id="follow-to">
+				<h4>sigo a:</h4>
+				<div class="follow-to-users" id="follow-to-users"></div>
+			</div>
+			<div id="follow-me">
+				<h4>me siguen:</h4>
+				<div class="follow-me-users" id="follow-me-users"></div>       
+			</div>
+			</div>
+		</div>
+	</div>
+
+<!-- SECCION. TEMAS -->
+	<div id="my-themes" class="section-container">
+	<h1>temas</h1>
+			<h2>seguidos</h2>
+			<ul id="themes-follow"></ul>
+			<h2>bloqueados</h2>
+			<ul id="themes-block"></ul>
 		<div id="temas_head"><a target="_blank" id="tema_actual">Selecciona un tema</a><a id="seguiropcion"></a><a id="blockopcion"></a></div>        
-		</div></div>
 		<div class="message_list" id="tema">
 		</div>
 	</div>
-	
-	 <div class="tabbertab">
-	<h3>favs</h3>    
-		<div class="section_head">Mis mensajes favoritos</div>
-		<div class="message_list" id="favs">
-		</div>
-	</div>
-	
-	
-	<div class="tabbertab">
-	<h3>perfil</h3>
-	<div id="profile" class="profile">
-		<div id="mifoto" style="float:left"></div>
-		<div class="profile_item" id="nombre"></div>
-		<div class="profile_item" id="apellidos"></div>
-		<div class="profile_item" id="urlpersonal"></div>
-		<div class="profile_item" id="descripcion"></div>
-		<div class="profile_item" id="blog"></div>
-		
-		<div id="follows">
-		<div id="follow-to">
-			<h4>Sigo a:</h4>
-			<div class="follow-to-users" id="follow-to-users"></div>
-		</div>
-		<div id="follow-me">
-			<h4>Me siguen:</h4>
-			<div class="follow-me-users" id="follow-me-users"></div>       
-		</div>
-		</div>
-	</div>
-		
-		
-	</div>
-	</div>
-</div>
+
 </body>
 
 
