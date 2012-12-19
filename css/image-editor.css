@@ -1,0 +1,121 @@
+body {
+	font-family: 'Metrophobic', sans-serif;
+	font-size: 16px;
+}
+
+#selector-editor {
+	position: relative;
+	width: 1200px;
+	margin-top: 10px;
+	margin-left: 5px;
+}
+
+#canvas-editor {
+	outline: 5px dotted #015965;
+}
+#canvas-controls{
+	width: 550px;
+	height: 600px;
+	overflow: hidden;
+	background-color: #5FC0CE;
+	padding: 5px;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+.controlitem {
+	border-bottom: 1px solid #015965;
+	background-color: #5FC0CE;
+	overflow: hidden;
+	cursor: pointer;
+	height: 40px;
+}
+.controlitem:hover {
+	height: 500px;
+}
+#selector-content img {
+	max-width: 150px;
+	max-height: 150px;
+	margin: 5px;
+}
+#selector-items {
+	margin-top: 10px;
+	height: 100%;
+	overflow: scroll;
+	padding: 20px;
+}
+
+#selector-content img:hover {
+	outline: 2px solid #ff3300;
+}
+
+#selector-editor h1 {
+	display: block;
+	font-size: 1.2em;
+	color: white;
+}
+#selector-editor h2 {
+	display: block;
+	font-size: 1em;
+	color: white;
+	background-color: #FF7A00;
+}
+
+#draw-options {
+	-webkit-transition: all .5s ease;
+	overflow: hidden;
+}
+#canvas-text.off + div {
+	-webkit-transition: all .5s ease;
+	overflow: hidden;
+	height: 0;
+	opacity: 0;
+}
+#canvas-text.on + div {
+	height: auto;
+	opacity: 1;
+}
+
+#draw-options.off {
+	height: 0;
+}
+#draw-options.on {
+	height: auto; 
+}
+
+#masonry-container {
+	display: none;
+	width: 600px;
+	height: 600px;
+}
+
+.btn {
+	width: 35px;
+	height: 35px;
+	font-size: 1.2em;
+	background-color: #FFB673;
+	color: white;
+}
+.btnon {
+	min-width: 35px;
+	min-height: 35px;
+	font-size: 1.2em;
+	background-color: #FF7A00;
+	color: white;
+}
+#canvas-rect {
+	background-image: url("/icon/square.png");
+	background-repeat:  no-repeat;
+}
+#canvas-circle {
+	background-image: url("/icon/circle.png");
+	background-repeat:  no-repeat;
+}
+#canvas-triangle {
+	background-image: url("/icon/triangle.png");
+	background-repeat:  no-repeat;
+}
+#clips-loader {
+	display: none;
+}

@@ -1,4 +1,20 @@
 // Junta los valores de un objeto para producir una url
+
+Array.prototype.shuffle = function() {
+ 	var len = this.length;
+	var i = len;
+	 while (i--) {
+	 	var p = parseInt(Math.random()*len);
+		var t = this[i];
+  	this[i] = this[p];
+  	this[p] = t;
+ 	}
+};
+
+function randomColor() {
+	return '#'+Math.floor(Math.random()*16777215).toString(16);
+}
+
 function encodeParams(dict) {
 	params = ""
 	for (var k in dict) {

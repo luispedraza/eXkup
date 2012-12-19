@@ -2,6 +2,21 @@
 // Contador de caracteres restantes
 /////////////////////////////////////
 var SELECTION = [];
+var NEWMESSAGE;
+
+window.addEventListener("load", initEditor);
+function initEditor() {
+	NEWMESSAGE = document.getElementById("newmessage");
+	document.getElementById("send").addEventListener("click", Update);
+	document.getElementById("cancel").addEventListener("click", CancelUpdate);
+	document.getElementById("setitalic").addEventListener("click", setItalic);
+	document.getElementById("setbold").addEventListener("click", setBold);
+	document.getElementById("newmessage").addEventListener("keydown", Counter);
+	document.getElementById("newmessage").addEventListener("mouseup", Selection);
+	document.getElementById("insertvideo").addEventListener("click", insertVideo);
+	document.getElementById("insertimage").addEventListener("click", insertImage);
+	document.getElementById("insertlink").addEventListener("click", insertLink);
+}
 
 function Counter()
 {
@@ -21,7 +36,7 @@ function Selection() {
 //////////////////////////////////////
 // Aplica la etiqueta <tag> a la selección
 //////////////////////////////////////
-function SetTag(tag) {
+function setTag(tag) {
 	var tagini = "<"+tag+">";
 	var tagfin = "</"+tag+">";
 	for (r in SELECTION) {
@@ -37,7 +52,7 @@ function SetTag(tag) {
 		var finCon = range.endContainer;
 		if (iniCon == finCon) {
 			iniCon.textContent = iniCon.textContent.slice(0,ini) +
-				iniCon.textContent.slice(ini,fin).bold() +
+				tagini + iniCon.textContent.slice(ini,fin) + tagfin +
 				iniCon.textContent.slice(fin);
 		}
 		else {
@@ -54,16 +69,16 @@ function SetTag(tag) {
 //////////////////////////////////////
 // Aplica etilo <b> a la selección
 //////////////////////////////////////
-function SetBold()
+function setBold()
 {
-	SetTag("b");
+	setTag("b");
 }
 //////////////////////////////////////
 // Aplica etilo <i> a la selección
 //////////////////////////////////////
-function SetItalic()
+function setItalic()
 {
-	SetTag("i");
+	setTag("i");
 }
 
 // http://www.codetoad.com/javascript_get_selected_text.asp

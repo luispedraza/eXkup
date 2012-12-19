@@ -1,0 +1,12 @@
+body {
+	width:600px;
+	height:600px;
+	overflow-x:hidden;
+	overflow-y:hidden;
+	font-family: 'Metrophobic', sans-serif;
+	font-size: 16px;
+	color:#333;
+	margin: 0px;
+	-webkit-perspective: 800px;
+	-webkit-transform-style: preserve-3d;
+}

@@ -8,13 +8,11 @@ function redirectConfig() {
 
 function initEskup() {
 	PUBLIC_KEY = localStorage["eskupkey"];
-	console.log(PUBLIC_KEY);
-	if (!PUBLIC_KEY) {
-		redirectConfig();
-	}	
+	if (!PUBLIC_KEY) redirectConfig();
 }
+
 function logOut() {
-	localStorage["eskupkey"] = "";
+	localStorage.removeItem("eskupkey");
 	window.close();
 }
 
@@ -45,6 +43,8 @@ var OUTPARAMS = {
 	nummsg: 12,		// cuántos mensajes
 	p: 1,			// qué página
 	f: "json",		// formato de respuesta
+	th: 1,
+	msg: "",
 	id: PUBLIC_KEY
 }
 var PROFILEESKUP = "http://eskup.elpais.com/Profileeskup";
@@ -108,6 +108,12 @@ function loadData(ev) {
 				"</a> " + 
 				formatDate(date) +
 				":</b>";
+			div_fav = document.createElement("img");
+			div_fav.src = "/icon/star.png";
+			div_fav.className = (checkFavorite(m_id)) ? ("favon") : ("favoff");
+			div_fav.setAttribute("m_id", m_id);
+			div_fav.onclick = setFavorite;
+			div_head.appendChild(div_fav);
 			// Elementos de control:
 			var div_ctrl = document.createElement("div");
 			div_ctrl.className = "msg_control";
@@ -127,6 +133,20 @@ function loadData(ev) {
 			div_ctrl.appendChild(a_reply);
 			div_ctrl.appendChild(a_fwd);
 			div_ctrl.appendChild(a_del);
+			// Hilos de mensajes
+			if (msg.idMsgRespuesta) {
+				var div_reply = document.createElement("div");
+				div_reply.className = "reply2link";
+				div_reply.innerText = "respuesta a " + msg.autorMsgRespuesta;
+				div_cont.appendChild(div_reply);
+
+				var div_thread = document.createElement("div");
+				div_thread.className = "thlink";
+				div_thread.innerText = "sigue el hilo";
+				div_thread.setAttribute("thread", msg.hilo);
+				div_thread.onclick = showThread;
+				div_cont.appendChild(div_thread);
+			}
 			// Construcción final y agregación
 			div_msg.appendChild(div_head);
 			div_msg.appendChild(div_cont);
@@ -254,7 +274,7 @@ function LoadFollowMe(pag)
 //////////////////////////////
 // Carga mensajes favoritos
 //////////////////////////////
-function LoadFavs()
+function loadFavs()
 {
 	var favs = document.getElementById("board");
 	favs.innerHTML = "";
@@ -267,8 +287,8 @@ function LoadFavs()
 			favs.appendChild(newfav);
 		}
 	}
-	var favicons = favs.getElementsByClassName("msg_fav_on");
-	for (cont=0; cont<favicons.length; cont++) favicons[cont].onclick = SetMsgFav;
+	var favicons = favs.getElementsByClassName("favon");
+	for (cont=0; cont<favicons.length; cont++) favicons[cont].onclick = setFavorite;
 }
 
 
@@ -322,19 +342,108 @@ function CheckSigoTema(temaid)
 	return 0;
 }
 // Comprueba si he bloqueado un tema
-function CheckBlockTema(temaid)
+function checkBlocked(temaid)
 {
-	for (cont = 0; cont < listatemasblock.length; cont++)
-		if (temaid == listatemasblock[cont])
-			return cont;
-	return -1;
+	return (listatemasblock.indexOf(msgid) >= 0);
 }
 
 // Comprueba si un mensaje está en mis favoritos
-function CheckMsgFav(msgid)
+function checkFavorite(msgid)
 {
-	for (cont = 0; cont < listamsgfav.length; cont++)
-		if (msgid == listamsgfav[cont])
-			return cont;
-	return -1;
+	return (listamsgfav.indexOf(msgid) >= 0);
 }
+
+function setFavorite(ev) {
+	var target = ev.target;
+	m_id = target.getAttribute("m_id");
+	if (target.className == "favon") {
+		target.className = "favoff";
+		localStorage.removeItem(m_id);
+		listamsgfav.splice(listamsgfav.indexOf(m_id), 1);
+		
+	} else {
+		target.className = "favon";
+		listamsgfav.push(m_id);
+		localStorage[m_id] = document.getElementById(m_id).innerHTML;
+	}
+	localStorage["msg_fav"] = JSON.stringify(listamsgfav);
+}
+
+function showThread(ev) {
+	threadId = ev.target.getAttribute("thread");
+	OUTPARAMS.msg = threadId;
+	apiCall("GET", OUTESKUP, OUTPARAMS, getThread);
+	function getThread(req) {
+		document.getElementById("board").innerHTML = "";
+		info = JSON.parse(req.responseText.replace(/'/g, "\""));
+		console.log(info);
+		var infoTree = new Object();
+		infoTree.id = threadId;
+		infoTree.children = [];
+		function addNode(node, parent, tree) {
+			if (tree.id == parent) tree.children.push(node)
+			else for (var n=0; n<tree.children.length; n++)
+				addNode(node, parent, tree.children[n]);
+		}
+		for (var m=0; m<info.mensajes.length; m++) {
+			var node = new Object();
+			node.id = info.mensajes[m].idMsg;
+			node.children = [];
+			parentId = info.mensajes[m].idMsgRespuesta;
+			addNode(node, parentId, infoTree);
+		}
+		console.log(infoTree);
+		//var tree = d3.layout.tree().size(500, 100);
+		var diameter = 960;
+		
+		var tree = d3.layout.tree()
+		.size([360, diameter / 2 - 120])
+		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
+
+		var diagonal = d3.svg.diagonal.radial()
+		.projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
+
+		var svg = d3.select("body").append("svg")
+		.attr("width", diameter)
+		.attr("height", diameter - 150)
+		.append("g")
+		.attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+
+
+		var nodes = tree.nodes(infoTree),
+		links = tree.links(nodes);
+
+		var link = svg.selectAll(".link")
+		.data(links)
+		.enter().append("path")
+		.attr("class", "link")
+		.attr("d", diagonal);
+
+		var node = svg.selectAll(".node")
+		.data(nodes)
+		.enter().append("g")
+		.attr("class", "node")
+		.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+
+		node.append("circle")
+		.attr("r", 4.5);
+
+		node.append("text")
+		.attr("dy", ".31em")
+		.attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+		.attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
+		.text(function(d) { return d.name; });
+		
+
+		d3.select(self.frameElement).style("height", diameter - 150 + "px");
+
+
+	}
+}
+
+
+
+
+
+
+

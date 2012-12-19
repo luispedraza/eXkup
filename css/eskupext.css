@@ -1,19 +1,5 @@
 ﻿@import url(http://fonts.googleapis.com/css?family=Metrophobic);
 
-body {
-	width:600px;
-	height:600px;
-	overflow-x:hidden;
-	overflow-y:hidden;
-	font-family: 'Metrophobic', sans-serif;
-	font-size: 16px;
-	color:#333;
-	margin: 0px;
-	-webkit-perspective: 800px;
-	-webkit-transform-style: preserve-3d;
-
-}
-
 a {
 	color:#f30;
 }
@@ -63,65 +49,6 @@ a {
 }
 .section-container:hover + .board {
 	-webkit-transform: rotateY(0deg);
-}
-
-#selector {
-	height: 600px;
-	width: 0px;
-	overflow: hidden;
-	position: absolute;
-	top: 0;
-	left: 0;
-	transition: all 1s ease;
-	-moz-transition: all 1s ease;
-	-webkit-transition: all 1s ease;
-	-o-transition: all 1s ease;
-	background-color: white;
-	border: 0px solid white;
-	z-index: 10;
-}
-#selector-content-normal, #selector-content-small {
-	width: 150px;
-	height: 600px;
-	float: right;
-	overflow: scroll;
-}
-#selector-content-editor {
-	width: 420px;
-	height: 500px;
-	float: left;
-	border: 1px dotted black;
-}
-#selector-canvas-controls {
-	background-color: #ccc;
-}
-#selector-footer .button {
-	background-color: red;
-	color: white;
-	font-weight: bold;
-	cursor: pointer;
-	display: inline;
-	margin: 5px;
-}
-#selector-footer {
-	position: absolute;
-	bottom: 0;
-}
-
-#selector.on {
-	width: 600px;
-	overflow: scroll;
-	border: 1px solid #f30;
-}
-
-
-
-#selector #selector-content img {
-	margin:10px;
-}
-
-#selector #selector-content img:hover {
-	outline: 2px solid #ff3300;
 }
 
 .message-list {
@@ -267,54 +194,6 @@ a {
 	float:right;
 }
 
-#counter {
-	font-size:2em;
-	font-weight:bold;
-}
-
-#commands {
-	width: 50px;
-	float: left;
-}
-
-#toolbar {
-	width: 400px;
-	float: right;
-}
-
-#toolbar .button {
-	display:inline;
-	cursor: pointer;
-	background-color: #f30;
-}
-
-#send2fb {
-	-webkit-appearance: none;
-	width: 30px;
-	height: 30px;
-	background: url('/icon/facebook.png') no-repeat;
-	-webkit-filter: grayscale(100%);
-}
-
-#send2tt {
-	-webkit-appearance: none;
-	width: 30px;
-	height: 30px;
-	background: url('/icon/twitter.png') no-repeat;
-	-webkit-filter: grayscale(100%);
-}
-
-#send2fb:checked, #send2tt:checked {
-	-webkit-filter: grayscale(0%);
-}
-
-#newmessage {
-	border: 1px solid red;
-	height: 100px;
-	width: 400px;
-	float: right;
-}
-
 .confirm {
   background-color: #fff;
   color: #333;
@@ -423,11 +302,17 @@ a {
 	color:#fff;
 }
 
-.msg_fav_on, .msg_fav_off {
+/* Estrella de favorito */
+.favon, .favoff {
 	float:right;
 	border:0 !important;
 }
-
+.favon {
+	-webkit-filter: grayscale(0);
+}
+.favoff {
+	-webkit-filter: grayscale(100%);
+}
 .section_head {
 	display:inline;
 }

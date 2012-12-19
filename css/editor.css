@@ -1,0 +1,103 @@
+#editor {
+	position: relative;
+	height: 180px;
+}
+
+#commands {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100px;
+}
+
+#toolbar {
+	position: absolute;
+	top: 0;
+	left: 120px;
+	width: 400px;
+}
+
+#newmessage {
+	position: relative;
+	left: 120px;
+	top: 50px;
+	border: 2px solid #FF7A00;
+	-webkit-border-radius: 10px;
+	height: 120px;
+	width: 500px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding: 5px;
+}
+
+#canvasimage {
+	border: 1px dotted black;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100px;
+}
+#commands #counter {
+	font-size:2em;
+	font-weight:bold;
+	border: 2px solid #FF7A00;
+	-webkit-border-radius: 10px;
+	text-align: center;
+	height: 50px;
+}
+
+#commands #send, #commands #cancel {
+	background-color: #03899C;
+	color: white;
+	-webkit-border-radius: 10px;
+	cursor: pointer;
+	margin-top: 5px;
+	height: 30px;
+	text-align: center;
+}
+#commands #send:hover, #commands #cancel:hover {
+	background-color: #1F6B75;
+}
+#commands #send:active, #commands #cancel:active {
+	background-color: #015965;
+}
+
+#toolbar .button {
+	display:inline;
+	cursor: pointer;
+	background-color: #FF7A00;
+}
+#toolbar .button:hover {
+	background-color: #BF7530;
+}
+#toolbar .button:active {
+	background-color: #A65000;
+}
+
+#send2fb {
+	-webkit-appearance: none;
+	width: 30px;
+	height: 30px;
+	background: url('/icon/facebook.png') no-repeat;
+	-webkit-filter: grayscale(100%);
+}
+#send2fb:hover, #send2tt:hover {
+	-webkit-filter: grayscale(50%);
+}
+
+#send2tt {
+	-webkit-appearance: none;
+	width: 30px;
+	height: 30px;
+	background: url('/icon/twitter.png') no-repeat;
+	-webkit-filter: grayscale(100%);
+}
+
+#send2fb, #send2tt {
+	cursor: pointer;
+}
+
+#send2fb:checked, #send2tt:checked {
+	-webkit-filter: grayscale(0%);
+}
+

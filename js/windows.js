@@ -1,68 +1,6 @@
 ﻿// Cargar imagen en canvas http://www.phpied.com/photo-canvas-tag-flip/
 
-//////////////////////////////////////////////////////////
-// recibida lista de imágenes capturadas para insertar
-//////////////////////////////////////////////////////////
-function onImages(result) 
-{ 
-	divnormal = document.getElementById("selector-content-normal");
-	divsmall = document.getElementById("selector-content-small");
-	var list = [];
-	for (f in result) list = list.concat(result[f]);
-	for (var i=0; i<list.length; i++) {
-		var isnew = true;
-		for (j=0; j<i; j++) {
-			if (list[i] == list[j])
-			{
-				isnew = false;
-				continue;
-			}
-		}
-		if (!isnew) continue;
-		newimg = new Image();
-		newimg.src = list[i];
-		newimg.onload = function() {
-			if (this.width > 150) {
-				this.style.maxWidth = "150px";
-				this.style.height = "auto";	
-				divnormal.appendChild(this);
-			}
-			else if (this.width > 20) {
-				divsmall.appendChild(this);
-			}
-		}
-		newimg.addEventListener("click", function() {
-			// var img = new Image();
-			// img.onload = function() {
-			// 	var canvas = document.getElementById("canvasimage");
-			// 	var ctx = canvas.getContext("2d");
-			// 	canvas.width = img.width;
-			// 	canvas.height = img.height;
-			// 	ctx.drawImage(img, 0, 0, img.width, img.height);
-			// }
-			// img.src = this.src;
-			// canvasEditor.add(new fabric.Rect({
-			// 	left: 5,
-			// 	top: 5,
-			// 	fill: "#ff5",
-			// 	width: 100, 
-			// 	height: 100
-			// }));
-			fabric.Image.fromURL(this.src, function(image) {
-				image.set({
-					left: 0,
-					top: 0,
-					angle: 0,
-					padding: 2,
-					cornersize: 10
-				});
-				canvasEditor.add(image);
-			});
-		});		
-		
-	}
-	document.getElementById("selector").className = "on";
-}
+
 //////////////////////////////////////////////////////////
 // recibida lista de videos capturados para insertar
 //////////////////////////////////////////////////////////
@@ -114,8 +52,8 @@ function insertVideo() {
 }
 
 function insertImage() {
-	chrome.tabs.executeScript({file: 'js/getimages.js', allFrames: true}, 
-		onImages);
+	window.close();
+	chrome.tabs.create({url:"image_editor.html"});
 }
 
 function insertCancel() {

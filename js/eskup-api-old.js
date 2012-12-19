@@ -9,10 +9,6 @@
 
 // Comprobación de configuración
 
-
-
-var NEWMESSAGE;
-
 var my_id = "";
 var xmlsigo;
 var xmlmios;
@@ -33,48 +29,15 @@ var listatemasblock = new Array();	// lista de temas bloqueados en la pestaña "
 var listatemasblockN = new Array();	// nombres de temas bloqueados en la pestaña "todo"
 
 // Mensajes guardados como favoritos:
-if (localStorage["msg_fav"] != "undefined") 
+if (localStorage["msg_fav"] != "undefined")
 	listamsgfav = JSON.parse(localStorage["msg_fav"]);
 
 var maxchar = 280;
-var twitter = 0;
-var facebook = 0;
 
 function scroller(ev) {
 	if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
 		loadData(ev);
 	}
-}
-var canvasEditor;
-window.onload = function() {
-	loadProfile();
-	LoadTemasBlock();
-	NEWMESSAGE = document.getElementById("newmessage");
-	// Eventos
-	document.getElementById("send").addEventListener("click", Update);
-	document.getElementById("cancel").addEventListener("click", CancelUpdate);
-	document.getElementById("setitalic").addEventListener("click", SetItalic);
-	document.getElementById("setbold").addEventListener("click", SetBold);
-	document.getElementById("newmessage").addEventListener("keydown", Counter);
-	document.getElementById("newmessage").addEventListener("mouseup", Selection);
-	document.getElementById("insertvideo").addEventListener("click", insertVideo);
-	document.getElementById("insertimage").addEventListener("click", insertImage);
-	document.getElementById("insertlink").addEventListener("click", insertLink);
-	document.getElementById("insert-cancel").addEventListener("click", insertCancel);
-	document.getElementById("insert-confirm").addEventListener("click", insertConfirm);
-	// Editor canvas
-	document.getElementById("canvas-remove").onclick = canvasRemoveElement;
-	document.getElementById("search").addEventListener("click", Search);
-	
-	document.getElementById("board").addEventListener("scroll", scroller);
-
-	document.getElementById("sigo").addEventListener("click", loadData);
-	document.getElementById("mios").addEventListener("click", loadData);
-	document.getElementById("priv").addEventListener("click", loadData);
-	document.getElementById("favs").addEventListener("click", LoadFavs);
-	canvasEditor = new fabric.Canvas("selector-canvas-editor");
-
-	document.getElementById("logout").onclick = logOut;
 }
 
 function LoadXmlData(data_id, temaid, temanombre)
@@ -151,17 +114,6 @@ function LoadXmlData(data_id, temaid, temanombre)
 		default:
 			console.log("el tablón no existe");
 	}
-	// var eskupreq = new XMLHttpRequest();
-	// eskupreq.open("GET",
-	// 	"http://eskup.elpais.com/Outeskup?t=" + tablon + "&nummsg=" + nummsg +  "&p=" + numpag + "&f=xml" + "&id=" + publickey, 
-	// 	true);
-	// eskupreq.onreadystatechange = function getOutEskupXMLdata()
-	// {
-	// 	var xmldata = eskupreq.responseXML;
-	// 	if (xmldata)
-	// 		showOutEskup(xmldata, data_id);
-	// };	
-	// eskupreq.send(null);	
 };
 
 
@@ -335,22 +287,22 @@ function showOutEskup(xmldata, locationid) {
 		// 	FormatDate(fechaMensaje) +
 		// 	":</b>";
 		// Estrella para mensajes favoritos
-		var divfav = document.createElement("img");
-		if (CheckMsgFav(idmsg) == -1)
-		{
-			divfav.src="/img/star_off.png";
-			divfav.className = "msg_fav_off";
-		}
-		else
-		{
-			divfav.src="/img/star_on.png";
-			divfav.className = "msg_fav_on";
-		}
-		divfav.alt = divmessage.id;
-		divfav.title = "Favorito";
+		// var divfav = document.createElement("img");
+		// if (CheckMsgFav(idmsg) == -1)
+		// {
+		// 	divfav.src="/img/star_off.png";
+		// 	divfav.className = "msg_fav_off";
+		// }
+		// else
+		// {
+		// 	divfav.src="/img/star_on.png";
+		// 	divfav.className = "msg_fav_on";
+		// }
+		// divfav.alt = divmessage.id;
+		// divfav.title = "Favorito";
 		//		divfav.addEventListener("click",SetMsgFav, false);
-		divfav.onclick = SetMsgFav;
-		divheader.appendChild(divfav);		
+		// divfav.onclick = SetMsgFav;
+		// divheader.appendChild(divfav);		
 
 		var msgtext = document.createElement("p");
 		msgtext.innerHTML = contenido;
@@ -531,7 +483,7 @@ function showEskupThread(xmldata, locationid) {
 	var fechas = xmldata.getElementsByTagName("tsMensaje");
 	var imagenes = xmldata.getElementsByTagName("cont_adicional");
 	
-	var reply2user = xmldata.getElementsByTagName("autorMsgRespuesta");
+	var reply2user = xmldata.getElementsByTagName("autorMsg");
 	var reply2id = xmldata.getElementsByTagName("idMsgRespuesta");
 	var levels = xmldata.getElementsByTagName("level");
 	var borrados = xmldata.getElementsByTagName("borrado");
@@ -796,30 +748,3 @@ function Search(div)
 		lastmsgsearch=Nsearch;		
 	}
 
-	function SetMsgFav(event)
-	{
-		var target = event.target;
-		msgid = target.alt.split("_")[1];
-		switch (target.className)
-		{
-			case "msg_fav_on":
-			delete localStorage[msgid];
-			listamsgfav.splice(CheckMsgFav(msgid), 1);
-			target.className = "msg_fav_off";
-			target.src="/img/star_off.png";
-			break;		
-			case "msg_fav_off":
-			if (CheckMsgFav(msgid) == -1)
-			{
-				listamsgfav.push(msgid);
-				target.className = "msg_fav_on";
-				target.src="/img/star_on.png";
-				
-				var divmsg = document.getElementById(target.alt);
-				localStorage[msgid] = divmsg.innerHTML;				
-			}
-			break;
-		}
-		localStorage["msg_fav"] = JSON.stringify(listamsgfav);
-		LoadFavs();
-	}

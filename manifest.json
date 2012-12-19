@@ -4,7 +4,7 @@
   "description": "Extensión de Chrome no oficial para utilizar Eskup, la red social de EL PAÍS. (http://www.eskup.es)",
   "browser_action": {
     "default_icon": "img/icon.png",
-    "default_popup": "eskuppopup.html"
+    "default_popup": "popup.html"
     },
   "permissions": [
 	"tabs",
