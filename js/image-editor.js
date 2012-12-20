@@ -1,5 +1,5 @@
 var canvasEditor;
-var LEFT, TOP, WIDTH, HEIGHT, OBJCOLOR="#ff0000", OBJOPACITY=1.0;
+var LEFT, TOP, WIDTH, HEIGHT, OBJCOLOR="#ff0000", OBJOPACITY=1.0, PADDING=2;
 
 window.onload = function() {
 	canvasEditor = new fabric.Canvas("canvas-editor");
@@ -208,7 +208,7 @@ function canvasInsertImage(ev) {
 			left: LEFT,
 			top: TOP,
 			angle: 0,
-			padding: 2,
+			padding: PADDING,
 			cornersize: 8,
 		});
 		canvasEditor.add(image);
@@ -226,6 +226,7 @@ function canvasInsertRect() {
         fill: OBJCOLOR,
         width: 70,
         height: 40,
+        padding: PADDING,
         opacity: OBJOPACITY
         }));
 }
@@ -236,6 +237,7 @@ canvasEditor.add(new fabric.Circle({
 		top: TOP,
         fill: OBJCOLOR,
         radius: 50,
+        padding: PADDING,
         opacity: OBJOPACITY
         }));
 }
@@ -247,6 +249,7 @@ function canvasInsertTriangle() {
         fill: OBJCOLOR,
         width: 50,
         height: 50,
+        padding: PADDING,
         opacity: OBJOPACITY
         }));
 }
@@ -262,6 +265,7 @@ function canvasInsertText(e) {
 		"", {
 			left: LEFT,
 			top: TOP,
+			padding: PADDING,
 			fontFamily: 'helvetica'
 		});
 	canvasEditor.add(text);
@@ -349,6 +353,15 @@ function canvasLayout() {
 		}
 		var newWidth = group[iElement].currentWidth-unit;
 		group[iElement].scaleToWidth(newWidth);
+	}
+	function cropGroup(group) {
+		for (var i=0; i<group.length; i++) {
+			if (group[i].type=="image") {
+				
+			} else {
+				
+			}
+		}
 	}
 	
 	var unit = 50;

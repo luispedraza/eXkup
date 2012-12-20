@@ -65,6 +65,8 @@ function loadData(ev) {
 				return;
 			OUTPARAMS.t = board;
 			OUTPARAMS.p = 1;
+			OUTPARAMS.th = "";
+			OUTPARAMS.msg = "";
 			document.getElementById("board").innerHTML = "";
 		}
 		else if (ev.type == "scroll") {
@@ -99,40 +101,40 @@ function loadData(ev) {
 				div_cont.appendChild(img_cont);
 			}
 			// La cabecera:
-			var div_head = document.createElement("div");
-			div_head.className = "msg_header";
-			div_head.innerHTML = "<b><a target='_blank' href='http://eskup.elpais.com/" + 
-				m_id +
-				"'>" + 
-				user +
-				"</a> " + 
-				formatDate(date) +
-				":</b>";
-			div_fav = document.createElement("img");
-			div_fav.src = "/icon/star.png";
-			div_fav.className = (checkFavorite(m_id)) ? ("favon") : ("favoff");
-			div_fav.setAttribute("m_id", m_id);
-			div_fav.onclick = setFavorite;
-			div_head.appendChild(div_fav);
-			// Elementos de control:
-			var div_ctrl = document.createElement("div");
-			div_ctrl.className = "msg_control";
+			var dHead = document.createElement("div");
+			dHead.className = "msg_header";
 			var img_user = document.createElement("img");
-			img_user.src = users[user].pathfoto;
-			var a_reply = document.createElement("a");
-			a_reply.innerText = "responder";
-			a_reply.addEventListener("click", msgReply);
-			var a_fwd = document.createElement("a");
-			a_fwd.innerText = "reenviar";
-			a_fwd.addEventListener("click", msgForward);
-			var a_del = document.createElement("a");
-			a_del.innerText = "borrar";
-			a_del.setAttribute("m_id", m_id);
-			a_del.addEventListener("click", msgDelete);
-			div_ctrl.appendChild(img_user);
-			div_ctrl.appendChild(a_reply);
-			div_ctrl.appendChild(a_fwd);
-			div_ctrl.appendChild(a_del);
+			img_user.src = checkUserPhoto(users[user].pathfoto);
+			dHead.appendChild(img_user);
+			dHead.innerHTML += user.link("http://eskup.elpais.com/"+m_id).bold() + 
+				formatDate(date).bold();
+			// Elementos de control:
+			var dCtrl = document.createElement("div");
+			dCtrl.className = "msg_control";
+			var dFav = document.createElement("div");
+			dFav.className = "btn";
+			dFav.innerText = (checkFavorite(m_id) ? "-favorito" : "+favorito");
+			dFav.setAttribute("m_id", m_id);
+			dFav.onclick = setFavorite;
+			var dReply = document.createElement("div");
+			dReply.className = "btn";
+			dReply.innerText = "responder";
+			dReply.setAttribute("m_id", m_id);
+			dReply.addEventListener("click", msgReply);
+			var dFwd = document.createElement("div");
+			dFwd.className = "btn";
+			dFwd.innerText = "reenviar";
+			dFwd.addEventListener("click", msgForward);
+			var dDel = document.createElement("div");
+			dDel.className = "btn";
+			dDel.innerText = "borrar";
+			dDel.setAttribute("m_id", m_id);
+			dDel.addEventListener("click", msgDelete);
+			dCtrl.appendChild(dFav);
+			dCtrl.appendChild(dReply);
+			dCtrl.appendChild(dFwd);
+			dCtrl.appendChild(dDel);
+			dHead.appendChild(dCtrl);
 			// Hilos de mensajes
 			if (msg.idMsgRespuesta) {
 				var div_reply = document.createElement("div");
@@ -144,19 +146,20 @@ function loadData(ev) {
 				div_thread.className = "thlink";
 				div_thread.innerText = "sigue el hilo";
 				div_thread.setAttribute("thread", msg.hilo);
-				div_thread.onclick = showThread;
+				div_thread.onclick = loadThread;
 				div_cont.appendChild(div_thread);
 			}
 			// Construcción final y agregación
-			div_msg.appendChild(div_head);
+			div_msg.appendChild(dHead);
 			div_msg.appendChild(div_cont);
-			div_msg.appendChild(div_ctrl);
 			div_board.appendChild(div_msg);
 		}
 	}
 }
 
-function msgReply() {
+function msgReply(e) {
+	var mId = e.target.getAttribute("m_id");
+	console.log(mId);
 
 }
 function msgForward() {
@@ -369,9 +372,13 @@ function setFavorite(ev) {
 	localStorage["msg_fav"] = JSON.stringify(listamsgfav);
 }
 
-function showThread(ev) {
+
+function loadThread(ev) {
 	threadId = ev.target.getAttribute("thread");
 	OUTPARAMS.msg = threadId;
+	OUTPARAMS.th = 1;
+	OUTPARAMS.t = "";
+	OUTPARAMS.p = "";
 	apiCall("GET", OUTESKUP, OUTPARAMS, getThread);
 	function getThread(req) {
 		document.getElementById("board").innerHTML = "";
@@ -379,6 +386,7 @@ function showThread(ev) {
 		console.log(info);
 		var infoTree = new Object();
 		infoTree.id = threadId;
+		infoTree.user = "raíz";
 		infoTree.children = [];
 		function addNode(node, parent, tree) {
 			if (tree.id == parent) tree.children.push(node)
@@ -388,59 +396,63 @@ function showThread(ev) {
 		for (var m=0; m<info.mensajes.length; m++) {
 			var node = new Object();
 			node.id = info.mensajes[m].idMsg;
+			node.user = info.mensajes[m].usuarioOrigen;
 			node.children = [];
 			parentId = info.mensajes[m].idMsgRespuesta;
 			addNode(node, parentId, infoTree);
 		}
 		console.log(infoTree);
-		//var tree = d3.layout.tree().size(500, 100);
-		var diameter = 960;
-		
-		var tree = d3.layout.tree()
-		.size([360, diameter / 2 - 120])
+		document.getElementById("main").className = "flip";
+		document.getElementById("graph").innerHTML = "";
+		// showNodeLinkTree(infoTree);
+		showMsgTree(infoTree);
+	}
+}
+
+function showMsgTree(infoTree) {
+	
+}
+
+function showNodeLinkTree(infoTree) {
+	var diameter = 600;
+	var tree = d3.layout.tree()
+		.size([360, diameter/2])
 		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 
-		var diagonal = d3.svg.diagonal.radial()
+	var diagonal = d3.svg.diagonal.radial()
 		.projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
 
-		var svg = d3.select("body").append("svg")
+	var svg = d3.select("#graph").append("svg")
 		.attr("width", diameter)
-		.attr("height", diameter - 150)
+		.attr("height", diameter)
 		.append("g")
 		.attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
-
-		var nodes = tree.nodes(infoTree),
+	var nodes = tree.nodes(infoTree),
 		links = tree.links(nodes);
 
-		var link = svg.selectAll(".link")
+	var link = svg.selectAll(".link")
 		.data(links)
 		.enter().append("path")
 		.attr("class", "link")
 		.attr("d", diagonal);
 
-		var node = svg.selectAll(".node")
+	var node = svg.selectAll(".node")
 		.data(nodes)
 		.enter().append("g")
 		.attr("class", "node")
 		.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
 
-		node.append("circle")
+	node.append("circle")
 		.attr("r", 4.5);
 
-		node.append("text")
+	node.append("text")
 		.attr("dy", ".31em")
 		.attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
 		.attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
 		.text(function(d) { return d.name; });
-		
-
-		d3.select(self.frameElement).style("height", diameter - 150 + "px");
-
-
-	}
+	d3.select(self.frameElement).style("height", diameter - 150 + "px");
 }
-
 
 
 

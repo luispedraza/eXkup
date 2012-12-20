@@ -23,3 +23,22 @@
 	cursor: pointer;
 	margin: 5px;
 }
+
+#progress {
+	position: absolute;
+	top: 200px;
+	left: 200px;
+	right: auto;
+	border: 1px solid black;
+	width: 200px;
+	height: 10px;
+	z-index: 100;
+	background-color: white;
+	display: none;
+}
+#progress-status {
+	background-color: orange;
+	float: left;
+	width: 20%;
+	height: 10px;
+}

@@ -24,27 +24,16 @@
 	<div id="dlg_ok" class="button">OK</div>
 	<div id="dlg_cancel" class="button">Cancel</div>
 </div>
+<div id= "progress">
+	<div id="progress-status"></div>
+</div>
 
-<!-- SECCION. MENSAJES -->
-	<div id="my-favs" class="section-container">
-	<h1>mensajes</h1>
-		<ul id="navigator">
-			<li id="todo" class="nav">todos</li>
-			<li id="sigo" class="nav">seguidos</li>
-			<li id="mios" class="nav">propios</li>
-			<li id="priv" class="nav">privados</li>
-			<li id="favs" class="nav">favoritos</li>
-		</ul>
-		<div class="search"><input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><a id="search" href="#">Buscar</a></div>
-	</div>
-	<div id="board" class="board message-list"></div>
+
+
 <!-- SECCION. EDITOR -->
-	<div id="editor" class="section-container">
+<div class="section-container">
 	<h1>nuevo</h1>
-	</div>
-
-	<div class="board">
-		<div id="editor">
+	<div id="editor">
 		<div id="commands">
 			<div id="counter">280</div>
 			<div class="send" id="send"><a href="#">mandar</a></div>
@@ -61,49 +50,67 @@
 			<input id="send2tt" type="checkbox" title="twitter"/>
 		</div>
 		<div id="newmessage" contenteditable></div>
-		</div>
-	
 	</div>
+</div>
 
-<!-- SECCION. PERFIL -->
-	<div id="my-profile" class="section-container">
-	<h1>perfil</h1>
-	</div>
 
-	<div class="board">
-		<div id="profile" class="profile">
-			<a id="logout" href="#">Cerrar Sesión</a>
-			<div id="mifoto" style="float:left"></div>
-			<div class="profile_item" id="nombre"></div>
-			<div class="profile_item" id="apellidos"></div>
-			<div class="profile_item" id="urlpersonal"></div>
-			<div class="profile_item" id="descripcion"></div>
-			<div class="profile_item" id="blog"></div>
-			
-			<div id="follows">
-			<div id="follow-to">
-				<h4>sigo a:</h4>
-				<div class="follow-to-users" id="follow-to-users"></div>
-			</div>
-			<div id="follow-me">
-				<h4>me siguen:</h4>
-				<div class="follow-me-users" id="follow-me-users"></div>       
-			</div>
-			</div>
-		</div>
+
+<!-- SECCION. MENSAJES -->
+<div class="section-container">
+	<h1>mensajes</h1>
+	<ul class="navigator">
+		<li id="todo">todos</li>
+		<li id="sigo">seguidos</li>
+		<li id="mios">propios</li>
+		<li id="priv">privados</li>
+		<li id="favs">favoritos</li>
+	</ul>
+	<div class="search">
+		<input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><input type="button" id="search" value="buscar">
 	</div>
+</div>
+<div id="board" class="message-list"></div>
 
 <!-- SECCION. TEMAS -->
-	<div id="my-themes" class="section-container">
+<div class="section-container">
 	<h1>temas</h1>
-			<h2>seguidos</h2>
-			<ul id="themes-follow"></ul>
-			<h2>bloqueados</h2>
-			<ul id="themes-block"></ul>
-		<div id="temas_head"><a target="_blank" id="tema_actual">Selecciona un tema</a><a id="seguiropcion"></a><a id="blockopcion"></a></div>        
-		<div class="message_list" id="tema">
-		</div>
+	<h2>seguidos</h2>
+		<ul id="themes-follow" class="navigator"></ul>
+	<h2>bloqueados</h2>
+		<ul id="themes-block" class="navigator"></ul>
+</div>
+
+<!-- SECCION. PERFIL -->
+<div class="section-container">
+	<h1>perfil</h1>
+</div>
+
+<div id="profile">
+	<a id="logout" href="#">Cerrar Sesión</a>
+	<div id="mifoto" style="float:left"></div>
+	<div class="profile_item" id="nombre"></div>
+	<div class="profile_item" id="apellidos"></div>
+	<div class="profile_item" id="urlpersonal"></div>
+	<div class="profile_item" id="descripcion"></div>
+	<div class="profile_item" id="blog"></div>
+	
+	<div id="follows">
+	<div id="follow-to">
+		<h4>sigo a:</h4>
+		<div class="follow-to-users" id="follow-to-users"></div>
 	</div>
+	<div id="follow-me">
+		<h4>me siguen:</h4>
+		<div class="follow-me-users" id="follow-me-users"></div>       
+	</div>
+	</div>
+</div>
+
+
+<div id="thread">
+	<div id="unflip">volver</div>
+	<div id="graph"></div>
+</div>
 
 </body>
 </html>

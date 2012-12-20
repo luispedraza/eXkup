@@ -1,5 +1,4 @@
 // Junta los valores de un objeto para producir una url
-
 Array.prototype.shuffle = function() {
  	var len = this.length;
 	var i = len;
