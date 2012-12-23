@@ -6,19 +6,23 @@
 	<link rel="stylesheet" href="css/editor.css" type="text/css" />
 	<link rel="stylesheet" href="css/image-editor.css" type="text/css" />
 	
+	<script type="text/javascript" src="lib/fabric.js"></script>
+	<script type="text/javascript" src="lib/masonry.min.js"></script>
+	<script type="text/javascript" src="lib/caman.3.3.0.full.min.js"></script>
+	
 	<script type="text/javascript" src="js/utils.js"></script>
 	<script type="text/javascript" src="js/editor.js"></script>
 	<script type="text/javascript" src="js/eskup-api-old.js"></script>
 	<script type="text/javascript" src="js/eskup-api.js"></script>
 	<script type="text/javascript" src="js/windows.js"></script>
 	<script type="text/javascript" src="js/image-editor.js"></script>
-	<script type="text/javascript" src="lib/fabric.js"></script>
-	<script type="text/javascript" src="lib/masonry.min.js"></script>
-	<script type="text/javascript" src="lib/caman.3.3.0.full.min.js"></script>
+	
 </head>
 <body>
+
 <div id="masonry-container"></div>
 
+<div>
 <div id="editor">
 	<div id="commands">
 		<div id="counter">280</div>
@@ -44,96 +48,137 @@
 		<canvas id="canvasimage"></canvas>
 	</div>
 </div>
-
+</div>
 
 
 <div id="selector-editor">
 	<canvas id="canvas-editor" width="600" height="600"></canvas>
 
 	<div id="canvas-controls">
+		<input id="back-color" name="back-color" type="color" value='#ffffff'>
+		<label for="back-color">color de fondo del lienzo</label>
 		
-		<div id="selector-content" class="controlitem">
-			<h1>selecciona una imagen…</h1>
-			<input type="checkbox" name="show-small" id="show-small">
-			<label for="show-small">Mostrar imágenes pequeñas</label>
+
+		<h1 class="off">selecciona una imagen…</h1>
+		<div id="selector-content">
+		<input type="checkbox" name="show-small" id="show-small">
+		<label for="show-small">Mostrar imágenes pequeñas</label>
 			<div id="selector-items">
 			<div class="item">
 				<h2>… desde tu disco duro</h2>
-				<input type="file" id="hd" name="hd">
-				<div id="hd-images" class="content-normal"></div>
+				<label for="hd" class="btn">selecciona una imagen</label>
+				<input type="file" id="hd" name="hd" accept="image/*">
+				<div id="hd-images"></div>
 			</div>
 			<div class="item">
 				<h2>… desde Google</h2>
-				<div class="content-normal"></div>
-				<div class="content-small"></div>
+				<form id="google-search-form">
+					<input id="google-search-string" placeholder="buscar una imagen…">
+					<input type="submit" value="buscar" id="google-search">
+				</form>
+				<div id="google"></div>
 			</div>
 			<div class="item">
 				<h2>… desde OpenClipArt Library</h2>
-				<input id="clips-search-string" placeholder="buscar un clip…">
-				<input type="button" value="buscar" id="clips-search">
-				<div id="clips" class="content-normal"><img id="clips-loader" src="/icon/loader.gif"></img></div>
+				<form id="clips-search-form">
+					<input id="clips-search-string" placeholder="buscar un clip…">
+					<input type="submit" value="buscar" id="clips-search">
+				</form>
+				<div id="clips"><img id="clips-loader" src="/icon/loader.gif"></img></div>
 				
 			</div>
 			</div>	
 		</div>
 
-		<h1>insertar/editar objetos</h1>
-		<input id="canvas-rect" type="button" class="btn"/>
-		<input id="canvas-circle" type="button" class="btn"/>
-		<input id="canvas-triangle" type="button" class="btn"/>
-		<label for="obj-opacity">Opacidad:</label>
-		<input id="obj-opacity" name="obj-opacity" type="range" min="0" max="100" value="100">
-		<label for="obj-color">Color:</label>
-		<input id="obj-color" name="obj-color" type="color" value="#ff0000">
-		
-		<input id="canvas-text" type="button" class="off" value="insertar texto">
+		<h1 class="off">insertar/editar objetos</h1>
 		<div>
-			<textarea id="canvas-text-value" width="100%" placeholder="escribe aquí el texto…"></textarea>
-			<label for="canvas-text-font">tipografía:</label>
-			<select id="canvas-text-font">
-				<option>Arial</option>
-				<option selected="">Helvetica</option>
-				<option>Myriad Pro</option>
-				<option>Delicious</option>
-				<option>Verdana</option>
-				<option>Georgia</option>
-				<option>Courier</option>
-				<option>Comic Sans MS</option>
-				<option>Impact</option>
-				<option>Monaco</option>
-				<option>Optima</option>
-				<option>Hoefler Text</option>
-				<option>Plaster</option>
-				<option>Engagement</option>
-			</select>
-			<input id="canvas-text-bold" type="button" style="font-weight:bold" class="btn" value="N">
-			<input id="canvas-text-italic" type="button" style="font-style:italic" class="btn" value="i">
-			<input id="canvas-text-under" type="button" style="text-decoration:underline" class="btn" value="o">
-			<input id="canvas-text-stroke" type="button" style="text-decoration:line-through" class="btn" value="o">
-			<input id="canvas-text-over" type="button" style="text-decoration:overline" class="btn" value="o">
-			<input id="canvas-text-shadow" type="button" style="text-shadow:#666666 1px 1px 3px" class="btn" value="S">
-		</div>
-		
-		<h1>eliminar objetos</h1>
-		<input id="canvas-remove" type="button" value="borrar"/>
-		<input id="canvas-clear" type="button" value="limpiar"/>
-		<h1>dibujo</h1>
-		<input type="checkbox" id="canvas-draw-on" name="canvas-draw-on">
-		<label for="canvas-draw-on">quiero dibujar algo</label>
-		<div id="draw-options" class="off">
-			<label for="draw-width">ancho:</label>
-			<input type="range" id="draw-width" name="draw-width" min="1" max="20">
-			<label for="draw-width">color:</label>
-			<input type="color" id="draw-color" name="draw-color">
-		</div>
-		<h1>reordenar</h1>
-		<input type="button" id="canvas-layout" value="Layout">
-		<input type="checkbox" id="canvas-layout-crop">
-		<label for="canvas-layout-crop">Permitir recortar y transformar elementos para un mejor ajuste</label>
+			<input id="canvas-rect" type="button" class="btn"/>
+			<input id="canvas-circle" type="button" class="btn"/>
+			<input id="canvas-triangle" type="button" class="btn"/>
+			<input id="canvas-line" type="button" class="btn"/>
+			<input id="canvas-text" type="button" class="btn" value="T">
+			<div>
+				<textarea id="canvas-text-value" width="100%" placeholder="escribe aquí el texto…"></textarea>
 
-		<label for="back-color">Color de fondo:</label>
-		<input id="back-color" name="back-color" type="color" value="#ffffff">
-	</div>
+				<div style="float: right">
+					<div>
+						<input id="canvas-text-bold" type="button" style="font-weight:bold" class="btn" value="N">
+						<input id="canvas-text-italic" type="button" style="font-style:italic" class="btn" value="i">
+						<input id="canvas-text-under" type="button" style="text-decoration:underline" class="btn" value="o">
+						<input id="canvas-text-stroke" type="button" style="text-decoration:line-through" class="btn" value="o">
+						<input id="canvas-text-over" type="button" style="text-decoration:overline" class="btn" value="o">
+						<input id="canvas-text-shadow" type="button" style="text-shadow:#666666 1px 1px 3px" class="btn" value="S">
+					</div>
+					<label for="canvas-text-font">tipografía:</label>
+					<select id="canvas-text-font">
+						<option>Arial</option>
+						<option selected="">Helvetica</option>
+						<option>Myriad Pro</option>
+						<option>Delicious</option>
+						<option>Verdana</option>
+						<option>Georgia</option>
+						<option>Courier</option>
+						<option>Comic Sans MS</option>
+						<option>Impact</option>
+						<option>Monaco</option>
+						<option>Optima</option>
+						<option>Hoefler Text</option>
+						<option>Plaster</option>
+						<option>Engagement</option>
+					</select>
+					
+				</div>
+			</div>
+
+
+			<input id="obj-crop" type="button" value="recortar">
+			<input id="obj-crop-poly" type="button" value="recorte poligonal">
+
+			<label for="obj-opacity">Opacidad:</label>
+			<input id="obj-opacity" name="obj-opacity" type="range" min="0" max="100" value="100">
+			<input id="obj-opacity-value" value="100 %">
+			<label for="obj-color">Color:</label>
+			<input id="obj-color" name="obj-color" type="color" value="#ff0000">
+
+			<input id="canvas-remove" type="button" value="borrar"/>
+			<input id="canvas-clear" type="button" value="limpiar"/>
+		</div>
+		<!-- Panel de dibujo -->
+		<h1 class="off">dibujo</h1>
+		<div>
+			<input type="checkbox" id="canvas-draw-on" name="canvas-draw-on">
+			<label for="canvas-draw-on">quiero dibujar algo</label>
+			<div id="draw-options" class="off">
+				<label for="draw-width">ancho:</label>
+				<input type="range" id="draw-width" name="draw-width" min="1" max="20">
+				<label for="draw-width">color:</label>
+				<input type="color" id="draw-color" name="draw-color">
+			</div>
+		</div>
+
+		<h1 class="off">reordenar</h1>
+		<div>
+			<input type="button" id="canvas-layout" value="layout">
+			<input type="checkbox" id="canvas-layout-crop">
+			<label for="canvas-layout-crop">Permitir recortar y transformar elementos para un mejor ajuste</label>
+		</div>
+		<!-- Panel de guardado y restauración -->
+		<h1 class="off">guardar o recuperar dibujo</h1>
+		<div>
+			<h2>guardar como…</h2>
+			<input id="canvas-save-name" placeholder="nombre del dibujo">
+			<input id="canvas-save" value="guardar" type=button>
+			<h2>cargar dibujo</h2>
+			<div id="saved-canvas">Aún no hay dibujos guardados</div>
+		</div>
+
+		
+		<h1 class="off">capas</h1>
+		<div id="canvas-layers"></div>
+		<h1 class="off">hitorial</h1>
+		<div id="canvas-history"></div>
+
+	</div> <!-- canvas controls -->
 </div>
 
 

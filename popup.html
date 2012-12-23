@@ -28,10 +28,10 @@
 	<div id="progress-status"></div>
 </div>
 
-
+<div id="board" class="message-list"></div>
 
 <!-- SECCION. EDITOR -->
-<div class="section-container">
+<div id="edit-section" class="section-container">
 	<h1>nuevo</h1>
 	<div id="editor">
 		<div id="commands">
@@ -50,13 +50,15 @@
 			<input id="send2tt" type="checkbox" title="twitter"/>
 		</div>
 		<div id="newmessage" contenteditable></div>
+		<div id="destinations">
+			<div id="send2priv">privado: </div>
+			<div id="send2theme">tema: </div>
+		</div>
 	</div>
 </div>
 
-
-
 <!-- SECCION. MENSAJES -->
-<div class="section-container">
+<div id="msg-section" class="section-container">
 	<h1>mensajes</h1>
 	<ul class="navigator">
 		<li id="todo">todos</li>
@@ -69,10 +71,10 @@
 		<input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><input type="button" id="search" value="buscar">
 	</div>
 </div>
-<div id="board" class="message-list"></div>
+
 
 <!-- SECCION. TEMAS -->
-<div class="section-container">
+<div id="thm-section" class="section-container">
 	<h1>temas</h1>
 	<h2>seguidos</h2>
 		<ul id="themes-follow" class="navigator"></ul>
@@ -81,7 +83,7 @@
 </div>
 
 <!-- SECCION. PERFIL -->
-<div class="section-container">
+<div id="prof-section" class="section-container">
 	<h1>perfil</h1>
 </div>
 
@@ -106,11 +108,10 @@
 	</div>
 </div>
 
-
-<div id="thread">
+<!-- <div id="thread">
 	<div id="unflip">volver</div>
 	<div id="graph"></div>
-</div>
+</div> -->
 
 </body>
 </html>

@@ -1,23 +1,52 @@
 var PUBLIC_KEY = "";
 var USER_ID = "";
-
-function redirectConfig() {
-	window.close();
-	chrome.tabs.create({url:"options.html"});
+var INESKUP = "http://eskup.elpais.com/Ineskup";
+var INPARAMS = {
+	c: "",
+	x: "",
+	f: "json",
+	d: "",
+	id: ""
 }
-
-function initEskup() {
-	PUBLIC_KEY = localStorage["eskupkey"];
-	if (!PUBLIC_KEY) redirectConfig();
+var OUTESKUP = "http://eskup.elpais.com/Outeskup";
+var OUTPARAMS = {
+	t: "",			// qué tablon
+	nummsg: 12,		// cuántos mensajes
+	p: 1,			// qué página
+	f: "json",		// formato de respuesta
+	th: 1,
+	msg: "",
+	id: ""
+}
+var PROFILEESKUP = "http://eskup.elpais.com/Profileeskup";
+var PROFILEPARAMS = {
+	id: "",
+	action: "",
+	f: "json",
+	pag: ""
+}
+function initEskup(callback) {
+	apiCall("GET", "http://eskup.elpais.com/Auth/modusereskup.pl", null, function(r) {
+		var doc = document.implementation.createHTMLDocument('');
+		doc.documentElement.innerHTML = r.responseText;
+		if (doc.getElementsByClassName("error").length) {
+			chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
+			window.close();
+			return;
+		}
+		PUBLIC_KEY = doc.getElementById("campo_api")
+						.getElementsByTagName("p")[0]
+						.getElementsByClassName("valor")[0]
+						.innerText;
+		INPARAMS.id = OUTPARAMS.id = PROFILEPARAMS.id = PUBLIC_KEY;
+		callback();
+	});
 }
 
 function logOut() {
 	localStorage.removeItem("eskupkey");
 	window.close();
 }
-
-initEskup();
-
 
 var TABLONES = {
 	mios: "t1-",
@@ -29,31 +58,7 @@ function getBoard(id) {
 	return (TABLONES.hasOwnProperty(id)) ? (TABLONES[id]) : (id);
 }
 
-var INESKUP = "http://eskup.elpais.com/Ineskup";
-var INPARAMS = {
-	c: "",
-	x: "",
-	f: "json",
-	d: "",
-	id: PUBLIC_KEY
-}
-var OUTESKUP = "http://eskup.elpais.com/Outeskup";
-var OUTPARAMS = {
-	t: "",			// qué tablon
-	nummsg: 12,		// cuántos mensajes
-	p: 1,			// qué página
-	f: "json",		// formato de respuesta
-	th: 1,
-	msg: "",
-	id: PUBLIC_KEY
-}
-var PROFILEESKUP = "http://eskup.elpais.com/Profileeskup";
-var PROFILEPARAMS = {
-	id: PUBLIC_KEY,
-	action: "",
-	f: "json",
-	pag: ""
-}
+
 /////////////////////////////////////////////////////////////////////////////
 // Tablón de mensajes ///////////////////////////////////////////////////////
 // ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
@@ -160,7 +165,6 @@ function loadData(ev) {
 function msgReply(e) {
 	var mId = e.target.getAttribute("m_id");
 	console.log(mId);
-
 }
 function msgForward() {
 
@@ -201,10 +205,6 @@ function loadProfile() {
 	function getProfile(req)
 	{
 		var info = req.responseText;
-		if (!info) {
-			redirectConfig();
-			return;
-		}
 		perfiles = JSON.parse(req.responseText.replace(/'/g, "\"")).perfilesUsuarios;
 		for (var u in perfiles) {
 			USER_ID = u;
@@ -304,19 +304,10 @@ function Update()
 	var tt_check = document.getElementById("send2tt");
 	var fb_check = document.getElementById("send2fb");
 	if (tt_check.checked) {
-		if (fb_check.checked) {
-			INPARAMS.d = "1|2";
-			console.log("tt y fb");
-		}
-		else {
-			INPARAMS.d = "1";
-			console.log("tt");
-		}
+		if (fb_check.checked) INPARAMS.d = "1|2";
+		else INPARAMS.d = "1";
 	}
-	else if (fb_check.checked) {
-		INPARAMS.d = "2";
-		console.log("tt");
-	}
+	else if (fb_check.checked) INPARAMS.d = "2";
 	newimg = document.getElementById("canvasimage");
 	if (newimg.width) {
 		INPARAMS.p = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));

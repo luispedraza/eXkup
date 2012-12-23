@@ -4,9 +4,8 @@ body {
 }
 
 #selector-editor {
-	position: relative;
 	width: 1200px;
-	margin-top: 10px;
+	margin-top: 200px;
 	margin-left: 5px;
 }
 
@@ -20,53 +19,83 @@ body {
 	background-color: #5FC0CE;
 	padding: 5px;
 	position: absolute;
-	top: 0;
-	right: 0;
+	top: 195px;
+	left: 630px;
+
+}
+#canvas-controls input[type='range'] {
+	-webkit-appearance: none;
+	padding-left:2px; padding-right:2px;
+	-webkit-border-radius: 3px;
+	background-image: -webkit-linear-gradient(top, #000000, #333333, #000000);
+}
+#canvas-controls input[type='file'] {
+	-webkit-appearance: none;
+    overflow: hidden;
+    width: 0;
+    height: 0;
 }
 
-.controlitem {
-	border-bottom: 1px solid #015965;
-	background-color: #5FC0CE;
-	overflow: hidden;
+#canvas-layers .item {
 	cursor: pointer;
-	height: 40px;
+	padding: 2px 2px 5px 2px;
+	height: 42px;
+	position: relative;
+	-webkit-transition: all .2s ease;
 }
-.controlitem:hover {
-	height: 500px;
+#canvas-layers .item div {
+	background-color: white;
+	height: 100%;
+	width: 100%;
 }
+
+#canvas-layers .item.hover {
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	border-bottom: 5px solid red;
+}
+
+#canvas-layers .item img {
+	max-height: 40px;
+	position: absolute;
+	top: 1px;
+	right: 1px;
+	margin: 2px;
+}
+
 #selector-content img {
 	max-width: 150px;
 	max-height: 150px;
 	margin: 5px;
 }
 #selector-items {
-	margin-top: 10px;
-	height: 100%;
 	overflow: scroll;
-	padding: 20px;
+	padding: 10px;
+}
+#selector-items .item {
+	margin-bottom: 5px;
 }
 
 #selector-content img:hover {
 	outline: 2px solid #ff3300;
 }
 
-#selector-editor h1 {
-	display: block;
-	font-size: 1.2em;
-	color: white;
-}
-#selector-editor h2 {
-	display: block;
+h1 {
 	font-size: 1em;
 	color: white;
-	background-color: #FF7A00;
+}
+h2 {
+	display: inline;
+	font-size: .9em;
+	color: white;
+	border-bottom: 1px dotted black;
 }
 
 #draw-options {
 	-webkit-transition: all .5s ease;
 	overflow: hidden;
 }
-#canvas-text.off + div {
+#canvas-text + div {
 	-webkit-transition: all .5s ease;
 	overflow: hidden;
 	height: 0;
@@ -77,11 +106,22 @@ body {
 	opacity: 1;
 }
 
-#draw-options.off {
-	height: 0;
+h1 {
+	cursor: pointer;
 }
-#draw-options.on {
-	height: auto; 
+h1.off + div {
+	height: 0;
+	overflow: hidden;
+	border-bottom: 1px solid black;
+	-webkit-transition: height .5s ease;
+}
+
+h1.on + div {
+	height: 300px;
+	overflow: scroll;
+	border-bottom: 1px solid black;
+	padding-bottom: 5px;
+	-webkit-transition: height .5s ease;
 }
 
 #masonry-container {

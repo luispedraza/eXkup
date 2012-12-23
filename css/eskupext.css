@@ -10,13 +10,19 @@ a {
 	width: 150px;
 	overflow: hidden;
 	-webkit-transition: all 1s ease;
-	border-bottom: 2px solid red;
+	border-bottom: 1px dotted red;
 	background-color: white;
+	position: relative;
+	cursor: pointer;
 }
 
+#edit-section.section-container:hover, #edit-section.section-container.on {
+	height: 250px;
+	width: 600px;
+	z-index: 10;
+}
 .section-container:hover {
 	height: 300px;
-	width: 600px;
 }
 
 .section-container h1 {
@@ -31,37 +37,42 @@ ul.navigator {
 	padding: 0;
 }
 ul.navigator li {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
 	list-style: none;
 	cursor: pointer;
+	padding: 2px;
 }
 ul.navigator li:hover {
-	background-color: red;
+	background-color: #FF7A00;
 	color: white;
 }
 
-#board, #profile {
-	background-color: white;
-	width: 450px;
+#board {
 	position: absolute;
 	top: 0;
 	right: 0;
-	-webkit-transition: all 1s ease;
-}
-#board {
+	background-color: white;
+	width: 450px;
 	height: 600px;
+	overflow: scroll;
 }
 
 #profile {
-	z-index: 10;
+	position: absolute;
+	top: 0;
+	right: 0;
+	background-color: white;
+	width: 450px;
+	-webkit-transition: all 1s ease;
+	height: 0;
 	overflow: hidden;
-	height:0;
 }
-#profile:hover, #profile.on {
-	height: 600px;
+#prof-section:hover + #profile, #profile.on {
+	height:600px;
 }
-
 #editor {
-	z-index: 10;
 	position: absolute;
 	top: 0;
 	left: 0;

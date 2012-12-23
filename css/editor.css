@@ -16,6 +16,7 @@
 }
 
 #newmessage {
+	outline: none;
 	position: absolute;
 	left: 150px;
 	top: 50px;
@@ -28,6 +29,11 @@
 	padding: 5px;
 }
 
+#destinations {
+	position: absolute;
+	left: 150px;
+	top: 180px;
+}
 #canvasimage {
 	border: 1px dotted black;
 	position: absolute;
@@ -41,7 +47,7 @@
 	border: 2px solid #FF7A00;
 	-webkit-border-radius: 10px;
 	text-align: center;
-	height: 50px;
+	height: 40px;
 }
 
 #commands #send, #commands #cancel {
@@ -50,7 +56,7 @@
 	-webkit-border-radius: 10px;
 	cursor: pointer;
 	margin-top: 5px;
-	height: 30px;
+	height: 40px;
 	text-align: center;
 }
 #commands #send:hover, #commands #cancel:hover {
