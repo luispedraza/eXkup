@@ -4,6 +4,11 @@ var LEFT, TOP, WIDTH, HEIGHT, OBJCOLOR="#ff0000", OBJOPACITY=1.0, PADDING=2;
 fabric.Polygon.prototype.add = function(point) {
 	this.points.push(point);
 }
+fabric.StaticCanvas.prototype.getObjectFromTS = function(ts) {
+	for (var i=0; i<this._objects.length; i++){
+		if (this._objects[i].ts == ts) return this._objects[i];
+	}
+}
 
 window.onload = function() {
 	canvasEditor = new fabric.Canvas("canvas-editor");
@@ -19,7 +24,7 @@ window.onload = function() {
 	canvasEditor.upperCanvasEl.oncontextmenu = function() {return false};
 	var panels = document.getElementsByClassName('off');
 	for (p in panels) panels[p].onclick = function(e) {
-		e.target.className = (e.target.className=='on' ? 'off' : 'on');
+		e.target.className = (e.target.className =='on' ? 'off' : 'on');
 	}
 	populateSaved();
 	// Buscador de clips
@@ -32,7 +37,6 @@ window.onload = function() {
 		getGoogleImages();
 		return false;
 	}
-	// document.getElementById("google-search").onclick = getGoogleImages;
 
 	document.addEventListener("keydown", function(e) {
 		if (e.keyCode == 46) canvasRemoveElement();
@@ -244,73 +248,69 @@ function canvasRemoveElement() {
 	}
 }
 
-function insertLayer(element, clip) {
+function insertLayer(element) {
 	var item = document.createElement("div");
 	item.className = "item";
 	item.draggable = true;
 	item.id = element.ts;
 	var itemInfo = document.createElement("div");
-	if (clip) itemInfo.innerText = "recorte";
-	else {
-		switch (element.type) {
-			case "text":
-				itemInfo.innerText = "texto";
-				break;
-			case "image":
-				itemInfo.innerText = "imagen";
-				break;
-			case "rect":
-				itemInfo.innerText = "rectángulo";
-				break;
-			case "triangle":
-				itemInfo.innerText = "triángulo";
-				break;
-			case "circle":
-				itemInfo.innerText = "circle";
-				break;
-		}
-	}
-	item.appendChild(itemInfo);
-	item.ondragover = function(e) {
-		e.preventDefault();
-	}
-	item.ondragenter = function(e) {
-		e.preventDefault();
-		e.target.className += " hover";
-	}
-	item.ondragleave = function(e) {
-		e.preventDefault();
-		e.target.className = e.target.className.replace(" hover", "");
-	}
-	item.ondrop = function(e) {
-		e.preventDefault();
-		var parent = document.getElementById("canvas-layers");
-		var data = e.dataTransfer.getData("Text");
-		parent.insertBefore(document.getElementById(data), e.target.nextSibling);
-		e.target.className = e.target.className.replace(" hover", "");
-	}
-	item.ondragstart = function(e) {
-		e.dataTransfer.setData("Text", e.target.id);
-	}
 	if (element.type == "text") {
-		item.innerHTML += element.text;
+		itemInfo.id = "txt-"+item.id;
+		itemInfo.innerHTML = element.text;
 	} else {
-		var tempCanvasEl = document.createElement("canvas");
-		tempCanvasEl.width = element.width;
-		tempCanvasEl.height = element.height;
-		var canvas = new fabric.StaticCanvas(tempCanvasEl);
 		element.cloneAsImage(function(o) {
-			o.left = o.width/2;
-			o.top = o.height/2;
+			o.scaleToHeight(40);
+			o.left = o.currentWidth/2;
+			o.top = o.currentHeight/2;
+			var tempCanvasEl = document.createElement("canvas");
+			tempCanvasEl.width = o.currentWidth;
+			tempCanvasEl.height = o.currentHeight;
+			var canvas = new fabric.StaticCanvas(tempCanvasEl);
 			canvas.add(o);
 			var img = new Image();
 			img.src = canvas.toDataURL();
 			img.draggable = false;
 			img.id = "thumb-"+item.id;
-			item.appendChild(img);
+			itemInfo.appendChild(img);
 		});
 	}
-	
+	item.appendChild(itemInfo);
+	item.ondragover = layerOnDragOver;
+	function layerOnDragOver(e) {
+		e.preventDefault();
+	}
+	item.ondragenter = layerOnDragEnter;
+	function layerOnDragEnter(e) {
+		e.preventDefault();
+		e.target.className += " hover";
+	}
+	item.ondragleave = layerOnDragLeave;
+	function layerOnDragLeave(e) {
+		e.preventDefault();
+		e.target.className = e.target.className.replace(" hover", "");
+	}
+	item.ondrop = layerOnDrop;
+	function layerOnDrop(e) {
+		e.preventDefault();
+		var parent = document.getElementById("canvas-layers");
+		var ts = e.dataTransfer.getData("Text");
+		parent.insertBefore(document.getElementById(ts), e.target.nextSibling);
+		e.target.className = e.target.className.replace(" hover", "");
+		var o = (canvasEditor.getObjectFromTS(ts));
+		canvasEditor.bringToFront(o);
+		if (e.target.id) {
+			for (var i=canvasEditor._objects.length-1; i>0; i--) {
+				console.log(i);
+				canvasEditor.sendBackwards(o);
+				if (canvasEditor.item(i).ts == e.target.id) break; 
+			}
+		}
+		canvasEditor.setActiveObject(o);
+	}
+	item.ondragstart = function(e) {
+		e.dataTransfer.setData("Text", e.target.id);
+	}
+
 	item.addEventListener("click", function(e) {
 		var objs = canvasEditor.getObjects();
 		for (var i=0; i<objs.length; i++) {
@@ -320,7 +320,16 @@ function insertLayer(element, clip) {
 			}
 		}
 	});
-	document.getElementById("canvas-layers").appendChild(item);
+	var parent = document.getElementById("canvas-layers");
+	parent.insertBefore(item, parent.firstChild.nextSibling);
+	if (!parent.firstChild.className) {
+		parent.firstChild.className = "item";
+		parent.firstChild.ondragover = layerOnDragOver;
+		parent.firstChild.ondragenter = layerOnDragEnter;
+		parent.firstChild.ondragleave = layerOnDragLeave;
+		parent.firstChild.ondrop = layerOnDrop;
+	}
+
 }
 
 function removeLayer(ts) {
@@ -704,7 +713,7 @@ function cropImage() {
 			canvasEditor.add(image);
 			canvasEditor.renderAll();
 			canvasEditor.setActiveObject(image);
-			insertLayer(image, true);
+			insertLayer(image);
 		})
 	var objects = canvasEditor.getObjects();
 	for (var i=0; i<objects.length; i++) {
@@ -747,7 +756,7 @@ function cropPolyImage() {
 			canvasEditor.add(image);
 			canvasEditor.renderAll();
 			canvasEditor.setActiveObject(image);
-			insertLayer(image, true);
+			insertLayer(image);
 		})
 	var objects = canvasEditor.getObjects();
 	for (var i=0; i<objects.length; i++) {
