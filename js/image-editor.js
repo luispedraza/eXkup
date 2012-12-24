@@ -142,6 +142,25 @@ window.onload = function() {
 	document.getElementById("canvas-layout").onclick = canvasLayout;
 	document.getElementById("canvas-save").onclick = canvasSave;
 
+	document.getElementById("canvas-filter").onclick = function() {
+		var o = canvasEditor.getActiveObject();
+		var canvas = document.createElement("canvas");
+		var img = new Image();
+		img.onload = function() {
+			Caman(img.src, canvas, function() {
+				this.brightness(-50).render(function(){
+					var newimg = new Image();
+					newimg.onload = function() {
+						o.setElement(this);
+						canvasEditor.renderAll();
+					}
+					newimg.src = canvas.toDataURL('png', 1.0);
+				});
+			})
+		}
+		img.src = o.getElement().src;
+	}
+
 }
 
 function showSmall(ev) {
@@ -257,23 +276,14 @@ function insertLayer(element) {
 	if (element.type == "text") {
 		itemInfo.id = "txt-"+item.id;
 		itemInfo.innerHTML = element.text;
-	} else {
-		element.cloneAsImage(function(o) {
-			o.scaleToHeight(40);
-			o.left = o.currentWidth/2;
-			o.top = o.currentHeight/2;
-			var tempCanvasEl = document.createElement("canvas");
-			tempCanvasEl.width = o.currentWidth;
-			tempCanvasEl.height = o.currentHeight;
-			var canvas = new fabric.StaticCanvas(tempCanvasEl);
-			canvas.add(o);
-			var img = new Image();
-			img.src = canvas.toDataURL();
-			img.draggable = false;
-			img.id = "thumb-"+item.id;
-			itemInfo.appendChild(img);
-		});
 	}
+	element.toDataURL(function(data){
+		var img = new Image();
+		img.src = data;
+		img.draggable = false;
+		img.id = "thumb-"+item.id;
+		item.appendChild(img);
+	})
 	item.appendChild(itemInfo);
 	item.ondragover = layerOnDragOver;
 	function layerOnDragOver(e) {
@@ -346,6 +356,7 @@ function canvasInsertImage(ev) {
 			padding: PADDING,
 			cornersize: 8,
 		});
+		image.ts = new Date().getTime();
 		insertLayer(image);
 		canvasEditor.add(image);
 		var im_width = image.currentWidth;
@@ -365,6 +376,7 @@ function canvasInsertRect() {
         padding: PADDING,
         opacity: OBJOPACITY
         });
+	rect.ts = new Date().getTime();
 	insertLayer(rect);
 	canvasEditor.add(rect);
 	canvasEditor.setActiveObject(rect);
@@ -379,6 +391,7 @@ function canvasInsertCircle() {
         padding: PADDING,
         opacity: OBJOPACITY
         });
+	circ.ts = new Date().getTime();
 	insertLayer(circ);
 	canvasEditor.add(circ);
 	canvasEditor.setActiveObject(circ);
@@ -396,6 +409,7 @@ function canvasInsertTriangle() {
         strokeWidth: 5,
         stroke: '#666'
         });
+	tri.ts = new Date().getTime();
 	insertLayer(tri);
 	canvasEditor.add(tri);
 	canvasEditor.setActiveObject(tri);
@@ -412,6 +426,7 @@ function canvasInsertLine() {
 	        opacity: OBJOPACITY,
 	        strokeWidth: 5,
         });
+	line.ts = new Date().getTime();
 	insertLayer(line);
 	canvasEditor.add(line);
 	canvasEditor.setActiveObject(line);
@@ -432,6 +447,7 @@ function canvasInsertText(e) {
 			padding: PADDING,
 			fontFamily: document.getElementById("canvas-text-font").value
 		});
+	text.ts = new Date().getTime();
 	insertLayer(text);
 	canvasEditor.add(text);
 	canvasEditor.setActiveObject(text);
@@ -467,22 +483,14 @@ function objectSelected(e) {
 	document.getElementById("canvas-text-font").value = active.text;
 }
 function objectModified(e) {
+	console.log("modi");
 	var element = e.target;
 	var ts = element.ts;
-	if (e.target.type == "text") {
+	if (e.target.type == "text")
 		document.getElementById("txt-"+ts).innerText =   element.text;
-	} else {
-		var tempCanvasEl = document.createElement("canvas");
-		tempCanvasEl.width = element.width;
-		tempCanvasEl.height = element.height;
-		var canvas = new fabric.StaticCanvas(tempCanvasEl);
-		element.cloneAsImage(function(o) {
-			o.left = o.width/2;
-			o.top = o.height/2;
-			canvas.add(o);
-			document.getElementById("thumb-"+ts).src = canvas.toDataURL();
-		});
-	}
+	element.toDataURL(function(data) {
+		document.getElementById("thumb-"+ts).src = data;
+	});
 }
 
 function canvasLayout() {

@@ -41,11 +41,15 @@ body {
 	padding-bottom: 5px;
 	height: auto;
 	-webkit-transition: all .2s ease;
+	position: relative;
 }
 #canvas-layers .item div {
 	background-color: white;
 	height: 42px;
 	width: 100%;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 #canvas-layers .item.hover {
@@ -56,8 +60,10 @@ body {
 
 #canvas-layers .item img {
 	max-height: 40px;
-	float: right;
 	margin: 2px;
+	position: absolute;
+	top: 0;
+	right: 0;
 }
 
 #selector-content img {
