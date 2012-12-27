@@ -12,7 +12,6 @@ fabric.StaticCanvas.prototype.getObjectFromTS = function(ts) {
 
 window.onload = function() {
 	canvasEditor = new fabric.Canvas("canvas-editor");
-	canvasEditor.backgroundColor = 'white';
 	canvasEditor.selection = false;		// Desactivada selección de grupo
 	WIDTH = canvasEditor.getWidth();
 	LEFT = WIDTH/2;
@@ -21,7 +20,18 @@ window.onload = function() {
 	initImageEditor();
 	canvasEditor.on('object:selected', objectSelected);
 	canvasEditor.on('object:modified', objectModified);
-	canvasEditor.upperCanvasEl.oncontextmenu = function() {return false};
+	canvasEditor.on('path:created', function(p) {
+		insertLayer(p.path);
+		insertHistory;
+	})
+	canvasEditor.on('object:moving', function(e){
+		var p = e.target;
+		console.log(e);
+		p.lineL && p.lineL.set({'x1': p.left, 'y1': p.top});
+		p.lineR && p.lineR.set({'x2': p.left, 'y2': p.top});
+		canvasEditor.renderAll();
+	})
+	// canvasEditor.upperCanvasEl.oncontextmenu = function() {return false};
 	var panels = document.getElementsByClassName('off');
 	for (p in panels) panels[p].onclick = function(e) {
 		e.target.className = (e.target.className =='on' ? 'off' : 'on');
@@ -40,6 +50,24 @@ window.onload = function() {
 
 	document.addEventListener("keydown", function(e) {
 		if (e.keyCode == 46) canvasRemoveElement();
+		else {
+			var o = canvasEditor.getActiveObject();
+			var inc = (e.shiftKey ? 20 : 1);
+			switch (e.keyCode) {
+				case 37:
+					o.left-=inc;
+					break;
+				case 38:
+					o.top-=inc;
+					break;
+				case 39:
+					o.left+=inc;
+					break;
+				case 40:
+					o.top+=inc;
+			}
+			canvasEditor.renderAll();
+		}
 	})
 	document.getElementById("back-color").addEventListener("change", function(ev){
 		canvasEditor.backgroundColor = ev.target.value;
@@ -130,11 +158,11 @@ window.onload = function() {
 	document.getElementById("canvas-clear").onclick = function() {canvasEditor.clear()};
 	document.getElementById("canvas-draw-on").addEventListener("change", function(ev) {
 		canvasEditor.isDrawingMode = ev.target.checked;
-		canvasEditor.freeDrawingLineWidth = document.getElementById("draw-width").value;
+		// canvasEditor.freeDrawingLineWidth = parseInt(document.getElementById("draw-width").value) || 1;
 		canvasEditor.freeDrawingColor = document.getElementById("draw-color").value;
 	});
 	document.getElementById("draw-width").addEventListener("change", function(ev) {
-		canvasEditor.freeDrawingLineWidth = ev.target.value;
+		canvasEditor.freeDrawingLineWidth = parseInt(document.getElementById("draw-width").value) || 1;
 	});
 	document.getElementById("draw-color").addEventListener("change", function(ev) {
 		canvasEditor.freeDrawingColor = ev.target.value;
@@ -277,13 +305,30 @@ function insertLayer(element) {
 		itemInfo.id = "txt-"+item.id;
 		itemInfo.innerHTML = element.text;
 	}
-	element.toDataURL(function(data){
+	else if (element.type == "path") {
+		console.log(element)
+		var c = document.createElement("canvas");
+		c.width = element.width;
+		c.height = element.height;
+		var p = new fabric.Path.fromObject(element.toObject());
+		p.left = p.width/2;
+		p.top = p.height/2;
+		var f = new fabric.Canvas(c);
+		f.add(p);
 		var img = new Image();
-		img.src = data;
+		img.src = f.toDataURLWithMultiplier('png', .2, 1);
 		img.draggable = false;
 		img.id = "thumb-"+item.id;
 		item.appendChild(img);
-	})
+	} else {
+		element.toDataURL(function(data){
+			var img = new Image();
+			img.src = data;
+			img.draggable = false;
+			img.id = "thumb-"+item.id;
+			item.appendChild(img);
+		})
+	}
 	item.appendChild(itemInfo);
 	item.ondragover = layerOnDragOver;
 	function layerOnDragOver(e) {
@@ -331,6 +376,7 @@ function insertLayer(element) {
 		}
 	});
 	var parent = document.getElementById("canvas-layers");
+	if (!parent.firstChild) parent.appendChild(document.createElement("div"));
 	parent.insertBefore(item, parent.firstChild.nextSibling);
 	if (!parent.firstChild.className) {
 		parent.firstChild.className = "item";
@@ -339,7 +385,33 @@ function insertLayer(element) {
 		parent.firstChild.ondragleave = layerOnDragLeave;
 		parent.firstChild.ondrop = layerOnDrop;
 	}
+}
 
+function insertHistory() {
+	var divHist = document.getElementById("canvas-history");
+	var c = new Object();
+	c.name = new Date().getTime();
+	c.canvas = canvasEditor.toJSON();
+	c.preview = canvasEditor.toDataURLWithMultiplier('png', .2, 1);
+	var hist = localStorage["HISTORY_CANVAS"];
+	var histcanvas = (hist ? JSON.parse(hist) : new Array());
+	histcanvas.push(c);
+	localStorage["HISTORY_CANVAS"] = JSON.stringify(histcanvas);
+	var mini = new Image();
+	mini.id = "hist-"+histcanvas.indexOf(c);
+	mini.src = c.preview;
+	mini.onclick = function() {
+		var savedCanvas = JSON.parse(localStorage["HISTORY_CANVAS"]);
+		canvasEditor.loadFromJSON(savedCanvas[this.id.split("-")[1]].canvas,
+			function() {
+				document.getElementById("canvas-layers").innerHTML = "";
+				var objects = canvasEditor.getObjects();
+				for (var i=0; i<objects.length; i++) {
+					insertLayer(objects[i]);
+				}
+			});
+	}
+	divHist.appendChild(mini);
 }
 
 function removeLayer(ts) {
@@ -356,14 +428,14 @@ function canvasInsertImage(ev) {
 			padding: PADDING,
 			cornersize: 8,
 		});
-		image.ts = new Date().getTime();
-		insertLayer(image);
 		canvasEditor.add(image);
 		var im_width = image.currentWidth;
 		if (im_width > WIDTH) image.scaleToWidth(WIDTH);
 		var im_height = image.currentHeight;
 		if (im_height > HEIGHT) image.scaleToWidth(HEIGHT);
 		canvasEditor.renderAll();
+		insertLayer(image);
+		insertHistory();
 	});
 }
 function canvasInsertRect() {
@@ -376,10 +448,10 @@ function canvasInsertRect() {
         padding: PADDING,
         opacity: OBJOPACITY
         });
-	rect.ts = new Date().getTime();
-	insertLayer(rect);
 	canvasEditor.add(rect);
 	canvasEditor.setActiveObject(rect);
+	insertLayer(rect);
+	insertHistory();
 }
 
 function canvasInsertCircle() {
@@ -391,10 +463,10 @@ function canvasInsertCircle() {
         padding: PADDING,
         opacity: OBJOPACITY
         });
-	circ.ts = new Date().getTime();
-	insertLayer(circ);
 	canvasEditor.add(circ);
 	canvasEditor.setActiveObject(circ);
+	insertLayer(circ);
+	insertHistory();
 }
 
 function canvasInsertTriangle() {
@@ -409,28 +481,49 @@ function canvasInsertTriangle() {
         strokeWidth: 5,
         stroke: '#666'
         });
-	tri.ts = new Date().getTime();
-	insertLayer(tri);
 	canvasEditor.add(tri);
 	canvasEditor.setActiveObject(tri);
+	insertLayer(tri);
+	insertHistory();
 }
 
 function canvasInsertLine() {
 	var line = new fabric.Line(
-		[100, 100, 200, 200],
+		[50, 50, 100, 50],
 		{
-	        left: LEFT,
-			top: TOP,
 	        fill: OBJCOLOR,
-	        padding: PADDING,
 	        opacity: OBJOPACITY,
 	        strokeWidth: 5,
         });
-	line.ts = new Date().getTime();
-	insertLayer(line);
+	line.lockMovementX=  true;
+    line.lockMovementY=  true;
+    line.lockRotation=  true;
+    line.lockScalingX=   true;
+    line.lockScalingY=   true;
+    line.lockUniScaling= true;
 	canvasEditor.add(line);
-	canvasEditor.setActiveObject(line);
-
+	var cLeft = new fabric.Rect({
+		left: line.get('x1'),
+		top: line.get('y1'),
+		width: 5,
+		height: 5,
+		opacity: 0
+	})
+	cLeft.lineL = line;
+	cLeft.hasControls = cLeft.hasBorders = false;
+	canvasEditor.add(cLeft);
+	var cRight = new fabric.Rect({
+		left: line.get('x2'),
+		top: line.get('y2'),
+		width: 5,
+		height: 5,
+		opacity: 0
+	})
+	cRight.lineR = line;
+	cRight.hasControls = cRight.hasBorders = false;
+	canvasEditor.add(cRight);
+	insertLayer(line);
+	insertHistory();
 }
 
 function canvasInsertText(e) {
@@ -447,10 +540,10 @@ function canvasInsertText(e) {
 			padding: PADDING,
 			fontFamily: document.getElementById("canvas-text-font").value
 		});
-	text.ts = new Date().getTime();
-	insertLayer(text);
 	canvasEditor.add(text);
 	canvasEditor.setActiveObject(text);
+	insertLayer(text);
+	insertHistory();
 	e.target.className += " on";
 	document.getElementById("canvas-text-value").focus();
 }
@@ -482,15 +575,32 @@ function objectSelected(e) {
 	document.getElementById("obj-opacity").value = Math.round(active.opacity*100);
 	document.getElementById("canvas-text-font").value = active.text;
 }
+
 function objectModified(e) {
 	console.log("modi");
 	var element = e.target;
 	var ts = element.ts;
-	if (e.target.type == "text")
-		document.getElementById("txt-"+ts).innerText =   element.text;
-	element.toDataURL(function(data) {
-		document.getElementById("thumb-"+ts).src = data;
-	});
+	try {
+		if (e.target.type == "text")
+			document.getElementById("txt-"+ts).innerText =   element.text;
+		else if (element.type == "path") {
+			var c = document.createElement("canvas");
+			c.width = element.width;
+			c.height = element.height;
+			var p = new fabric.Path.fromObject(element.toObject());
+			p.left = p.width/2;
+			p.top = p.height/2;
+			var f = new fabric.Canvas(c);
+			f.add(p);
+			document.getElementById("thumb-"+ts).src = f.toDataURLWithMultiplier('png', .2, 1);
+		} else {
+			element.toDataURL(function(data) {
+			document.getElementById("thumb-"+ts).src = data;
+			});
+		}
+	} catch(err) {
+		console.log(err);
+	}
 }
 
 function canvasLayout() {
@@ -507,14 +617,15 @@ function canvasLayout() {
 	}
 	/* Adapata las dimensiones de los objetos al layout buscado */
 	function adaptGroup(group, unit) {
+		var margin = 2;
 		for (var i=0; i<group.length; i++) {
 			var elemW = 0;
 			if (group[i].type=="image")
 				elemW = group[i].width;
 			else 
 				elemW = group[i].currentWidth;
-			elemWnew = Math.round(elemW/unit)*unit;
-			if (elemWnew==0) elemWnew = unit;
+			elemWnew = (Math.round(elemW/unit)*unit - margin) || (unit-margin);
+			// if (elemWnew==0) elemWnew = unit;
 			group[i].scaleToWidth(elemWnew);
 		}
 	}
@@ -639,7 +750,6 @@ function onCropImage() {
 		objects[i].selectable = false;
 	}
 	var rect = new fabric.Rect({
-		canRotate: false,
         left: LEFT,
 		top: TOP,
         fill: '#000',
@@ -648,14 +758,17 @@ function onCropImage() {
         height: 100,
         padding: PADDING
         })
+	rect.lockRotation = true;
 	canvasEditor.add(rect);
 	canvasEditor.setActiveObject(rect);
 	canvasEditor.upperCanvasEl.addEventListener('mousedown', mouseCrop);
+	canvasEditor.off('object:modified', objectModified);
 	function mouseCrop(e) {
 		if (e.button == 2) {
 			cropImage();
 			canvasEditor.upperCanvasEl.removeEventListener('mousedown', mouseCrop);
-		} 
+			canvasEditor.on('object:modified', objectModified);
+		}
 	}
 }
 
@@ -680,7 +793,6 @@ function onCropPolyImage() {
 	canvasEditor.add(pol);
 	canvasEditor.upperCanvasEl.addEventListener('mousedown', mousePolyCrop);
 	function mousePolyCrop(e) {
-		console.log(e);
 		if (e.button == 0) {
 			var pointer = canvasEditor.getPointer(e);
 			pointer.x -= pol.left;
@@ -730,12 +842,12 @@ function cropImage() {
 }
 function cropPolyImage() {
 	var poly = canvasEditor.item(canvasEditor.getObjects().length-1);
+	canvasEditor.remove(poly);
 	poly._calcDimensions();
 	var x = poly.left;
 	var y = poly.top;
 	var w = poly.width;
 	var h = poly.height;
-	console.log(poly);
 
 	var newcanvas = document.createElement('canvas');
 	newcanvas.width = w; 
@@ -750,6 +862,7 @@ function cropPolyImage() {
 	newcontext.closePath();
 	newcontext.clip();
 	var canvas = canvasEditor.getElement();
+
 	newcontext.drawImage(canvas, x+poly.minX, y+poly.minY, w, h, 0, 0, w, h);
 	newcontext.restore();
 	fabric.Image.fromURL(newcanvas.toDataURL('png', 1.0),
@@ -770,10 +883,9 @@ function cropPolyImage() {
 	for (var i=0; i<objects.length; i++) {
 		objects[i].selectable = true;
 	}
-	canvasEditor.remove(poly);
 }
 
-function canvasSave() {
+function canvasSave(key) {
 	var c = new Object();
 	c.name = document.getElementById("canvas-save-name").value;
 	c.canvas = canvasEditor.toJSON();
@@ -782,7 +894,7 @@ function canvasSave() {
 	var savedCanvas = (saved ? JSON.parse(saved) : new Array());
 	savedCanvas.push(c);
 	localStorage["SAVED_CANVAS"] = JSON.stringify(savedCanvas);
-	populateSaved()
+	populateSaved();
 }
 function populateSaved() {
 	var saved = localStorage["SAVED_CANVAS"];
@@ -808,7 +920,13 @@ function populateSaved() {
 			var savedCanvas = JSON.parse(localStorage["SAVED_CANVAS"]);
 			for (var s=0; s<savedCanvas.length; s++) {
 				if (savedCanvas[s].name == this.id) {
-					canvasEditor.loadFromJSON(savedCanvas[s].canvas);
+					canvasEditor.loadFromJSON(savedCanvas[s].canvas,
+						function() {
+							var objects = canvasEditor.getObjects();
+							for (var i=0; i<objects.length; i++) {
+								insertLayer(objects[i]);
+							}
+						});
 				}
 			}
 		}

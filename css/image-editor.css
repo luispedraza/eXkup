@@ -65,6 +65,13 @@ body {
 	top: 0;
 	right: 0;
 }
+#canvas-history img {
+	margin: 5px;
+}
+#canvas-history img:hover {
+	cursor: pointer;
+	outline: 1px solid red;
+}
 
 #selector-content img {
 	max-width: 150px;
