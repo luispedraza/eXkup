@@ -4,6 +4,7 @@ var LEFT, TOP, WIDTH, HEIGHT, OBJCOLOR="#ff0000", OBJOPACITY=1.0, PADDING=2;
 fabric.Polygon.prototype.add = function(point) {
 	this.points.push(point);
 }
+
 fabric.StaticCanvas.prototype.getObjectFromTS = function(ts) {
 	for (var i=0; i<this._objects.length; i++){
 		if (this._objects[i].ts == ts) return this._objects[i];
@@ -25,13 +26,21 @@ window.onload = function() {
 		insertHistory;
 	})
 	canvasEditor.on('object:moving', function(e){
-		var p = e.target;
-		console.log(e);
-		p.lineL && p.lineL.set({'x1': p.left, 'y1': p.top});
-		p.lineR && p.lineR.set({'x2': p.left, 'y2': p.top});
+		var o = e.target;
+		console.log(o);
+		o.lineL && o.lineL.set({'x1': o.left, 'y1': o.top});
+		o.lineR && o.lineR.set({'x2': o.left, 'y2': o.top});
+		if (o.pointL){
+			o.set({'x1': o.left-o.width/2, 'y1': o.top-o.height/2});
+			o.pointL.set({'left': o.x1, 'top': o.y1});
+		}
+		if (o.pointR) {
+			o.set({'x2': o.left+o.width/2, 'y2': o.top+o.height/2});
+			o.pointR.set({'left': o.x2, 'top': o.y2});
+		}
 		canvasEditor.renderAll();
 	})
-	// canvasEditor.upperCanvasEl.oncontextmenu = function() {return false};
+	canvasEditor.upperCanvasEl.oncontextmenu = function() {return false};
 	var panels = document.getElementsByClassName('off');
 	for (p in panels) panels[p].onclick = function(e) {
 		e.target.className = (e.target.className =='on' ? 'off' : 'on');
@@ -170,25 +179,21 @@ window.onload = function() {
 	document.getElementById("canvas-layout").onclick = canvasLayout;
 	document.getElementById("canvas-save").onclick = canvasSave;
 
-	document.getElementById("canvas-filter").onclick = function() {
-		var o = canvasEditor.getActiveObject();
-		var canvas = document.createElement("canvas");
-		var img = new Image();
-		img.onload = function() {
-			Caman(img.src, canvas, function() {
-				this.brightness(-50).render(function(){
-					var newimg = new Image();
-					newimg.onload = function() {
-						o.setElement(this);
-						canvasEditor.renderAll();
-					}
-					newimg.src = canvas.toDataURL('png', 1.0);
-				});
-			})
-		}
-		img.src = o.getElement().src;
+	var filters = document.getElementsByClassName("filter");
+	for (var f=0; f<filters.length; f++) {
+		filters[f].addEventListener('mouseup', Filter);
+		filters[f].addEventListener('change', function(e) {
+			if (e.target.type == 'range') {
+				document.getElementById(e.target.id + '-val').value = e.target.value;
+			}
+		});
 	}
-
+	filters = document.getElementsByClassName("preset");
+	console.log(filters);
+	for (var f=0; f<filters.length; f++) {
+		console.log("filter");
+		filters[f].addEventListener('click', Filter);
+	}
 }
 
 function showSmall(ev) {
@@ -206,8 +211,8 @@ function loadHDImage(ev1) {
 	fr.onload = function(ev2) {
 		var img = new Image();
 		img.src = ev2.target.result;
-		img.onclick = canvasInsertImage;
-		document.getElementById("hd-images").appendChild(img);
+		img.onclick = canvasInsertImage;	// inserta la imagen en el lienzo
+		document.getElementById("hd_images").appendChild(img);
 	}
 	fr.readAsDataURL(filename);
 }
@@ -494,9 +499,12 @@ function canvasInsertLine() {
 	        fill: OBJCOLOR,
 	        opacity: OBJOPACITY,
 	        strokeWidth: 5,
+	        padding: 0
         });
-	line.lockMovementX=  true;
-    line.lockMovementY=  true;
+	line.hasBorders = false;
+	line.hasControls = false;
+	// line.lockMovementX=  true;
+ //    line.lockMovementY=  true;
     line.lockRotation=  true;
     line.lockScalingX=   true;
     line.lockScalingY=   true;
@@ -507,9 +515,11 @@ function canvasInsertLine() {
 		top: line.get('y1'),
 		width: 5,
 		height: 5,
-		opacity: 0
+		opacity: 100,
+		fill: '#000'
 	})
 	cLeft.lineL = line;
+	line.pointL = cLeft;
 	cLeft.hasControls = cLeft.hasBorders = false;
 	canvasEditor.add(cLeft);
 	var cRight = new fabric.Rect({
@@ -520,6 +530,7 @@ function canvasInsertLine() {
 		opacity: 0
 	})
 	cRight.lineR = line;
+	line.pointR = cRight;
 	cRight.hasControls = cRight.hasBorders = false;
 	canvasEditor.add(cRight);
 	insertLayer(line);
@@ -549,7 +560,7 @@ function canvasInsertText(e) {
 }
 
 function canvasObjOpacity(ev) {
-	document.getElementById("obj-opacity-value").value = ev.target.value+ " %";
+	document.getElementById("obj-opacity-val").value = ev.target.value+ " %";
 	OBJOPACITY = parseInt(ev.target.value)/100;
 	var activeObj = canvasEditor.getActiveObject();
 	var activeGrp = canvasEditor.getActiveGroup();
@@ -938,4 +949,20 @@ function populateSaved() {
 	}
 	savedDiv.innerHTML = "";
 	savedDiv.appendChild(savedTable);
+}
+
+function Filter(e) {
+	console.log(e);
+	var o = canvasEditor.getActiveObject();
+	var canvas = document.createElement("canvas");
+	Caman(o._originalImage.src, canvas, function() {
+		this[e.target.id](e.target.value).render(function(){
+			var newimg = new Image();
+			newimg.onload = function() {
+				o.setElement(this);
+				canvasEditor.renderAll();
+			}
+			newimg.src = canvas.toDataURL('png', 1.0);
+		});
+	})
 }

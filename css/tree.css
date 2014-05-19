@@ -1,4 +1,52 @@
+/* Arbol de mensajes de un hilo */
+.node {
+	width: 100%;
+	border-left: 1px dotted black;
+}
+.item {
+	padding-left: 10px;
+	padding-top: 20px;
+	border-bottom: 1px dotted black;
+}	
+.node.last{
+	border-left: none;
+}
+.node.last > .item {
+	border-left: 1px dotted black;
+}
+.more {
+	cursor: pointer;
+	background-color: orange;
+	width: 100px;
+	font-size: 1em;
+	height: 1.5em;
+	background-image: url('/icon/more.png');
+	background-repeat: no-repeat;
+	padding-left: 15px;
+}
+.more.on {
+	background-color: white;
+	background-image: url('/icon/less.png');
+	border-left: 1px dotted black;
+}
+.content {
+	background-color: orange;
+	padding: 3px;
+	margin-bottom: -20px;
+}
 
+.children {
+	margin-top: 20px;
+	margin-left: 20px;
+	height: 1.5em;
+	overflow: hidden;
+}
+.children.on {
+	display: block;
+	height: auto;
+}
+
+/*
 
 
 .node {
@@ -33,4 +81,4 @@ path.link {
 	fill: none;
 	stroke: #9ecae1;
 	stroke-width: 1.5px;
-}
+}*/

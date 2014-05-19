@@ -1,32 +1,34 @@
 #editor {
+	height: 200px;
+	overflow: hidden;
+	position: relative;
 }
 
 #commands {
 	position: absolute;
 	left: 0;
-	top: 50px;
+	top: 0;
 	width: 100px;
 }
 
 #toolbar {
 	position: absolute;
-	top: 10px;
-	left: 150px;
-	width: 400px;
+	top: 0;
+	left: 120px;
 }
 
 #newmessage {
 	outline: none;
 	position: absolute;
-	left: 150px;
+	left: 120px;
 	top: 50px;
-	border: 2px solid #FF7A00;
-	-webkit-border-radius: 10px;
-	height: 120px;
-	width: 400px;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	height: 100px;
+	width: 450px;
 	overflow-y: scroll;
 	overflow-x: hidden;
-	padding: 5px;
+	padding: 10px;
 }
 
 #destinations {
@@ -41,22 +43,26 @@
 	bottom: 0;
 	width: 100px;
 }
+
 #commands #counter {
-	font-size:2em;
-	font-weight:bold;
-	border: 2px solid #FF7A00;
-	-webkit-border-radius: 10px;
+	font-size:1.5em;
+	border: 1px solid #ddd;
+	border-radius: 3px;
 	text-align: center;
 	height: 40px;
 }
 
+#commands a {
+	color: #fff;
+	text-decoration: none;
+}
+
 #commands #send, #commands #cancel {
-	background-color: #03899C;
+	background-color: #000;
 	color: white;
-	-webkit-border-radius: 10px;
 	cursor: pointer;
-	margin-top: 5px;
-	height: 40px;
+	margin-top: 10px;
+	height: 30px;
 	text-align: center;
 }
 #commands #send:hover, #commands #cancel:hover {
@@ -66,23 +72,24 @@
 	background-color: #015965;
 }
 
-#toolbar .button {
-	display:inline;
+#toolbar a.button {
+	text-decoration: none;
+	width: 18px;
+	height: 16px;
+	padding-top: 2px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	text-align: center;
+	color: #666;
 	cursor: pointer;
-	background-color: #FF7A00;
 }
 #toolbar .button:hover {
-	background-color: #BF7530;
-}
-#toolbar .button:active {
-	background-color: #A65000;
+	background-color: #666;
+	color: #fff;
 }
 
 #send2fb {
 	-webkit-appearance: none;
-	width: 30px;
-	height: 30px;
-	background: url('/icon/facebook.png') no-repeat;
 	-webkit-filter: grayscale(100%);
 }
 #send2fb:hover, #send2tt:hover {
@@ -91,9 +98,6 @@
 
 #send2tt {
 	-webkit-appearance: none;
-	width: 30px;
-	height: 30px;
-	background: url('/icon/twitter.png') no-repeat;
 	-webkit-filter: grayscale(100%);
 }
 

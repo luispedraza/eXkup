@@ -24,9 +24,24 @@ function initPopup() {
 			sleep(1000);
 		})
 		document.getElementById("send2priv").addEventListener("click", sendPriv);
+		document.getElementById("closetree").addEventListener("click", function() {
+			document.getElementById("board").style.left = 0;
+			document.getElementById("tree-board").style.left = "450px";
+		})
+
+		document.getElementById("edit-section-h1").onclick = showEditor;
+		document.getElementById("cancel").onclick = showEditor;
+		document.getElementById("profile-section-h1").onclick = showProfile;
 	});
 }
-
+function showEditor() {
+	var e = document.getElementById("edit-section");
+	e.className = (e.className.match("on") ? "" : "on");
+}
+function showProfile() {
+	var e = document.getElementById("profile-section");
+	e.className = (e.className.match("on") ? "" : "on");
+}
 function dispatchProgress(p) {
 	var event = document.createEvent("Event");
 	event.initEvent("change", true, true);

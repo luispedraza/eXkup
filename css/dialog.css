@@ -1,7 +1,6 @@
-#dialog {
+#dlg {
 	width: 400px;
 	height: 300px;
-	z-index: 100;
 	background-color: #ddd;
 	border: 1px solid black;
 	position: absolute;
@@ -10,9 +9,9 @@
 	margin-left: -200px;
 	margin-top: -150px;
 	opacity: .9;
-	display: none;
+	z-index: 100;
 }
-#dialog .button {
+#dlg .btn {
 	background-color: orange;
 	color: white;
 	bottom: 0px;

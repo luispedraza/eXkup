@@ -1,6 +1,6 @@
 <!doctype html>
 <html>
-	<head>
+<head>
 	<meta charset="utf-8" />
 	<link rel="stylesheet" href="css/eskupext.css" type="text/css" />
 	<link rel="stylesheet" href="css/editor.css" type="text/css" />
@@ -19,167 +19,209 @@
 	
 </head>
 <body>
+	<div id="masonry-container"></div>
 
-<div id="masonry-container"></div>
-
-<div>
-<div id="editor">
-	<div id="commands">
-		<div id="counter">280</div>
-		<div class="send" id="send">publicar</div>
-		<div class="cancel" id="cancel">cancelar</div>
-	</div>
-	<div id="toolbar">
-		<img id="setbold" class="button" title="negrita" src="icon/bold.png" />
-		<img id="setitalic" class="button" title="cursiva" src="icon/italic.png" /> 
-		<img id="insertlink" class="button" title="enlazar esta página" src="icon/link.png" />
-		<img id="insertvideo" class="button" title="insertar vídeo" src="icon/video.png" />
-		<img id="insertimage" class="button" title="insertar imagen" src="icon/photo.png" />
-		<img id="cortas" class="button" title="acortar enlaces" src="icon/cortas.png" />
-		<input id="send2fb" type="checkbox" title="facebook"/>
-		<input id="send2tt" type="checkbox" title="twitter"/>
-	</div>
-	<div id="newmessage" contenteditable></div>
-	<div id="newimage">
-		<div id="newimage-control">
-			<div id="insert-cancel" class="button">eliminar</div>
-			<div id="insert-confirm" class="button">insertar</div>
-		</div>
-		<canvas id="canvasimage"></canvas>
-	</div>
-</div>
-</div>
-
-
-<div id="selector-editor">
-	<canvas id="canvas-editor" width="600" height="600"></canvas>
-
-	<div id="canvas-controls">
-		<input id="back-color" name="back-color" type="color" value='#ffffff'>
-		<label for="back-color">color de fondo del lienzo</label>
-		
-
-		<h1 class="off">selecciona una imagen…</h1>
-		<div id="selector-content">
-		<input type="checkbox" name="show-small" id="show-small">
-		<label for="show-small">Mostrar imágenes pequeñas</label>
-			<div id="selector-items">
-			<div class="item">
-				<h2>… desde tu disco duro</h2>
-				<label for="hd" class="btn">selecciona una imagen</label>
-				<input type="file" id="hd" name="hd" accept="image/*">
-				<div id="hd-images"></div>
+	<div>
+		<div id="editor">
+			<div id="commands">
+				<div id="counter">280</div>
+				<div class="send" id="send">publicar</div>
+				<div class="cancel" id="cancel">cancelar</div>
 			</div>
-			<div class="item">
-				<h2>… desde Google</h2>
-				<form id="google-search-form">
-					<input id="google-search-string" placeholder="buscar una imagen…">
-					<input type="submit" value="buscar" id="google-search">
-				</form>
-				<div id="google"></div>
+			<div id="toolbar">
+				<img id="setbold" class="button" title="negrita" src="icon/bold.png" />
+				<img id="setitalic" class="button" title="cursiva" src="icon/italic.png" /> 
+				<img id="insertlink" class="button" title="enlazar esta página" src="icon/link.png" />
+				<img id="insertvideo" class="button" title="insertar vídeo" src="icon/video.png" />
+				<img id="insertimage" class="button" title="insertar imagen" src="icon/photo.png" />
+				<img id="cortas" class="button" title="acortar enlaces" src="icon/cortas.png" />
+				<input id="send2fb" type="checkbox" title="facebook"/>
+				<input id="send2tt" type="checkbox" title="twitter"/>
 			</div>
-			<div class="item">
-				<h2>… desde OpenClipArt Library</h2>
-				<form id="clips-search-form">
-					<input id="clips-search-string" placeholder="buscar un clip…">
-					<input type="submit" value="buscar" id="clips-search">
-				</form>
-				<div id="clips"><img id="clips-loader" src="/icon/loader.gif"></img></div>
-				
-			</div>
-			</div>	
-		</div>
-
-		<h1 class="off">insertar/editar objetos</h1>
-		<div>
-			<input id="canvas-rect" type="button" class="btn"/>
-			<input id="canvas-circle" type="button" class="btn"/>
-			<input id="canvas-triangle" type="button" class="btn"/>
-			<input id="canvas-line" type="button" class="btn"/>
-			<input id="canvas-text" type="button" class="btn" value="T">
-			<div>
-				<textarea id="canvas-text-value" width="100%" placeholder="escribe aquí el texto…"></textarea>
-
-				<div style="float: right">
-					<div>
-						<input id="canvas-text-bold" type="button" style="font-weight:bold" class="btn" value="N">
-						<input id="canvas-text-italic" type="button" style="font-style:italic" class="btn" value="i">
-						<input id="canvas-text-under" type="button" style="text-decoration:underline" class="btn" value="o">
-						<input id="canvas-text-stroke" type="button" style="text-decoration:line-through" class="btn" value="o">
-						<input id="canvas-text-over" type="button" style="text-decoration:overline" class="btn" value="o">
-						<input id="canvas-text-shadow" type="button" style="text-shadow:#666666 1px 1px 3px" class="btn" value="S">
-					</div>
-					<label for="canvas-text-font">tipografía:</label>
-					<select id="canvas-text-font">
-						<option>Arial</option>
-						<option selected="">Helvetica</option>
-						<option>Myriad Pro</option>
-						<option>Delicious</option>
-						<option>Verdana</option>
-						<option>Georgia</option>
-						<option>Courier</option>
-						<option>Comic Sans MS</option>
-						<option>Impact</option>
-						<option>Monaco</option>
-						<option>Optima</option>
-						<option>Hoefler Text</option>
-						<option>Plaster</option>
-						<option>Engagement</option>
-					</select>
-					
+			<div id="newmessage" contenteditable></div>
+			<div id="newimage">
+				<div id="newimage-control">
+					<div id="insert-cancel" class="button">eliminar</div>
+					<div id="insert-confirm" class="button">insertar</div>
 				</div>
-			</div>
-
-
-			<input id="obj-crop" type="button" value="recortar">
-			<input id="obj-crop-poly" type="button" value="recorte poligonal">
-
-			<label for="obj-opacity">Opacidad:</label>
-			<input id="obj-opacity" name="obj-opacity" type="range" min="0" max="100" value="100">
-			<input id="obj-opacity-value" value="100 %">
-			<label for="obj-color">Color:</label>
-			<input id="obj-color" name="obj-color" type="color" value="#ff0000">
-
-			<input id="canvas-remove" type="button" value="borrar"/>
-			<input id="canvas-clear" type="button" value="limpiar"/>
-			<input id="canvas-filter" type="button" value="filtro"/>
-		</div>
-		<!-- Panel de dibujo -->
-		<h1 class="off">dibujo</h1>
-		<div>
-			<input type="checkbox" id="canvas-draw-on" name="canvas-draw-on">
-			<label for="canvas-draw-on">quiero dibujar algo</label>
-			<div id="draw-options" class="off">
-				<label for="draw-width">ancho:</label>
-				<input type="range" id="draw-width" name="draw-width" min="1" max="20">
-				<label for="draw-width">color:</label>
-				<input type="color" id="draw-color" name="draw-color">
+				<canvas id="canvasimage"></canvas>
 			</div>
 		</div>
+	</div>
 
-		<h1 class="off">reordenar</h1>
-		<div>
-			<input type="button" id="canvas-layout" value="layout">
-			<input type="checkbox" id="canvas-layout-crop">
-			<label for="canvas-layout-crop">Permitir recortar y transformar elementos para un mejor ajuste</label>
-		</div>
-		<!-- Panel de guardado y restauración -->
-		<h1 class="off">guardar o recuperar dibujo</h1>
-		<div>
-			<h2>guardar como…</h2>
-			<input id="canvas-save-name" placeholder="nombre del dibujo">
-			<input id="canvas-save" value="guardar" type=button>
-			<h2>cargar dibujo</h2>
-			<div id="saved-canvas">Aún no hay dibujos guardados</div>
-		</div>
-
+	<div id="selector-editor">
 		
-		<h1 class="off">capas</h1>
-		<div id="canvas-layers"><div></div>
-		</div>
-		<h1 class="off">hitorial</h1>
-		<div id="canvas-history"></div>
-	</div> <!-- canvas controls -->
-</div>
+		<canvas id="canvas-editor" width="600" height="600"></canvas>
+
+		<div id="canvas-controls">
+			<input id="back-color" name="back-color" type="color" value='#ffffff'>
+			<label for="back-color">color de fondo del lienzo</label>
+
+
+			<h1 class="off">Selector de imágenes</h1>
+			<div id="selector-content">
+				<input type="checkbox" name="show-small" id="show-small">
+				<label for="show-small">Mostrar imágenes pequeñas</label>
+				<div id="selector-items">
+					<div class="item">
+						<h2>Imagen Local</h2>
+						<label for="hd" class="btn">Selecciona Archivo</label>
+						<input type="file" id="hd" name="hd" accept="image/*">
+						<div id="hd_images"></div>
+					</div>
+					<div class="item">
+						<h2>Google</h2>
+						<form id="google-search-form">
+							<input id="google-search-string" placeholder="buscar una imagen…">
+							<input type="submit" value="buscar" id="google-search">
+						</form>
+						<div id="google"></div>
+					</div>
+					<div class="item">
+						<h2>OpenClipArt Library</h2>
+						<form id="clips-search-form">
+							<input id="clips-search-string" placeholder="buscar un clip…">
+							<input type="submit" value="buscar" id="clips-search">
+						</form>
+						<div id="clips">
+							<img id="clips-loader" src="/icon/loader.gif"></img>
+						</div>
+					</div>
+				</div>	
+			</div>
+
+			<div id="edit-object">
+				<h1 class="off">Paleta de objetos</h1>
+				<div>
+					<input id="canvas-rect" type="button" class="btn"/>
+					<input id="canvas-circle" type="button" class="btn"/>
+					<input id="canvas-triangle" type="button" class="btn"/>
+					<input id="canvas-line" type="button" class="btn"/>
+					<input id="canvas-text" type="button" class="btn" value="T">
+					<div>
+						<textarea id="canvas-text-value" width="100%" placeholder="escribe aquí el texto…"></textarea>
+
+						<div style="float: right">
+							<div>
+								<input id="canvas-text-bold" type="button" style="font-weight:bold" class="btn" value="N">
+								<input id="canvas-text-italic" type="button" style="font-style:italic" class="btn" value="i">
+								<input id="canvas-text-under" type="button" style="text-decoration:underline" class="btn" value="o">
+								<input id="canvas-text-stroke" type="button" style="text-decoration:line-through" class="btn" value="o">
+								<input id="canvas-text-over" type="button" style="text-decoration:overline" class="btn" value="o">
+								<input id="canvas-text-shadow" type="button" style="text-shadow:#666666 1px 1px 3px" class="btn" value="S">
+							</div>
+							<label for="canvas-text-font">tipografía:</label>
+							<select id="canvas-text-font">
+								<option>Arial</option>
+								<option selected="">Helvetica</option>
+								<option>Myriad Pro</option>
+								<option>Delicious</option>
+								<option>Verdana</option>
+								<option>Georgia</option>
+								<option>Courier</option>
+								<option>Comic Sans MS</option>
+								<option>Impact</option>
+								<option>Monaco</option>
+								<option>Optima</option>
+								<option>Hoefler Text</option>
+								<option>Plaster</option>
+								<option>Engagement</option>
+							</select>
+						</div>
+					</div>
+
+
+					<input id="obj-crop" type="button" value="recortar">
+					<input id="obj-crop-poly" type="button" value="recorte poligonal">
+
+					<label for="obj-opacity">Opacidad:</label>
+					<input id="obj-opacity" name="obj-opacity" type="range" min="0" max="100" value="100">
+					<input id="obj-opacity-val" value="100 %">
+					<label for="obj-color">Color:</label>
+					<input id="obj-color" name="obj-color" type="color" value="#ff0000">
+
+					<input id="canvas-remove" type="button" value="borrar"/>
+					<input id="canvas-clear" type="button" value="limpiar"/>
+
+					<div id="filters">
+						<h2>Filtros</h2>
+						<div id="filters_custom">
+							<label for="brightness">Brillo</label>
+							<input class="filter" id="brightness" type="range" min="-100" max="100" value="0"/>
+							<input id="brightness-val" value="0" type="text"><br>
+							<label for="contrast">Contrate</label>
+							<input class="filter" id="contrast" type="range" min="-100" max="100" value="0"/>
+							<input id="contrast-val" value="0" type="text"><br>
+							<label for="saturation">Saturación</label>
+							<input class="filter" id="saturation" type="range" min="-100" max="100" value="0"/>
+							<input id="saturation-val" value="0" type="text"><br>
+							<label for="hue">Tonalidad</label>
+							<input class="filter" id="hue" type="range" min="0" max="100" value="0"/>
+							<input id="hue-val" value="0" type="text"><br>
+							<label for="exposure">Exposición</label>
+							<input class="filter" id="exposure" type="range" min="-100" max="100" value="0"/>
+							<input id="exposure-val" value="0" type="text"><br>
+							<label for="sepia">Sepia</label>
+							<input class="filter" id="sepia" type="range" min="0" max="100" value="0"/>
+							<input id="sepia-val" value="0" type="text"><br>
+							<label for="gamma">Gamma</label>
+							<input class="filter" id="gamma" type="range" min="0" max="10" step="0.1" value="0"/>
+							<input id="gamma-val" value="0" type="text"><br>
+							<label for="noise">Ruido</label>
+							<input class="filter" id="noise" type="range" min="0" max="100" value="0"/>
+							<input id="noise-val" value="0" type="text"><br>
+						</div>
+						<div id="filters_preset">
+							<input class="preset" id="vintage" type="button" value="Vintage"/>
+							<input class="preset" id="lomo" type="button" value="Lomo"/>
+							<input class="preset" id="sinCity" type="button" value="SinCity"/>
+							<input class="preset" id="sunrise" type="button" value="Sunrise"/>
+							<input class="preset" id="grungy" type="button" value="Grungy"/>
+							<input class="preset" id="pinhole" type="button" value="Pinhole"/>
+							<input class="preset" id="glowingSun" type="button" value="Glowing Sun"/>
+							<input class="preset" id="nostalgia" type="button" value="Nostalgia"/>
+							<input class="preset" id="concentrate" type="button" value="Concentrate"/>
+						</div>
+					</div><!-- filters -->
+				</div>
+				<!-- Panel de dibujo -->
+				<h1 class="off">dibujo</h1>
+				<div>
+					<input type="checkbox" id="canvas-draw-on" name="canvas-draw-on">
+					<label for="canvas-draw-on">quiero dibujar algo</label>
+					<div id="draw-options" class="off">
+						<label for="draw-width">ancho:</label>
+						<input type="range" id="draw-width" name="draw-width" min="1" max="20">
+						<label for="draw-width">color:</label>
+						<input type="color" id="draw-color" name="draw-color">
+					</div>
+				</div>
+
+				<h1 class="off">reordenar</h1>
+				<div>
+					<input type="button" id="canvas-layout" value="layout">
+					<input type="checkbox" id="canvas-layout-crop">
+					<label for="canvas-layout-crop">Permitir recortar y transformar elementos para un mejor ajuste</label>
+				</div>
+				<!-- Panel de guardado y restauración -->
+				<h1 class="off">guardar o recuperar dibujo</h1>
+				<div>
+					<h2>guardar como…</h2>
+					<input id="canvas-save-name" placeholder="nombre del dibujo">
+					<input id="canvas-save" value="guardar" type=button>
+					<h2>cargar dibujo</h2>
+					<div id="saved-canvas">Aún no hay dibujos guardados</div>
+				</div>
+
+
+				<h1 class="off">capas</h1>
+				<div id="canvas-layers"><div></div>
+			</div>
+			<h1 class="off">Historial</h1>
+			<div id="canvas-history"></div>
+
+		</div> <!-- canvas controls -->
+		
+	</div>
 </body>
 </html>

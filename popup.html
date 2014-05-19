@@ -2,6 +2,8 @@
 <html>
 <head>
 	<meta charset="utf-8" />
+	<link href='http://fonts.googleapis.com/css?family=Roboto:400,700,400italic,700italic,300' rel='stylesheet' type='text/css'>
+	<link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="css/eskupext.css" type="text/css" />
 	<link rel="stylesheet" href="css/popup.css" type="text/css" />
 	<link rel="stylesheet" href="css/editor.css" type="text/css" />
@@ -18,95 +20,99 @@
 </head>
 <body>
 
-<div id = "dialog">
-	<div id="dlg_msg">¿está seguro de querer continuar?</div>
-	<div id="dlg_extra"></div>
-	<div id="dlg_ok" class="button">OK</div>
-	<div id="dlg_cancel" class="button">Cancel</div>
-</div>
-<div id= "progress">
-	<div id="progress-status"></div>
-</div>
-
-<div id="board" class="message-list"></div>
-
-<!-- SECCION. EDITOR -->
-<div id="edit-section" class="section-container">
-	<h1>nuevo</h1>
-	<div id="editor">
-		<div id="commands">
-			<div id="counter">280</div>
-			<div class="send" id="send"><a href="#">mandar</a></div>
-			<div class="cancel" id="cancel"><a href="#">cancelar</a></div>
+	<div id="header">
+		<ul id="header-menu">
+			<li>perfil</li>
+			<li>opciones</li>
+			<li>desconectar</li>
+		</ul>
+		<div id="header-user">
+			<img id="user-avatar" />
+			<span id="user-name">lpedraza</span>
+			<span id="user-fullname">(Luis Pedraza)</span>
 		</div>
-		<div id="toolbar">
-			<img id="setbold" class="button" title="negrita" src="icon/bold.png" />
-			<img id="setitalic" class="button" title="cursiva" src="icon/italic.png" /> 
-			<img id="insertlink" class="button" title="enlazar esta página" src="icon/link.png" />
-			<img id="insertvideo" class="button" title="insertar vídeo" src="icon/video.png" />
-			<img id="insertimage" class="button" title="insertar imagen" src="icon/photo.png" />
-			<img id="cortas" class="button" title="acortar enlaces" src="icon/cortas.png" />
-			<input id="send2fb" type="checkbox" title="facebook"/>
-			<input id="send2tt" type="checkbox" title="twitter"/>
+	</div><!-- header -->
+
+	<div id= "progress">
+		<div id="progress-status"></div>
+	</div>
+
+	<div id="messages">
+		<div id="board" class="message-list"></div>
+		<div id="tree-board"><a id="closetree" href="#">volver</a><div id="tree"></div></div>
+	</div>
+
+	<div id="navigation">
+		<!-- SECCION. MENSAJES -->
+		<div id="msg-section" class="section-container">
+			<h1>mensajes</h1>
+			<ul class="navigator">
+				<li id="todo">todos</li>
+				<li id="sigo">seguidos</li>
+				<li id="mios">propios</li>
+				<li id="priv">privados</li>
+				<li id="favs">favoritos</li>
+			</ul>
+			<div class="search">
+				<input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><input type="button" id="search" value="buscar">
+			</div>
 		</div>
-		<div id="newmessage" contenteditable></div>
-		<div id="destinations">
-			<div id="send2priv">privado: </div>
-			<div id="send2theme">tema: </div>
+		<!-- SECCION. TEMAS -->
+		<div id="thm-section" class="section-container">
+			<h1>temas</h1>
+			<ul id="themes-follow" class="navigator"></ul>
+		</div>
+	</div><!-- navigation -->
+
+	<!-- SECCION. PERFIL -->
+	<div id="profile-section">
+		<h1 id="profile-section-h1">perfil</h1>
+		<a id="logout" href="#">Cerrar Sesión</a>
+		<div id="mifoto" style="float:left"></div>
+		<div class="profile_item" id="nombre"></div>
+		<div class="profile_item" id="apellidos"></div>
+		<div class="profile_item" id="urlpersonal"></div>
+		<div class="profile_item" id="descripcion"></div>
+		<div class="profile_item" id="blog"></div>
+
+		<div id="follows">
+			<div id="follow-to">
+				<h4>sigo a:</h4>
+				<div class="follow-to-users" id="follow-to-users"></div>
+			</div>
+			<div id="follow-me">
+				<h4>me siguen:</h4>
+				<div class="follow-me-users" id="follow-me-users"></div>       
+			</div>
 		</div>
 	</div>
-</div>
 
-<!-- SECCION. MENSAJES -->
-<div id="msg-section" class="section-container">
-	<h1>mensajes</h1>
-	<ul class="navigator">
-		<li id="todo">todos</li>
-		<li id="sigo">seguidos</li>
-		<li id="mios">propios</li>
-		<li id="priv">privados</li>
-		<li id="favs">favoritos</li>
-	</ul>
-	<div class="search">
-		<input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><input type="button" id="search" value="buscar">
+	<!-- SECCION. EDITOR -->
+	<div id="edit-section">
+		<h1 id="edit-section-h1">escribir nuevo mensaje <span class="fa fa-chevron-up"></span></h1>
+		<div id="editor">
+			<div id="commands">
+				<div id="counter">280</div>
+				<div class="send" id="send"><a href="#">mandar</a></div>
+				<div class="cancel" id="cancel"><a href="#">cancelar</a></div>
+			</div>
+			<div id="toolbar">
+				<a id="setbold" class="button fa fa-bold" title="negrita"></a>
+				<a id="setitalic" class="button fa fa-italic" title="cursiva"></a>
+				<a id="insertlink" class="button fa fa-link" title="enlazar esta página"></a>
+				<a id="insertvideo" class="button fa fa-video-camera" title="insertar vídeo"></a>
+				<a id="insertimage" class="button fa fa-camera" title="insertar imagen"></a>
+				<a id="cortas" class="button fa fa-cut" title="acortar enlaces"></a>
+				<input id="send2fb" type="checkbox" title="facebook" class="fa fa-facebook-square" />
+				<input id="send2tt" type="checkbox" title="twitter" class="fa fa-twitter-square" />
+			</div>
+			<div id="newmessage" contenteditable></div>
+			<div id="destinations">
+				<div id="send2priv">privado: </div>
+				<div id="send2theme">tema: </div>
+			</div>
+		</div>
 	</div>
-</div>
-
-
-<!-- SECCION. TEMAS -->
-<div id="thm-section" class="section-container">
-	<h1>temas</h1>
-	<h2>seguidos</h2>
-		<ul id="themes-follow" class="navigator"></ul>
-	<h2>bloqueados</h2>
-		<ul id="themes-block" class="navigator"></ul>
-</div>
-
-<!-- SECCION. PERFIL -->
-<div id="prof-section" class="section-container">
-	<h1>perfil</h1>
-</div>
-
-<div id="profile">
-	<a id="logout" href="#">Cerrar Sesión</a>
-	<div id="mifoto" style="float:left"></div>
-	<div class="profile_item" id="nombre"></div>
-	<div class="profile_item" id="apellidos"></div>
-	<div class="profile_item" id="urlpersonal"></div>
-	<div class="profile_item" id="descripcion"></div>
-	<div class="profile_item" id="blog"></div>
-	
-	<div id="follows">
-	<div id="follow-to">
-		<h4>sigo a:</h4>
-		<div class="follow-to-users" id="follow-to-users"></div>
-	</div>
-	<div id="follow-me">
-		<h4>me siguen:</h4>
-		<div class="follow-me-users" id="follow-me-users"></div>       
-	</div>
-	</div>
-</div>
 
 <!-- <div id="thread">
 	<div id="unflip">volver</div>

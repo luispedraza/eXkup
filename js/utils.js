@@ -36,17 +36,32 @@ function dataURItoBlob(dataURI) {
 function formatDate(tsDate)
 {
 	var thedate = new Date(tsDate * 1000);
-	return "<span class='time'>" + 
+	var now = new Date();
+	var diff = (now-thedate) / 1000;
+	var ago = "";
+	if (diff<60) {
+		ago = "Hace " + Math.round(diff) + " segundos ";
+	}
+	else if (diff<3600) {
+		ago = "Hace " + Math.round(diff/60) + " minutos ";
+	}
+	else if (diff<86400) {
+		ago = "Hace más de " + Math.floor(diff/3600) + " horas ";
+	}
+	else {
+		ago = "Hace más de " + Math.floor(diff/86400) + " días ";	
+	}
+	var when = "[" + padNumber(thedate.getDate(),2) +
+	"/" +
+	padNumber(thedate.getMonth()+1,2) +
+	"/" + 
+	padNumber(thedate.getFullYear(),4) +
+	" a las " +
 	padNumber(thedate.getHours().toString(),2) +
 	":" + 
-	padNumber(thedate.getMinutes(),2) +
-	" " + 
-	padNumber(thedate.getDate(),2) +
-	"-" +
-	padNumber(thedate.getMonth(),2) +
-	"-" + 
-	padNumber(thedate.getFullYear(),4) +
-	"</span>";
+	padNumber(thedate.getMinutes(),2) + "]"; 
+	
+	return "<span class='time'>" + ago + when + "</span>";
 	function padNumber(stdate, stlength)
 	{
 		while (stdate.toString().length < stlength) 
@@ -79,8 +94,7 @@ function apiCall(method, url, data, func) {
 		};
 	};
 	req.send(data);
-	if (!func) 
-		return req.responseText;
+	if (!func) return req.responseText;
 }
 
 function checkUserPhoto(path)
@@ -101,6 +115,11 @@ function fillProfile(user) {
 	document.getElementById("blog").innerHTML = "Blog: " + urlblog.link(urlblog);
 	document.getElementById("descripcion").innerText = "Sobre mí: "+ descripcion;
 	document.getElementById("mifoto").innerHTML = "<img src='" + foto + "' />";
+}
+
+function fillHeader(user) {
+	console.log(user);
+	document.getElementById("user-avatar").setAttribute("src", user.pathfoto);
 }
 
 function fillFollows(div, users) {

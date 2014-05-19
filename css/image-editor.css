@@ -1,5 +1,7 @@
+@import url(http://fonts.googleapis.com/css?family=Pathway+Gothic+One);
+
 body {
-	font-family: 'Metrophobic', sans-serif;
+	font-family: 'Pathway Gothic One', sans-serif;
 	font-size: 16px;
 }
 
@@ -13,15 +15,14 @@ body {
 	outline: 5px dotted #015965;
 }
 #canvas-controls{
+	float: right;
 	width: 550px;
 	height: 600px;
 	overflow: hidden;
-	background-color: #5FC0CE;
+	background-color: #1b99dd;
+	color: #fff;
 	padding: 5px;
-	position: absolute;
-	top: 195px;
-	left: 630px;
-
+	
 }
 #canvas-controls input[type='range'] {
 	-webkit-appearance: none;
@@ -34,6 +35,9 @@ body {
     overflow: hidden;
     width: 0;
     height: 0;
+}
+#canvas-controls input[type='text'] {
+	width: 20px;
 }
 
 #canvas-layers .item {
@@ -95,10 +99,8 @@ h1 {
 	color: white;
 }
 h2 {
-	display: inline;
 	font-size: .9em;
 	color: white;
-	border-bottom: 1px dotted black;
 }
 
 #draw-options {
@@ -169,3 +171,36 @@ h1.on + div {
 #clips-loader {
 	display: none;
 }
+
+/* Opciones de filtrado */
+#filters_custom label {
+	display: inline-block;
+	width: 65px;
+}
+#filters_custom input[type=text] {
+	display: none;
+}
+#filters_custom input[type=range] {
+	width: 200px;
+}
+#filters_custom {
+	width: 300px;
+	border-radius: 5px;
+	border: 1px solid #fff;
+	padding: 5px;
+	float: left;
+}
+#filters_preset {
+	width: 200px;
+	float: right;
+}
+#filters_preset {
+	border: 1px solid #fff;
+	border-radius: 5px;
+	padding: 5px;
+}
+#filters_preset input[type=button] {
+	width: 70px;
+	height: 50px;
+}
+
