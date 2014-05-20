@@ -138,22 +138,25 @@ function appendMsg(msg, board) {
 	dHead.innerHTML += formatDate(date).bold();
 	// Elementos de control:
 	var dCtrl = document.createElement("div");
-	dCtrl.className = "msg_control";
+	dCtrl.className = "msg_control fa fa-plus-square";
 	// Guardar vavorito
 	var dFav = document.createElement("div");
 	dFav.className = (checkFavorite(m_id) ? "btn favoff" : "btn favon");
-	dFav.title = (checkFavorite(m_id) ? "-fav" : "+fav");
+	dFav.innerHTML = "<i class='fa fa-star'></i> favorito";
+	dFav.title = (checkFavorite(m_id) ? "eliminar" : "añadir") + " favorito";
 	dFav.setAttribute("m_id", m_id);
 	dFav.addEventListener("click", setFavorite);
 	// Respuesta
 	var dReply = document.createElement("div");
 	dReply.className = "btn reply";
+	dReply.innerHTML = "<i class='fa fa-mail-reply'></i> responder";
 	dReply.title = "responder";
 	dReply.setAttribute("m_id", m_id);
 	dReply.addEventListener("click", msgReply);
 	// Forward
 	var dFwd = document.createElement("div");
 	dFwd.className = "btn fwd";
+	dFwd.innerHTML = "<i class='fa fa-mail-forward'></i> reenviar";
 	dFwd.title = "reenviar";
 	dFwd.addEventListener("click", msgForward);
 	dCtrl.appendChild(dFav);
@@ -168,6 +171,7 @@ function appendMsg(msg, board) {
 		dHead.innerHTML += div_reply.outerHTML;
 		var div_thread = document.createElement("div");
 		div_thread.className = "btn thlink";
+		div_thread.innerHTML = "<i class='fa fa-comments'></i> charla";
 		div_thread.title = "sigue el hilo";
 		div_thread.setAttribute("thread", msg.hilo);
 		div_thread.addEventListener("click", loadThread);
