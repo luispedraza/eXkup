@@ -216,15 +216,22 @@ ul.navigator li:hover {
 	font-size:1em;
 	position: relative;
 	border-bottom: 1px dotted #ccc;
-	min-height: 65px;
+	height: 40px;
 }
-
-.msg_header > b {
-	display: block;
+.msg_header .time {
+	margin-left: 8px;
+	font-size: 12px;
+	color: #aaa;
+	text-decoration: none;
 }
-
+.msg_header .time:hover {
+	color: #666;
+}
+.msg_header .time:before {
+	margin-right: 3px;
+}
 .msg_header img {
-	width:40px;
+	width: 35px;
 	height:auto;
 	float:left;
 	margin-right: 10px;
@@ -242,10 +249,14 @@ ul.navigator li:hover {
 	height: 1.2em;
 	font-size: 11px;
 	color: #ccc;
+	padding: 3px;
 }
 
 .msg_control:hover {
 	height: 65px;
+	border: 1px solid #ccc;
+	background-color: #fff;
+	box-shadow: -3px 2px 8px 0px rgba(50, 50, 50, 0.75);
 }
 .msg_control:before {
 	display: block;
@@ -278,10 +289,11 @@ ul.navigator li:hover {
 }
 
 .msg_content  img {
-	padding: 1px;
-	border: 1px solid #ccc;
+	/* padding: 1px; */
+	/* border: 1px solid #ccc; */
 	width: 100%;
-	height: auto;
+	/* height: auto; */
+	margin-top: 5px;
 }
 
 /* Profile */

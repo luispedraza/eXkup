@@ -104,7 +104,8 @@ function loadData(ev) {
 }
 
 function appendMsg(msg, board) {
-	var m_id = msg.idMsg;	
+	console.log(msg);
+	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
 	var date = msg.tsMensaje;
 	// Creación del nuevo mensaje:
@@ -126,16 +127,29 @@ function appendMsg(msg, board) {
 	dHead.className = "msg_header";
 	var img_user = document.createElement("img");
 	img_user.src = msg.pathfoto;
+	dHead.appendChild(img_user);	// user image
+
 	var a_user = document.createElement("a");
-	a_user.href = "http://eskup.elpais.com/"+user;
-	a_user.target="_blank";
-	a_user.appendChild(img_user);
-	dHead.appendChild(a_user);
-	var from = document.createElement("a");
-	from.href = "http://eskup.elpais.com/" + user;
-	from.innerText = user;
-	dHead.innerHTML += "Por " + from.outerHTML;
-	dHead.innerHTML += formatDate(date).bold();
+	a_user.href = "http://eskup.elpais.com/" + user;
+	a_user.textContent = user;
+	dHead.appendChild(a_user);		// user link
+	var date_element = getDateElement(date);
+	date_element.href = "http://eskup.elpais.com/" + m_id;
+	date_element.target = "_blank";
+	date_element.addEventListener("mouseover", function() {
+		alert("tetas");
+		// var ts = this.getAttribute(ts);
+		// var date = new Date(ts);
+		// var tooltip = document.createElement("span");
+		// tooltip.className = "time-tooltip";
+		// tooltip.textContent = formatDate(date);
+		// this.appendChild(tooltip);
+	});
+	date_element.addEventListener("mouseout", function() {
+		console.log("saliendo");
+	});
+	dHead.appendChild(date_element);
+
 	// Elementos de control:
 	var dCtrl = document.createElement("div");
 	dCtrl.className = "msg_control fa fa-plus-square";

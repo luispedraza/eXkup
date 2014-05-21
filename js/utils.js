@@ -1,3 +1,4 @@
+var MESES = new Array("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre");
 // Junta los valores de un objeto para producir una url
 Array.prototype.shuffle = function() {
  	var len = this.length;
@@ -32,42 +33,39 @@ function dataURItoBlob(dataURI) {
     return new Blob([new Uint8Array(array)], {type: mimeString});
 }
 
-// Formateo de fechas
-function formatDate(tsDate)
-{
-	var thedate = new Date(tsDate * 1000);
-	var now = new Date();
-	var diff = (now-thedate) / 1000;
-	var ago = "";
-	if (diff<60) {
-		ago = "Hace " + Math.round(diff) + " segundos ";
+/* Elemento de tiempo de publicación de un mensaje
+	@param tsData: timestamp date
+*/
+function getDateElement(tsDate)
+{	
+	var theDate = new Date(tsDate * 1000);
+	var elapsed = (new Date() - theDate) / 1000;
+	var when = "";
+	if (elapsed<60) {			// menos de 1 minuto
+		when = Math.round(elapsed) + " s.";
 	}
-	else if (diff<3600) {
-		ago = "Hace " + Math.round(diff/60) + " minutos ";
+	else if (elapsed<3600) {	// menos de 1 horra
+		when = Math.round(elapsed/60) + " min.";
 	}
-	else if (diff<86400) {
-		ago = "Hace más de " + Math.floor(diff/3600) + " horas ";
+	else if (elapsed<86400) {	// menos de 1 día
+		when = Math.round(elapsed/3600) + " h.";
 	}
 	else {
-		ago = "Hace más de " + Math.floor(diff/86400) + " días ";	
+		when = formatDate(theDate, false);
 	}
-	var when = "[" + padNumber(thedate.getDate(),2) +
-	"/" +
-	padNumber(thedate.getMonth()+1,2) +
-	"/" + 
-	padNumber(thedate.getFullYear(),4) +
-	" a las " +
-	padNumber(thedate.getHours().toString(),2) +
-	":" + 
-	padNumber(thedate.getMinutes(),2) + "]"; 
-	
-	return "<span class='time'>" + ago + when + "</span>";
-	function padNumber(stdate, stlength)
-	{
-		while (stdate.toString().length < stlength) 
-			stdate = "0" + stdate;
-		return stdate;
-	}
+	var element = document.createElement("a");
+	element.className = "time fa fa-clock-o";
+	element.textContent = when;
+	element.setAttribute("data-ts", tsDate);
+	element.addEventListener("mouseover", function() {
+		alert("hola");
+	});
+	return element;
+}
+
+/* Formateo de una fecha */
+function formatDate(date, withYear) {
+	return date.getDate() + " de " + MESES[date.getMonth()] + withYear ? (" de " + date.getFullYear()) : "";
 }
 
 // Función general de comunicación con el servidor
