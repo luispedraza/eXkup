@@ -57,7 +57,6 @@ function getDateElement(tsDate)
 	element.className = "time fa fa-clock-o";
 	element.textContent = when;
 	element.setAttribute("data-ts", tsDate);
-	console.log("evento");
 	element.addEventListener("mouseover", function() {
 		console.log("entrando");
 		// var ts = this.getAttribute(ts);

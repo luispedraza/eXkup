@@ -74,13 +74,13 @@ function loadData(ev) {
 	if (ev) {
 		if (ev.type == "click") {
 			board = getBoard(ev.target.id);
-			if (board == OUTPARAMS.t)
+			if (board == OUTPARAMS.t)	// tablón actual, nada que hacer
 				return;
-			OUTPARAMS.t = board;
-			OUTPARAMS.p = 1;
-			OUTPARAMS.th = "";
-			OUTPARAMS.msg = "";
-			document.getElementById("board").innerHTML = "";
+			OUTPARAMS.t = board;		// selección de tablón
+			OUTPARAMS.p = 1;			// primera página
+			OUTPARAMS.th = "";			// no thread
+			OUTPARAMS.msg = "";			// no mensaje
+			document.getElementById("board").innerHTML = "";	// limpieza
 		}
 		else if (ev.type == "scroll") {
 			OUTPARAMS.p++;
@@ -96,15 +96,14 @@ function loadData(ev) {
 		document.getElementById("tree-board").style.left = "450px";
 		for (var i=0; i<messages.length; i++) {
 			var msg = info.mensajes[i];
-			msg.pathfoto = checkUserPhoto(users[msg.usuarioOrigen].pathfoto);
 			if (msg.borrado) continue;
+			msg.pathfoto = checkUserPhoto(users[msg.usuarioOrigen].pathfoto);
 			appendMsg(msg, board);
 		}
 	}
 }
 
 function appendMsg(msg, board) {
-	console.log(msg);
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
 	var date = msg.tsMensaje;

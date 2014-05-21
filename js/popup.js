@@ -32,6 +32,12 @@ function initPopup() {
 		document.getElementById("edit-section-h1").onclick = showEditor;
 		document.getElementById("cancel").onclick = showEditor;
 		document.getElementById("profile-section-h1").onclick = showProfile;
+		// cargar tablón de eventos seguidos
+		(function() {
+			var evObj = document.createEvent('MouseEvents');
+		    evObj.initEvent("click", true, false);
+		    document.getElementById("sigo").dispatchEvent(evObj);
+		})();
 	});
 }
 function showEditor() {
