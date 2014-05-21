@@ -92,6 +92,42 @@ ul.navigator li:hover {
 	overflow-y: hidden;
 	overflow-x: hidden;
 }
+#messages-header {
+	padding: 10px;
+	background-color: #666;
+}
+#messages-header .search {
+	float: right;
+	background-color: #fff;
+	border-radius: 3px;
+	border: 1px solid #fff;
+}
+#messages-header .search a {
+	border: 0;
+	outline: none;
+	background-color: #666;
+	color: #fff;
+	margin: 0;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	cursor: pointer;
+	padding: 4px;
+}
+#messages-header .search a:hover {
+	background-color: #000;
+}
+#messages-header .search input[type=text] {
+	outline: none;
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+	border: 0;
+	margin: 0;
+	padding: 4px;
+}
+#messages-title {
+	color: #fff;
+	font-weight: 300;
+}
 #board, #tree-board {
 	-webkit-transition: all .5s ease;
 	width: 450px;

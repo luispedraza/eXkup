@@ -48,9 +48,6 @@
 				<li id="priv">privados</li>
 				<li id="favs">favoritos</li>
 			</ul>
-			<div class="search">
-				<input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/><input type="button" id="search" value="buscar">
-			</div>
 		</div>
 		<!-- SECCION. TEMAS -->
 		<div id="thm-section" class="section-container">
@@ -60,6 +57,15 @@
 	</div><!-- navigation -->
 	
 	<div id="messages">
+		<div id="messages-header">
+			<div class="search">
+				<input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/>
+				<a type="button" id="search" class ="fa fa-search"></a>
+			</div>
+			<span id="messages-title">
+				Title
+			</span>
+		</div>
 		<div id="board" class="message-list"></div>
 		<div id="tree-board"><a id="closetree" href="#">volver</a><div id="tree"></div></div>
 	</div>
