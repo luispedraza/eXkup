@@ -238,7 +238,16 @@ ul.navigator li:hover {
 	margin-bottom: 10px;
 	border-radius: 30px;
 }
-
+.msg_header .reply2link {
+	font-size: 12px;
+	cursor: pointer;
+	color: #aaa;
+}
+.msg_header .reply2link:before {
+	display: inline-block;
+	-webkit-transform: rotate(180deg); /* Opera, Chrome, and Safari */
+	margin-right: 3px;
+}
 .msg_control {
 	position: absolute;
 	right: 0;

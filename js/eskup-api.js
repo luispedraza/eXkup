@@ -136,18 +136,6 @@ function appendMsg(msg, board) {
 	var date_element = getDateElement(date);
 	date_element.href = "http://eskup.elpais.com/" + m_id;
 	date_element.target = "_blank";
-	date_element.addEventListener("mouseover", function() {
-		alert("tetas");
-		// var ts = this.getAttribute(ts);
-		// var date = new Date(ts);
-		// var tooltip = document.createElement("span");
-		// tooltip.className = "time-tooltip";
-		// tooltip.textContent = formatDate(date);
-		// this.appendChild(tooltip);
-	});
-	date_element.addEventListener("mouseout", function() {
-		console.log("saliendo");
-	});
 	dHead.appendChild(date_element);
 
 	// Elementos de control:
@@ -179,10 +167,15 @@ function appendMsg(msg, board) {
 
 	// Hilos de mensajes
 	if (msg.idMsgRespuesta) {
-		var div_reply = document.createElement("div");
-		div_reply.className = "reply2link";
-		div_reply.innerText = "Respondiendo a " + msg.autorMsgRespuesta + " ";
-		dHead.innerHTML += div_reply.outerHTML;
+		var div_reply = document.createElement("a");
+		div_reply.className = "reply2link fa fa-mail-reply";
+		div_reply.textContent = msg.autorMsgRespuesta;
+		div_reply.title = "Respuesta a";
+		div_reply.addEventListener("click", function() {
+			alert("hola");
+		});
+		dHead.innerHTML += "<br />"
+		dHead.appendChild(div_reply);
 		var div_thread = document.createElement("div");
 		div_thread.className = "btn thlink";
 		div_thread.innerHTML = "<i class='fa fa-comments'></i> charla";

@@ -57,8 +57,18 @@ function getDateElement(tsDate)
 	element.className = "time fa fa-clock-o";
 	element.textContent = when;
 	element.setAttribute("data-ts", tsDate);
+	console.log("evento");
 	element.addEventListener("mouseover", function() {
-		alert("hola");
+		console.log("entrando");
+		// var ts = this.getAttribute(ts);
+		// var date = new Date(ts);
+		// var tooltip = document.createElement("span");
+		// tooltip.className = "time-tooltip";
+		// tooltip.textContent = formatDate(date);
+		// this.appendChild(tooltip);
+	});
+	element.addEventListener("mouseout", function() {
+		console.log("saliendo");
 	});
 	return element;
 }
