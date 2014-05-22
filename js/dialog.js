@@ -8,10 +8,11 @@ function showDialog(msg, extra, callback, timeout) {
 	$("#dlg_extra").html(extra);
 	$("#btn-yes").on("click", function() {
 		removeDialog();
-		callback(true);
+		callback("YES");
 	});
 	$("#btn-no").on("click", function() {
 		removeDialog();
+		callback("NO");
 	});
 	// optional timeout function
 	if (timeout) {
