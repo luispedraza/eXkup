@@ -33,48 +33,27 @@ function dataURItoBlob(dataURI) {
     return new Blob([new Uint8Array(array)], {type: mimeString});
 }
 
-/* Elemento de tiempo de publicación de un mensaje
-	@param tsData: timestamp date
+/* Cuánto tiempo hace que el mensaje fue enviado
+	@param date: Date del mensaje
+	@param now: Date actual
 */
-function getDateElement(tsDate)
-{	
-	var theDate = new Date(tsDate * 1000);
-	var elapsed = (new Date() - theDate) / 1000;
-	var when = "";
+function getTimeAgo(date, now) {
+	var elapsed = (now - date) / 1000;
 	if (elapsed<60) {			// menos de 1 minuto
-		when = Math.round(elapsed) + " s.";
+		return Math.round(elapsed) + " s.";
 	}
 	else if (elapsed<3600) {	// menos de 1 horra
-		when = Math.round(elapsed/60) + " min.";
+		return Math.round(elapsed/60) + " min.";
 	}
 	else if (elapsed<86400) {	// menos de 1 día
-		when = Math.round(elapsed/3600) + " h.";
+		return Math.round(elapsed/3600) + " h.";
 	}
-	else {
-		when = formatDate(theDate, false);
-	}
-	var element = document.createElement("a");
-	element.className = "time fa fa-clock-o";
-	element.textContent = when;
-	element.setAttribute("data-ts", tsDate);
-	element.addEventListener("mouseover", function() {
-		console.log("entrando");
-		// var ts = this.getAttribute(ts);
-		// var date = new Date(ts);
-		// var tooltip = document.createElement("span");
-		// tooltip.className = "time-tooltip";
-		// tooltip.textContent = formatDate(date);
-		// this.appendChild(tooltip);
-	});
-	element.addEventListener("mouseout", function() {
-		console.log("saliendo");
-	});
-	return element;
-}
+	return formatDate(theDate, false);
+};
 
 /* Formateo de una fecha */
 function formatDate(date, withYear) {
-	return date.getDate() + " de " + MESES[date.getMonth()] + withYear ? (" de " + date.getFullYear()) : "";
+	return date.getDate() + " de " + MESES[date.getMonth()] + (withYear ? (" de " + date.getFullYear()) : "");
 }
 
 // Función general de comunicación con el servidor

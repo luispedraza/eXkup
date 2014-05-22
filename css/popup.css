@@ -33,8 +33,12 @@ ul.navigator li {
 	cursor: pointer;
 	padding: 2px;
 }
+ul.navigator li.on {
+	color: #0293ff;
+	font-weight: 400;
+}
 ul.navigator li:hover {
-	background-color: #FF7A00;
+	background-color: #0293ff;
 	color: white;
 }
 
@@ -223,12 +227,44 @@ ul.navigator li:hover {
 	font-size: 12px;
 	color: #aaa;
 	text-decoration: none;
+	position: relative;
 }
 .msg_header .time:hover {
 	color: #666;
 }
 .msg_header .time:before {
 	margin-right: 3px;
+}
+
+span.time-tooltip {
+	display: inline-block;
+	position: absolute;
+	width: 150px;
+	background-color: #666;
+	color: #fff;
+	padding: 2px;
+	left: -50px;
+	top: 18px;
+	margin-left: 5px;
+	border: 1px solid #fff;
+}
+.time-tooltip:before {
+	content: " ";
+	display: block;
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	background-color: #666;
+	left: 70px;
+	top: -5px;
+	-webkit-transform: rotate(45deg);
+}
+span.time-tooltip span {
+	display: block;
+	padding: 3px;
+}
+span.time-tooltip span:first-child {
+	border-bottom: 1px solid #ccc;
 }
 .msg_header img {
 	width: 35px;
@@ -252,7 +288,7 @@ ul.navigator li:hover {
 	position: absolute;
 	right: 0;
 	top: 0;
-	width: 70px;
+	/* width: 70px; */
 	overflow: hidden;
 	/* -webkit-transition: all .5s ease; */
 	height: 1.2em;

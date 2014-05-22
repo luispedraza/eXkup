@@ -1,3 +1,4 @@
+var TIME_TOOLTIP_TIMER = null;
 var PUBLIC_KEY = "";
 var USER_ID = "";
 var INESKUP = "http://eskup.elpais.com/Ineskup";
@@ -73,7 +74,9 @@ function getBoard(id) {
 function loadData(ev) {
 	if (ev) {
 		if (ev.type == "click") {
+			console.log(ev);
 			board = getBoard(ev.target.id);
+			console.log(board);
 			if (board == OUTPARAMS.t)	// tablón actual, nada que hacer
 				return;
 			OUTPARAMS.t = board;		// selección de tablón
@@ -81,6 +84,7 @@ function loadData(ev) {
 			OUTPARAMS.th = "";			// no thread
 			OUTPARAMS.msg = "";			// no mensaje
 			document.getElementById("board").innerHTML = "";	// limpieza
+			uiSelectBoard(ev.target.id);// selección del tablón 
 		}
 		else if (ev.type == "scroll") {
 			OUTPARAMS.p++;
@@ -106,7 +110,7 @@ function loadData(ev) {
 function appendMsg(msg, board) {
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
-	var date = msg.tsMensaje;
+	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
 	// Creación del nuevo mensaje:
 	var div_msg = document.createElement("div");
 	div_msg.className = "message";
@@ -132,7 +136,29 @@ function appendMsg(msg, board) {
 	a_user.href = "http://eskup.elpais.com/" + user;
 	a_user.textContent = user;
 	dHead.appendChild(a_user);		// user link
-	var date_element = getDateElement(date);
+	var date_element = document.createElement("a");
+	date_element.className = "time fa fa-clock-o";
+	date_element.textContent = getTimeAgo(new Date(tsMessage), new Date());
+	date_element.setAttribute("data-ts", tsMessage);
+	date_element.addEventListener("mouseover", function() {
+		var timeAgoElement = this;
+		TIME_TOOLTIP_TIMER = setTimeout(function() {
+			var ts = parseInt(timeAgoElement.getAttribute("data-ts"));
+			var date = new Date(ts);
+			var tooltip = document.createElement("span");
+			tooltip.className = "time-tooltip";
+			tooltip.innerHTML = "<span>"
+				+formatDate(date, true)
+				+"</span><span>"
+				+date.toLocaleTimeString()
+				+"</span>";
+			timeAgoElement.appendChild(tooltip);
+		}, 500);
+	});
+	date_element.addEventListener("mouseout", function() {
+		clearTimeout(TIME_TOOLTIP_TIMER);
+		$(this).find(".time-tooltip").remove();
+	});
 	date_element.href = "http://eskup.elpais.com/" + m_id;
 	date_element.target = "_blank";
 	dHead.appendChild(date_element);

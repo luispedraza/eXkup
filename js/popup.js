@@ -66,3 +66,10 @@ function sendPriv(e) {
 		document.getElementById("edit-section").className += " on";
 	}
 }
+
+/* Selecciona el board actual en la interfaz */
+function uiSelectBoard(board) {
+	console.log(board);
+	$(".board-selector.on").removeClass("on");
+	$("#"+board).addClass("on");
+}
