@@ -1,30 +1,22 @@
-function showDialog(msg, extra, callback) {
-	var bd = document.getElementsByTagName('body')[0];
-	var dlg = document.createElement('div');
-	dlg.id = 'dlg';
-	var msgDiv = document.createElement('div');
-	msgDiv.className = 'dlg_msg';
-	msgDiv.innerText = msg;
-	var extraDiv = document.createElement('div');
-	extraDiv.innerText = extra;
-	var ok = document.createElement('div');
-	ok.className = 'btn';
-	ok.innerText = 'Sí';
-	ok.onclick = function() {
-		document.getElementsByTagName('body')[0]
-			.removeChild(document.getElementById('dlg'));
+/* Show a modal dialog onscreen */
+function showDialog(msg, extra, callback, timeout) {
+	function removeDialog() { $("#modal").remove(); };
+	var DIALOG_HTML = "<div id='modal'><div id='dlg'><div id='dlg_msg'></div><div id='dlg_extra'></div><div id='btn-yes' class='btn yes'>Sí</div><div id='btn-no' class='btn no'>No</div></div></div>";
+	// insertamos el diálogo modal
+	$("body").append(DIALOG_HTML);
+	$("#dlg_msg").html(msg);
+	$("#dlg_extra").html(extra);
+	$("#btn-yes").on("click", function() {
+		removeDialog();
 		callback(true);
-	}
-	var cancel = document.createElement('div');
-	cancel.className = 'btn';
-	cancel.innerText = 'No';
-	cancel.onclick = function() {
-		document.getElementsByTagName('body')[0]
-			.removeChild(document.getElementById('dlg'));
-	}
-	dlg.appendChild(msgDiv);
-	dlg.appendChild(extraDiv);
-	dlg.appendChild(ok);
-	dlg.appendChild(cancel);
-	bd.appendChild(dlg);
-}
+	});
+	$("#btn-no").on("click", function() {
+		removeDialog();
+	});
+	// optional timeout function
+	if (timeout) {
+		setTimeout(function() {
+			removeDialog();
+		}, timeout);
+	};
+};

@@ -213,7 +213,7 @@ function appendMsg(msg, board) {
 	if (user == USER_ID) {
 		var dDel = document.createElement("div");
 		dDel.className = "btn";
-		dDel.innerText = "borrar";
+		dDel.innerHTML = "<i class='fa fa-times-circle'></i> borrar";
 		dDel.setAttribute("m_id", m_id);
 		dDel.addEventListener("click", msgDelete);
 		dCtrl.appendChild(dDel);
@@ -343,9 +343,7 @@ function LoadFollowMe(pag)
 	}
 }
 
-//////////////////////////////
-// Carga mensajes favoritos
-//////////////////////////////
+/* Carga de mdensajes favoritos */
 function loadFavs() {
 	var favs = document.getElementById("board");
 	favs.innerHTML = "";

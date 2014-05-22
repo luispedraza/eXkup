@@ -288,20 +288,23 @@ span.time-tooltip span:first-child {
 	position: absolute;
 	right: 0;
 	top: 0;
-	/* width: 70px; */
 	overflow: hidden;
-	/* -webkit-transition: all .5s ease; */
-	height: 1.2em;
+	transition: all .2s ease;
 	font-size: 11px;
-	color: #ccc;
+	color: #aaa;
 	padding: 3px;
+}
+.msg_control .btn {
+	display: none;
 }
 
 .msg_control:hover {
-	height: 65px;
 	border: 1px solid #ccc;
 	background-color: #fff;
 	box-shadow: -3px 2px 8px 0px rgba(50, 50, 50, 0.75);
+}
+.msg_control:hover .btn {
+	display: block;
 }
 .msg_control:before {
 	display: block;

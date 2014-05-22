@@ -1,26 +1,35 @@
-#dlg {
-	width: 400px;
-	height: 300px;
-	background-color: #ddd;
-	border: 1px solid black;
+#modal {
 	position: absolute;
-	top: 50%;
-	left: 50%;
-	margin-left: -200px;
-	margin-top: -150px;
-	opacity: .9;
-	z-index: 100;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(0,0,0,.6);
+}
+#dlg {
+	margin-left: auto;
+	margin-right: auto;
+	width: 400px;
+	background-color: #f6f6f6;
+	margin-top: 100px;
+	padding: 10px;
+	border: 1px solid #fff;
+	color: #666;
+	box-shadow: -3px 2px 8px 0px rgba(50, 50, 50, 0.75);
 }
 #dlg .btn {
-	background-color: orange;
+	display: inline-block;
+	background-color: #666;
 	color: white;
-	bottom: 0px;
 	width: 50px;
-	border: 2px solid white;
-	font-weight: bold;
 	text-align: center;
 	cursor: pointer;
-	margin: 5px;
+	margin-right: 20px;
+	margin-top: 10px;
+}
+
+#dlg .btn:hover {
+	background-color: #000;
 }
 
 #progress {
