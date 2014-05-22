@@ -241,19 +241,25 @@ function msgForward() {
 /* Eliminación de un mensaje */
 function msgDelete() {
 	var m_id = this.getAttribute("m_id");
-	showDialog("¿Seguro que desea borrar este mensaje?", "",
+	showDialog("¿Seguro que desea borrar este mensaje?", "", ["Sí", "No"],
 		function(result) {
-			if (result=="YES") {
+			if (result=="Sí") {
 				INPARAMS.c = "del";
 				INPARAMS.x = m_id;
 				apiCall("GET", INESKUP, INPARAMS, function(req) {
 					var info = JSON.parse(req.responseText.replace(/'/g, "\""));
 					if (info.status=="ok") {
 						showDialog("Eliminación correcta",
-							"El mensaje ha sido eliminado con éxito, aunque el cambio puede tardar en verse reflejado en los servidores de Eskup.");
+							"El mensaje ha sido eliminado con éxito, aunque el cambio puede tardar en verse reflejado en los servidores de Eskup.",
+							["OK"],
+							null,
+							2000);
 						$("#"+m_id).remove();
 					} else showDialog("Se ha producido un error",
-							"No ha sido posible eliminar el mensaje. Vuelve a intentarlo de nuevo más tarde.");
+							"No ha sido posible eliminar el mensaje. Vuelve a intentarlo de nuevo más tarde.",
+							["OK"],
+							null,
+							2000);
 				});
 				INPARAMS.c = "";
 				INPARAMS.x = "";
