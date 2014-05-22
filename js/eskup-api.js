@@ -35,6 +35,7 @@ var PROFILEPARAMS = {
 	f: "json",
 	pag: ""
 }
+
 function initEskup(callback) {
 	apiCall("GET", "http://eskup.elpais.com/Auth/modusereskup.pl", null, function(r) {
 		var doc = document.implementation.createHTMLDocument('');
@@ -168,9 +169,9 @@ function appendMsg(msg, board) {
 	dCtrl.className = "msg_control fa fa-plus-square";
 	// Guardar vavorito
 	var dFav = document.createElement("div");
-	dFav.className = (checkFavorite(m_id) ? "btn favoff" : "btn favon");
+	dFav.className = checkFavorite(m_id) ? "btn fav on" : "btn fav";
 	dFav.innerHTML = "<i class='fa fa-star'></i> favorito";
-	dFav.title = (checkFavorite(m_id) ? "eliminar" : "añadir") + " favorito";
+	dFav.title = "favorito";
 	dFav.setAttribute("m_id", m_id);
 	dFav.addEventListener("click", setFavorite);
 	// Respuesta
@@ -221,6 +222,8 @@ function appendMsg(msg, board) {
 	// Construcción final y agregación
 	div_msg.appendChild(dHead);
 	div_msg.appendChild(div_cont);
+	// finalmente, guardamos datos originales del mensaje (para favoritear)
+	div_msg.setAttribute("data-msg", JSON.stringify(msg));
 	board.appendChild(div_msg);
 }
 
@@ -343,23 +346,14 @@ function LoadFollowMe(pag)
 //////////////////////////////
 // Carga mensajes favoritos
 //////////////////////////////
-function loadFavs()
-{
+function loadFavs() {
 	var favs = document.getElementById("board");
 	favs.innerHTML = "";
-	for (cont=0; cont < listamsgfav.length; cont++)
-	{
-		var newfav = document.createElement("div");
-		newfav.className = "message";
-		if (localStorage[listamsgfav[cont]]) {
-			newfav.innerHTML = localStorage[listamsgfav[cont]];
-			favs.appendChild(newfav);
-		}
-	}
-	var favicons = favs.getElementsByClassName("favon");
-	for (cont=0; cont<favicons.length; cont++) favicons[cont].onclick = setFavorite;
+	for (var cont=0, len=listamsgfav.length; cont<len; cont++) {
+		var message = localStorage.getItem(listamsgfav[cont]);
+		if (message) appendMsg(JSON.parse(message), favs);
+	};
 }
-
 
 function Update()
 {
@@ -402,27 +396,22 @@ function checkBlocked(temaid)
 }
 
 // Comprueba si un mensaje está en mis favoritos
-function checkFavorite(msgid)
-{
+function checkFavorite(msgid) {
 	return (listamsgfav.indexOf(msgid) >= 0);
 }
 
 /* Agrega o elimina un mensaje de la lista de favoritos */
-function setFavorite(ev) {
-	var target = ev.target;
-	m_id = target.getAttribute("m_id");
+function setFavorite() {
+	var $this = $(this);
+	$this.toggleClass('on');
+	var m_id = $this.closest('.message').attr("id");	// id del mensaje
 	console.log(m_id);
-	if (target.className.match("favon")) {
-		target.className.replace("favon", "favoff");
-		target.title = "+fav"
-		localStorage.removeItem(m_id);
-		listamsgfav.splice(listamsgfav.indexOf(m_id), 1);
-		
-	} else {
-		target.className.replace("favoff", "favon");
-		target.title = "-fav";
+	if ($this.hasClass("on")) {		// mensaje marcado como favorito
 		listamsgfav.push(m_id);
-		localStorage[m_id] = document.getElementById(m_id).innerHTML;
+		localStorage[m_id] = document.getElementById(m_id).getAttribute("data-msg");
+	} else {						// mensaje desmarcado como favorito
+		listamsgfav.splice(listamsgfav.indexOf(m_id), 1);
+		localStorage.removeItem(m_id);
 	}
 	localStorage["msg_fav"] = JSON.stringify(listamsgfav);
 }

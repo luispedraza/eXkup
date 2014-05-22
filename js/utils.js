@@ -48,7 +48,7 @@ function getTimeAgo(date, now) {
 	else if (elapsed<86400) {	// menos de 1 día
 		return Math.round(elapsed/3600) + " h.";
 	}
-	return formatDate(theDate, false);
+	return formatDate(date, false);
 };
 
 /* Formateo de una fecha */

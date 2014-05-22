@@ -319,11 +319,12 @@ span.time-tooltip span:first-child {
 .msg_control .btn.fa {
 	display: block;
 	width: 100%;
-	
-	
 }
 .msg_control .btn:hover {
 	color: #666;
+}
+.msg_control .fav.on {
+	color: red;
 }
 
 .msg_content {
@@ -334,10 +335,7 @@ span.time-tooltip span:first-child {
 }
 
 .msg_content  img {
-	/* padding: 1px; */
-	/* border: 1px solid #ccc; */
 	width: 100%;
-	/* height: auto; */
 	margin-top: 5px;
 }
 
