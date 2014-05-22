@@ -17,6 +17,12 @@
 	color: #666;
 	box-shadow: -3px 2px 8px 0px rgba(50, 50, 50, 0.75);
 }
+#dlg_msg {
+	border-bottom: 1px solid #ccc;
+}
+#dlg_extra {
+	margin-top: 10px;
+}
 #dlg .btn {
 	display: inline-block;
 	background-color: #666;
