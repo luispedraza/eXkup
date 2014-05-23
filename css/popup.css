@@ -139,14 +139,14 @@ ul.navigator li:hover {
 #board {
 	position: absolute;
 	/* width: 450px; */
-	height: 510px;
+	height: 475px;
 	overflow-y: scroll;
 	top: 40px;
 }
 #tree-board {
 	position: absolute;
 	left: 450px;
-	height: 517px;
+	height: 475px;
 	top: 40px;
 	overflow-y: scroll;
 	/* width: 450px; */

@@ -21,13 +21,24 @@ function InEskup(c) {
 var OUTESKUP = "http://eskup.elpais.com/Outeskup";
 var OUTPARAMS = {
 	t: "",			// qué tablon
-	nummsg: 12,		// cuántos mensajes
+	nummsg: 20,		// cuántos mensajes
 	p: 1,			// qué página
 	f: "json",		// formato de respuesta
 	th: 1,
 	msg: "",
 	id: ""
 }
+
+/* get a single message */
+function eskupGetMessage(msg_id, callback) {
+	var params = {
+		id: PUBLIC_KEY,
+		f: "json",
+		msg: msg_id
+	};
+	apiCall("GET", OUTESKUP, params, callback);
+};
+
 var PROFILEESKUP = "http://eskup.elpais.com/Profileeskup";
 var PROFILEPARAMS = {
 	id: "",
@@ -69,25 +80,28 @@ function getBoard(id) {
 	return (TABLONES.hasOwnProperty(id)) ? (TABLONES[id]) : (id);
 }
 
+function eskupParseResponse(response) {
+	console.log(response);
+	return JSON.parse(response.replace(/'/g, "\""));
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Tablón de mensajes ///////////////////////////////////////////////////////
 // ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
 function loadData(board) {
 	if (board) {
-		currentBoard = getBoard(board);
-		if (currentBoard == OUTPARAMS.t)	// tablón actual, nada que hacer
+		if (board == OUTPARAMS.t)		// tablón actual, nada que hacer
 			return;
-		OUTPARAMS.t = currentBoard;		// selección de tablón
+		OUTPARAMS.t = board;			// selección de tablón
 		OUTPARAMS.p = 1;				// primera página
 		OUTPARAMS.th = "";				// no thread
 		OUTPARAMS.msg = "";				// no mensaje
 		document.getElementById("board").innerHTML = "";	// limpieza
-		uiSelectBoard(board);			// selección del tablón
 	} else { OUTPARAMS.p++; }			// nueva página
 
 	apiCall("GET", OUTESKUP, OUTPARAMS, getData);
 	function getData(req) {
-		var info = JSON.parse(req.responseText.replace(/'/g, "\""));
+		var info = eskupParseResponse(req.response);
 		var users = info.perfilesUsuarios;
 		var messages = info.mensajes;
 		var board = document.getElementById("board");
@@ -216,8 +230,6 @@ function appendMsg(msg, board) {
 	// Construcción final y agregación
 	div_msg.appendChild(dHead);
 	div_msg.appendChild(div_cont);
-	// finalmente, guardamos datos originales del mensaje (para favoritear)
-	div_msg.setAttribute("data-msg", JSON.stringify(msg));
 	board.appendChild(div_msg);
 }
 
@@ -228,6 +240,7 @@ function msgReply(e) {
 	msgDiv.scrollIntoView();
 	msgDiv.className += " on";
 }
+
 function msgForward() {
 
 }
@@ -401,10 +414,17 @@ function setFavorite() {
 	var $this = $(this);
 	$this.toggleClass('on');
 	var m_id = $this.closest('.message').attr("id");	// id del mensaje
-	console.log(m_id);
 	if ($this.hasClass("on")) {		// mensaje marcado como favorito
 		listamsgfav.push(m_id);
-		localStorage[m_id] = document.getElementById(m_id).getAttribute("data-msg");
+		// obtenfo el mensaje de la api:
+		eskupGetMessage(m_id, function(req) {
+			var data = eskupParseResponse(req.response);
+			if (data.errorCode == 0) {
+				var msg = data.mensajes[0];
+				msg.pathfoto = checkUserPhoto(data.perfilesUsuarios[msg.usuarioOrigen].pathfoto);
+				localStorage[m_id] = JSON.stringify(msg);
+			};
+		});
 	} else {						// mensaje desmarcado como favorito
 		listamsgfav.splice(listamsgfav.indexOf(m_id), 1);
 		localStorage.removeItem(m_id);

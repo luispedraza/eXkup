@@ -15,18 +15,22 @@ function initPopup() {
 			};
 		});
 		document.getElementById("todo").addEventListener("click", function(){
-			loadData(this.id);
+			loadBoard(this.id);
 		});
 		document.getElementById("sigo").addEventListener("click", function() {
-			loadData(this.id);
+			loadBoard(this.id);
 		});
 		document.getElementById("mios").addEventListener("click", function() {
-			loadData(this.id);
+			loadBoard(this.id);
 		});
 		document.getElementById("priv").addEventListener("click", function() {
-			loadData(this.id);
+			loadBoard(this.id);
 		});
-		document.getElementById("favs").addEventListener("click", loadFavs);
+		document.getElementById("favs").addEventListener("click", function() {
+			currentBoard = getBoard(this.id);
+			loadFavs();
+			uiSelectBoard(this.id);
+		});
 		document.getElementById("logout").onclick = logOut;
 
 		document.getElementById("progress").addEventListener("change", function(e) {
@@ -54,6 +58,12 @@ function initPopup() {
 		    document.getElementById("sigo").dispatchEvent(evObj);
 		})();
 	});
+}
+
+function loadBoard(id) {
+	currentBoard = getBoard(id);
+	loadData(currentBoard);
+	uiSelectBoard(id);
 }
 
 function showEditor() {
