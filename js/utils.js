@@ -132,12 +132,15 @@ function fillThemes(themes) {
 	for (var t in themes.perfilesEventos) {
 		temaid = "ev-"+t;
 		var item = document.createElement("li");
+		item.className = "board-selector";
 		item.id = temaid;
-		item.onclick = loadData;
-		item.innerText = themes.perfilesEventos[t].nombre;
+		item.addEventListener("click", function() {
+			loadData(this.id);
+		});
+		item.textContent = themes.perfilesEventos[t].nombre;
 		div_themes.appendChild(item);			
-	}
-}
+	};
+};
 
 function processVideos(msg_content)
 {

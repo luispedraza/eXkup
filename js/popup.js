@@ -85,12 +85,6 @@ function sendPriv(e) {
 
 /* Selecciona el board actual en la interfaz */
 function uiSelectBoard(board) {
-	console.log(board);
 	$(".board-selector.on").removeClass("on");
 	$("#"+board).addClass("on");
-}
-
-/* Función de scroll para cargar más mensajes */
-function scroller(ev) {
-	
 }
