@@ -72,25 +72,19 @@ function getBoard(id) {
 /////////////////////////////////////////////////////////////////////////////
 // Tablón de mensajes ///////////////////////////////////////////////////////
 // ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
-function loadData(ev) {
-	if (ev) {
-		if (ev.type == "click") {
-			console.log(ev);
-			board = getBoard(ev.target.id);
-			console.log(board);
-			if (board == OUTPARAMS.t)	// tablón actual, nada que hacer
-				return;
-			OUTPARAMS.t = board;		// selección de tablón
-			OUTPARAMS.p = 1;			// primera página
-			OUTPARAMS.th = "";			// no thread
-			OUTPARAMS.msg = "";			// no mensaje
-			document.getElementById("board").innerHTML = "";	// limpieza
-			uiSelectBoard(ev.target.id);// selección del tablón 
-		}
-		else if (ev.type == "scroll") {
-			OUTPARAMS.p++;
-		}
-	}
+function loadData(board) {
+	if (board) {
+		currentBoard = getBoard(board);
+		if (currentBoard == OUTPARAMS.t)	// tablón actual, nada que hacer
+			return;
+		OUTPARAMS.t = currentBoard;		// selección de tablón
+		OUTPARAMS.p = 1;				// primera página
+		OUTPARAMS.th = "";				// no thread
+		OUTPARAMS.msg = "";				// no mensaje
+		document.getElementById("board").innerHTML = "";	// limpieza
+		uiSelectBoard(board);			// selección del tablón
+	} else { OUTPARAMS.p++; }			// nueva página
+
 	apiCall("GET", OUTESKUP, OUTPARAMS, getData);
 	function getData(req) {
 		var info = JSON.parse(req.responseText.replace(/'/g, "\""));

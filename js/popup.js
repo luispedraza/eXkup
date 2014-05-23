@@ -1,3 +1,5 @@
+var currentBoard = null;
+
 window.addEventListener("load", initPopup);
 
 function initPopup() {
@@ -6,11 +8,24 @@ function initPopup() {
 		LoadTemasBlock();
 		// Eventos
 		document.getElementById("search").addEventListener("click", Search);
-		document.getElementById("board").addEventListener("scroll", scroller);
-		document.getElementById("todo").addEventListener("click", loadData);
-		document.getElementById("sigo").addEventListener("click", loadData);
-		document.getElementById("mios").addEventListener("click", loadData);
-		document.getElementById("priv").addEventListener("click", loadData);
+		document.getElementById("board").addEventListener("scroll", function() {
+			if (currentBoard == "favs") return;
+			if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
+				loadData(null);
+			};
+		});
+		document.getElementById("todo").addEventListener("click", function(){
+			loadData(this.id);
+		});
+		document.getElementById("sigo").addEventListener("click", function() {
+			loadData(this.id);
+		});
+		document.getElementById("mios").addEventListener("click", function() {
+			loadData(this.id);
+		});
+		document.getElementById("priv").addEventListener("click", function() {
+			loadData(this.id);
+		});
 		document.getElementById("favs").addEventListener("click", loadFavs);
 		document.getElementById("logout").onclick = logOut;
 
@@ -40,6 +55,7 @@ function initPopup() {
 		})();
 	});
 }
+
 function showEditor() {
 	var e = document.getElementById("edit-section");
 	e.className = (e.className.match("on") ? "" : "on");
@@ -72,4 +88,9 @@ function uiSelectBoard(board) {
 	console.log(board);
 	$(".board-selector.on").removeClass("on");
 	$("#"+board).addClass("on");
+}
+
+/* Función de scroll para cargar más mensajes */
+function scroller(ev) {
+	
 }

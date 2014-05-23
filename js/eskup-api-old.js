@@ -34,12 +34,6 @@ if (localStorage["msg_fav"] != "undefined")
 
 var maxchar = 280;
 
-function scroller(ev) {
-	if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
-		loadData(ev);
-	}
-}
-
 function LoadXmlData(data_id, temaid, temanombre)
 {
 	if (data_id == "completo")
