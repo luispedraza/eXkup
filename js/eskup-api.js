@@ -81,7 +81,6 @@ function getBoard(id) {
 }
 
 function eskupParseResponse(response) {
-	console.log(response);
 	return JSON.parse(response.replace(/'/g, "\""));
 }
 
@@ -423,6 +422,7 @@ function setFavorite() {
 				var msg = data.mensajes[0];
 				msg.pathfoto = checkUserPhoto(data.perfilesUsuarios[msg.usuarioOrigen].pathfoto);
 				localStorage[m_id] = JSON.stringify(msg);
+				showDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, null);
 			};
 		});
 	} else {						// mensaje desmarcado como favorito
@@ -434,7 +434,6 @@ function setFavorite() {
 
 // http://eskup.elpais.com/Outeskup?t=&nummsg=12&p=&f=json&th=1&msg=1356611973-8fe6c2d09824c9e5523f9931a834a641&id=7gTvFkSaO-pa0342AjhqMg&
 function loadThread(ev) {
-	console.log("cargando thread");
 	var threadId = ev.target.getAttribute("thread");
 	OUTPARAMS.msg = threadId;
 	OUTPARAMS.th = 1;

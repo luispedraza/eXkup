@@ -1,6 +1,10 @@
 /* Show a modal dialog onscreen */
 function showDialog(msg, extra, buttons, callback, timeout) {
-	function removeDialog() { $("#modal").remove(); };
+	function removeDialog() {
+		$("#modal").fadeOut(function() {
+			$("#modal").remove();
+		});
+	};
 	var DIALOG_HTML = "<div id='modal'><div id='dlg'><div id='dlg_msg'></div><div id='dlg_extra'></div><div id='dlg_buttons'></div></div></div>";
 	// insertamos el diálogo modal
 	$("body").append(DIALOG_HTML);
@@ -25,4 +29,8 @@ function showDialog(msg, extra, buttons, callback, timeout) {
 			removeDialog();
 		}, timeout);
 	};
+	// cerrar el modal cuando se hace click fuera de la ventana 
+	$("#modal").on("click", function(e) {
+		if (e.target.id == "modal") removeDialog();
+	});
 };
