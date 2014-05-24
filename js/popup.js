@@ -1,4 +1,5 @@
 var currentBoard = null;
+var loading = false;
 
 window.addEventListener("load", initPopup);
 
@@ -9,9 +10,12 @@ function initPopup() {
 		// Eventos
 		document.getElementById("search").addEventListener("click", Search);
 		document.getElementById("board").addEventListener("scroll", function() {
-			if (currentBoard == "favs") return;
+			if ((currentBoard == "favs") || loading) return;
 			if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
-				loadData(null);
+				loading = true;
+				loadData(null, function() {
+					loading = false;
+				});
 			};
 		});
 		document.getElementById("todo").addEventListener("click", function(){

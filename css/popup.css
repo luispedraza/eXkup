@@ -132,6 +132,16 @@ ul.navigator li:hover {
 	color: #fff;
 	font-weight: 300;
 }
+#board .loading {
+	background-color: #fff;
+	padding: 10px;
+	margin: 10px;
+	text-align: center;
+	color: #aaa;
+}
+#board .loading .fa {
+	margin-right: 10px;
+}
 #board, #tree-board {
 	-webkit-transition: all .5s ease;
 	width: 450px;

@@ -135,7 +135,7 @@ function fillThemes(themes) {
 		item.className = "board-selector";
 		item.id = temaid;
 		item.addEventListener("click", function() {
-			loadData(this.id);
+			loadBoard(this.id);
 		});
 		item.textContent = themes.perfilesEventos[t].nombre;
 		div_themes.appendChild(item);			

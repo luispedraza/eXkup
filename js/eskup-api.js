@@ -87,7 +87,7 @@ function eskupParseResponse(response) {
 /////////////////////////////////////////////////////////////////////////////
 // Tablón de mensajes ///////////////////////////////////////////////////////
 // ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
-function loadData(board) {
+function loadData(board, callback) {
 	if (board) {
 		if (board == OUTPARAMS.t)		// tablón actual, nada que hacer
 			return;
@@ -97,7 +97,7 @@ function loadData(board) {
 		OUTPARAMS.msg = "";				// no mensaje
 		document.getElementById("board").innerHTML = "";	// limpieza
 	} else { OUTPARAMS.p++; }			// nueva página
-
+	$("#board").append("<div class='loading'><i class='fa fa-refresh fa-spin'></i>cargando datos...</div>");
 	apiCall("GET", OUTESKUP, OUTPARAMS, getData);
 	function getData(req) {
 		var info = eskupParseResponse(req.response);
@@ -112,6 +112,8 @@ function loadData(board) {
 			msg.pathfoto = checkUserPhoto(users[msg.usuarioOrigen].pathfoto);
 			appendMsg(msg, board);
 		}
+		if (callback) callback();
+		$("#board").find(".loading").remove();
 	}
 }
 
@@ -422,13 +424,20 @@ function setFavorite() {
 				var msg = data.mensajes[0];
 				msg.pathfoto = checkUserPhoto(data.perfilesUsuarios[msg.usuarioOrigen].pathfoto);
 				localStorage[m_id] = JSON.stringify(msg);
-				showDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, null);
+				showDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, 2000);
 			};
 		});
 	} else {						// mensaje desmarcado como favorito
-		listamsgfav.splice(listamsgfav.indexOf(m_id), 1);
-		localStorage.removeItem(m_id);
-	}
+		showDialog("¿Seguro que desea eliminar este mensaje?", 
+			"Esta acción no se puede deshacer", 
+			["Sí", "Cancelar"], function(result) {
+				if (result == "Sí") {
+					listamsgfav.splice(listamsgfav.indexOf(m_id), 1);
+					localStorage.removeItem(m_id);
+					showDialog("El mensaje se ha eliminado de tus favoritos.", null, [], null, 2000);
+				};
+			});
+	};
 	localStorage["msg_fav"] = JSON.stringify(listamsgfav);
 }
 
