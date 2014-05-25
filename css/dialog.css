@@ -19,6 +19,7 @@
 }
 .dlg_msg {
 	border-bottom: 1px solid #ccc;
+	font-size: 1.3em;
 }
 .dlg_extra {
 	margin-top: 10px;
