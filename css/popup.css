@@ -305,6 +305,9 @@ span.time-tooltip span:first-child {
 	color: #aaa;
 	padding: 3px;
 }
+.modal .msg_control {
+	display: none;
+}
 .msg_control .btn {
 	display: none;
 }

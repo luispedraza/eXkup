@@ -249,7 +249,7 @@ function msgForward() {
 /* Eliminación de un mensaje */
 function msgDelete() {
 	var m_id = this.getAttribute("m_id");
-	showDialog("¿Seguro que desea borrar este mensaje?", "", ["Sí", "No"],
+	new ModalDialog("¿Seguro que desea borrar este mensaje?", "", ["Sí", "No"],
 		function(result) {
 			if (result=="Sí") {
 				INPARAMS.c = "del";
@@ -257,17 +257,19 @@ function msgDelete() {
 				apiCall("GET", INESKUP, INPARAMS, function(req) {
 					var info = JSON.parse(req.responseText.replace(/'/g, "\""));
 					if (info.status=="ok") {
-						showDialog("Eliminación correcta",
+						new ModalDialog("Eliminación correcta",
 							"El mensaje ha sido eliminado con éxito, aunque el cambio puede tardar en verse reflejado en los servidores de Eskup.",
 							["OK"],
 							null,
 							2000);
 						$("#"+m_id).remove();
-					} else showDialog("Se ha producido un error",
+					} else {
+						new ModalDialog("Se ha producido un error",
 							"No ha sido posible eliminar el mensaje. Vuelve a intentarlo de nuevo más tarde.",
 							["OK"],
 							null,
-							2000);
+							2000);	
+					}
 				});
 				INPARAMS.c = "";
 				INPARAMS.x = "";
@@ -412,10 +414,9 @@ function checkFavorite(msgid) {
 
 /* Agrega o elimina un mensaje de la lista de favoritos */
 function setFavorite() {
-	var $this = $(this);
-	$this.toggleClass('on');
-	var m_id = $this.closest('.message').attr("id");	// id del mensaje
-	if ($this.hasClass("on")) {		// mensaje marcado como favorito
+	var $favBtn = $(this);
+	var m_id = $favBtn.closest('.message').attr("id");	// id del mensaje
+	if (!$favBtn.hasClass("on")) {		// mensaje marcado como favorito
 		listamsgfav.push(m_id);
 		// obtenfo el mensaje de la api:
 		eskupGetMessage(m_id, function(req) {
@@ -424,17 +425,25 @@ function setFavorite() {
 				var msg = data.mensajes[0];
 				msg.pathfoto = checkUserPhoto(data.perfilesUsuarios[msg.usuarioOrigen].pathfoto);
 				localStorage[m_id] = JSON.stringify(msg);
-				showDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, 2000);
+				new ModalDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, 2000);
+				$favBtn.toggleClass('on');
 			};
 		});
 	} else {						// mensaje desmarcado como favorito
-		showDialog("¿Seguro que desea eliminar este mensaje?", 
-			"Esta acción no se puede deshacer", 
+		new ModalDialog("¿Seguro que desea eliminar este mensaje de sus favoritos?",
+			$favBtn.closest(".message")[0].outerHTML,
 			["Sí", "Cancelar"], function(result) {
 				if (result == "Sí") {
 					listamsgfav.splice(listamsgfav.indexOf(m_id), 1);
 					localStorage.removeItem(m_id);
-					showDialog("El mensaje se ha eliminado de tus favoritos.", null, [], null, 2000);
+					new ModalDialog("El mensaje se ha eliminado de tus favoritos.", null, [], null, 2000);
+					$favBtn.toggleClass('on');
+					// además lo eliminamos del tablón de favoritos
+					if (currentBoard == "favs") {
+						$favBtn.closest('.message').fadeOut(function() {
+							$(this).remove();
+						});
+					};
 				};
 			});
 	};

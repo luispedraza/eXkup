@@ -1,28 +1,32 @@
 /* Show a modal dialog onscreen */
-function showDialog(msg, extra, buttons, callback, timeout) {
+function ModalDialog(msg, extra, buttons, callback, timeout) {
 	function removeDialog() {
-		$("#modal").fadeOut(function() {
-			$("#modal").remove();
-		});
+		var m = modalDialog.modal;
+		m.fadeOut(function() { this.remove(); });
 	};
-	var DIALOG_HTML = "<div id='modal'><div id='dlg'><div id='dlg_msg'></div><div id='dlg_extra'></div><div id='dlg_buttons'></div></div></div>";
+	var modalDialog = this;
+	var modal = this.modal = $("<div class='modal'><div class='dlg'></div></div>");
+	var dlg = modal.find(".dlg");
 	// insertamos el diálogo modal
-	$("body").append(DIALOG_HTML);
-	$("#dlg_msg").html(msg);
-	$("#dlg_extra").html(extra);
+	$("body").append(modal);
+	if (msg) {
+		dlg.append("<div class='dlg_msg'>"+msg+"</div>");
+	};
+	if (extra) {
+		dlg.append("<div class='dlg_extra'>"+extra+"</div>")
+	};
 	if (buttons) {
-		buttonsDiv = document.getElementById("dlg_buttons");
+		buttonsDiv = $("<div class='dlg_buttons'></div>");
+		dlg.append(buttonsDiv);
 		for (var b=0; b<buttons.length; b++) {
-			var btn = document.createElement("div");
-			btn.className = "btn";
-			btn.textContent = buttons[b];		// texto del botón, empleado como variable de retorno
-			btn.addEventListener("click", function() {
+			var btn = $("<div class='btn'>"+buttons[b]+"</div>");
+			btn.on("click", function() {
 				removeDialog();
 				if (callback) callback(this.textContent);
 			});
-			buttonsDiv.appendChild(btn);
+			buttonsDiv.append(btn);
 		};
-	}
+	};
 	// optional timeout function
 	if (timeout) {
 		setTimeout(function() {
@@ -30,7 +34,7 @@ function showDialog(msg, extra, buttons, callback, timeout) {
 		}, timeout);
 	};
 	// cerrar el modal cuando se hace click fuera de la ventana 
-	$("#modal").on("click", function(e) {
-		if (e.target.id == "modal") removeDialog();
+	modal.on("click", function(e) {
+		if (e.target.className == "modal") removeDialog();
 	});
 };
