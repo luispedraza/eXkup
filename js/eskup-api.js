@@ -233,8 +233,6 @@ function appendMsg(msg, board, themes) {
 	// Temas del mensaje
 	var $divThemes = $("<ul class='themes'></ul>");
 	var msgThemes = msg.CopiaEnTablones.split( "," );	// temas del mensaje
-	// var temabloqueado = false;
-	// var msgbloqueado = true;
 	for (var t=0, len = msgThemes.length; t < len; t++) {
 		var themeData = msgThemes[t].split("-");
 		if (themeData[0] == "ev") {	
@@ -248,8 +246,8 @@ function appendMsg(msg, board, themes) {
 			// if (CheckSigoTema(temaid) == 1) temali.className = "seguido";					
 			// else temali.className = "noseguido";
 			$divThemes.append($themeElement);
-		}
-	}
+		};
+	};
 	// Construcción final y agregación
 	div_msg.appendChild(dHead);
 	div_msg.appendChild(div_cont);

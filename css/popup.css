@@ -371,6 +371,7 @@ span.time-tooltip span:first-child {
 	border-radius: 3px;
 	border: 1px solid #ccc;
 	cursor: pointer;
+	margin-bottom: 2px;
 }
 .themes li:hover {
 	text-decoration: underline;
