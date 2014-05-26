@@ -101,23 +101,25 @@ function loadData(board, callback) {
 	apiCall("GET", OUTESKUP, OUTPARAMS, getData);
 	function getData(req) {
 		var info = eskupParseResponse(req.response);
-		var users = info.perfilesUsuarios;
+		console.log(info);
 		var messages = info.mensajes;
+		var usersInfo = info.perfilesUsuarios;
+		var themesInfo = info.perfilesEventos;
 		var board = document.getElementById("board");
 		board.style.left = 0;
 		document.getElementById("tree-board").style.left = "450px";
 		for (var i=0; i<messages.length; i++) {
 			var msg = info.mensajes[i];
 			if (msg.borrado) continue;
-			msg.pathfoto = checkUserPhoto(users[msg.usuarioOrigen].pathfoto);
-			appendMsg(msg, board);
+			msg.pathfoto = checkUserPhoto(usersInfo[msg.usuarioOrigen].pathfoto);
+			appendMsg(msg, board, themesInfo);
 		}
 		if (callback) callback();
 		$("#board").find(".loading").remove();
 	}
 }
 
-function appendMsg(msg, board) {
+function appendMsg(msg, board, themes) {
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
 	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
@@ -228,12 +230,34 @@ function appendMsg(msg, board) {
 		dCtrl.appendChild(dDel);
 	}
 	dHead.appendChild(dCtrl);
+	// Temas del mensaje
+	var $divThemes = $("<ul class='themes'></ul>");
+	var msgThemes = msg.CopiaEnTablones.split( "," );	// temas del mensaje
+	// var temabloqueado = false;
+	// var msgbloqueado = true;
+	for (var t=0, len = msgThemes.length; t < len; t++) {
+		var themeData = msgThemes[t].split("-");
+		if (themeData[0] == "ev") {	
+			var themeID = themeData[1];
+			var themeInfo = themes[themeID];	// información sobre el tema, de la API
+			// BLOQUEDO DE TEMAS:
+			// if ((locationid == "todo") && (CheckBlockTema(temaid) != -1)) continue;
+			// else msgbloqueado = false;
+			var themeName = themeInfo.nombre;
+			var $themeElement = $("<li>" + themeName + "</li>");
+			// if (CheckSigoTema(temaid) == 1) temali.className = "seguido";					
+			// else temali.className = "noseguido";
+			$divThemes.append($themeElement);
+		}
+	}
 	// Construcción final y agregación
 	div_msg.appendChild(dHead);
 	div_msg.appendChild(div_cont);
+	$(div_msg).append($divThemes);
 	board.appendChild(div_msg);
 }
 
+/* Respuesta a un usuario */
 function msgReply(e) {
 	showEditor();
 	var mId = e.target.getAttribute("m_id");
@@ -366,7 +390,7 @@ function loadFavs() {
 		if (message) appendMsg(JSON.parse(message), favs);
 	};
 }
-
+/* Envía un nuevo mensaje */
 function Update()
 {
 	var api = new InEskup();

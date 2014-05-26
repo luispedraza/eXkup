@@ -356,6 +356,26 @@ span.time-tooltip span:first-child {
 	margin-top: 5px;
 }
 
+.themes {
+	font-size: 11px;
+	padding: 0;
+}
+.themes:before {
+	content: "TEMAS: ";
+}
+.themes li {
+	display: inline-block;
+	padding: 1px 3px;;
+	background-color: #eee;
+	margin-right: 5px;
+	border-radius: 3px;
+	border: 1px solid #ccc;
+	cursor: pointer;
+}
+.themes li:hover {
+	text-decoration: underline;
+}
+
 /* Profile */
 #profile-section img {
   margin:2px;

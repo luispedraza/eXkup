@@ -45,68 +45,68 @@ function LoadXmlData(data_id, temaid, temanombre)
 	switch (data_id)
 	{
 		case "sigo":
-			tablon = "2";
-			numpag = numpagsigo;
-			break;
+		tablon = "2";
+		numpag = numpagsigo;
+		break;
 		case "privado":
-			tablon = "3";
-			numpag = numpagprvd;
-			break;
+		tablon = "3";
+		numpag = numpagprvd;
+		break;
 		case "todo":
-			tablon = "t1-ULTIMOSMENSAJES";
-			numpag = numpagtodo;
-			break;
+		tablon = "t1-ULTIMOSMENSAJES";
+		numpag = numpagtodo;
+		break;
 		case "mios":
-			tablon = "t1-" + my_id;
-			numpag = numpagmios;
-			break;
+		tablon = "t1-" + my_id;
+		numpag = numpagmios;
+		break;
 		case "tema":
-			tablon = temaid;
-			temaid = temaid.replace("ev-", "");
-			if (temaid != temaactual)
+		tablon = temaid;
+		temaid = temaid.replace("ev-", "");
+		if (temaid != temaactual)
+		{
+			numpagtema = 1;
+			temaactual = temaid;
+			document.getElementById("tema").innerHTML = "";
+		}
+		if (temanombre != null)
+		{
+			document.getElementById("tema_actual").innerHTML = temanombre;
+			document.getElementById("tema_actual").href= "http://eskup.elpais.com/*" + temaid;
+			var seguiropcion = document.getElementById("seguiropcion");
+			if (CheckSigoTema(temaid) == 1)
 			{
-				numpagtema = 1;
-				temaactual = temaid;
-				document.getElementById("tema").innerHTML = "";
+				seguiropcion.innerHTML = "<img src='img/seguido.png' />";					
+				seguiropcion.title = "Dejar de seguirlo";
+				seguiropcion.href = "javascript:SeguirOff('" + temaid + "')";
 			}
-			if (temanombre != null)
+			else
 			{
-				document.getElementById("tema_actual").innerHTML = temanombre;
-				document.getElementById("tema_actual").href= "http://eskup.elpais.com/*" + temaid;
-				var seguiropcion = document.getElementById("seguiropcion");
-				if (CheckSigoTema(temaid) == 1)
-				{
-					seguiropcion.innerHTML = "<img src='img/seguido.png' />";					
-					seguiropcion.title = "Dejar de seguirlo";
-					seguiropcion.href = "javascript:SeguirOff('" + temaid + "')";
-				}
-				else
-				{
-					seguiropcion.innerHTML = "<img src='img/noseguido.png' />";					
-					seguiropcion.title = "Quiero seguirlo";
-					seguiropcion.href = "javascript:SeguirOn('" + temaid + "')";
-				}
-				var blockopcion = document.getElementById("blockopcion");
-				if (CheckBlockTema(temaid) != -1)
-				{
-					blockopcion.innerHTML = "<img src='img/block_on.png' />";
-					blockopcion.title = "Desbloquear tema";
-					blockopcion.href = "javascript:BlockOff('" + temaid + "', '" + temanombre + "')";			
-				}
-				else
-				{				
-					blockopcion.innerHTML = "<img src='img/block_off.png' />";
-					blockopcion.title = "Bloquear tema";
-					blockopcion.href = "javascript:BlockOn('" + temaid + "', '" + temanombre + "')";					
-				}
+				seguiropcion.innerHTML = "<img src='img/noseguido.png' />";					
+				seguiropcion.title = "Quiero seguirlo";
+				seguiropcion.href = "javascript:SeguirOn('" + temaid + "')";
 			}
-			numpag = numpagtema;
-			document.getElementById("temas_lista").style.display = "none";
-			document.getElementById("temas_block_lista").style.display = "none";
-			document.getElementById('tabber').tabber.tabShow(4);
-			break;			
+			var blockopcion = document.getElementById("blockopcion");
+			if (CheckBlockTema(temaid) != -1)
+			{
+				blockopcion.innerHTML = "<img src='img/block_on.png' />";
+				blockopcion.title = "Desbloquear tema";
+				blockopcion.href = "javascript:BlockOff('" + temaid + "', '" + temanombre + "')";			
+			}
+			else
+			{				
+				blockopcion.innerHTML = "<img src='img/block_off.png' />";
+				blockopcion.title = "Bloquear tema";
+				blockopcion.href = "javascript:BlockOn('" + temaid + "', '" + temanombre + "')";					
+			}
+		}
+		numpag = numpagtema;
+		document.getElementById("temas_lista").style.display = "none";
+		document.getElementById("temas_block_lista").style.display = "none";
+		document.getElementById('tabber').tabber.tabShow(4);
+		break;			
 		default:
-			console.log("el tablón no existe");
+		console.log("el tablón no existe");
 	}
 };
 
@@ -250,7 +250,7 @@ function showOutEskup(xmldata, locationid) {
 	var reply2id = xmldata.getElementsByTagName("idMsgRespuesta");
 	var levels = xmldata.getElementsByTagName("level");
 	var borrados = xmldata.getElementsByTagName("borrado");
-	var tablones = xmldata.getElementsByTagName("CopiaEnTablones");
+	// var tablones = xmldata.getElementsByTagName("CopiaEnTablones");
 	for (var i = 0; i in id_mensajes; i++) 
 	{
 		// if (borrados[i].childNodes[0].nodeValue == 1) continue;
@@ -334,7 +334,7 @@ function showOutEskup(xmldata, locationid) {
 		// 	deletebtn.id = deleteid;
 		// 	deletebtn.href ="javascript:DeleteTry('" + confirmid + "')";
 		// 	divcontrol.appendChild(deletebtn);
-			
+		
 		// 	var confirmbtn = document.createElement("div");
 		// 	confirmbtn.className = "confirm";
 		// 	confirmbtn.id = confirmid;
@@ -387,64 +387,64 @@ function showOutEskup(xmldata, locationid) {
 			divfooter.appendChild(divhilo);		
 
 		}	
-		if (locationid != "tema")
-		{
-			divtablones = document.createElement("ul");
-			divtablones.className = "listatemas";		
-			var temasTokens = tablones[i].childNodes[0].nodeValue.split( "," );
-			var haytemas = 0;
-			var temabloqueado = false;
-			var msgbloqueado = true;
-			for ( var tk = 0; tk < temasTokens.length; tk++ )
-			{
-				if (temasTokens[tk].substr(0,3) == "ev-")
-				{
-					haytemas = 1;
-					var temaid = temasTokens[tk].substr(3);
-					// BLOQUEDO DE TEMAS:
-					if ((locationid == "todo") && (CheckBlockTema(temaid) != -1))
-					{
-						continue;				
-					}
-					else
-					{
-						msgbloqueado = false; 
-					}
-					var temaname = xmldata.getElementsByTagName(temaid)[0].getElementsByTagName("nombre")[0].childNodes[0].nodeValue;
-				//	divtablones.innerHTML = divtablones.innerHTML + "<p>" + temasTokens[tk] + "</p>";
-				var temali = document.createElement("li");
-				var temalink = document.createElement("a");					
-				temalink.href = "javascript:LoadXmlData('tema', 'ev-" + temaid + "', '" + temaname + "')";
-				//					temalink.href = "'http://eskup.elpais.com/*" + temaid + "'";
-				temalink.target = "_blank";
-				if (CheckSigoTema(temaid) == 1)
-				{
-					temali.className = "seguido";					
-				}
-				else
-				{
-					temali.className = "noseguido";					
-				}					
-				temalink.innerHTML = temaname;
-				temali.appendChild(temalink);
-				divtablones.appendChild(temali);
-				//					divtablones.innerHTML = divtablones.innerHTML + "<a target='_blank' href='http://eskup.elpais.com/*" + temaid + "'>" + 
-					//				xmldata.getElementsByTagName(temaid)[0].getElementsByTagName("nombre")[0].childNodes[0].nodeValue + " >> </a>";
-				}
-				}		
-				if ((haytemas == 1) && (msgbloqueado) && (locationid == "todo")) continue;
-				if (haytemas)
-				{
-					divtemas = document.createElement("div");
-					divtemas.className = "temas";
-					divtemas.innerHTML = "Temas";
-					divtemas.onmouseover = "this.style.backgroundColor='red'";
-					divtemas.appendChild(divtablones);	
-					divfooter.appendChild(divtemas);
-				}			
-			}
-			divcontent.appendChild(divfooter);			
-			location.appendChild(divmessage);
+		// if (locationid != "tema")
+		// {
+		// 	divtablones = document.createElement("ul");
+		// 	divtablones.className = "listatemas";		
+		// 	var temasTokens = tablones[i].childNodes[0].nodeValue.split( "," );
+		// 	var haytemas = 0;
+		// 	var temabloqueado = false;
+		// 	var msgbloqueado = true;
+		// 	for ( var tk = 0; tk < temasTokens.length; tk++ )
+		// 	{
+		// 		if (temasTokens[tk].substr(0,3) == "ev-")
+		// 		{
+		// 			haytemas = 1;
+		// 			var temaid = temasTokens[tk].substr(3);
+		// 			// BLOQUEDO DE TEMAS:
+		// 			if ((locationid == "todo") && (CheckBlockTema(temaid) != -1))
+		// 			{
+		// 				continue;				
+		// 			}
+		// 			else
+		// 			{
+		// 				msgbloqueado = false; 
+		// 			}
+		// 			var temaname = xmldata.getElementsByTagName(temaid)[0].getElementsByTagName("nombre")[0].childNodes[0].nodeValue;
+		// 		//	divtablones.innerHTML = divtablones.innerHTML + "<p>" + temasTokens[tk] + "</p>";
+		// 		var temali = document.createElement("li");
+		// 		var temalink = document.createElement("a");					
+		// 		temalink.href = "javascript:LoadXmlData('tema', 'ev-" + temaid + "', '" + temaname + "')";
+		// 		//					temalink.href = "'http://eskup.elpais.com/*" + temaid + "'";
+		// 		temalink.target = "_blank";
+		// 		if (CheckSigoTema(temaid) == 1)
+		// 		{
+		// 			temali.className = "seguido";					
+		// 		}
+		// 		else
+		// 		{
+		// 			temali.className = "noseguido";					
+		// 		}					
+		// 		temalink.innerHTML = temaname;
+		// 		temali.appendChild(temalink);
+		// 		divtablones.appendChild(temali);
+		// 		//					divtablones.innerHTML = divtablones.innerHTML + "<a target='_blank' href='http://eskup.elpais.com/*" + temaid + "'>" + 
+		// 			//				xmldata.getElementsByTagName(temaid)[0].getElementsByTagName("nombre")[0].childNodes[0].nodeValue + " >> </a>";
+		// 		}
+		// 	}		
+		// 	if ((haytemas == 1) && (msgbloqueado) && (locationid == "todo")) continue;
+		// 	if (haytemas)
+		// 	{
+		// 		divtemas = document.createElement("div");
+		// 		divtemas.className = "temas";
+		// 		divtemas.innerHTML = "Temas";
+		// 		divtemas.onmouseover = "this.style.backgroundColor='red'";
+		// 		divtemas.appendChild(divtablones);	
+		// 		divfooter.appendChild(divtemas);
+		// 	}			
+		// }
+		divcontent.appendChild(divfooter);			
+		location.appendChild(divmessage);
 			// por si al haber bloqueado mensajes se muestran demasiado pocos:
 			nummsgCargados++;		
 		}
@@ -459,13 +459,13 @@ function showOutEskup(xmldata, locationid) {
 		}
 	}
 
-function showEskupThread(xmldata, locationid) {
-	var lista = new Array();	
-	var ulthread = document.createElement("ul");	
-	var limessage;
-	ulthread.id = "tree";
-	var currul = ulthread;
-	currlevel = 0;
+	function showEskupThread(xmldata, locationid) {
+		var lista = new Array();	
+		var ulthread = document.createElement("ul");	
+		var limessage;
+		ulthread.id = "tree";
+		var currul = ulthread;
+		currlevel = 0;
 	// En qué div se inserta la información:
 	var location = document.getElementById(locationid);
 	// Extracción de información del xmldata:
@@ -547,7 +547,7 @@ function showEskupThread(xmldata, locationid) {
 		replybtn.href = "javascript:Reply('" +
 			usuarioOrigen + "','" + 
 			idmsg + "')";
-		divcontrol.appendChild(replybtn);
+divcontrol.appendChild(replybtn);
 		if (usuarioOrigen == my_id)	// soy yo
 		{
 			var deletebtn = document.createElement("a");
@@ -582,33 +582,33 @@ function showEskupThread(xmldata, locationid) {
 				idmsg +  "','" +
 				contenido +
 				"')";
-			divcontrol.appendChild(resendbtn);				
-		}
-		divmessage.appendChild(divcontrol);		
+divcontrol.appendChild(resendbtn);				
+}
+divmessage.appendChild(divcontrol);		
 
-		var imagen = imagenes[i].childNodes[0].nodeValue;
-		if (imagen != 0)
-		{
-			imagen = "http://eskup.elpais.com" + imagen;
-			var divimage = document.createElement("img");
-			divimage.src=imagen;
-			divimage.style.maxWidth="250px !important;"
-			divimage.style.height="auto";
-			divcontent.appendChild(divimage);
-		}		
+var imagen = imagenes[i].childNodes[0].nodeValue;
+if (imagen != 0)
+{
+	imagen = "http://eskup.elpais.com" + imagen;
+	var divimage = document.createElement("img");
+	divimage.src=imagen;
+	divimage.style.maxWidth="250px !important;"
+	divimage.style.height="auto";
+	divcontent.appendChild(divimage);
+}		
 
-		limessage.appendChild(divmessage);
-		currul.appendChild(limessage);
+limessage.appendChild(divmessage);
+currul.appendChild(limessage);
 
-	}	  
-	location.appendChild(ulthread);
-	$(function() {
-		$("#tree").treeview({
-			collapsed: false,
-			animated: "medium",
-			persist: "location"
-		});
+}	  
+location.appendChild(ulthread);
+$(function() {
+	$("#tree").treeview({
+		collapsed: false,
+		animated: "medium",
+		persist: "location"
 	});
+});
 }
 
 function ShowReply2(idmsgA, idmsgBdiv)
