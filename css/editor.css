@@ -21,9 +21,8 @@
 	outline: none;
 	position: absolute;
 	left: 120px;
-	top: 50px;
-	border: 1px solid #ddd;
-	border-radius: 3px;
+	top: 30px;
+	border: 1px solid #eee;
 	height: 100px;
 	width: 450px;
 	overflow-y: scroll;
@@ -33,8 +32,8 @@
 
 #destinations {
 	position: absolute;
-	left: 150px;
-	top: 180px;
+	left: 120px;
+	top: 150px;
 }
 #canvasimage {
 	border: 1px dotted black;
@@ -72,20 +71,18 @@
 	background-color: #015965;
 }
 
-#toolbar a.button {
-	text-decoration: none;
-	width: 18px;
-	height: 16px;
-	padding-top: 2px;
-	border: 1px solid #ccc;
-	border-radius: 3px;
-	text-align: center;
-	color: #666;
+#toolbar button {
+	font-size: 16px;
+	width: 30px;
+	height: 30px;
+	background-color: #fff;
+	outline: none;
+	color: #000;
 	cursor: pointer;
+	border: none;
 }
-#toolbar .button:hover {
-	background-color: #666;
-	color: #fff;
+#toolbar button:hover {
+	background-color: #ddd;
 }
 
 #send2fb {
