@@ -80,7 +80,11 @@ ul.navigator li:hover {
 	font-size: 12px;
 	font-weight: 300;
 }
-#header-menu li:hover {
+#header-menu li.on {
+	background-color: #fff;
+	color: #0293ff;
+}
+#header-menu li:not(.on):hover {
 	border-bottom: 2px solid #fff;
 }
 #user-avatar {

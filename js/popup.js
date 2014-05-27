@@ -53,6 +53,7 @@ function initPopup() {
 		document.getElementById("cancel").onclick = showEditor;
 		/* Mostrar el perfil */
 		$("#profile-item").on("click", function() {
+			$(this).toggleClass('on');
 			$("#profile-container").toggleClass('on');
 		});
 		// cargar tablón de eventos seguidos
