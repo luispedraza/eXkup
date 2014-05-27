@@ -9,11 +9,12 @@ body {
 }
 
 #profile-container {
-	background-color: red;
+	background-color: #fff;
 	height: 600px;
 	width: 100%;
 	position: absolute;
 	top: 600px;
+	border-top: 1px solid #ddd;
 	-webkit-transition: top .25s linear;
 	   -moz-transition: top .25s linear;
 	    -ms-transition: top .25s linear;
@@ -207,7 +208,7 @@ ul.navigator li:hover {
 	margin: 0;
 }
 
-#edit-section.on, #profile-section.on {
+#edit-section.on {
 	height: 250px;
 }
 #edit-section.on h1 .fa-chevron-up {
@@ -215,15 +216,8 @@ ul.navigator li:hover {
 }
 /* Profile */
 #profile-section {
-	display: none;
-	position: absolute;
-	bottom: 0;
-	background-color: white;
-	width: 100%;
-	-webkit-transition: height .5s ease;
-	height: 50px;
-	overflow: hidden;
-	border-top: 1px solid black;
+	overflow: auto;
+	padding: 10px;
 }
 
 /* Mensajes */
@@ -401,25 +395,33 @@ span.time-tooltip span:first-child {
   float:left;
 }
 
-.profile_item {
-	background-color:white;
-	margin:2px;
-	border-width:1px;
-	padding-left: 70px;
+.profile-item span {
+	display: inline-block;
+	background-color: #f2f2f2;
+	border: 1px solid #fff;
+}
+.profile-item .field {	
+	width: 100px;
+	text-align: right;
+}
+.profile-item .value {
+	width: 300px;
 }
 #follow-to, #follow-me {
+	border: 1px solid #ddd;
+	padding: 5px;
 	overflow-x: hidden;
 	overflow-y: auto;
 	height: 300px;
 }
 
 #follow-to {
-	width:48%;
+	width:270px;
 	float:left;
 }
 
 #follow-me {
-	width:48%;
+	width:270px;
 	float:right;
 }
 

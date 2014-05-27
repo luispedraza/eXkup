@@ -83,25 +83,20 @@ function apiCall(method, url, data, func) {
 	if (!func) return req.responseText;
 }
 
-function checkUserPhoto(path)
-{
+/* Comprueba si hay foto de usuario, o devuelve una por defecto */
+function checkUserPhoto(path) {
 	return (path) ? (path) : ("img/noimage.png");
-}
+};
 
 function fillProfile(user) {
-	var foto = user.pathfoto;
-	var nombre = user.nombre;
-	var apellidos = user.apellidos;
-	var descripcion = user.descripcion;
 	var urlwebpersonal = user.urlwebpersonal;
 	var urlblog = user.urlblog;
-	document.getElementById("nombre").innerText = "Nombre: " + nombre;
-	document.getElementById("apellidos").innerText = "Apellidos: " + apellidos;
-	document.getElementById("urlpersonal").innerHTML = "Página web: " + urlwebpersonal.link(urlwebpersonal);
-	document.getElementById("blog").innerHTML = "Blog: " + urlblog.link(urlblog);
-	document.getElementById("descripcion").innerText = "Sobre mí: "+ descripcion;
-	document.getElementById("mifoto").innerHTML = "<img src='" + foto + "' />";
-}
+	$("#nombre .value").html(user.nombre);
+	$("#apellidos .value").html(user.apellidos);
+	$("#descripcion .value").html(user.descripcion);
+	$("#urlpersonal .value").html(urlwebpersonal.link(urlwebpersonal));
+	$("#urlblog .value").html(urlblog.link(urlblog));
+};
 
 function fillHeader(user) {
 	console.log(user);

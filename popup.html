@@ -23,7 +23,7 @@
 
 	<div id="header">
 		<ul id="header-menu">
-			<li>perfil</li>
+			<li id="profile-item">perfil</li>
 			<li>opciones</li>
 			<li id="logout">desconectar</li>
 		</ul>
@@ -99,14 +99,13 @@
 	<div id="profile-container">
 		<!-- SECCION. PERFIL -->
 		<div id="profile-section">
-			<h1 id="profile-section-h1">perfil</h1>
-			<a id="logout_" href="#">Cerrar Sesión</a>
-			<div id="mifoto" style="float:left"></div>
-			<div class="profile_item" id="nombre"></div>
-			<div class="profile_item" id="apellidos"></div>
-			<div class="profile_item" id="urlpersonal"></div>
-			<div class="profile_item" id="descripcion"></div>
-			<div class="profile_item" id="blog"></div>
+			<div id="profile-info">
+				<div class="profile-item" id="nombre"><span class="field">Nombre:</span><span class="value"></span></div>
+				<div class="profile-item" id="apellidos"><span class="field">Apellidos:</span><span class="value"></span></div>
+				<div class="profile-item" id="descripcion"><span class="field">Sobre mí:</span><span class="value"></span></div>
+				<div class="profile-item" id="urlpersonal"><span class="field">Página web:</span><span class="value"></span></div>
+				<div class="profile-item" id="urlblog"><span class="field">Blog:</span><span class="value"></span></div>
+			</div>
 
 			<div id="follows">
 				<div id="follow-to">

@@ -4,8 +4,15 @@ var loading = false;
 window.addEventListener("load", initPopup);
 
 function initPopup() {
+	/* Obtención de la clave pública de usuario, e inicialización del perfil */
 	initEskup(function() {
-		loadProfile();
+		loadProfile(function(user) {
+			fillHeader(user);
+			fillProfile(user);
+			LoadFollowTo();
+			LoadFollowMe();
+			LoadThemes();
+		});
 		LoadTemasBlock();
 		// Eventos
 		document.getElementById("search").addEventListener("click", Search);
@@ -44,7 +51,10 @@ function initPopup() {
 
 		document.getElementById("edit-section-h1").onclick = showEditor;
 		document.getElementById("cancel").onclick = showEditor;
-		document.getElementById("profile-section-h1").onclick = showProfile;
+		/* Mostrar el perfil */
+		$("#profile-item").on("click", function() {
+			$("#profile-container").toggleClass('on');
+		});
 		// cargar tablón de eventos seguidos
 		(function() {
 			var evObj = document.createEvent('MouseEvents');
@@ -64,10 +74,7 @@ function showEditor() {
 	var e = document.getElementById("edit-section");
 	e.className = (e.className.match("on") ? "" : "on");
 }
-function showProfile() {
-	var e = document.getElementById("profile-section");
-	e.className = (e.className.match("on") ? "" : "on");
-}
+
 function dispatchProgress(p) {
 	var event = document.createEvent("Event");
 	event.initEvent("change", true, true);

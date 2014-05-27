@@ -63,7 +63,7 @@ function initEskup(callback) {
 		INPARAMS.id = OUTPARAMS.id = PROFILEPARAMS.id = PUBLIC_KEY;
 		callback();
 	});
-}
+};
 
 function logOut() {
 	apiCall("GET", "http://www.elpais.com/clientes2/desconectar.html", null);
@@ -307,24 +307,19 @@ function msgDelete() {
 // Información de usuario
 // ej: http://eskup.elpais.com/Profileeskup?action=info_usuarios&f=xml&id=7gTvFkSaO-pa0342AjhqMg
 //////////////////////////
-function loadProfile() {
+function loadProfile(callback) {
 	PROFILEPARAMS.action = "info_usuarios";
-	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, getProfile);
-	function getProfile(req) {
+	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
 		var info = req.responseText;
-		perfiles = JSON.parse(req.responseText.replace(/'/g, "\"")).perfilesUsuarios;
+		perfiles = eskupParseResponse(req.response).perfilesUsuarios;
 		for (var u in perfiles) {
 			USER_ID = u;
 			TABLONES["mios"] = "t1-" + USER_ID;
 			var usuario = perfiles[u];
 		}
-		fillHeader(usuario);
-		fillProfile(usuario);
-		LoadFollowTo();
-		LoadFollowMe();
-		LoadThemes();
-	};
-}
+		callback(usuario);
+	});
+};
 
 /////////////////////////
 // Los temas que sigo 
