@@ -20,8 +20,11 @@ window.addEventListener("load", function() {
 /* contador de caracteres del mensaje */
 function Counter() {
 	var message = $("#newmessage").text();
-	console.log(message);
-	console.log(message.length);
 	var remaining = MAXCHAR - message.length;
-	$("#counter").text(remaining.toString());
+	var $counter = $("#counter");
+	$counter.text(remaining.toString());
+	// coloreado del contador:
+	if (remaining <= 10) $counter.attr('class', 'warning2');
+	else if (remaining <= 50) $counter.attr('class', 'warning1');
+	else $counter.attr('class', '');
 };

@@ -47,15 +47,24 @@
 
 #counter {
 	font-size:24px;
+	font-weight: bold;
 	border: 1px solid #eee;
 	text-align: center;
 	height: 50px;
 	background-color: #fff;
 }
+#counter.warning1 {
+	color: #ff7728;
+}
+#counter.warning2 {
+	color: #ff1815;
+}
 #counter:after {
+	font-weight: 200;
 	content: "caracteres";
-	font-size: 10px;
+	font-size: 12px;
 	display: block;
+	color: #666;
 }
 
 #commands a {
