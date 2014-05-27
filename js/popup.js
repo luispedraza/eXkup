@@ -36,16 +36,6 @@ function initPopup() {
 			uiSelectBoard(this.id);
 		});
 		document.getElementById("logout").onclick = logOut;
-
-		document.getElementById("progress").addEventListener("change", function(e) {
-			p = e.customData;
-			if ((p<1)||(p>99)) e.target.style.display="none";
-			else {
-				e.target.style.display="block";
-			}
-			document.getElementById("progress-status").style.width = p+"%";
-			sleep(1000);
-		})
 		document.getElementById("send2priv").addEventListener("click", sendPriv);
 		document.getElementById("closetree").addEventListener("click", function() {
 			document.getElementById("board").style.left = 0;

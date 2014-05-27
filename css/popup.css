@@ -7,6 +7,22 @@ body {
 	font-size: 14px;
 	margin: 0px;
 }
+
+#profile-container {
+	background-color: red;
+	height: 600px;
+	width: 100%;
+	position: absolute;
+	top: 600px;
+	-webkit-transition: top .25s linear;
+	   -moz-transition: top .25s linear;
+	    -ms-transition: top .25s linear;
+	     -o-transition: top .25s linear;
+	        transition: top .25s linear;
+}
+#profile-container.on {
+	top: 50px;
+}
 /* Navegación */
 .section-container {
 	background-color: white;

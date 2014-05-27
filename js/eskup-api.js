@@ -68,7 +68,7 @@ function initEskup(callback) {
 function logOut() {
 	apiCall("GET", "http://www.elpais.com/clientes2/desconectar.html", null);
 	window.close();
-}
+};
 
 var TABLONES = {
 	mios: "t1-",
@@ -231,27 +231,31 @@ function appendMsg(msg, board, themes) {
 	}
 	dHead.appendChild(dCtrl);
 	// Temas del mensaje
-	var $divThemes = $("<ul class='themes'></ul>");
-	var msgThemes = msg.CopiaEnTablones.split( "," );	// temas del mensaje
-	for (var t=0, len = msgThemes.length; t < len; t++) {
-		var themeData = msgThemes[t].split("-");
-		if (themeData[0] == "ev") {	
-			var themeID = themeData[1];
-			var themeInfo = themes[themeID];	// información sobre el tema, de la API
-			// BLOQUEDO DE TEMAS:
-			// if ((locationid == "todo") && (CheckBlockTema(temaid) != -1)) continue;
-			// else msgbloqueado = false;
-			var themeName = themeInfo.nombre;
-			var $themeElement = $("<li>" + themeName + "</li>");
-			// if (CheckSigoTema(temaid) == 1) temali.className = "seguido";					
-			// else temali.className = "noseguido";
-			$divThemes.append($themeElement);
+	var themesFound = false;
+	if (themes) {
+		var $divThemes = $("<ul class='themes'></ul>");
+		var msgThemes = msg.CopiaEnTablones.split( "," );	// temas del mensaje
+		for (var t=0, len = msgThemes.length; t < len; t++) {
+			var themeData = msgThemes[t].split("-");
+			if (themeData[0] == "ev") {
+				themesFound = true;
+				var themeID = themeData[1];
+				var themeInfo = themes[themeID];	// información sobre el tema, de la API
+				// BLOQUEDO DE TEMAS:
+				// if ((locationid == "todo") && (CheckBlockTema(temaid) != -1)) continue;
+				// else msgbloqueado = false;
+				var themeName = themeInfo.nombre;
+				var $themeElement = $("<li>" + themeName + "</li>");
+				// if (CheckSigoTema(temaid) == 1) temali.className = "seguido";					
+				// else temali.className = "noseguido";
+				$divThemes.append($themeElement);
+			};
 		};
 	};
 	// Construcción final y agregación
 	div_msg.appendChild(dHead);
 	div_msg.appendChild(div_cont);
-	$(div_msg).append($divThemes);
+	if (themesFound) $(div_msg).append($divThemes);
 	board.appendChild(div_msg);
 }
 
@@ -306,8 +310,7 @@ function msgDelete() {
 function loadProfile() {
 	PROFILEPARAMS.action = "info_usuarios";
 	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, getProfile);
-	function getProfile(req)
-	{
+	function getProfile(req) {
 		var info = req.responseText;
 		perfiles = JSON.parse(req.responseText.replace(/'/g, "\"")).perfilesUsuarios;
 		for (var u in perfiles) {
@@ -389,8 +392,7 @@ function loadFavs() {
 	};
 }
 /* Envía un nuevo mensaje */
-function Update()
-{
+function Update() {
 	var api = new InEskup();
 	api.dat.c = "add";
 	api.dat.m = NEWMESSAGE.innerHTML;
@@ -483,6 +485,7 @@ function loadThread(ev) {
 	apiCall("GET", OUTESKUP, OUTPARAMS, getThread);
 	function getThread(req) {
 		info = JSON.parse(req.responseText.replace(/'/g, "\""));
+		console.log(info);
 		var infoTree = new Object();
 		infoTree.id = null;
 		function addNode(node, parent, tree) {

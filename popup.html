@@ -34,99 +34,94 @@
 		</div>
 	</div><!-- header -->
 
-	<div id= "progress">
-		<div id="progress-status"></div>
-	</div>
+	<div id="messages-container">
+		<div id="navigation">
+			<!-- SECCION. MENSAJES -->
+			<div id="msg-section" class="section-container">
+				<h1>mensajes</h1>
+				<ul class="navigator">
+					<li id="sigo" class="board-selector">suscripciones</li>
+					<li id="todo" class="board-selector">todos</li>
+					<li id="mios" class="board-selector">propios</li>
+					<li id="priv" class="board-selector">privados</li>
+					<li id="favs" class="board-selector">favoritos</li>
+				</ul>
+			</div>
+			<!-- SECCION. TEMAS -->
+			<div id="thm-section" class="section-container">
+				<h1>temas</h1>
+				<ul id="themes-follow" class="navigator"></ul>
+			</div>
+		</div><!-- navigation -->
+		
+		<div id="messages">
+			<div id="messages-header">
+				<div class="search">
+					<input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/>
+					<a type="button" id="search" class ="fa fa-search"></a>
+				</div>
+				<span id="messages-title">
+					Title
+				</span>
+			</div>
+			<div id="board" class="message-list"></div>
+			<div id="tree-board"><a id="closetree" href="#">volver</a><div id="tree"></div></div>
+		</div>
 
-	<div id="navigation">
-		<!-- SECCION. MENSAJES -->
-		<div id="msg-section" class="section-container">
-			<h1>mensajes</h1>
-			<ul class="navigator">
-				<li id="sigo" class="board-selector">suscripciones</li>
-				<li id="todo" class="board-selector">todos</li>
-				<li id="mios" class="board-selector">propios</li>
-				<li id="priv" class="board-selector">privados</li>
-				<li id="favs" class="board-selector">favoritos</li>
-			</ul>
+		<!-- SECCION. EDITOR -->
+		<div id="edit-section">
+			<h1 id="edit-section-h1">escribir nuevo mensaje <span class="fa fa-chevron-up"></span></h1>
+			<div id="editor">
+				<div id="commands">
+					<div id="counter">280</div>
+					<div class="send" id="send">ENVIAR</div>
+					<div class="cancel" id="cancel">CANCELAR</div>
+				</div>
+				<div id="toolbar">
+					<button id="setbold" class="button fa fa-bold" title="negrita"></button>
+					<button id="setitalic" class="button fa fa-italic" title="cursiva"></button>
+					<button id="insertlink" class="button fa fa-link" title="enlazar esta página"></button>
+					<button id="insertvideo" class="button fa fa-video-camera" title="insertar vídeo"></button>
+					<button id="insertimage" class="button fa fa-camera" title="insertar imagen"></button>
+					<button id="cortas" class="button fa fa-cut" title="acortar enlaces"></button>
+					<input id="send2fb" type="checkbox" title="facebook" class="fa fa-facebook-square" />
+					<input id="send2tt" type="checkbox" title="twitter" class="fa fa-twitter-square" />
+				</div>
+				<div id="newmessage" contenteditable="true"></div>
+				<div id="destinations">
+					<div id="send2priv">privado: </div>
+					<div id="send2theme">tema: </div>
+				</div>
+			</div>
 		</div>
-		<!-- SECCION. TEMAS -->
-		<div id="thm-section" class="section-container">
-			<h1>temas</h1>
-			<ul id="themes-follow" class="navigator"></ul>
+	</div> <!-- msg-container -->
+
+	<div id="profile-container">
+		<!-- SECCION. PERFIL -->
+		<div id="profile-section">
+			<h1 id="profile-section-h1">perfil</h1>
+			<a id="logout_" href="#">Cerrar Sesión</a>
+			<div id="mifoto" style="float:left"></div>
+			<div class="profile_item" id="nombre"></div>
+			<div class="profile_item" id="apellidos"></div>
+			<div class="profile_item" id="urlpersonal"></div>
+			<div class="profile_item" id="descripcion"></div>
+			<div class="profile_item" id="blog"></div>
+
+			<div id="follows">
+				<div id="follow-to">
+					<h4>sigo a:</h4>
+					<div class="follow-to-users" id="follow-to-users"></div>
+				</div>
+				<div id="follow-me">
+					<h4>me siguen:</h4>
+					<div class="follow-me-users" id="follow-me-users"></div>       
+				</div>
+			</div>
 		</div>
-	</div><!-- navigation -->
+	</div> <!-- profile-container -->
+
 	
-	<div id="messages">
-		<div id="messages-header">
-			<div class="search">
-				<input name="search" type="text" value="" placeholder="texto a buscar…" size="15" maxlength="25" id="searchtxt_sigo"/>
-				<a type="button" id="search" class ="fa fa-search"></a>
-			</div>
-			<span id="messages-title">
-				Title
-			</span>
-		</div>
-		<div id="board" class="message-list"></div>
-		<div id="tree-board"><a id="closetree" href="#">volver</a><div id="tree"></div></div>
-	</div>
-
-
-
-	<!-- SECCION. PERFIL -->
-	<div id="profile-section">
-		<h1 id="profile-section-h1">perfil</h1>
-		<a id="logout_" href="#">Cerrar Sesión</a>
-		<div id="mifoto" style="float:left"></div>
-		<div class="profile_item" id="nombre"></div>
-		<div class="profile_item" id="apellidos"></div>
-		<div class="profile_item" id="urlpersonal"></div>
-		<div class="profile_item" id="descripcion"></div>
-		<div class="profile_item" id="blog"></div>
-
-		<div id="follows">
-			<div id="follow-to">
-				<h4>sigo a:</h4>
-				<div class="follow-to-users" id="follow-to-users"></div>
-			</div>
-			<div id="follow-me">
-				<h4>me siguen:</h4>
-				<div class="follow-me-users" id="follow-me-users"></div>       
-			</div>
-		</div>
-	</div>
-
-	<!-- SECCION. EDITOR -->
-	<div id="edit-section">
-		<h1 id="edit-section-h1">escribir nuevo mensaje <span class="fa fa-chevron-up"></span></h1>
-		<div id="editor">
-			<div id="commands">
-				<div id="counter">280</div>
-				<div class="send" id="send"><a href="#">mandar</a></div>
-				<div class="cancel" id="cancel"><a href="#">cancelar</a></div>
-			</div>
-			<div id="toolbar">
-				<button id="setbold" class="button fa fa-bold" title="negrita"></button>
-				<button id="setitalic" class="button fa fa-italic" title="cursiva"></button>
-				<button id="insertlink" class="button fa fa-link" title="enlazar esta página"></button>
-				<button id="insertvideo" class="button fa fa-video-camera" title="insertar vídeo"></button>
-				<button id="insertimage" class="button fa fa-camera" title="insertar imagen"></button>
-				<button id="cortas" class="button fa fa-cut" title="acortar enlaces"></button>
-				<input id="send2fb" type="checkbox" title="facebook" class="fa fa-facebook-square" />
-				<input id="send2tt" type="checkbox" title="twitter" class="fa fa-twitter-square" />
-			</div>
-			<div id="newmessage" contenteditable="true"></div>
-			<div id="destinations">
-				<div id="send2priv">privado: </div>
-				<div id="send2theme">tema: </div>
-			</div>
-		</div>
-	</div>
-
-<!-- <div id="thread">
-	<div id="unflip">volver</div>
-	<div id="graph"></div>
-</div> -->
 
 </body>
 </html>
