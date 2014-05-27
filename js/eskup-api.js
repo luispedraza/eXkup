@@ -261,7 +261,7 @@ function appendMsg(msg, board, themes) {
 
 /* Respuesta a un usuario */
 function msgReply(e) {
-	showEditor();
+	showEditor(true, "respuesta a ");
 	var mId = e.target.getAttribute("m_id");
 	var msgDiv = document.getElementById(mId);
 	msgDiv.scrollIntoView();

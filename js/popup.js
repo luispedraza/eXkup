@@ -49,8 +49,12 @@ function initPopup() {
 			document.getElementById("tree-board").style.left = "450px";
 		})
 
-		document.getElementById("edit-section-h1").onclick = showEditor;
-		document.getElementById("cancel").onclick = showEditor;
+		$("#edit-section-h1").on("click", function() {
+			showEditor();
+		});
+		$("#cancel").on("click", function() {
+			showEditor(false);
+		});
 		/* Mostrar el perfil */
 		$("#profile-item").on("click", function() {
 			$(this).toggleClass('on');
@@ -71,10 +75,17 @@ function loadBoard(id) {
 	uiSelectBoard(id);
 }
 
-function showEditor() {
-	var e = document.getElementById("edit-section");
-	e.className = (e.className.match("on") ? "" : "on");
-}
+/* Gestión de la ventana de edición */
+function showEditor(show, info) {
+	// mostrar u ocultar la ventana de edición
+	if (show == null) {
+		$("#edit-section").toggleClass("on");
+	} else {
+		show ? $("#edit-section").addClass("on") : $("#edit-section").removeClass("on");	
+	};
+	// título de la ventana de edición:
+	$("#edit-section-h1 .edit-title").html(info ? info : "escribir nuevo mensaje");
+};
 
 function dispatchProgress(p) {
 	var event = document.createEvent("Event");

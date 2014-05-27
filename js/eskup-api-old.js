@@ -32,8 +32,6 @@ var listatemasblockN = new Array();	// nombres de temas bloqueados en la pestañ
 if (localStorage["msg_fav"] != "undefined")
 	listamsgfav = JSON.parse(localStorage["msg_fav"]);
 
-var maxchar = 280;
-
 function LoadXmlData(data_id, temaid, temanombre)
 {
 	if (data_id == "completo")
@@ -334,7 +332,7 @@ function showOutEskup(xmldata, locationid) {
 		// 	deletebtn.id = deleteid;
 		// 	deletebtn.href ="javascript:DeleteTry('" + confirmid + "')";
 		// 	divcontrol.appendChild(deletebtn);
-		
+
 		// 	var confirmbtn = document.createElement("div");
 		// 	confirmbtn.className = "confirm";
 		// 	confirmbtn.id = confirmid;

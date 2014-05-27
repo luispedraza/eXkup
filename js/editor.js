@@ -1,36 +1,27 @@
 var SELECTION = [];
-var NEWMESSAGE;
+var MAXCHAR = 280;
 
 window.addEventListener("load", function() {
 	NEWMESSAGE = document.getElementById("newmessage");
-	document.getElementById("send").addEventListener("click", Update);
-	document.getElementById("cancel").addEventListener("click", CancelUpdate);
+	$("#send").on("click", Update);
+	$("#cancel").on("click", CancelUpdate);
 	$("#setitalic").on("click", function() {
-		console.log("hola");
 		document.execCommand('italic',false,null);
 	});
 	$("#setbold").on("click", function() {
-		document.execCommand('bold',false,null);	// selección en negritas
+		document.execCommand('bold',false,null);
 	});
-	document.getElementById("newmessage").addEventListener("keydown", Counter);
-	document.getElementById("newmessage").addEventListener("mouseup", Selection);
-	document.getElementById("insertvideo").addEventListener("click", insertVideo);
-	document.getElementById("insertimage").addEventListener("click", insertImage);
-	document.getElementById("insertlink").addEventListener("click", insertLink);
+	$("#newmessage").on("keyup", Counter);
+	$("#insertvideo").on("click", insertVideo);
+	$("#insertimage").on("click", insertImage);
+	$("#insertlink").on("click", insertLink);
 });
 
-function Counter()
-{
-	var remaining = maxchar - NEWMESSAGE.innerText.length-1;
-	document.getElementById("counter").innerText = String(remaining);
-};
-
-function Selection() {
-	SELECTION = [];
-	var sel = document.getSelection();
-	if (!sel.containsNode(NEWMESSAGE, true))
-		return;
-	for (var s=0; s<sel.rangeCount; s++) {
-		SELECTION.push(sel.getRangeAt(s));
-	}
+/* contador de caracteres del mensaje */
+function Counter() {
+	var message = $("#newmessage").text();
+	console.log(message);
+	console.log(message.length);
+	var remaining = MAXCHAR - message.length;
+	$("#counter").text(remaining.toString());
 };

@@ -14,7 +14,7 @@ body {
 	width: 100%;
 	position: absolute;
 	top: 600px;
-	border-top: 1px solid #ddd;
+	/* border-top: 1px solid #ddd; */
 	-webkit-transition: top .25s linear;
 	   -moz-transition: top .25s linear;
 	    -ms-transition: top .25s linear;
@@ -64,10 +64,12 @@ ul.navigator li:hover {
 	padding: 10px 5px;
 	background-color: #0293ff;
 	color: #fff;
-	/* position: fixed; */
+	position: relative;
 }
 #header-menu {
-	float: right;
+	position: absolute;
+	right: 0;
+	bottom: 0;
 	margin: 0;
 }
 #header-menu li {
@@ -210,6 +212,10 @@ ul.navigator li:hover {
 	padding: 10px;
 	cursor: pointer;
 	margin: 0;
+}
+
+#edit-section h1 .edit-title {
+	margin-right: 10px;
 }
 
 #edit-section.on {
@@ -439,6 +445,6 @@ span.time-tooltip span:first-child {
 
 
 #follows img.online {
-	border:3px solid #f30;
+	border:1px solid #0293ff;
 }
 
