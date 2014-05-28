@@ -16,7 +16,7 @@ window.addEventListener("load", function() {
 	$("#insertlink").on("click", insertLink);
 });
 
-/* contador de caracteres del mensaje */
+/* Contador de caracteres del mensaje */
 function Counter() {
 	var message = $("#newmessage").text();
 	var remaining = MAXCHAR - message.length;
@@ -26,4 +26,34 @@ function Counter() {
 	if (remaining <= 10) $counter.attr('class', 'warning2');
 	else if (remaining <= 50) $counter.attr('class', 'warning1');
 	else $counter.attr('class', '');
+};
+
+/* Inserción de texto al final del nuevo mensaje */
+function insertText(txt) {
+	$newmessage = $("#newmessage");
+	$newmessage.html($newmessage.html() + " " + txt + " ");
+};
+
+/* Inserta un link a la pestaña actual u otra pestaña abierta */
+function insertLink() {
+	// obtener la pestaña actual
+	chrome.tabs.query({'currentWindow': true, 'active': true}, function(result) {
+		var currentTab = result[0];
+		// obtener todas las pestañas
+		chrome.tabs.query({}, function(result) {
+			var allTabs = result;
+			var $links = $("<div class='links-list'></div>");
+			$links.append("<h1>Enlace a la pestaña actual</h1>")
+				.append("<div class='link-item close-on-click' data-link='"+currentTab.url+"'><span class='link-title'>"+currentTab.title+"</span><span class='link-url fa fa-link'>"+currentTab.url+"</span></div>")
+				.append("<h1>Enlaces a otras pestañas abiertas en Chrome:</h1>");
+			for (var l=0, len=allTabs.length; l<len; l++) {
+				tab = allTabs[l];
+				$links.append("<div class='link-item close-on-click' data-link='"+tab.url+"'><span class='link-title'>"+tab.title+"</span><span class='link-url fa fa-link'>"+tab.url+"</span></div>")
+			};
+			$links.find(".link-item").on("click", function() {
+					insertText($(this).attr("data-link"));
+			});
+			new ModalDialog("Selecciona la URL que quieres insertar:", $links, ["Cancelar"], null);
+		});
+	});
 };

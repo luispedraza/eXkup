@@ -13,7 +13,7 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 		dlg.append("<div class='dlg_msg'>"+msg+"</div>");
 	};
 	if (extra) {
-		dlg.append("<div class='dlg_extra'>"+extra+"</div>")
+		dlg.append("<div class='dlg_extra'></div>").append(extra);
 	};
 	if (buttons) {
 		buttonsDiv = $("<div class='dlg_buttons'></div>");
@@ -37,4 +37,6 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 	modal.on("click", function(e) {
 		if (e.target.className == "modal") removeDialog();
 	});
+	// Algunos elementos del contenido pueden cerrar el diálogo (independientemente de que tengan otros eventos asociados)
+	modal.find(".close-on-click").on("click", removeDialog);
 };

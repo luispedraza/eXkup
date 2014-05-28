@@ -33,18 +33,12 @@ function onVideos(result)
 	}
 }
 
-function insertText(txt)
-{
-	NEWMESSAGE.innerText += " " + txt + " ";
-	replaceCursor();
-}
-
-function insertLink()
-{
-	chrome.tabs.query({'currentWindow': true, 'active': true}, function(t) {
-		insertText(t[0].url);
-	});	
-}
+/* Obtiene la url de la pestaña actual */
+function getCurrentURLs(callback) {
+	chrome.tabs.query({'currentWindow': true, 'active': true}, function(result) {
+		callback(result);
+	});
+};
 
 function insertVideo() {
 	chrome.tabs.executeScript({file: 'js/getvideos.js', allFrames: true}, 
@@ -66,20 +60,4 @@ function insertConfirm() {
 	var element = canvasEditor.getElement();
 	ctx.drawImage(element, 0, 0, 420, 500);
 	insertCancel();
-}
-
-function replaceCursor() {
-	NEWMESSAGE.focus();
-	// colocar el cursor al final
-	var range = document.createRange();
-	var lastNode = NEWMESSAGE;
-	while (lastNode.nodeName != "#text") {
-		lastNode = lastNode.childNodes[lastNode.childNodes.length-1];
-		if (!lastNode.childNodes) break;
-	}
-	range.setStart(lastNode,lastNode.length);
-	range.collapse(true);
-	sel = document.getSelection();
-	sel.removeAllRanges();
-	sel.addRange(range);
 }

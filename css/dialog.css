@@ -18,10 +18,10 @@
 	box-shadow: -3px 2px 8px 0px rgba(50, 50, 50, 0.75);
 }
 .dlg_msg {
-	border-bottom: 1px solid #ccc;
 	font-size: 1.3em;
 }
 .dlg_extra {
+	border-top: 1px solid #ccc;
 	margin-top: 10px;
 	max-height: 300px;
 	overflow-y: scroll;
@@ -60,4 +60,47 @@
 	float: left;
 	width: 20%;
 	height: 10px;
+}
+
+/* Lista de enlaces para inserción */
+.links-list {
+	max-height: 300px;
+	overflow-y: scroll;
+	padding-right: 10px;
+}
+.links-list h1 {
+	padding: 2px;
+	font-size: 14px;
+	background-color: #666;
+	color: #fff;
+}
+
+.link-item {
+	font-size: 12px;
+	cursor: pointer;
+	background-color: #fff;
+	padding: 2px;
+	margin-bottom: 3px;
+	border: 1px dotted #000;
+}
+
+.link-item:hover {
+	border-left: 2px solid #666;
+}
+
+.link-item span {
+	padding: 2px;
+	display: block;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.link-title {
+	font-weight: bold;
+}
+.link-url {
+	padding-left: 10px;
+}
+.link-url:before {
+	margin-right: 5px;
 }

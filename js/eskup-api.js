@@ -1,12 +1,19 @@
 var TIME_TOOLTIP_TIMER = null;
 var PUBLIC_KEY = "";
 var USER_ID = "";
+
 var INESKUP = "http://eskup.elpais.com/Ineskup";
 var INPARAMS = {
 	m: "",			// Contenido del mensaje (c=add|reply|edit, ignorado con c=del)
-	c: "",			// add, del, edit, reply
-	t: "",			// Destino *tema1|*tema2|nick1|nick2 
-	x: "",			// Extra. (c=add)?(id fwd), (c=del)?(id del), (c=edit)?(id edit), (c=reply)?(id reply)
+					// obligatorio, excepto cuando se elimina un mensaje (c=del)
+					// admite etiquetas <a> y <i>
+	c: "",			// Comando: add (envío o forward), del, edit, reply
+	t: "",			// Destino: tablones o privados a usuarios *tema1|*tema2|nickname1|nickname2
+					// cuando el comando no es add sólo se puede indicar un destino
+					// para eliminar un mensaje privado (c=del) debe ser t=p
+					// nota: se requirer autorización para escribir en un tema
+					// no se puede enviar a privados y a temas a la vez
+	x: "",			// Extra. (c=add)reenvío?(id fwd), (c=del)?(id del), (c=edit)?(id edit), (c=reply)?(id reply)
 	p: "", 			// Imagen adjunta al mensaje
 	f: "json",		// Formato de la respuesta
 	d: "",			// Destino Twitter (1), Facebook (2) o Ambos (1|2)
@@ -260,13 +267,13 @@ function appendMsg(msg, board, themes) {
 }
 
 /* Respuesta a un usuario */
-function msgReply(e) {
+function msgReply() {
+	$("#replying-message").remove();
 	showEditor(true, "respuesta a ");
-	var mId = e.target.getAttribute("m_id");
-	var msgDiv = document.getElementById(mId);
-	msgDiv.scrollIntoView();
-	msgDiv.className += " on";
-}
+	var mId = this.getAttribute("m_id");
+	var msgDiv = $("#"+mId)[0];
+	$("#editor").before($("<div id='replying-message'></div>").html(msgDiv.outerHTML));
+};
 
 function msgForward() {
 
@@ -325,17 +332,15 @@ function loadProfile(callback) {
 // Los temas que sigo 
 // ej.: http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
 /////////////////////////
-function LoadThemes()
-{
+function LoadThemes() {
 	PROFILEPARAMS.action = "list_eventos";
-	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, getThemesInfo);
-	function getThemesInfo(req)
-	{
-		var themes = JSON.parse(req.responseText.replace(/\\/g, ""));
+	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
+		var themes = eskupParseResponse(req.response);
+		console.log("temas", themes);
 		if (!themes) return;
 		fillThemes(themes);
-	}
-}
+	});
+};
 
 ///////////////////////
 // ¿A quiénes sigo?
@@ -386,6 +391,7 @@ function loadFavs() {
 		if (message) appendMsg(JSON.parse(message), favs);
 	};
 }
+
 /* Envía un nuevo mensaje */
 function Update() {
 	var api = new InEskup();

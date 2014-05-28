@@ -206,6 +206,14 @@ ul.navigator li:hover {
 	     -o-transition: height .25s ease-in-out;
 	        transition: height .25s ease-in-out;
 }
+/* el mensaje que se está contestanddo */
+#replying-message {
+	background-color: #f8f8f8;
+	border-bottom: 1px dotted #666;
+	max-height: 220px;
+	overflow-y: scroll;
+	padding: 10px;
+}
 #edit-section h1 {
 	background-color: #666;
 	color: #fff;
@@ -223,7 +231,7 @@ ul.navigator li:hover {
 }
 
 #edit-section.on {
-	height: 250px;
+	height: 550px;
 }
 #edit-section.on h1 .fa-chevron-up {
 	-webkit-transform:rotate(180deg);
@@ -246,9 +254,6 @@ ul.navigator li:hover {
 	margin: 10px;
 	padding: 10px;
 	box-shadow: 0 1px 2px #d9d9d9;
-}
-.message.on {
-	background-color: cyan;
 }
 
 .msg_header {
@@ -329,7 +334,7 @@ span.time-tooltip span:first-child {
 	color: #aaa;
 	padding: 3px;
 }
-.modal .msg_control {
+.modal .msg_control, #replying-message .msg_control {
 	display: none;
 }
 .msg_control .btn {
@@ -378,8 +383,12 @@ span.time-tooltip span:first-child {
 .msg_content  img {
 	width: 100%;
 	margin-top: 5px;
+	display: block;
 }
+#replying-message .msg_content  img {
+	width: 150px;
 
+}
 .themes {
 	font-size: 11px;
 	padding: 0;
