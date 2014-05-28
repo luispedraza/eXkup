@@ -11,7 +11,10 @@ function initPopup() {
 			fillProfile(user);
 			LoadFollowTo();
 			LoadFollowMe();
-			LoadThemes();
+			eskupLoadFollowedThemes();
+			eskupLoadWritableThemes(function() {
+				
+			});
 		});
 		LoadTemasBlock();
 		// Eventos

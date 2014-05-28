@@ -328,11 +328,10 @@ function loadProfile(callback) {
 	});
 };
 
-/////////////////////////
-// Los temas que sigo 
-// ej.: http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
-/////////////////////////
-function LoadThemes() {
+/* Los temas que sigo 
+http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
+*/
+function eskupLoadFollowedThemes() {
 	PROFILEPARAMS.action = "list_eventos";
 	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
 		var themes = eskupParseResponse(req.response);
@@ -341,6 +340,18 @@ function LoadThemes() {
 		fillThemes(themes);
 	});
 };
+/* Los temas en los que puedo escribir 
+http://eskup.elpais.com/Profileeskup?action=list_writers&f=json&id=7gTvFkSaO-pa0342AjhqMg
+*/
+function eskupLoadWritableThemes(callback) {
+	PROFILEPARAMS.action = "list_writers";
+	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
+		var themes = eskupParseResponse(req.response);
+		console.log("temas", themes);
+		if (!themes) return;
+		callback(themes);
+	});
+}
 
 ///////////////////////
 // ¿A quiénes sigo?
