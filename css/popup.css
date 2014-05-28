@@ -8,21 +8,25 @@ body {
 	margin: 0px;
 }
 
+.container {
+	
+}
+
 #profile-container {
 	background-color: #fff;
-	height: 600px;
+	height: 0;
 	width: 100%;
 	position: absolute;
-	top: 600px;
-	/* border-top: 1px solid #ddd; */
-	-webkit-transition: top .25s linear;
-	   -moz-transition: top .25s linear;
-	    -ms-transition: top .25s linear;
-	     -o-transition: top .25s linear;
-	        transition: top .25s linear;
+	top: 50px;
+	overflow: hidden;
+	-webkit-transition: height .25s linear;
+	   -moz-transition: height .25s linear;
+	    -ms-transition: height .25s linear;
+	     -o-transition: height .25s linear;
+	        transition: height .25s linear;
 }
 #profile-container.on {
-	top: 50px;
+	height: 550px;
 }
 /* Navegación */
 .section-container {

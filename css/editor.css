@@ -52,6 +52,11 @@
 	text-align: center;
 	height: 50px;
 	background-color: #fff;
+	-webkit-transition: color .5s linear;
+	   -moz-transition: color .5s linear;
+	    -ms-transition: color .5s linear;
+	     -o-transition: color .5s linear;
+	        transition: color .5s linear;
 }
 #counter.warning1 {
 	color: #ff7728;

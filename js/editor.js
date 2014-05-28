@@ -2,7 +2,6 @@ var SELECTION = [];
 var MAXCHAR = 280;
 
 window.addEventListener("load", function() {
-	NEWMESSAGE = document.getElementById("newmessage");
 	$("#send").on("click", Update);
 	$("#cancel").on("click", CancelUpdate);
 	$("#setitalic").on("click", function() {
