@@ -10,10 +10,10 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 	// insertamos el diálogo modal
 	$("body").append(modal);
 	if (msg) {
-		dlg.append("<div class='dlg_msg'>"+msg+"</div>");
+		$("<div class='dlg_msg'>"+msg+"</div>").appendTo(dlg);
 	};
 	if (extra) {
-		dlg.append("<div class='dlg_extra'></div>").append(extra);
+		$("<div class='dlg_extra'></div>").append(extra).appendTo(dlg);
 	};
 	if (buttons) {
 		buttonsDiv = $("<div class='dlg_buttons'></div>");
@@ -24,10 +24,10 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 				removeDialog();
 				if (callback) {
 					// posible valor de retorno generado en el diálogo modal 
-					var returnArray = [];
-					dlg.find("[data-return]").each(function(e) {
-						returnArray.push(e.attr("data-return"));
-					});
+					returnArray = dlg.find("[data-return]").map(function() {
+						return $(this).attr("data-return");
+					})
+					.get();
 					callback(this.textContent, returnArray);
 				};
 			});

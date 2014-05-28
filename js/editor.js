@@ -64,8 +64,32 @@ function insertLink() {
 
 /* Muestra el selector de temas a que se quiere enviar un mensaje */
 function showThemesSelector() {
-	new ModalDialog("¿A qué temas enviarás tu mensaje?", null, ["OK", "Cancelar"], null);
-}
+	eskupLoadWritableThemes(function(themes) {
+		console.log(themes);
+		var $listThemes = $("<ul class='themes-list'></ul>");
+		themes = themes.perfilesEventos;
+		for (var t in themes) {
+			console.log(t);
+			var theme = themes[t];
+			$("<li class='theme-item fa fa-square-o'></li>").attr("data-item", t).text(theme.nombre)
+			.on("click", function() {
+				$this = $(this);
+				$this.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
+				if ($this.hasClass('fa-check-square-o')) {
+					$this.attr("data-return", $this.attr("data-item"));	
+				} else {
+					$this.removeAttr('data-return');
+				};
+			})
+			.appendTo($listThemes);
+		};
+		new ModalDialog("¿A qué temas enviarás tu mensaje?", $listThemes, ["OK", "Cancelar"], function(button, data) {
+			if (button == "OK") {
+				console.log(data);
+			};
+		});
+	});	
+};
 
 
 

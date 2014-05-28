@@ -104,3 +104,19 @@
 .link-url:before {
 	margin-right: 5px;
 }
+
+/* lista de temas para escribir */
+.themes-list {
+	padding: 0;
+}
+.themes-list .theme-item {
+	display: block;
+	list-style: none;
+	background-color: #fff;
+	margin-bottom: 3px;
+	padding: 2px;
+	cursor: pointer;
+}
+.themes-list .theme-item:before {
+	margin-right: 5px;
+}

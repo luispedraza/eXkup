@@ -1,6 +1,7 @@
 var TIME_TOOLTIP_TIMER = null;
 var PUBLIC_KEY = "";
 var USER_ID = "";
+var WRITABLE_THEMES = null;
 
 var INESKUP = "http://eskup.elpais.com/Ineskup";
 var INPARAMS = {
@@ -344,11 +345,15 @@ function eskupLoadFollowedThemes(callback) {
 http://eskup.elpais.com/Profileeskup?action=list_writers&f=json&id=7gTvFkSaO-pa0342AjhqMg
 */
 function eskupLoadWritableThemes(callback) {
-	PROFILEPARAMS.action = "list_writers";
-	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
-		var themes = eskupParseResponse(req.response);
-		callback(themes);
-	});
+	if (WRITABLE_THEMES != null) {
+		callback(WRITABLE_THEMES);
+	} else {
+		PROFILEPARAMS.action = "list_writers";
+		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
+			WRITABLE_THEMES = eskupParseResponse(req.response);
+			callback(WRITABLE_THEMES);
+		});
+	};
 };
 
 ///////////////////////
