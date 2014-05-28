@@ -36,7 +36,27 @@
 	position: absolute;
 	left: 120px;
 	top: 170px;
+	font-size: 12px;
 }
+#destinations:before {
+	content: "Enviar a: "
+}
+
+.send2 {
+	display: inline-block;
+	width: 100px;
+	border: 1px dotted #ccc;
+	border-radius: 2px;
+	cursor: pointer;
+	padding: 2px;
+}
+
+.send2:hover {
+	border: 1px solid #aaa;
+	background-color: #eee;
+}
+
+
 #canvasimage {
 	border: 1px dotted black;
 	position: absolute;

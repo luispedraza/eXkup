@@ -82,14 +82,16 @@ var TABLONES = {
 	sigo: "2",
 	priv: "3",
 	todo: "t1-ULTIMOSMENSAJES"
-}
+};
+
 function getBoard(id) {
 	return (TABLONES.hasOwnProperty(id)) ? (TABLONES[id]) : (id);
-}
+};
 
 function eskupParseResponse(response) {
-	return JSON.parse(response.replace(/'/g, "\""));
-}
+	// return JSON.parse(response.replace(/'/g, "\""));
+	return JSON.parse(response);
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // Tablón de mensajes ///////////////////////////////////////////////////////
@@ -331,13 +333,11 @@ function loadProfile(callback) {
 /* Los temas que sigo 
 http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
 */
-function eskupLoadFollowedThemes() {
+function eskupLoadFollowedThemes(callback) {
 	PROFILEPARAMS.action = "list_eventos";
 	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
 		var themes = eskupParseResponse(req.response);
-		console.log("temas", themes);
-		if (!themes) return;
-		fillThemes(themes);
+		callback(themes);
 	});
 };
 /* Los temas en los que puedo escribir 
@@ -347,11 +347,9 @@ function eskupLoadWritableThemes(callback) {
 	PROFILEPARAMS.action = "list_writers";
 	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
 		var themes = eskupParseResponse(req.response);
-		console.log("temas", themes);
-		if (!themes) return;
 		callback(themes);
 	});
-}
+};
 
 ///////////////////////
 // ¿A quiénes sigo?

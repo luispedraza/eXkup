@@ -11,7 +11,9 @@ function initPopup() {
 			fillProfile(user);
 			LoadFollowTo();
 			LoadFollowMe();
-			eskupLoadFollowedThemes();
+			eskupLoadFollowedThemes(function(data) {
+				fillThemes(data);
+			});
 			eskupLoadWritableThemes(function() {
 				
 			});
@@ -46,7 +48,6 @@ function initPopup() {
 			uiSelectBoard(this.id);
 		});
 		document.getElementById("logout").onclick = logOut;
-		document.getElementById("send2priv").addEventListener("click", sendPriv);
 		document.getElementById("closetree").addEventListener("click", function() {
 			document.getElementById("board").style.left = 0;
 			document.getElementById("tree-board").style.left = "450px";
@@ -76,7 +77,7 @@ function loadBoard(id) {
 	currentBoard = getBoard(id);
 	loadData(currentBoard);
 	uiSelectBoard(id);
-}
+};
 
 /* Gestión de la ventana de edición */
 function showEditor(show, info) {
@@ -95,22 +96,10 @@ function dispatchProgress(p) {
 	event.initEvent("change", true, true);
 	event.customData = p;
 	document.getElementById("progress").dispatchEvent(event);
-}
-
-function sendPriv(e) {
-	if (e.target.className == "on") {
-		e.target.className = "";
-		document.getElementById("profile").className = "";
-		document.getElementById("edit-section").className.replace(" on", "");
-	} else {
-		e.target.className = "on";
-		document.getElementById("profile").className = "on";
-		document.getElementById("edit-section").className += " on";
-	}
-}
+};
 
 /* Selecciona el board actual en la interfaz */
 function uiSelectBoard(board) {
 	$(".board-selector.on").removeClass("on");
 	$("#"+board).addClass("on");
-}
+};

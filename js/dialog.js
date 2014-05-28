@@ -22,7 +22,14 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 			var btn = $("<div class='btn'>"+buttons[b]+"</div>");
 			btn.on("click", function() {
 				removeDialog();
-				if (callback) callback(this.textContent);
+				if (callback) {
+					// posible valor de retorno generado en el diálogo modal 
+					var returnArray = [];
+					dlg.find("[data-return]").each(function(e) {
+						returnArray.push(e.attr("data-return"));
+					});
+					callback(this.textContent, returnArray);
+				};
 			});
 			buttonsDiv.append(btn);
 		};

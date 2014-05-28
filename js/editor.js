@@ -14,6 +14,10 @@ window.addEventListener("load", function() {
 	$("#insertvideo").on("click", insertVideo);
 	$("#insertimage").on("click", insertImage);
 	$("#insertlink").on("click", insertLink);
+	// Destinos de mensaje:
+	$("#send2theme").on("click", function() {
+		showThemesSelector();
+	});
 });
 
 /* Contador de caracteres del mensaje */
@@ -57,3 +61,12 @@ function insertLink() {
 		});
 	});
 };
+
+/* Muestra el selector de temas a que se quiere enviar un mensaje */
+function showThemesSelector() {
+	new ModalDialog("¿A qué temas enviarás tu mensaje?", null, ["OK", "Cancelar"], null);
+}
+
+
+
+

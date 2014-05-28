@@ -122,18 +122,17 @@ function fillFollows(div, users) {
 	}
 }
 
+/* Rellenar la lista de temas seguidos en el perfil */
 function fillThemes(themes) {
-	div_themes = document.getElementById("themes-follow");
-	for (var t in themes.perfilesEventos) {
-		temaid = "ev-"+t;
-		var item = document.createElement("li");
-		item.className = "board-selector";
-		item.id = temaid;
-		item.addEventListener("click", function() {
-			loadBoard(this.id);
-		});
-		item.textContent = themes.perfilesEventos[t].nombre;
-		div_themes.appendChild(item);			
+	$divThemes = $("#themes-follow");
+	themes = themes.perfilesEventos;
+	for (var t in themes) {
+		themeID = "ev-"+t;
+		var $item = $("<li></li>").attr("class", "board-selector").attr("id", themeID).text(themes[t].nombre)
+			.on("click", function() {
+				loadBoard(this.id);	
+			})
+			.appendTo($divThemes);
 	};
 };
 
