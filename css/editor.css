@@ -50,6 +50,7 @@
 	cursor: pointer;
 	padding: 2px;
 	position: relative;
+	/* height: 20px; */
 }
 .send2 ul {
 	position: absolute;
@@ -145,24 +146,26 @@
 	background-color: #ddd;
 }
 
-#send2fb {
-	-webkit-appearance: none;
-	-webkit-filter: grayscale(100%);
+/* Enviar a redes sociales */
+#send2social input {
+	display: none;
 }
-#send2fb:hover, #send2tt:hover {
-	-webkit-filter: grayscale(50%);
+#send2social label {
+	font-size: 16px;
+	margin-left: 5px;
+	-webkit-filter: grayscale(90%);
+	padding: 2px;
+	border: 1px solid transparent;
 }
-
-#send2tt {
-	-webkit-appearance: none;
-	-webkit-filter: grayscale(100%);
-}
-
-#send2fb, #send2tt {
-	cursor: pointer;
-}
-
-#send2fb:checked, #send2tt:checked {
+#send2social input:checked + label {
 	-webkit-filter: grayscale(0%);
+	border-color: #666;
 }
 
+.facebook {
+	color: #3B5999;
+
+}
+.twitter {
+	color: #55acee;
+}
