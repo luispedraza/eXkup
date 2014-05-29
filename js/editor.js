@@ -136,6 +136,7 @@ function Update() {
 	var newimg = document.getElementById("canvasimage");
 	var image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
 	eskupUpdate(message, themes, social, image, function (result) {
+		console.log(result);
 		if (result.status == "error") {
 			new ModalDialog("Error a enviar el mensaje", result.info);
 		} else {

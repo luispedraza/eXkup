@@ -58,15 +58,15 @@ function formatDate(date, withYear) {
 
 // Función general de comunicación con el servidor
 function apiCall(method, url, data, func) {
-	if (method == "GET") 
+	if (method == "GET")
 		url = url + "?" + encodeParams(data);
 	var req = new XMLHttpRequest();
-	req.open((method=="GET") ? "GET" : "POST", url, (func) ? (true) : (false));
+	req.open((method=="GET") ? "GET" : "POST", url);
 	if(method == "POST") {
-		req.setRequestHeader("content-type", "application/x-www-form-urlencoded; charset=utf-8");
+		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 		data = encodeParams(INPARAMS);
 	} else if (method == "MULTI") {
-		req.setRequestHeader("enctype", "multipart/form-data;");
+		req.setRequestHeader("Content-Type", "multipart/form-data;");
 		formData = new FormData();
 		for (i in data)
 			formData.append(i, data[i]);
@@ -75,13 +75,38 @@ function apiCall(method, url, data, func) {
 	if (func) {
 		req.onreadystatechange = function() {
 			if(req.readyState == 4 && req.status == 200) {
-				func(req);
+				func(req.response);
 			};
 		};
 	};
 	req.send(data);
-	if (!func) return req.responseText;
-}
+	if (!func) return req.response;
+};
+
+// Función general de comunicación con el servidor
+// function apiCall(method, url, data, func) {
+// 	if (method == "GET") {
+// 		$.ajax({
+// 		    url: url,
+// 		    data: data,
+// 		    type: 'GET',
+// 		    success: func
+// 		});
+// 	} else {
+// 		var form = new FormData();
+// 		for (i in data) form.append(i, data[i]);
+// 		$.ajax({
+// 		    url: url,
+// 		    data: data,
+// 		    cache: false,
+// 		    contentType: false,
+// 		    processData: false,
+// 		    type: 'POST',
+// 		    success: func
+// 		});
+// 	};
+// 	if (!func) return req.responseText;
+// };
 
 /* Comprueba si hay foto de usuario, o devuelve una por defecto */
 function checkUserPhoto(path) {

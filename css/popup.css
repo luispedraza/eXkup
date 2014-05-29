@@ -161,6 +161,20 @@ ul.navigator li:hover {
 	color: #fff;
 	font-weight: 300;
 }
+#board .no-messages {
+	margin: 10px;
+	padding: 10px;
+	border-radius: 3px;
+	border-width: 1px;
+	border-style: solid;
+	border-left-color: #ccc;
+	border-top-color: #ccc;
+	border-right-color: #fff;
+	border-bottom-color: #fff;
+	text-align: center;
+	color: #666;
+	font-style: italic;
+}
 #board .loading {
 	background-color: #fff;
 	padding: 10px;

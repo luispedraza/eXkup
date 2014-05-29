@@ -60,7 +60,7 @@ var PROFILEPARAMS = {
 function initEskup(callback) {
 	apiCall("GET", "http://eskup.elpais.com/Auth/modusereskup.pl", null, function(r) {
 		var doc = document.implementation.createHTMLDocument('');
-		doc.documentElement.innerHTML = r.responseText;
+		doc.documentElement.innerHTML = r;
 		if (doc.getElementsByClassName("error").length) {
 			window.close();
 			chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
@@ -110,26 +110,28 @@ function loadData(board, callback) {
 		document.getElementById("board").innerHTML = "";	// limpieza
 	} else { OUTPARAMS.p++; }			// nueva página
 	$("#board").append("<div class='loading'><i class='fa fa-refresh fa-spin'></i>cargando datos...</div>");
-	apiCall("GET", OUTESKUP, OUTPARAMS, getData);
-	function getData(req) {
-		var info = eskupParseResponse(req.response);
-		console.log(info);
+	apiCall("GET", OUTESKUP, OUTPARAMS, function (r) {
+		var info = eskupParseResponse(r);
 		var messages = info.mensajes;
 		var usersInfo = info.perfilesUsuarios;
 		var themesInfo = info.perfilesEventos;
 		var board = document.getElementById("board");
 		board.style.left = 0;
 		document.getElementById("tree-board").style.left = "450px";
-		for (var i=0; i<messages.length; i++) {
-			var msg = info.mensajes[i];
-			if (msg.borrado) continue;
-			msg.pathfoto = checkUserPhoto(usersInfo[msg.usuarioOrigen].pathfoto);
-			appendMsg(msg, board, themesInfo);
+		if (messages.length == 0) {
+			$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
+		} else {
+			for (var i=0; i<messages.length; i++) {
+				var msg = info.mensajes[i];
+				if (msg.borrado) continue;
+				msg.pathfoto = checkUserPhoto(usersInfo[msg.usuarioOrigen].pathfoto);
+				appendMsg(msg, board, themesInfo);
+			};
 		}
 		if (callback) callback();
 		$("#board").find(".loading").remove();
-	}
-}
+	});
+};
 
 function appendMsg(msg, board, themes) {
 	var m_id = msg.idMsg;
@@ -292,8 +294,8 @@ function msgDelete() {
 			if (result=="Sí") {
 				INPARAMS.c = "del";
 				INPARAMS.x = m_id;
-				apiCall("GET", INESKUP, INPARAMS, function(req) {
-					var info = JSON.parse(req.responseText.replace(/'/g, "\""));
+				apiCall("GET", INESKUP, INPARAMS, function(r) {
+					var info = eskupParseResponse(r);
 					if (info.status=="ok") {
 						new ModalDialog("Eliminación correcta",
 							"El mensaje ha sido eliminado con éxito, aunque el cambio puede tardar en verse reflejado en los servidores de Eskup.",
@@ -324,8 +326,8 @@ function eskupLoadProfile(callback) {
 		callback(USER_PROFILE);
 	} else {
 		PROFILEPARAMS.action = "info_usuarios";
-		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
-			perfiles = eskupParseResponse(req.response).perfilesUsuarios;
+		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(r) {
+			perfiles = eskupParseResponse(r).perfilesUsuarios;
 			for (var u in perfiles) {
 				USER_ID = u;
 				TABLONES["mios"] = "t1-" + USER_ID;
@@ -344,8 +346,8 @@ function eskupLoadFollowedThemes(callback) {
 		callback(FOLLOWED_THEMES);
 	} else {
 		PROFILEPARAMS.action = "list_eventos";
-		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
-			FOLLOWED_THEMES = eskupParseResponse(req.response);
+		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(r) {
+			FOLLOWED_THEMES = eskupParseResponse(r);
 			callback(FOLLOWED_THEMES);
 		});
 	};
@@ -358,8 +360,8 @@ function eskupLoadWritableThemes(callback) {
 		callback(WRITABLE_THEMES);
 	} else {
 		PROFILEPARAMS.action = "list_writers";
-		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
-			WRITABLE_THEMES = eskupParseResponse(req.response).perfilesEventos;
+		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(r) {
+			WRITABLE_THEMES = eskupParseResponse(r).perfilesEventos;
 			callback(WRITABLE_THEMES);
 		});
 	};
@@ -374,16 +376,14 @@ function LoadFollowTo(pag)
 	if (!pag) pag = 1;
 	PROFILEPARAMS.action="list_usuarios";
 	PROFILEPARAMS.pag = pag;
-	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, getFTInfo);
-	function getFTInfo(req)
-	{
-		var users = JSON.parse(req.responseText);
+	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function (r) {
+		var users = eskupParseResponse(r);
 		if (!users) return;
 		if (users.pagina != pag) return;
 		fillFollows(document.getElementById("follow-to-users"), users);
 		LoadFollowTo(pag+1);
-	}
-}
+	});
+};
 
 ////////////////////////////
 // ¿Quiénes me siguen?
@@ -394,16 +394,14 @@ function LoadFollowMe(pag)
 	if (!pag) pag = 1;
 	PROFILEPARAMS.action="list_seguidores";
 	PROFILEPARAMS.pag = pag;
-	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, getFMInfo);
-	function getFMInfo(req)
-	{
-		var users = JSON.parse(req.responseText);
+	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function (r) {
+		var users = eskupParseResponse(r);
 		if (!users) return;
 		if (users.pagina != pag) return;
 		fillFollows(document.getElementById("follow-me-users"), users);
 		LoadFollowMe(pag+1);
-	}
-}
+	});
+};
 
 /* Carga de mdensajes favoritos */
 function loadFavs() {
@@ -434,15 +432,16 @@ function eskupUpdate(msg, themes, social, image, callback) {
 	}
 	else if (social.tt) api.dat.d = "1";
 	// imagen
-	if (image) {
-		api.dat.p = image;
-		api.m = "MULTI";
-	} else {
-		api.m = "POST";
-	};
+	// if (image) {
+	// 	api.dat.p = image;
+	// 	api.m = "MULTI";
+	// } else {
+	// 	api.m = "POST";
+	// };
+	api.m = "MULTI";
 	console.log(api);
-	apiCall(api.m, api.url, api.dat, function(req) {
-		if (callback) callback(eskupParseResponse(req.response));
+	apiCall(api.m, api.url, api.dat, function(r) {
+		if (callback) callback(eskupParseResponse(r));
 	});
 };
 

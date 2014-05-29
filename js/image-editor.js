@@ -715,13 +715,12 @@ function canvasInsertSVG(ev) {
 function getOpenClips() {
 	document.getElementById("clips-loader").style.display = "block";
 	var query = document.getElementById("clips-search-string").value;
-	apiCall("GET", "http://openclipart.org/search/json/", {"query":query,"page":1}, function(result){
-		console.log(result.response.replace("\n", ""));
-		console.log(result.response.replace("\r", ""));
-		console.log(result.response.replace("\r\n", ""));
-		console.log(result.response.replace("\n\r", ""));
-		var data = JSON.parse(result.response.replace("\n", ""));
-
+	apiCall("GET", "http://openclipart.org/search/json/", {"query":query,"page":1}, function(r){
+		console.log(r.replace("\n", ""));
+		console.log(r.replace("\r", ""));
+		console.log(r.replace("\r\n", ""));
+		console.log(r.replace("\n\r", ""));
+		var data = JSON.parse(r.replace("\n", ""));
 		document.getElementById("clips-loader").style.display = "none";
 		if (data.msg == "success") {
 			for (var i=0; i<data.payload.length; i++) {
