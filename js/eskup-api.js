@@ -96,6 +96,18 @@ function eskupParseResponse(response) {
 	return JSON.parse(response);
 };
 
+/* Completa la información de un mensaje */
+function buildMessage(msg, usersInfo) {
+	var user = usersInfo[msg.usuarioOrigen];
+	msg.pathfoto = checkUserPhoto(user.pathfoto);
+	msg.usuarioOrigenNombre = (user.nombre + " " + user.apellidos).trim();
+	if (msg.idMsgRespuesta) {
+		user = usersInfo[msg.autorMsgRespuesta];
+		msg.pathfotoRespuesta = checkUserPhoto(user.pathfoto);
+		msg.usuarioRespuestaNombre = (user.nombre + " " + user.apellidos).trim();
+	};
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // Tablón de mensajes ///////////////////////////////////////////////////////
 // ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
@@ -124,7 +136,7 @@ function loadData(board, callback) {
 			for (var i=0; i<messages.length; i++) {
 				var msg = info.mensajes[i];
 				if (msg.borrado) continue;
-				msg.pathfoto = checkUserPhoto(usersInfo[msg.usuarioOrigen].pathfoto);
+				buildMessage(msg, usersInfo);
 				appendMsg(msg, board, themesInfo);
 			};
 		}
@@ -160,7 +172,8 @@ function appendMsg(msg, board, themes) {
 
 	var a_user = document.createElement("a");
 	a_user.href = "http://eskup.elpais.com/" + user;
-	a_user.textContent = user;
+	a_user.textContent = "@" + user;
+	if (msg.usuarioOrigenNombre) a_user.textContent += " (" + msg.usuarioOrigenNombre + ")";
 	dHead.appendChild(a_user);		// user link
 	var date_element = document.createElement("a");
 	date_element.className = "time fa fa-clock-o";
@@ -217,13 +230,22 @@ function appendMsg(msg, board, themes) {
 	dCtrl.appendChild(dFwd);
 
 	// Hilos de mensajes
-	if (msg.idMsgRespuesta) {
+	if (msg.idMsgRespuesta && (msg.idMsgRespuesta != m_id)) {
 		var div_reply = document.createElement("a");
 		div_reply.className = "reply2link fa fa-mail-reply";
 		div_reply.textContent = msg.autorMsgRespuesta;
+		if (msg.usuarioRespuestaNombre) div_reply.textContent += " (" + msg.usuarioRespuestaNombre + ")";
 		div_reply.title = "Respuesta a";
+		div_reply.setAttribute("data-reply", msg.idMsgRespuesta);
 		div_reply.addEventListener("click", function() {
-			alert("hola");
+			var THAT = this;
+			eskupGetMessage(this.getAttribute("data-reply"), function(r) {
+				var data = eskupParseResponse(r);
+				var repliedMsg = data.mensajes[0];
+				buildMessage(repliedMsg, data.perfilesUsuarios);
+				// agrego el mensaje respondido como hijo del mensaje actual
+				appendMsg(repliedMsg, $(THAT).closest(".message").addClass("conversation").get(0), data.perfilesEventos);
+			});
 		});
 		dHead.innerHTML += "<br />"
 		dHead.appendChild(div_reply);
@@ -471,11 +493,11 @@ function setFavorite() {
 	if (!$favBtn.hasClass("on")) {		// mensaje marcado como favorito
 		listamsgfav.push(m_id);
 		// obtenfo el mensaje de la api:
-		eskupGetMessage(m_id, function(req) {
-			var data = eskupParseResponse(req.response);
+		eskupGetMessage(m_id, function(r) {
+			var data = eskupParseResponse(r);
 			if (data.errorCode == 0) {
 				var msg = data.mensajes[0];
-				msg.pathfoto = checkUserPhoto(data.perfilesUsuarios[msg.usuarioOrigen].pathfoto);
+				buildMessage(msg, data.perfilesUsuarios);
 				localStorage[m_id] = JSON.stringify(msg);
 				localStorage["msg_fav"] = JSON.stringify(listamsgfav);
 				new ModalDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, 2000);
@@ -510,10 +532,8 @@ function loadThread(ev) {
 	OUTPARAMS.th = 1;
 	OUTPARAMS.t = "";
 	OUTPARAMS.p = "";
-	apiCall("GET", OUTESKUP, OUTPARAMS, getThread);
-	function getThread(req) {
-		info = JSON.parse(req.responseText.replace(/'/g, "\""));
-		console.log(info);
+	apiCall("GET", OUTESKUP, OUTPARAMS, function (r) {
+		info = eskupParseResponse(r);
 		var infoTree = new Object();
 		infoTree.id = null;
 		function addNode(node, parent, tree) {
@@ -529,7 +549,7 @@ function loadThread(ev) {
 		}
 		for (var m=0; m<info.mensajes.length; m++) {
 			var node = info.mensajes[m];
-			node.pathfoto = checkUserPhoto(info.perfilesUsuarios[node.usuarioOrigen].pathfoto);
+			buildMessage(node, info.perfilesUsuarios);
 			node.children = [];
 			node.nRep = 0;
 			parentId = node.idMsgRespuesta;
@@ -541,8 +561,8 @@ function loadThread(ev) {
 		document.getElementById("board").style.left = "-450px";
 		// showNodeLinkTree(infoTree);
 		showMsgTree(infoTree, document.getElementById("tree"), true);
-	}
-}
+	});
+};
 
 function showMsgTree(infoTree, board, last) {
 	var divNode = document.createElement("div");
