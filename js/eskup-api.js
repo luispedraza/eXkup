@@ -454,13 +454,12 @@ function eskupUpdate(msg, themes, social, image, callback) {
 	}
 	else if (social.tt) api.dat.d = "1";
 	// imagen
-	// if (image) {
-	// 	api.dat.p = image;
-	// 	api.m = "MULTI";
-	// } else {
-	// 	api.m = "POST";
-	// };
-	api.m = "MULTI";
+	if (image) {
+		api.dat.p = image;
+		api.m = "MULTI";
+	} else {
+		api.m = "POST";
+	};
 	console.log(api);
 	apiCall(api.m, api.url, api.dat, function(r) {
 		if (callback) callback(eskupParseResponse(r));

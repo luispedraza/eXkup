@@ -18,8 +18,8 @@ function randomColor() {
 function encodeParams(dict) {
 	params = ""
 	for (var k in dict) {
-		params += k+"="+dict[k]+"&";
-	}
+		params += k+"="+encodeURI(dict[k])+"&";
+	};
 	return params;
 }
 
