@@ -192,4 +192,16 @@ function processVideos(msg_content)
 	}
 	//message.replaceChild(linktext, null);	
 	//http://www.w3schools.com/Dom/dom_nodes_remove.asp	
-}
+};
+
+/* Convertir un objeto en una array, por ejemplo para ordenar luego sus elementos */
+function makeArray(obj) {
+	var result = [];
+	for (k in obj) {
+		var val = obj[k];
+		val.__key = k;
+		result.push(val);
+	};
+	return result;
+};
+

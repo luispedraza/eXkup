@@ -67,21 +67,31 @@ function showThemesSelector() {
 	eskupLoadWritableThemes(function(themes) {
 		console.log(themes);
 		var $listThemes = $("<ul class='themes-list'></ul>");
-		themes = themes.perfilesEventos;
-		for (var t in themes) {
-			console.log(t);
+		themes = makeArray(themes.perfilesEventos).sort(function(a,b) {
+			// ordenamos alfabéticamente la lista de temas
+			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
+		});
+		console.log(themes);
+		for (var t=0, len=themes.length; t<len; t++) {
 			var theme = themes[t];
-			$("<li class='theme-item fa fa-square-o'></li>").attr("data-item", t).text(theme.nombre)
-			.on("click", function() {
-				$this = $(this);
-				$this.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
-				if ($this.hasClass('fa-check-square-o')) {
-					$this.attr("data-return", $this.attr("data-item"));	
-				} else {
-					$this.removeAttr('data-return');
-				};
-			})
-			.appendTo($listThemes);
+			var key = theme.__key;
+			$("<li class='theme-item fa fa-square-o'></li>")
+				.attr("data-item", key)
+				.attr("class", theme.activo ? "theme-item fa fa-square-o" : "theme-item closed fa fa-ban")
+				.append("<span class='theme-name'>" + theme.nombre + "</span>")
+				.append("<img class='theme-image' src='" + theme.pathfoto + "'/>")
+				.append("<span class='theme-description'>" + theme.descripcion)
+				.on("click", function() {
+					$this = $(this);
+					if ($this.hasClass('closed')) return;	// el tema está cerrado
+					$this.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
+					if ($this.hasClass('fa-check-square-o')) {
+						$this.attr("data-return", $this.attr("data-item"));	
+					} else {
+						$this.removeAttr('data-return');
+					};
+				})
+				.appendTo($listThemes);
 		};
 		new ModalDialog("¿A qué temas enviarás tu mensaje?", $listThemes, ["OK", "Cancelar"], function(button, data) {
 			if (button == "OK") {
