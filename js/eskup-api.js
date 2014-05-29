@@ -92,7 +92,7 @@ function getBoard(id) {
 };
 
 function eskupParseResponse(response) {
-	// return JSON.parse(response.replace(/'/g, "\""));
+	if (response.match(/\{\'/)) response = response.replace(/\'/g, "\"");
 	return JSON.parse(response);
 };
 
@@ -415,30 +415,35 @@ function loadFavs() {
 	};
 }
 
-/* Envía un nuevo mensaje */
-function Update() {
+/* Función para enviar un mensaje a través de la API */
+function eskupUpdate(msg, themes, social, image, callback) {
 	var api = new InEskup();
+	api.dat.m = msg;
+	// comando
 	api.dat.c = "add";
-	api.dat.m = NEWMESSAGE.innerHTML;
-	var tt_check = document.getElementById("send2tt");
-	var fb_check = document.getElementById("send2fb");
-	if (tt_check.checked) {
-		if (fb_check.checked) api.dat.d = "1|2";
-		else api.dat.d = "1";
+	// temas destino
+	if (themes) {
+		api.dat.t = themes.map(function(d){
+			return "*"+d;
+		}).join("|");
+	};
+	// destinos sociales
+	if (social.fb) {
+		if (social.tt) api.dat.d = "1|2";
+		else api.dat.d = "2";
 	}
-	else if (fb_check.checked) api.dat.d = "2";
-	newimg = document.getElementById("canvasimage");
-	if (newimg && newimg.width) {
-		api.dat.p = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
+	else if (social.tt) api.dat.d = "1";
+	// imagen
+	if (image) {
+		api.dat.p = image;
 		api.m = "MULTI";
-	}
-	else {
+	} else {
 		api.m = "POST";
-	}
-	apiCall(api.m, api.url, api.dat, function(result) {
-		console.log(result);
+	};
+	console.log(api);
+	apiCall(api.m, api.url, api.dat, function(req) {
+		if (callback) callback(eskupParseResponse(req.response));
 	});
-	NEWMESSAGE.innerHTML="";
 };
 
 // Comprueba si sigo un tema

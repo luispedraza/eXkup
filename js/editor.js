@@ -75,7 +75,7 @@ function showThemesSelector() {
 			};
 		};
 		var $listThemes = $("<ul class='themes-list'></ul>");
-		themes = makeArray(themes).sort(function(a,b) {
+		var themes = makeArray(themes).sort(function(a,b) {
 			// ordenamos alfabéticamente la lista de temas
 			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
 		});
@@ -94,17 +94,14 @@ function showThemesSelector() {
 				.appendTo($listThemes);
 		};
 		// marcar elementos ya seleccionados
-		selected = $("#send2theme").attr("data-send2theme");
-		if (selected) {
-			var selected = JSON.parse(selected);
-			if (selected.length) {
-				$listThemes.find(".theme-item").each(function() {
-					$li = $(this);
-					if (selected.indexOf($li.attr("data-item")) >= 0) {
-						onClickWritableTheme($li);
-					};
-				});
-			};
+		var selected = getSelectedThemes();
+		if (selected.length) {
+			$listThemes.find(".theme-item").each(function() {
+				$li = $(this);
+				if (selected.indexOf($li.attr("data-item")) >= 0) {
+					onClickWritableTheme($li);
+				};
+			});
 		};
 		new ModalDialog("¿A qué temas enviarás tu mensaje?", $listThemes, ["OK", "Cancelar"], function(button, data) {
 			if (button == "OK") {
@@ -123,6 +120,28 @@ function showThemesSelector() {
 	});	
 };
 
+/* Temas seleccionados para enviar el mensaje */
+function getSelectedThemes() {
+	selected = $("#send2theme").attr("data-send2theme");
+	if (selected) return JSON.parse(selected);
+	return [];
+};
 
+/* Envía un nuevo mensaje */
+function Update() {
+	var message = $("#newmessage").html();
+	var themes = getSelectedThemes();
+	var social = {	fb: $("#send2fb").prop("checked"),
+					tt: $("#send2tt").prop("checked")};
+	var newimg = document.getElementById("canvasimage");
+	var image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
+	eskupUpdate(message, themes, social, image, function (result) {
+		if (result.status == "error") {
+			new ModalDialog("Error a enviar el mensaje", result.info);
+		} else {
+			$("#newmessage").html("");
+		};
+	});
+};
 
 
