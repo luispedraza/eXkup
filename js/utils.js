@@ -153,9 +153,12 @@ function fillThemes(themes) {
 	themes = themes.perfilesEventos;
 	for (var t in themes) {
 		themeID = "ev-"+t;
-		var $item = $("<li></li>").attr("class", "board-selector").attr("id", themeID).text(themes[t].nombre)
+		var $item = $("<li>")
+			.attr("class", "board-selector")
+			.attr("id", themeID)
+			.text(themes[t].nombre)
 			.on("click", function() {
-				loadBoard(this.id);	
+				loadBoard(this.id);
 			})
 			.appendTo($divThemes);
 	};

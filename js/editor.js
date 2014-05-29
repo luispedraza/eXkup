@@ -23,6 +23,8 @@ window.addEventListener("load", function() {
 /* Contador de caracteres del mensaje */
 function Counter() {
 	var message = $("#newmessage").text();
+	message = message.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AFMzx");
+	console.log(message);
 	var remaining = MAXCHAR - message.length;
 	var $counter = $("#counter");
 	$counter.text(remaining.toString());

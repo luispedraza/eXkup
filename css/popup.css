@@ -406,6 +406,7 @@ span.time-tooltip span:first-child {
 	color: #666;
 	font-weight: 300;
 	margin-top: 10px;
+	word-wrap: break-word;
 }
 
 .msg_content  img {

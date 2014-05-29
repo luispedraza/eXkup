@@ -75,8 +75,9 @@ function initPopup() {
 
 function loadBoard(id) {
 	currentBoard = getBoard(id);
-	loadData(currentBoard);
-	uiSelectBoard(id);
+	loadData(currentBoard, function (data) {
+		uiSelectBoard(id, data);	
+	});
 };
 
 /* Gestión de la ventana de edición */
@@ -99,7 +100,29 @@ function dispatchProgress(p) {
 };
 
 /* Selecciona el board actual en la interfaz */
-function uiSelectBoard(board) {
+function uiSelectBoard(board, data) {
+	// selección del tablón actual en el menú lateral
 	$(".board-selector.on").removeClass("on");
 	$("#"+board).addClass("on");
+	// información sobre el tablero actual:
+	console.log("datos", board, data);
+	$boardTitle = $("#board-title");
+	$boardDescription = $("#board-description");
+	var title, description;
+	if (board == "sigo") {
+		title = "Mensajes de usuarios y temas que sigo";
+	} else if (board == "todo") {
+		title = "Todos los mensajes de Eskup";
+	} else if (board == "mios") {
+		title = "Mensajes enviados por mí";
+	} else if (board == "priv") {
+		title = "Mis mensajes privados";
+	} else if (board == "favs") {
+		title = "Mis mensajes favoritos";
+	} else {
+
+	};
+	$boardTitle.text(title);
 };
+
+

@@ -124,6 +124,7 @@ function loadData(board, callback) {
 	$("#board").append("<div class='loading'><i class='fa fa-refresh fa-spin'></i>cargando datos...</div>");
 	apiCall("GET", OUTESKUP, OUTPARAMS, function (r) {
 		var info = eskupParseResponse(r);
+		console.log(info);
 		var messages = info.mensajes;
 		var usersInfo = info.perfilesUsuarios;
 		var themesInfo = info.perfilesEventos;
@@ -140,7 +141,7 @@ function loadData(board, callback) {
 				appendMsg(msg, board, themesInfo);
 			};
 		}
-		if (callback) callback();
+		if (callback) callback(info);
 		$("#board").find(".loading").remove();
 	});
 };
@@ -272,7 +273,8 @@ function appendMsg(msg, board, themes) {
 		var $divThemes = $("<ul class='themes'></ul>");
 		var msgThemes = msg.CopiaEnTablones.split( "," );	// temas del mensaje
 		for (var t=0, len = msgThemes.length; t < len; t++) {
-			var themeData = msgThemes[t].split("-");
+			var themeKey = msgThemes[t];
+			var themeData = themeKey.split("-");
 			if (themeData[0] == "ev") {
 				themesFound = true;
 				var themeID = themeData[1];
@@ -280,11 +282,16 @@ function appendMsg(msg, board, themes) {
 				// BLOQUEDO DE TEMAS:
 				// if ((locationid == "todo") && (CheckBlockTema(temaid) != -1)) continue;
 				// else msgbloqueado = false;
-				var themeName = themeInfo.nombre;
-				var $themeElement = $("<li>" + themeName + "</li>");
 				// if (CheckSigoTema(temaid) == 1) temali.className = "seguido";					
 				// else temali.className = "noseguido";
-				$divThemes.append($themeElement);
+				var themeName = themeInfo.nombre;
+				var $themeElement = $("<li>")
+					.attr("data-board", themeKey)
+					.text(themeName)
+					.on("click", function() {
+						loadBoard($(this).attr("data-board"));
+					})
+					.appendTo($divThemes);
 			};
 		};
 	};
