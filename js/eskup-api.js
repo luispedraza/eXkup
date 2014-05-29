@@ -2,6 +2,8 @@ var TIME_TOOLTIP_TIMER = null;
 var PUBLIC_KEY = "";
 var USER_ID = "";
 var WRITABLE_THEMES = null;
+var FOLLOWED_THEMES = null;
+var USER_PROFILE = null;
 
 var INESKUP = "http://eskup.elpais.com/Ineskup";
 var INPARAMS = {
@@ -313,36 +315,43 @@ function msgDelete() {
 		});
 }
 
-//////////////////////////
-// Información de usuario
-// ej: http://eskup.elpais.com/Profileeskup?action=info_usuarios&f=xml&id=7gTvFkSaO-pa0342AjhqMg
-//////////////////////////
-function loadProfile(callback) {
-	PROFILEPARAMS.action = "info_usuarios";
-	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
-		var info = req.responseText;
-		perfiles = eskupParseResponse(req.response).perfilesUsuarios;
-		for (var u in perfiles) {
-			USER_ID = u;
-			TABLONES["mios"] = "t1-" + USER_ID;
-			var usuario = perfiles[u];
-		}
-		callback(usuario);
-	});
+
+/* 	Información de perfil de usuario
+	http://eskup.elpais.com/Profileeskup?action=info_usuarios&f=xml&id=7gTvFkSaO-pa0342AjhqMg
+*/
+function eskupLoadProfile(callback) {
+	if (USER_PROFILE != null) {
+		callback(USER_PROFILE);
+	} else {
+		PROFILEPARAMS.action = "info_usuarios";
+		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
+			perfiles = eskupParseResponse(req.response).perfilesUsuarios;
+			for (var u in perfiles) {
+				USER_ID = u;
+				TABLONES["mios"] = "t1-" + USER_ID;
+				USER_PROFILE = perfiles[u];
+			}
+			callback(USER_PROFILE);
+		});
+	};
 };
 
-/* Los temas que sigo 
-http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
+/* 	Los temas que sigo 
+	http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
 */
 function eskupLoadFollowedThemes(callback) {
-	PROFILEPARAMS.action = "list_eventos";
-	apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
-		var themes = eskupParseResponse(req.response);
-		callback(themes);
-	});
+	if (FOLLOWED_THEMES != null) {
+		callback(FOLLOWED_THEMES);
+	} else {
+		PROFILEPARAMS.action = "list_eventos";
+		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
+			FOLLOWED_THEMES = eskupParseResponse(req.response);
+			callback(FOLLOWED_THEMES);
+		});
+	};
 };
-/* Los temas en los que puedo escribir 
-http://eskup.elpais.com/Profileeskup?action=list_writers&f=json&id=7gTvFkSaO-pa0342AjhqMg
+/* 	Los temas en los que puedo escribir 
+	http://eskup.elpais.com/Profileeskup?action=list_writers&f=json&id=7gTvFkSaO-pa0342AjhqMg
 */
 function eskupLoadWritableThemes(callback) {
 	if (WRITABLE_THEMES != null) {

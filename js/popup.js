@@ -6,7 +6,7 @@ window.addEventListener("load", initPopup);
 function initPopup() {
 	/* Obtención de la clave pública de usuario, e inicialización del perfil */
 	initEskup(function() {
-		loadProfile(function(user) {
+		eskupLoadProfile(function(user) {
 			fillHeader(user);
 			fillProfile(user);
 			LoadFollowTo();
@@ -15,7 +15,7 @@ function initPopup() {
 				fillThemes(data);
 			});
 			eskupLoadWritableThemes(function() {
-				
+
 			});
 		});
 		LoadTemasBlock();
