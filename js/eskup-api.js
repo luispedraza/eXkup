@@ -359,7 +359,7 @@ function eskupLoadWritableThemes(callback) {
 	} else {
 		PROFILEPARAMS.action = "list_writers";
 		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(req) {
-			WRITABLE_THEMES = eskupParseResponse(req.response);
+			WRITABLE_THEMES = eskupParseResponse(req.response).perfilesEventos;
 			callback(WRITABLE_THEMES);
 		});
 	};

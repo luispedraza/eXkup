@@ -65,13 +65,20 @@ function insertLink() {
 /* Muestra el selector de temas a que se quiere enviar un mensaje */
 function showThemesSelector() {
 	eskupLoadWritableThemes(function(themes) {
-		console.log(themes);
+		function onClickWritableTheme($li) {
+			if ($li.hasClass('closed')) return;	// el tema está cerrado
+			$li.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
+			if ($li.hasClass('fa-check-square-o')) {
+				$li.attr("data-return", $li.attr("data-item"));	
+			} else {
+				$li.removeAttr('data-return');
+			};
+		};
 		var $listThemes = $("<ul class='themes-list'></ul>");
-		themes = makeArray(themes.perfilesEventos).sort(function(a,b) {
+		themes = makeArray(themes).sort(function(a,b) {
 			// ordenamos alfabéticamente la lista de temas
 			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
 		});
-		console.log(themes);
 		for (var t=0, len=themes.length; t<len; t++) {
 			var theme = themes[t];
 			var key = theme.__key;
@@ -82,20 +89,35 @@ function showThemesSelector() {
 				.append("<img class='theme-image' src='" + theme.pathfoto + "'/>")
 				.append("<span class='theme-description'>" + theme.descripcion)
 				.on("click", function() {
-					$this = $(this);
-					if ($this.hasClass('closed')) return;	// el tema está cerrado
-					$this.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
-					if ($this.hasClass('fa-check-square-o')) {
-						$this.attr("data-return", $this.attr("data-item"));	
-					} else {
-						$this.removeAttr('data-return');
-					};
+					onClickWritableTheme($(this));
 				})
 				.appendTo($listThemes);
 		};
+		// marcar elementos ya seleccionados
+		selected = $("#send2theme").attr("data-send2theme");
+		if (selected) {
+			var selected = JSON.parse(selected);
+			if (selected.length) {
+				$listThemes.find(".theme-item").each(function() {
+					$li = $(this);
+					if (selected.indexOf($li.attr("data-item")) >= 0) {
+						onClickWritableTheme($li);
+					};
+				});
+			};
+		};
 		new ModalDialog("¿A qué temas enviarás tu mensaje?", $listThemes, ["OK", "Cancelar"], function(button, data) {
 			if (button == "OK") {
-				console.log(data);
+				eskupLoadWritableThemes(function(writable) {
+					$("#send2theme")
+						.attr("data-send2theme", JSON.stringify(data))
+						.find(".count").text(data.length);
+					$list = $("#send2theme-list").html("");	// limpieza de selecciones anteriores
+					for (var t=0; t<data.length; t++) {
+						var theme = writable[data[t]];
+						$("<li></li>").text(theme.nombre).appendTo($list);
+					};
+				});
 			};
 		});
 	});	

@@ -49,6 +49,27 @@
 	border-radius: 2px;
 	cursor: pointer;
 	padding: 2px;
+	position: relative;
+}
+.send2 ul {
+	position: absolute;
+	left: 0;
+	bottom: 10px;
+	display: none;
+	padding: 0;
+	background-color: #eee;
+	max-height: 100px;
+	overflow-y: scroll;
+}
+.send2 ul li {
+	list-style: none;
+	padding: 2px;
+	font-size: 11px;
+	white-space: nowrap;
+	border-bottom: 1px dotted #ccc;
+}
+.send2:hover ul {
+	display: block;
 }
 
 .send2:hover {
