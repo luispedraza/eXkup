@@ -42,6 +42,7 @@ ul.navigator {
 	padding: 0;
 	color: #666;
 	font-weight: 300;
+	margin: 3px 0;
 }
 ul.navigator li {
 	overflow: hidden;
@@ -113,6 +114,10 @@ ul.navigator li:hover {
 	padding: 5px;
 }
 
+#navigation h1 {
+	margin: 0;
+}
+
 #messages {
 	position: relative;
 	float: right;
@@ -167,13 +172,12 @@ ul.navigator li:hover {
 	font-weight: 300;
 }
 
-
 #board-info {
-	overflow: hidden;
+	color: #fff;
 }
 
 #board-title {
-	color: #fff;
+	/* color: #fff; */
 	font-style: italic;
 	overflow: hidden;
 	white-space: nowrap;
@@ -181,6 +185,24 @@ ul.navigator li:hover {
 }
 #board-description {
 	height: 0;
+	overflow: hidden;
+	transition: height .25s ease;
+}
+#board-info.on #board-description {
+	height: 100px;
+}
+#board-info .see-more {
+	font-size: 12px;
+	text-align: center;
+	position: absolute;
+	bottom: -8px;
+}
+#board-info .see-more span {
+	background-color: #666;
+	color: #fff;
+	border-radius: 5px;
+	padding: 3px 10px;
+	cursor: pointer;
 }
 
 /***********************/
@@ -509,6 +531,6 @@ span.time-tooltip span:first-child {
 
 
 #follows img.online {
-	border:1px solid #0293ff;
+	border: 3px solid #0293ff;
 }
 

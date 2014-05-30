@@ -44,7 +44,7 @@ function initPopup() {
 		});
 		document.getElementById("favs").addEventListener("click", function() {
 			currentBoard = getBoard(this.id);
-			loadFavs();
+			loadFavorites();
 			uiSelectBoard(this.id);
 		});
 		document.getElementById("logout").onclick = logOut;
@@ -70,24 +70,20 @@ function initPopup() {
 		    evObj.initEvent("click", true, false);
 		    document.getElementById("sigo").dispatchEvent(evObj);
 		})();
+
+		/* Información sobre el tablón actual */
+		$("#board-info .see-more").on("click", function() {
+			$("#board-info").toggleClass("on");
+		});
 	});
 }
 
-function loadBoard(id) {
-	currentBoard = getBoard(id);
-	loadData(currentBoard, function (data) {
-		uiSelectBoard(id, data);	
-	});
-};
+
 
 /* Gestión de la ventana de edición */
 function showEditor(show, info) {
-	// mostrar u ocultar la ventana de edición
-	if (show == null) {
-		$("#edit-section").toggleClass("on");
-	} else {
-		show ? $("#edit-section").addClass("on") : $("#edit-section").removeClass("on");	
-	};
+	$edit = $("#edit-section");
+	(show == null) ? $edit.toggleClass("on") : $edit.toggleClass("on", show);
 	// título de la ventana de edición:
 	$("#edit-section-h1 .edit-title").html(info ? info : "escribir nuevo mensaje");
 };
@@ -97,6 +93,14 @@ function dispatchProgress(p) {
 	event.initEvent("change", true, true);
 	event.customData = p;
 	document.getElementById("progress").dispatchEvent(event);
+};
+
+/* Carga de un tablón en la ventana de mensajes */
+function loadBoard(id) {
+	currentBoard = getBoard(id);
+	loadData(currentBoard, function (data) {
+		uiSelectBoard(id, data);
+	});
 };
 
 /* Selecciona el board actual en la interfaz */
