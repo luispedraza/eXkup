@@ -19,11 +19,8 @@ body {
 	position: absolute;
 	top: 50px;
 	overflow: hidden;
-	-webkit-transition: height .25s linear;
-	   -moz-transition: height .25s linear;
-	    -ms-transition: height .25s linear;
-	     -o-transition: height .25s linear;
-	        transition: height .25s linear;
+	transition: height .25s linear;
+	z-index: 300;
 }
 #profile-container.on {
 	height: 550px;
@@ -128,6 +125,8 @@ ul.navigator li:hover {
 #messages-header {
 	padding: 10px;
 	background-color: #666;
+	position:relative;
+	z-index: 100;
 }
 #messages-header .search {
 	float: right;
@@ -156,11 +155,37 @@ ul.navigator li:hover {
 	border: 0;
 	margin: 0;
 	padding: 4px;
+	width: 50px;
+	transition: width .25s ease;
 }
+#messages-header .search input[type=text]:focus {
+	width: 120px;	
+}
+
 #messages-title {
 	color: #fff;
 	font-weight: 300;
 }
+
+
+#board-info {
+	overflow: hidden;
+}
+
+#board-title {
+	color: #fff;
+	font-style: italic;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+#board-description {
+	height: 0;
+}
+
+/***********************/
+/* tablón de mensajes  */
+/***********************/
 #board .no-messages {
 	margin: 10px;
 	padding: 10px;
@@ -186,7 +211,7 @@ ul.navigator li:hover {
 	margin-right: 10px;
 }
 #board, #tree-board {
-	-webkit-transition: all .5s ease;
+	transition: all .5s ease;
 	width: 450px;
 }
 #board {
@@ -216,11 +241,8 @@ ul.navigator li:hover {
 	height: 40px;
 	border-top: 1px solid #fff;
 	overflow: hidden;
-	-webkit-transition: height .25s ease-in-out;
-	   -moz-transition: height .25s ease-in-out;
-	    -ms-transition: height .25s ease-in-out;
-	     -o-transition: height .25s ease-in-out;
-	        transition: height .25s ease-in-out;
+	z-index: 200;
+	transition: height .25s ease-in-out;
 }
 /* el mensaje que se está contestanddo */
 #replying-message {
