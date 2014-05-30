@@ -66,7 +66,7 @@ function insertLink() {
 
 /* Muestra el selector de temas a que se quiere enviar un mensaje */
 function showThemesSelector() {
-	eskupLoadWritableThemes(function(themes) {
+	API.loadWritableThemes(function(themes) {
 		function onClickWritableTheme($li) {
 			if ($li.hasClass('closed')) return;	// el tema está cerrado
 			$li.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
@@ -107,7 +107,7 @@ function showThemesSelector() {
 		};
 		new ModalDialog("¿A qué temas enviarás tu mensaje?", $listThemes, ["OK", "Cancelar"], function(button, data) {
 			if (button == "OK") {
-				eskupLoadWritableThemes(function(writable) {
+				API.loadWritableThemes(function(writable) {
 					$("#send2theme")
 						.attr("data-send2theme", JSON.stringify(data))
 						.find(".count").text(data.length);
@@ -137,7 +137,7 @@ function Update() {
 					tt: $("#send2tt").prop("checked")};
 	var newimg = document.getElementById("canvasimage");
 	var image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
-	eskupUpdate(message, themes, social, image, function (result) {
+	API.update(message, themes, social, image, function (result) {
 		console.log(result);
 		if (result.status == "error") {
 			new ModalDialog("Error a enviar el mensaje", result.info);

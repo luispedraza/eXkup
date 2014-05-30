@@ -174,28 +174,6 @@ function BlockOff (id, name)
 	LoadTemasBlock();
 }
 
-// Carga de localStorage mis temas blockeados
-function LoadTemasBlock ()
-{
-	if (typeof(localStorage["temas_block"]) != "undefined")
-	{
-		listatemasblock = JSON.parse(localStorage["temas_block"]);
-		listatemasblockN = JSON.parse(localStorage["temas_blockN"]);
-		divtemasblock = document.getElementById("temas_block_lista");
-		divtemasblock.innerHTML = "";
-		for (var cont=0; cont < listatemasblock.length; cont++)
-		{
-			var temaitem = document.createElement("li");			
-			var temalink = document.createElement("a");
-			var temaid = listatemasblock[cont];
-			var evento = "ev-" + temaid;
-			temalink.href = "javascript:LoadXmlData('tema', '" + evento + "', '" + temaid + "')";
-			temalink.innerHTML = listatemasblockN[cont];
-			temaitem.appendChild(temalink);
-			divtemasblock.appendChild(temaitem);			
-		}
-	}
-}
 ////////////////////////////
 // Reenvío de un mensaje
 ////////////////////////////
