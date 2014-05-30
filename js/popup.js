@@ -81,11 +81,29 @@ function initPopup() {
 };
 
 /* Gestión de la ventana de edición */
-function showEditor(show, info) {
+function showEditor(show, config, msgID) {
+	if (typeof config == "undefined") config = "reset";
 	$edit = $("#edit-section");
 	(show == null) ? $edit.toggleClass("on") : $edit.toggleClass("on", show);
-	// título de la ventana de edición:
-	$("#edit-section-h1 .edit-title").html(info ? info : "escribir nuevo mensaje");
+	switch (config) {
+		case "reply":
+			$("#edit-section-h1 .edit-title").html("respondiendo al mensaje:");
+			$("#send").text("RESPONDER")
+				.attr("data-command", "reply")
+				.attr("data-id", msgID);
+			break;
+		case "forward":
+			$("#edit-section-h1 .edit-title").html("reenviando el mensaje:");
+			$("#send").text("REENVIAR")
+				.attr("data-command", "forward")
+				.attr("data-id", msgID);
+			break;
+		default:
+			$("#edit-section-h1 .edit-title").html("escribir nuevo mensaje");
+			$("#send").text("ENVIAR")
+				.attr("data-command", "send")
+				.removeAttr("data-id");
+	};
 };
 
 function dispatchProgress(p) {
@@ -274,16 +292,13 @@ function appendMsg(msg, board, themes) {
 	dReply.className = "btn reply";
 	dReply.innerHTML = "<i class='fa fa-mail-reply'></i> responder";
 	dReply.title = "responder";
-	dReply.setAttribute("m_id", m_id);
-	dReply.addEventListener("click", msgReply);
+	dReply.addEventListener("click", replyMessage);
 	// Forward
 	var dFwd = document.createElement("div");
 	dFwd.className = "btn fwd";
 	dFwd.innerHTML = "<i class='fa fa-mail-forward'></i> reenviar";
 	dFwd.title = "reenviar";
-	dFwd.addEventListener("click", function() {
-
-	});
+	dFwd.addEventListener("click", forwardMessage);
 	dCtrl.appendChild(dFav);
 	dCtrl.appendChild(dReply);
 	dCtrl.appendChild(dFwd);
@@ -439,5 +454,23 @@ function loadData(board, callback) {
 		if (callback) callback(info);
 		$("#board").find(".loading").remove();
 	});
+};
+
+/* Respuesta a un mensaje */
+function replyMessage() {
+	var msg = $(this).closest('.message').get(0);
+	$("#replying-message").remove();
+	$("#editor").before($("<div>")
+		.attr("id", "replying-message")
+		.html(msg.outerHTML));
+	showEditor(true, "reply", msg.id);
+};
+
+/* Reenvío de un mensaje */
+function forwardMessage() {
+	var msg = $(this).closest('.message').get(0);
+	$("#replying-message").remove();
+	showEditor(true, "forward", msg.id);
+	$("#newmessage").html($(msg).find(".msg_content").get(0).innerHTML);
 };
 

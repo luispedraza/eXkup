@@ -7,7 +7,7 @@ var TABLONES = {
 	priv: "3",
 	todo: "t1-ULTIMOSMENSAJES"
 };
-	
+
 Array.prototype.shuffle = function() {
  	var len = this.length;
 	var i = len;
@@ -76,7 +76,7 @@ function apiCall(method, url, data, func) {
 	req.open((method=="GET") ? "GET" : "POST", url);
 	if(method == "POST") {
 		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
-		data = encodeParams(INPARAMS);
+		data = encodeParams(data);
 	} else if (method == "MULTI") {
 		req.setRequestHeader("Content-Type", "multipart/form-data;");
 		formData = new FormData();
@@ -217,19 +217,6 @@ function makeArray(obj) {
 	};
 	return result;
 };
-
-
-
-/* Respuesta a un usuario */
-function msgReply() {
-	$("#replying-message").remove();
-	showEditor(true, "respuesta a ");
-	var msgDiv = $("#"+this.getAttribute("m_id"))[0];
-	$("#editor").before($("<div id='replying-message'></div>").html(msgDiv.outerHTML));
-};
-
-
-
 
 
 
