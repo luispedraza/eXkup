@@ -75,9 +75,13 @@ function initEskup(callback) {
 	});
 };
 
-function logOut() {
-	apiCall("GET", "http://www.elpais.com/clientes2/desconectar.html", null);
-	window.close();
+/* Desconectar el usuario actual */
+function eskupLogOut() {
+	console.log("log out");
+	apiCall("GET", "http://www.elpais.com/clientes2/desconectar.html", null, function() {
+		console.log("logged out");
+		window.close();	
+	});
 };
 
 var TABLONES = {
@@ -109,10 +113,10 @@ function buildMessage(msg, usersInfo) {
 	};
 };
 
-/////////////////////////////////////////////////////////////////////////////
-// Tablón de mensajes ///////////////////////////////////////////////////////
-// ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
-function loadData(board, callback) {
+/* 	Carga un tablón de mensajes
+	ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
+*/
+function eskupLoadBoard(board, callback) {
 	if (board) {
 		if (board == OUTPARAMS.t)		// tablón actual, nada que hacer
 			return;
@@ -121,41 +125,15 @@ function loadData(board, callback) {
 		OUTPARAMS.th = "";				// no thread
 		OUTPARAMS.msg = "";				// no mensaje
 		document.getElementById("board").innerHTML = "";	// limpieza
-	} else { OUTPARAMS.p++; }			// nueva página
-	$("#board").append("<div class='loading'><i class='fa fa-refresh fa-spin'></i>cargando datos...</div>");
+	} else { OUTPARAMS.p++; };			// nueva página
 	apiCall("GET", OUTESKUP, OUTPARAMS, function (r) {
-		var info = eskupParseResponse(r);
-		console.log(info);
-		var messages = info.mensajes;
-		var usersInfo = info.perfilesUsuarios;
-		var themesInfo = info.perfilesEventos;
-		var board = document.getElementById("board");
-		board.style.left = 0;
-		document.getElementById("tree-board").style.left = "450px";
-		if (messages.length == 0) {
-			$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
-		} else {
-			for (var i=0; i<messages.length; i++) {
-				var msg = info.mensajes[i];
-				if (msg.borrado) continue;
-				buildMessage(msg, usersInfo);
-				appendMsg(msg, board, themesInfo);
-			};
-		}
-		if (callback) callback(info);
-		$("#board").find(".loading").remove();
+		if (callback) callback(eskupParseResponse(r));
 	});
 };
 
-
-
-
-
 function msgForward() {
 
-}
-
-
+};
 
 /* Borrar un mensaje de dEskup */
 function eskupMsgDelete(msgID, callback) {
@@ -285,17 +263,12 @@ function CheckSigoTema(temaid) {
 		if (temaid == listatemas[cont])
 			return 1;	
 	return 0;
-}
-// Comprueba si he bloqueado un tema
-function checkBlocked(temaid)
-{
-	return (listatemasblock.indexOf(msgid) >= 0);
 };
+// Comprueba si he bloqueado un tema
+function checkBlocked(temaid) { return (listatemasblock.indexOf(msgid) >= 0); };
 
 // Comprueba si un mensaje está en mis favoritos
-function checkFavorite(msgid) {
-	return (listamsgfav.indexOf(msgid) >= 0);
-};
+function checkFavorite(msgid) { return (listamsgfav.indexOf(msgid) >= 0); };
 
 /* Agegar mensake a favoritos */
 function eskupSetFavorite(msgID, callback) {
@@ -323,8 +296,7 @@ function eskupRemoveFavorite(msgID, callback) {
 	callback();
 };
 
-
-/* 	Carga de una vonversación completa 
+/* 	Carga de una conversación completa 
 	http://eskup.elpais.com/Outeskup?t=&nummsg=12&p=&f=json&th=1&msg=1356611973-8fe6c2d09824c9e5523f9931a834a641&id=7gTvFkSaO-pa0342AjhqMg&
 */
 function eskupLoadThread(threadID, callback) {
@@ -336,11 +308,4 @@ function eskupLoadThread(threadID, callback) {
 		if (callback) callback(eskupParseResponse(r));
 	});
 };
-
-
-
-
-
-
-
 

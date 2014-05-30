@@ -571,3 +571,27 @@ function showNodeLinkTree(infoTree) {
 	d3.select(self.frameElement).style("height", diameter - 150 + "px");
 };
 
+/* Carga de un tablón de mensajes */
+function loadData(board, callback) {
+	$("#board").append("<div class='loading'><i class='fa fa-refresh fa-spin'></i>cargando datos...</div>");
+	eskupLoadBoard(board, function(info) {
+		var messages = info.mensajes;
+		var usersInfo = info.perfilesUsuarios;
+		var themesInfo = info.perfilesEventos;
+		var board = document.getElementById("board");
+		board.style.left = 0;
+		document.getElementById("tree-board").style.left = "450px";
+		if (messages.length == 0) {
+			$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
+		} else {
+			for (var i=0; i<messages.length; i++) {
+				var msg = info.mensajes[i];
+				if (msg.borrado) continue;
+				buildMessage(msg, usersInfo);
+				appendMsg(msg, board, themesInfo);
+			};
+		}
+		if (callback) callback(info);
+		$("#board").find(".loading").remove();
+	});
+};

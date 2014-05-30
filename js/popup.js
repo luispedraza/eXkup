@@ -47,7 +47,7 @@ function initPopup() {
 			loadFavorites();
 			uiSelectBoard(this.id);
 		});
-		document.getElementById("logout").onclick = logOut;
+		$("#logout").on("click", function() {eskupLogOut()});
 		document.getElementById("closetree").addEventListener("click", function() {
 			document.getElementById("board").style.left = 0;
 			document.getElementById("tree-board").style.left = "450px";
