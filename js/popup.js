@@ -8,8 +8,11 @@ window.addEventListener("load", initPopup);
 function initPopup() {
 	/* Obtención de la clave pública de usuario, e inicialización del perfil */
 	API.init(function(userID) {
-		console.log(userID);
 		TABLONES["mios"] = "t1-" + userID;
+		API.loadFollowedThemes(function(data) {
+			console.log("etmas", data);
+			fillThemes(data);
+		});
 		// eskupLoadBlockedThemes();
 		// Eventos
 		document.getElementById("search").addEventListener("click", Search);
@@ -60,12 +63,16 @@ function initPopup() {
 				fillProfile(user);
 				LoadFollowTo();
 				LoadFollowMe();
-				API.loadFollowedThemes(function(data) {
-					fillThemes(data);
-				});
 				$("#profile-container").toggleClass('on');
 			});
 		});
+
+		// $.fn.appearElement("#board");
+		// $(document.body).on('appear', '.message', function(e, $affected) {
+		// 	// add class called “appeared” for each appeared element
+		// 	$(this).addClass("appeared");
+		// });
+
 		// cargar tablón de eventos seguidos
 		(function() {
 			var evObj = document.createEvent('MouseEvents');
@@ -74,7 +81,7 @@ function initPopup() {
 		})();
 
 		/* Información sobre el tablón actual */
-		$("#board-info .see-more").on("click", function() {
+		$("#board-title").on("click", function() {
 			$("#board-info").toggleClass("on");
 		});
 	});
@@ -117,22 +124,24 @@ function dispatchProgress(p) {
 function loadBoard(id) {
 	currentBoard = getBoard(id);
 	loadData(currentBoard, function (data) {
-		uiSelectBoard(id, data);
+		uiSelectBoard(id, data.perfilesEventos[id.split("-")[1]]);
 	});
 };
 
 /* Selecciona el board actual en la interfaz */
-function uiSelectBoard(board, data) {
+function uiSelectBoard(board, boardInfo) {
+	console.log(boardInfo);
 	// selección del tablón actual en el menú lateral
 	$(".board-selector.on").removeClass("on");
 	$("#"+board).addClass("on");
 	// información sobre el tablero actual:
-	console.log("datos", board, data);
-	$boardTitle = $("#board-title");
-	$boardDescription = $("#board-description");
-	var title, description;
+	$boardTitle = $("#board-title").html("");
+	$boardDescription = $("#board-description").html("");
+	var title = "", description = $("<div>");
 	if (board == "sigo") {
 		title = "Mensajes de usuarios y temas que sigo";
+		description
+			.append($("<p>").text("Aquí encontrarás todos los mensajes publicados por los usuarios a los que sigues, y en los temas que sigues."));
 	} else if (board == "todo") {
 		title = "Todos los mensajes de Eskup";
 	} else if (board == "mios") {
@@ -142,9 +151,13 @@ function uiSelectBoard(board, data) {
 	} else if (board == "favs") {
 		title = "Mis mensajes favoritos";
 	} else {
-
+		title = boardInfo.nombre;
+		$("<img>").attr("src", boardInfo.pathfoto).appendTo(description);
+		$("<p>").html(boardInfo.descripcion).appendTo(description);
+		$themeControl = $("<div>").attr("class", "theme-control");
 	};
-	$boardTitle.text(title);
+	$boardTitle.html(title);
+	$boardDescription.append(description);
 };
 
 /* Carga de una conversación completa */
@@ -220,7 +233,6 @@ function setFavorite() {
 	@themes: información complementaria (temas)
 */
 function appendMsg(msg, board, themes) {
-	console.log(msg);
 	var userNickname = API.getUserNickname();
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
@@ -228,6 +240,8 @@ function appendMsg(msg, board, themes) {
 	// Creación del nuevo mensaje:
 	var div_msg = document.createElement("div");
 	div_msg.className = "message";
+	// div_msg.className = "message card";
+	// $(div_msg).appear({force_process: true});
 	div_msg.id = m_id;
 	// El contenido del mensaje:
 	var div_cont = document.createElement("div");
@@ -478,7 +492,7 @@ function loadData(board, callback) {
 				API.buildMessage(msg, usersInfo);
 				appendMsg(msg, board, themesInfo);
 			};
-		}
+		};
 		if (callback) callback(info);
 		$("#board").find(".loading").remove();
 	});

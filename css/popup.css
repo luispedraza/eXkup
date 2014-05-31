@@ -132,6 +132,7 @@ ul.navigator li:hover {
 	background-color: #666;
 	position:relative;
 	z-index: 100;
+	border-bottom: 1px solid #fff;
 }
 #messages-header .search {
 	float: right;
@@ -177,32 +178,45 @@ ul.navigator li:hover {
 }
 
 #board-title {
-	/* color: #fff; */
-	font-style: italic;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
+	cursor: pointer;
+	font-weight: bold;
+	font-size: 16px;
+}
+#board-title:before {
+	display:inline-block;
+	margin-right: 5px;
+	transition: all .25s ease;
 }
 #board-description {
 	height: 0;
 	overflow: hidden;
-	transition: height .25s ease;
+	transition: all .25s ease;
+	clear: both;
+	font-weight: 200;
+	font-size: 12px;
 }
 #board-info.on #board-description {
-	height: 100px;
+	height: 115px;
+	padding: 5px;
+	margin-top: 10px;
+	background-color: #555555;
+	border-radius: 3px;
 }
-#board-info .see-more {
-	font-size: 12px;
-	text-align: center;
-	position: absolute;
-	bottom: -8px;
+#board-info.on #board-title:before {
+	-webkit-transform:rotate(180deg);
 }
-#board-info .see-more span {
-	background-color: #666;
-	color: #fff;
-	border-radius: 5px;
-	padding: 3px 10px;
-	cursor: pointer;
+
+#board-description img {
+	border: 1px solid #fff;
+	float: right;
+}
+#board-description p {
+	max-height: 100px;
+	overflow-y: scroll;
+	padding-right: 5px;
 }
 
 /***********************/
@@ -314,6 +328,23 @@ ul.navigator li:hover {
 	margin: 10px;
 	padding: 10px;
 	box-shadow: 0 1px 2px #d9d9d9;
+}
+.card {
+    -webkit-transition: all 400ms ease;
+    -moz-transition: all 400ms ease;
+    -o-transition: all 400ms ease;
+    transition: all 400ms ease;
+    -webkit-transform:  translate3d(0px, 100px, 0) rotateX(-30deg) scale(1.25, 1.25);
+    -moz-transform: translate3d(0px, 100px, 0) rotateX(-30deg) scale(1.25, 1.25);
+    transform: translate3d(0px, 100px, 0) rotateX(-30deg) scale(1.25, 1.25);
+    opacity: 0;
+}
+ 
+.card.appeared{
+    -webkit-transform: translate3d(0px, 0px, 0px) rotateX(0)  scale(1, 1);
+    -moz-transform:  translate3d(0px, 0px, 0px) rotateX(0)  scale(1, 1);
+    transform: translate3d(0px, 0px, 0px) rotateX(0)  scale(1, 1);
+    opacity: 1;
 }
 .message.conversation {
 	border-color: #0293ff;
