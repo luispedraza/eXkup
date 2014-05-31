@@ -7,6 +7,10 @@ function EskupApi() {
 	var FOLLOWED_THEMES = null;
 	var USER_PROFILE = null;
 	var INESKUP = "http://eskup.elpais.com/Ineskup";
+	var COMMANDS = {send: "add",
+					forward: "add",
+					reply: "reply",
+					edit: "edit"};
 	var INPARAMS = {
 		m: "",			// Contenido del mensaje (c=add|reply|edit, ignorado con c=del)
 						// obligatorio, excepto cuando se elimina un mensaje (c=del)
@@ -55,13 +59,18 @@ function EskupApi() {
 		return JSON.parse(response);
 	};
 	
+	/* Obtiene el nickname del usuario */
+	this.getUserNickname = function() {
+		return USER_ID;
+	};
+
 	/* Inicializa las variables de Eskup */
 	this.init = function(callback) {
 		apiCall("GET", "http://eskup.elpais.com/Auth/getuserpk.pl", null, function(r) {
 			var info = eskupParseResponse(r);
 			if (info.status == "error") {
-				window.close();
 				chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
+				window.close();
 				return;
 			} else {
 				PUBLIC_KEY = info.id;
@@ -212,31 +221,33 @@ function EskupApi() {
 	this.loadFavorites = function(callback) { if (callback) callback(listamsgfav); };
 
 	/* Función para enviar un mensaje a través de la API */
-	this.update = function(msg, themes, social, image, callback) {
+	this.update = function(data, callback) {
 		var api = new InEskup();
-		api.dat.m = msg;
+		// el mensaje
+		api.dat.m = data.message;
 		// comando
-		api.dat.c = "add";
+		api.dat.c = COMMANDS[data.command];
+		// ID de mensaje a reenviar o contestar:
+		if (data.msgID) api.dat.x = data.msgID;
 		// temas destino
-		if (themes) {
-			api.dat.t = themes.map(function(d){
+		if (data.themes) {
+			api.dat.t = data.themes.map(function(d){
 				return "*"+d;
 			}).join("|");
 		};
 		// destinos sociales
-		if (social.fb) {
-			if (social.tt) api.dat.d = "1|2";
+		if (data.social.fb) {
+			if (data.social.tt) api.dat.d = "1|2";
 			else api.dat.d = "2";
 		}
-		else if (social.tt) api.dat.d = "1";
+		else if (data.social.tt) api.dat.d = "1";
 		// imagen
-		if (image) {
+		if (data.image) {
 			api.dat.p = image;
 			api.m = "MULTI";
 		} else {
 			api.m = "POST";
 		};
-		console.log(api);
 		apiCall(api.m, api.url, api.dat, function(r) {
 			if (callback) callback(eskupParseResponse(r));
 		});

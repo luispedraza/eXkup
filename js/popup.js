@@ -220,7 +220,7 @@ function setFavorite() {
 	@themes: información complementaria (temas)
 */
 function appendMsg(msg, board, themes) {
-	var USER_ID = API.USER_ID;
+	var userNickname = API.getUserNickname();
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
 	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
@@ -330,7 +330,7 @@ function appendMsg(msg, board, themes) {
 		div_thread.addEventListener("click", loadThread);
 		dCtrl.appendChild(div_thread);
 	}
-	if (user == USER_ID) {
+	if (user == userNickname) {		// el mensaje es del usuario actual
 		var dDel = document.createElement("div");
 		dDel.className = "btn";
 		dDel.innerHTML = "<i class='fa fa-times-circle'></i> borrar";

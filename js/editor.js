@@ -24,7 +24,6 @@ window.addEventListener("load", function() {
 function Counter() {
 	var message = $("#newmessage").text();
 	message = message.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AFMzx");
-	console.log(message);
 	var remaining = MAXCHAR - message.length;
 	var $counter = $("#counter");
 	$counter.text(remaining.toString());
@@ -131,18 +130,23 @@ function getSelectedThemes() {
 
 /* Envía un nuevo mensaje */
 function Update() {
-	var message = $("#newmessage").html();
-	var themes = getSelectedThemes();
-	var social = {	fb: $("#send2fb").prop("checked"),
+	var data = {};
+	data.message = $("#newmessage").html();
+	data.themes = getSelectedThemes();
+	data.social = {	fb: $("#send2fb").prop("checked"),
 					tt: $("#send2tt").prop("checked")};
 	var newimg = document.getElementById("canvasimage");
-	var image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
-	API.update(message, themes, social, image, function (result) {
-		console.log(result);
+	data.image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
+	var command = data.command = this.getAttribute("data-command");
+	if ((command == "reply") || (command == "forward")) data.msgID = this.getAttribute("data-id");
+	console.log(data);
+	API.update(data, function (result) {
 		if (result.status == "error") {
 			new ModalDialog("Error a enviar el mensaje", result.info);
 		} else {
-			$("#newmessage").html("");
+			ModalDialog("Mensaje enviado correctamente", null, ["Aceptar"], function() {
+				$("#newmessage").html("");
+			}, 1000);
 		};
 	});
 };
