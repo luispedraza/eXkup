@@ -220,6 +220,7 @@ function setFavorite() {
 	@themes: información complementaria (temas)
 */
 function appendMsg(msg, board, themes) {
+	console.log(msg);
 	var userNickname = API.getUserNickname();
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
@@ -292,12 +293,16 @@ function appendMsg(msg, board, themes) {
 	dReply.className = "btn reply";
 	dReply.innerHTML = "<i class='fa fa-mail-reply'></i> responder";
 	dReply.title = "responder";
+	dReply.setAttribute("data-id", m_id);
+	dReply.setAttribute("data-user", user);
 	dReply.addEventListener("click", replyMessage);
 	// Forward
 	var dFwd = document.createElement("div");
 	dFwd.className = "btn fwd";
-	dFwd.innerHTML = "<i class='fa fa-mail-forward'></i> reenviar";
+	dFwd.innerHTML = "<i class='fa fa-retweet'></i> reenviar";
 	dFwd.title = "reenviar";
+	dFwd.setAttribute("data-id", m_id);
+	dFwd.setAttribute("data-user", user);
 	dFwd.addEventListener("click", forwardMessage);
 	dCtrl.appendChild(dFav);
 	dCtrl.appendChild(dReply);
@@ -329,8 +334,31 @@ function appendMsg(msg, board, themes) {
 		div_thread.setAttribute("data-thread", msg.hilo);
 		div_thread.addEventListener("click", loadThread);
 		dCtrl.appendChild(div_thread);
-	}
-	if (user == userNickname) {		// el mensaje es del usuario actual
+	};
+	// Mensaje reenviado 
+	if (msg.reenvio) {
+		var div_forward = document.createElement("a");
+		div_forward.className = "reply2link fa fa-retweet";
+		div_forward.textContent = "mensaje reenviado";
+		div_forward.setAttribute("data-forward", msg.reenvio);
+		div_forward.addEventListener("click", function() {
+			var THAT = this;
+			API.getMessage(this.getAttribute("data-forward"), function(data) {
+				var forwardedMsg = data.mensajes[0];
+				if (forwardedMsg) {
+					API.buildMessage(forwardedMsg, data.perfilesUsuarios);
+					// agrego el mensaje respondido como hijo del mensaje actual
+					appendMsg(forwardedMsg, $(THAT).closest(".message").addClass("conversation").get(0), data.perfilesEventos);
+				} else {	// el mensaje original puede estar elminado
+					new ModalDialog("El mensaje original ha sido eliminado", null, ["Aceptar"], null, 2000);
+				};
+			});
+		});
+		dHead.innerHTML += "<br />"
+		dHead.appendChild(div_forward);
+	};
+	// Mensaje propio
+	if (user == userNickname) {
 		var dDel = document.createElement("div");
 		dDel.className = "btn";
 		dDel.innerHTML = "<i class='fa fa-times-circle'></i> borrar";
@@ -468,9 +496,12 @@ function replyMessage() {
 
 /* Reenvío de un mensaje */
 function forwardMessage() {
-	var msg = $(this).closest('.message').get(0);
 	$("#replying-message").remove();
-	showEditor(true, "forward", msg.id);
-	$("#newmessage").html($(msg).find(".msg_content").get(0).innerHTML);
+	var msg = $(this).closest('.message').get(0);
+	var user = this.getAttribute("data-user");
+	var msgID = this.getAttribute("data-id");
+	showEditor(true, "forward", msgID);
+	var messageContent = "fwd @" + user + ": " + $(msg).find(".msg_content").get(0).innerHTML;
+	$("#newmessage").html(messageContent);
 };
 
