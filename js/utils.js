@@ -69,11 +69,12 @@ function formatDate(date, withYear) {
 };
 
 // Función general de comunicación con el servidor
-function apiCall(method, url, data, func) {
+function apiCall(method, url, data, callback) {
+	var callbackDefined = !((typeof callback == "undefined") || (callback == null));
 	if (method == "GET")
 		url = url + "?" + encodeParams(data);
 	var req = new XMLHttpRequest();
-	req.open((method=="GET") ? "GET" : "POST", url);
+	req.open((method=="GET") ? "GET" : "POST", url, callbackDefined);
 	if(method == "POST") {
 		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 		data = encodeParams(data);
@@ -84,20 +85,20 @@ function apiCall(method, url, data, func) {
 			formData.append(i, data[i]);
 		data = formData;
 	}
-	if (func) {
+	if (callbackDefined) {
 		req.onreadystatechange = function() {
 			if(req.readyState == 4 && req.status == 200) {
-				func(req.response);
+				callback(req.response);
 			};
 		};
 	};
 	req.send(data);
-	if (!func) return req.response;
+	if (!callbackDefined) return req.response;
 };
 
 /* Comprueba si hay foto de usuario, o devuelve una por defecto */
 function checkUserPhoto(path) {
-	return path || "img/noimage.png";
+	return path || "img/noimage.jpg";
 };
 
 function fillProfile(user) {
@@ -135,7 +136,6 @@ function fillFollows(div, users) {
 /* Rellenar la lista de temas seguidos en el perfil */
 function fillThemes(themes) {
 	$divThemes = $("#themes-follow");
-	themes = themes.perfilesEventos;
 	for (var t in themes) {
 		themeID = "ev-"+t;
 		var $item = $("<li>")

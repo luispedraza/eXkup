@@ -10,8 +10,7 @@ function initPopup() {
 	API.init(function(userID) {
 		TABLONES["mios"] = "t1-" + userID;
 		API.loadFollowedThemes(function(data) {
-			console.log("etmas", data);
-			fillThemes(data);
+			fillThemes(data.perfilesEventos);
 		});
 		// eskupLoadBlockedThemes();
 		// Eventos
@@ -124,7 +123,10 @@ function dispatchProgress(p) {
 function loadBoard(id) {
 	currentBoard = getBoard(id);
 	loadData(currentBoard, function (data) {
-		uiSelectBoard(id, data.perfilesEventos[id.split("-")[1]]);
+		var boardKey = id.split("-")[1];
+		var boardInfo = data.perfilesEventos[boardKey];
+		if (boardInfo) boardInfo.__key = boardKey;
+		uiSelectBoard(id, boardInfo);
 	});
 };
 
@@ -154,7 +156,12 @@ function uiSelectBoard(board, boardInfo) {
 		title = boardInfo.nombre;
 		$("<img>").attr("src", boardInfo.pathfoto).appendTo(description);
 		$("<p>").html(boardInfo.descripcion).appendTo(description);
-		$themeControl = $("<div>").attr("class", "theme-control");
+		var boardKey = boardInfo.__key;
+		$themeControl = $("<div>").attr("class", "theme-control").appendTo($boardDescription);
+		var followed = boardKey in API.loadFollowedThemes().perfilesEventos;
+		var writable = boardKey in API.loadWritableThemes().perfilesEventos;
+		$themeControl.append(
+			$("<div>").attr("class", "control-item" + (followed) ? "follow on" : "follow").text("seguir"));
 	};
 	$boardTitle.html(title);
 	$boardDescription.append(description);

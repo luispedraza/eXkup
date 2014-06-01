@@ -55,8 +55,10 @@ function EskupApi() {
 
 	/* Función que parasea los JSON recibidos de Eskup */
 	function eskupParseResponse(response) {
-		if (response.match(/\{\'/)) response = response.replace(/\'/g, "\"");
-		return JSON.parse(response);
+		if (response) {
+			if (response.match(/\{\'/)) response = response.replace(/\'/g, "\"");
+			return JSON.parse(response);	
+		};
 	};
 	
 	/* Obtiene el nickname del usuario */
@@ -168,29 +170,21 @@ function EskupApi() {
 		http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadFollowedThemes = function(callback) {
-		if (FOLLOWED_THEMES != null) {
-			callback(FOLLOWED_THEMES);
-		} else {
-			PROFILEPARAMS.action = "list_eventos";
-			apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(r) {
-				FOLLOWED_THEMES = eskupParseResponse(r);
-				callback(FOLLOWED_THEMES);
-			});
-		};
+		PROFILEPARAMS.action = "list_eventos";
+		return FOLLOWED_THEMES || (FOLLOWED_THEMES = eskupParseResponse(apiCall("GET", PROFILEESKUP, PROFILEPARAMS,
+			(callback) ? function(r) {
+				callback(FOLLOWED_THEMES = eskupParseResponse(r));
+			} : null)));
 	};
 	/* 	Los temas en los que puedo escribir 
 		http://eskup.elpais.com/Profileeskup?action=list_writers&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadWritableThemes = function(callback) {
-		if (WRITABLE_THEMES != null) {
-			callback(WRITABLE_THEMES);
-		} else {
-			PROFILEPARAMS.action = "list_writers";
-			apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(r) {
-				WRITABLE_THEMES = eskupParseResponse(r).perfilesEventos;
-				callback(WRITABLE_THEMES);
-			});
-		};
+		PROFILEPARAMS.action = "list_writers";
+		return WRITABLE_THEMES || (WRITABLE_THEMES = eskupParseResponse(apiCall("GET", PROFILEESKUP, PROFILEPARAMS,
+			(callback) ? function(r) {
+				callback(WRITABLE_THEMES = eskupParseResponse(r));
+			} : null)));
 	};
 
 	/*	Usuarios que sigo
