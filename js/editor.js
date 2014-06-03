@@ -2,8 +2,8 @@ var SELECTION = [];
 var MAXCHAR = 280;
 
 window.addEventListener("load", function() {
-	$("#send").on("click", Update);
-	$("#cancel").on("click", CancelUpdate);
+	$("#send").on("click", sendMessage);
+	$("#cancel").on("click", cancel);
 	$("#setitalic").on("click", function() {
 		document.execCommand('italic',false,null);
 	});
@@ -123,13 +123,12 @@ function showThemesSelector() {
 
 /* Temas seleccionados para enviar el mensaje */
 function getSelectedThemes() {
-	selected = $("#send2theme").attr("data-send2theme");
-	if (selected) return JSON.parse(selected);
-	return [];
+	var selected = $("#send2theme").attr("data-send2theme");
+	return (selected ? JSON.parse(selected) : []);
 };
 
 /* Envía un nuevo mensaje */
-function Update() {
+function sendMessage() {
 	var data = {};
 	data.message = $("#newmessage").html();
 	data.themes = getSelectedThemes();
@@ -149,6 +148,11 @@ function Update() {
 			}, 1000);
 		};
 	});
+};
+
+/* Cancela el envío de un mensaje */
+function cancel() {
+
 };
 
 

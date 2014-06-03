@@ -104,41 +104,6 @@ function LoadXmlData(data_id, temaid, temanombre)
 	}
 };
 
-
-function SeguirOn (id)
-{
-	if (!confirm('¿Está seguro de querer seguir este tema?')) return;
-	var req =  new XMLHttpRequest();
-	req.open("GET",
-		"http://eskup.elpais.com/Profileeskup?action=add_eventos&data=" + id + "&id=" + publickey, 
-		true);
-	req.onreadystatechange = function SeguirOnResult()
-	{	
-		var seguiropcion = document.getElementById("seguiropcion");
-		seguiropcion.innerHTML = "<img src='img/seguido.png' />";
-		seguiropcion.title = "Dejar de seguirlo";
-		seguiropcion.href = "javascript:SeguirOff('" + id + "')";
-	}
-	req.send(null);
-}
-
-function SeguirOff (id)
-{
-	if (!confirm('¿Está seguro de querer dejar de seguir este tema?')) return;
-	var req =  new XMLHttpRequest();
-	req.open("GET",
-		"http://eskup.elpais.com/Profileeskup?action=del_eventos&data=" + id + "&id=" + publickey, 
-		true);
-	req.onreadystatechange = function SeguirOffResult()
-	{	
-		var seguiropcion = document.getElementById("seguiropcion");
-		seguiropcion.innerHTML = "<img src='img/noseguido.png' />";
-		seguiropcion.title = "Quiero seguirlo";
-		seguiropcion.href = "javascript:SeguirOn('" + id + "')";
-	}
-	req.send(null);
-}
-
 function BlockOn (id, name)
 {
 	if (!confirm('¿Está seguro de querer bloquear este tema? Sus mensajes no se mostrarán más en la pestaña TODO')) return;
@@ -196,15 +161,6 @@ function Reply(user, idmsg, prv)
 	if (prv) tablon = user;
 	NEWMESSAGE.focus();
 };
-
-/** Cancelación de la actualización **/
-function CancelUpdate ()
-{
-	extra = "";
-	command = "add";
-	tablon = "";
-	NEWMESSAGE = "";
-}
 
 function showOutEskup(xmldata, locationid) {
 	// En qué div se inserta la información:

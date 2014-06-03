@@ -65,18 +65,18 @@ ul.navigator li {
 	padding: 2px;
 }
 ul.navigator li.on {
-	color: #0293ff;
+	color: #004862;
 	font-weight: 400;
 }
 ul.navigator li:hover {
-	background-color: #0293ff;
+	background-color: #004862;
 	color: white;
 }
 
 #header {
 	height: 30px;
 	padding: 10px 5px;
-	background-color: #0293ff;
+	background-color: #004862;
 	color: #fff;
 	position: relative;
 }
@@ -95,11 +95,11 @@ ul.navigator li:hover {
 	text-transform: uppercase;
 	font-size: 12px;
 	font-weight: 300;
-	border-bottom: 2px solid #0293ff;
+	border-bottom: 2px solid #004862;
 }
 #header-menu li.on {
 	background-color: #fff;
-	color: #0293ff;
+	color: #004862;
 	border-bottom: 2px solid #fff;
 }
 #header-menu li:hover {
@@ -396,8 +396,8 @@ ul.navigator li:hover {
     opacity: 1;
 }
 .message.conversation {
-	border-color: #0293ff;
-	box-shadow: 0 1px 5px #0293ff;
+	border-color: #004862;
+	box-shadow: 0 1px 5px #004862;
 }
 .conversation .message {
 	border: none;
@@ -602,8 +602,7 @@ span.time-tooltip span:first-child {
 	border:3px solid #ccc;
 }
 
-
 #follows img.online {
-	border: 3px solid #0293ff;
+	border: 3px solid #004862;
 }
 

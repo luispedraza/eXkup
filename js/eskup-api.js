@@ -150,14 +150,26 @@ function EskupApi() {
 		};
 	};
 
+	/* Limpia la información sobre un tema */
+	this.clearThemeInfo = function(theme) {
+
+	};
+
 	/* carga información sobre un tema */
 	this.loadThemeInfo = function(theme, callback) {
-		function getInfo(d) {if (d) return eskupParseResponse(d).perfilesEventos[theme]};
+		function getInfo(r) {
+			return eskupParseResponse(r).perfilesEventos[theme];
+		};
 		var params = eskupParams({action: "info_eventos", event: theme});
-		return THEMES_INFO[theme] || (THEMES_INFO[theme] = getInfo(
-			apiCall("GET", PROFILEESKUP, params,
-					(callback ? function(r) { callback(THEMES_INFO[theme] = getInfo(r)); } : null)
-					)));
+		if (!callback) 
+			return (THEMES_INFO[theme] || (THEMES_INFO[theme] = getInfo(apiCall("GET", PROFILEESKUP, params))));
+		if (THEMES_INFO[theme] != null) {
+			callback(THEMES_INFO[theme]); return;	
+		};
+		apiCall("GET", PROFILEESKUP, params, function(r) {
+			THEMES_INFO[theme] = getInfo(r);
+			callback(THEMES_INFO[theme]);
+		});
 	};
 
 	/* Limpia de caché la lista de temas seguidos */
@@ -168,12 +180,14 @@ function EskupApi() {
 		http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadFollowedThemes = function(callback) {
-		function getInfo(d) {if (d) return eskupParseResponse(d).perfilesEventos};
+		if (FOLLOWED_THEMES != null) {
+			callback(FOLLOWED_THEMES); return;	
+		};
 		var params = eskupParams({action: "list_eventos"});
-		return FOLLOWED_THEMES || (FOLLOWED_THEMES = getInfo(
-			apiCall("GET", PROFILEESKUP, params,
-				(callback ? function(r) { callback(FOLLOWED_THEMES = getInfo(r)); } : null)
-			)));
+		apiCall("GET", PROFILEESKUP, params, function(r) {
+			FOLLOWED_THEMES = eskupParseResponse(r).perfilesEventos;
+			callback(FOLLOWED_THEMES);
+		});
 	};
 	/* Comenzar a seguir una lista de temas
 		http://eskup.elpais.com/Profileeskup?action=add_eventos&f=json&data=ev1,ev2&id=7gTvFkSaO-pa0342AjhqMg
@@ -195,12 +209,14 @@ function EskupApi() {
 		http://eskup.elpais.com/Profileeskup?action=list_writers&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadWritableThemes = function(callback) {
-		function getInfo(d) { if (d) return eskupParseResponse(d).perfilesEventos };
+		if (WRITABLE_THEMES != null) {
+			callback(WRITABLE_THEMES); return;	
+		};
 		var params = eskupParams({action: "list_writers"});
-		return WRITABLE_THEMES || (WRITABLE_THEMES = getInfo(
-			apiCall("GET", PROFILEESKUP, params,
-				(callback ? function(r) { callback(WRITABLE_THEMES = getInfo(r)); } : null)
-			)));
+		apiCall("GET", PROFILEESKUP, params, function(r) {
+			WRITABLE_THEMES = eskupParseResponse(r).perfilesEventos;
+			callback(WRITABLE_THEMES);
+		});
 	};
 	/* Comenzar a escribir en una lista de temas
 		http://eskup.elpais.com/Profileeskup?action=add_eventos&f=json&data=ev1,ev2&id=7gTvFkSaO-pa0342AjhqMg

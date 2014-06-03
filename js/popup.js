@@ -165,13 +165,15 @@ function uiSelectBoard(board) {
 	} else if (board == "favs") {
 		title = "Mis mensajes favoritos";
 	} else {
-		var boardInfo = API.loadThemeInfo(board.split("-")[1]);
-		title = boardInfo.nombre;
-		$("<img>").attr("src", boardInfo.pathfoto).appendTo($description);
-		$("<p>").html(boardInfo.descripcion).appendTo($description);
+		var theme = board.split("-")[1];
+		var themeInfo = API.loadThemeInfo(theme);
+		console.log(themeInfo);
+		title = themeInfo.nombre;
+		$("<img>").attr("src", themeInfo.pathfoto).appendTo($description);
+		$("<p>").html(themeInfo.descripcion).appendTo($description);
 		var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
-		var followed = (boardInfo.estado_seguimiento == 1);
-		var writable = (boardInfo.estado_escritura == 1);
+		var followed = (themeInfo.estado_seguimiento == 1);
+		var writable = (themeInfo.estado_escritura == 1);
 		var blocked = false;
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
@@ -183,7 +185,7 @@ function uiSelectBoard(board) {
 						[(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
 						function(result) {
 							if (result == "Cancelar") return;
-							API.followThemes([boardInfo.__key],
+							API.followThemes([theme],
 								result == "Comenzar a seguirlo",
 								function(r) {
 									if (r == "OK") {
@@ -206,10 +208,9 @@ function uiSelectBoard(board) {
 						[(writable ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
 						function(result) {
 							if (result == "Cancelar") return;
-							API.writeThemes([boardInfo.__key],
+							API.writeThemes([theme],
 								result == "Comenzar a escribir",
 								function(r) {
-									console.log(r);
 									if (r == "OK") {
 										$this.toggleClass('on');
 										API.clearWritableThemes();	// limpiar caché de temas en que escribo
