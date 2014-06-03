@@ -3,55 +3,61 @@ function EskupApi() {
 	var PUBLIC_KEY = "";
 	var NICKNAME = "";
 	var USER_ID = "";
-	var WRITABLE_THEMES = null;
-	var FOLLOWED_THEMES = null;
+	var WRITABLE_THEMES = null;	// temas en los que puedo escribir
+	var FOLLOWED_THEMES = null;	// temas que sigo
+	var BLOCKED_THEMES = null;	// temas que he bloqueado
 	var THEMES_INFO = {}; 	// información sobre eventos
 	var USER_PROFILE = null;
+	var FAVORITES = (localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : new Array();	// lista de temas favoritos que se almacena en localStorage
 	var INESKUP = "http://eskup.elpais.com/Ineskup";
-	var COMMANDS = {send: "add",
-					forward: "add",
-					reply: "reply",
-					edit: "edit"};
-	var INPARAMS = {
-		m: "",			// Contenido del mensaje (c=add|reply|edit, ignorado con c=del)
-						// obligatorio, excepto cuando se elimina un mensaje (c=del)
-						// admite etiquetas <a> y <i>
-		c: "",			// Comando: add (envío o forward), del, edit, reply
-		t: "",			// Destino: tablones o privados a usuarios *tema1|*tema2|nickname1|nickname2
-						// cuando el comando no es add sólo se puede indicar un destino
-						// para eliminar un mensaje privado (c=del) debe ser t=p
-						// nota: se requirer autorización para escribir en un tema
-						// no se puede enviar a privados y a temas a la vez
-		x: "",			// Extra. (c=add)reenvío?(id fwd), (c=del)?(id del), (c=edit)?(id edit), (c=reply)?(id reply)
-		p: "", 			// Imagen adjunta al mensaje
-		f: "json",		// Formato de la respuesta
-		d: "",			// Destino Twitter (1), Facebook (2) o Ambos (1|2)
-		id: ""			// Clave pública
-	};
+	// var INPARAMS = {
+	// 	m: "",			// Contenido del mensaje (c=add|reply|edit, ignorado con c=del)
+	// 					// obligatorio, excepto cuando se elimina un mensaje (c=del)
+	// 					// admite etiquetas <a> y <i>
+	// 	c: "",			// Comando: add (envío o forward), del, edit, reply
+	// 	t: "",			// Destino: tablones o privados a usuarios *tema1|*tema2|nickname1|nickname2
+	// 					// cuando el comando no es add sólo se puede indicar un destino
+	// 					// para eliminar un mensaje privado (c=del) debe ser t=p
+	// 					// nota: se requirer autorización para escribir en un tema
+	// 					// no se puede enviar a privados y a temas a la vez
+	// 	x: "",			// Extra. (c=add)reenvío?(id fwd), (c=del)?(id del), (c=edit)?(id edit), (c=reply)?(id reply)
+	// 	p: "", 			// Imagen adjunta al mensaje
+	// 	f: "json",		// Formato de la respuesta
+	// 	d: "",			// Destino Twitter (1), Facebook (2) o Ambos (1|2)
+	// 	id: ""			// Clave pública
+	// };
 
-	function InEskup(c) {
-		this.url = INESKUP;
-		this.dat = INPARAMS;
-		this.m = "GET";
-	};
+	// function InEskup(c) {
+	// 	this.url = INESKUP;
+	// 	this.dat = INPARAMS;
+	// 	this.m = "GET";
+	// };
 
 	var OUTESKUP = "http://eskup.elpais.com/Outeskup";
-	var OUTPARAMS = {
-		t: "",			// qué tablon
-		nummsg: 20,		// cuántos mensajes
-		p: 1,			// qué página
-		f: "json",		// formato de respuesta
-		th: 1,
-		msg: "",
-		id: ""
-	};
+	// var OUTPARAMS = {
+	// 	t: "",			// qué tablon
+	// 	nummsg: 20,		// cuántos mensajes
+	// 	p: 1,			// qué página
+	// 	f: "json",		// formato de respuesta
+	// 	th: 1,
+	// 	msg: "",
+	// 	id: ""
+	// };
 
 	var PROFILEESKUP = "http://eskup.elpais.com/Profileeskup";
-	var PROFILEPARAMS = {
-		id: "",
-		action: "",
-		f: "json",
-		pag: ""
+	// var PROFILEPARAMS = {
+	// 	id: "",
+	// 	action: "",
+	// 	f: "json",
+	// 	pag: ""
+	// };
+
+	/* Stub de parámetros para una petición de Eskup */
+	function eskupParams(data) {
+		var result = {id: PUBLIC_KEY, f: "json"};
+		for (var k in data) 
+			result[k] = data[k];
+		return result;
 	};
 
 	/* Función que parasea los JSON recibidos de Eskup */
@@ -63,9 +69,7 @@ function EskupApi() {
 	};
 	
 	/* Obtiene el nickname del usuario */
-	this.getUserNickname = function() {
-		return USER_ID;
-	};
+	this.getUserNickname = function() { return USER_ID; };
 
 	/* Inicializa las variables de Eskup */
 	this.init = function(callback) {
@@ -78,7 +82,6 @@ function EskupApi() {
 			} else {
 				PUBLIC_KEY = info.id;
 				USER_ID = info.nickname;
-				INPARAMS.id = OUTPARAMS.id = PROFILEPARAMS.id = PUBLIC_KEY;
 				callback(USER_ID);
 			};
 		});
@@ -86,11 +89,7 @@ function EskupApi() {
 
 	/* get a single message */
 	this.getMessage = function(msg_id, callback) {
-		var params = {
-			id: PUBLIC_KEY,
-			f: "json",
-			msg: msg_id
-		};
+		var params = eskupParams({msg: msg_id});
 		apiCall("GET", OUTESKUP, params, function(r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
@@ -119,25 +118,18 @@ function EskupApi() {
 		ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadMessages = function(board, page, callback) {
-		OUTPARAMS.t = board;			// selección de tablón
-		OUTPARAMS.p = page;				// primera página
-		OUTPARAMS.th = "";				// no thread
-		OUTPARAMS.msg = "";				// no mensaje
-		apiCall("GET", OUTESKUP, OUTPARAMS, function (r) {
+		var params = eskupParams({t: board, p: page});
+		apiCall("GET", OUTESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
 	};
 
 	/* Borrar un mensaje de dEskup */
 	this.deleteMessage = function(msgID, callback) {
-		INPARAMS.c = "del";
-		INPARAMS.x = msgID;
-		apiCall("GET", INESKUP, INPARAMS, function(r) {
-			var info = eskupParseResponse(r);
-			if (callback) callback(info);
+		var params = eskupParams({c: "del", x: msgID});
+		apiCall("GET", INESKUP, params, function(r) {
+			if (callback) callback(eskupParseResponse(r));
 		});
-		INPARAMS.c = "";
-		INPARAMS.x = "";
 	};
 
 	/* 	Información de perfil de usuario
@@ -147,8 +139,8 @@ function EskupApi() {
 		if (USER_PROFILE != null) {
 			callback(USER_PROFILE);
 		} else {
-			PROFILEPARAMS.action = "info_usuarios";
-			apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function(r) {
+			var params = eskupParams({c: "info_usuarios"});
+			apiCall("GET", PROFILEESKUP, params, function(r) {
 				perfiles = eskupParseResponse(r).perfilesUsuarios;
 				for (var u in perfiles) {
 					USER_PROFILE = perfiles[u];
@@ -161,10 +153,9 @@ function EskupApi() {
 	/* carga información sobre un tema */
 	this.loadThemeInfo = function(theme, callback) {
 		function getInfo(d) {if (d) return eskupParseResponse(d).perfilesEventos[theme]};
-		PROFILEPARAMS.action = "info_eventos";
-		PROFILEPARAMS.event = theme;
+		var params = eskupParams({action: "info_eventos", event: theme});
 		return THEMES_INFO[theme] || (THEMES_INFO[theme] = getInfo(
-			apiCall("GET", PROFILEESKUP, PROFILEPARAMS,
+			apiCall("GET", PROFILEESKUP, params,
 					(callback ? function(r) { callback(THEMES_INFO[theme] = getInfo(r)); } : null)
 					)));
 	};
@@ -178,9 +169,9 @@ function EskupApi() {
 	*/
 	this.loadFollowedThemes = function(callback) {
 		function getInfo(d) {if (d) return eskupParseResponse(d).perfilesEventos};
-		PROFILEPARAMS.action = "list_eventos";
+		var params = eskupParams({action: "list_eventos"});
 		return FOLLOWED_THEMES || (FOLLOWED_THEMES = getInfo(
-			apiCall("GET", PROFILEESKUP, PROFILEPARAMS,
+			apiCall("GET", PROFILEESKUP, params,
 				(callback ? function(r) { callback(FOLLOWED_THEMES = getInfo(r)); } : null)
 			)));
 	};
@@ -190,9 +181,8 @@ function EskupApi() {
 		@param follow: true (seguir) o false (no seguir)
 	*/
 	this.followThemes = function(themes, follow, callback) {
-		PROFILEPARAMS.action = follow ? "add_eventos" : "del_eventos";
-		PROFILEPARAMS.data = themes.join(",");
-		apiCall("GET", PROFILEESKUP, PROFILEPARAMS,
+		var params = eskupParams({action: (follow ? "add_eventos" : "del_eventos"), data: themes.join(",")});
+		apiCall("GET", PROFILEESKUP, params,
 			function(r) {
 				callback(r);
 			});
@@ -206,10 +196,9 @@ function EskupApi() {
 	*/
 	this.loadWritableThemes = function(callback) {
 		function getInfo(d) { if (d) return eskupParseResponse(d).perfilesEventos };
-		PROFILEPARAMS.action = "list_writers";
-		PROFILEPARAMS.event = "";
+		var params = eskupParams({action: "list_writers"});
 		return WRITABLE_THEMES || (WRITABLE_THEMES = getInfo(
-			apiCall("GET", PROFILEESKUP, PROFILEPARAMS,
+			apiCall("GET", PROFILEESKUP, params,
 				(callback ? function(r) { callback(WRITABLE_THEMES = getInfo(r)); } : null)
 			)));
 	};
@@ -219,9 +208,8 @@ function EskupApi() {
 		@param follow: true (seguir) o false (no seguir)
 	*/
 	this.writeThemes = function(themes, write, callback) {
-		PROFILEPARAMS.action = write ? "add_writers" : "del_writers";
-		PROFILEPARAMS.data = themes.join(",");
-		apiCall("GET", PROFILEESKUP, PROFILEPARAMS,
+		var params = eskupParams({action: (write ? "add_writers" : "del_writers"), data: themes.join(",")});
+		apiCall("GET", PROFILEESKUP, params,
 			function(r) {
 				callback(r);
 			});
@@ -231,10 +219,8 @@ function EskupApi() {
 		ej: http://eskup.elpais.com/Profileeskup?action=list_usuarios&f=xml&pag=1&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadFollowTo = function(pag, callback) {
-		PROFILEPARAMS.action = "list_usuarios";
-		PROFILEPARAMS.pag = pag;
-		PROFILEPARAMS.max = 100;
-		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function (r) {
+		var params = eskupParams({action: "list_usuarios", pag: pag, max: 100});
+		apiCall("GET", PROFILEESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
 	};
@@ -243,62 +229,58 @@ function EskupApi() {
 		ej: http://eskup.elpais.com/Profileeskup?action=list_seguidores&f=xml&pag=1&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadFollowMe = function(pag, callback) {
-		PROFILEPARAMS.action="list_seguidores";
-		PROFILEPARAMS.pag = pag;
-		PROFILEPARAMS.max = 100;
-		apiCall("GET", PROFILEESKUP, PROFILEPARAMS, function (r) {
+		var params = eskupParams({action: "list_seguidores", pag: pag, max: 100});
+		apiCall("GET", PROFILEESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
 	};
 
 	/* Carga de mensajes favoritos, por compatibilidad con otras APIs */
-	this.loadFavorites = function(callback) { if (callback) callback(listamsgfav); };
+	this.loadFavorites = function(callback) { if (callback) callback(FAVORITES); };
 
 	/* Función para enviar un mensaje a través de la API */
 	this.update = function(data, callback) {
-		var api = new InEskup();
+		var commands = {send: "add",
+						forward: "add",
+						reply: "reply",
+						edit: "edit"};
+		var params = eskupParams();
+		var method = "POST";
 		// el mensaje
-		api.dat.m = data.message;
+		params.m = data.message;
 		// comando
-		api.dat.c = COMMANDS[data.command];
+		params.c = commands[data.command];
 		// ID de mensaje a reenviar o contestar:
-		if (data.msgID) api.dat.x = data.msgID;
+		if (data.msgID) params.x = data.msgID;
 		// temas destino
 		if (data.themes) {
-			api.dat.t = data.themes.map(function(d){
+			params.t = data.themes.map(function(d){
 				return "*"+d;
 			}).join("|");
 		};
 		// destinos sociales
 		if (data.social.fb) {
-			if (data.social.tt) api.dat.d = "1|2";
-			else api.dat.d = "2";
+			if (data.social.tt) params.d = "1|2";
+			else params.d = "2";
 		}
-		else if (data.social.tt) api.dat.d = "1";
+		else if (data.social.tt) params.d = "1";
 		// imagen
 		if (data.image) {
-			api.dat.p = image;
-			api.m = "MULTI";
-		} else {
-			api.m = "POST";
+			params.p = image;
+			method = "MULTI";
 		};
-		apiCall(api.m, api.url, api.dat, function(r) {
+		apiCall(method, INESKUP, params, function(r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
 	};
 
 	/* Comprueba si sigo un tema */
-	this.CheckSigoTema = function(temaid) {
-		for (cont = 0; cont < listatemas.length; cont++)
-			if (temaid == listatemas[cont])
-				return 1;	
-		return 0;
-	};
+	this.checkThemeFollowed = function(theme) { return theme in FOLLOWED_THEMES; };
 	// Comprueba si he bloqueado un tema
-	this.checkThemeBlocked = function(temaid) { return (listatemasblock.indexOf(msgid) >= 0); };
+	this.checkThemeBlocked = function(theme) { return theme in BLOCKED_THEMES; };
 
 	// Comprueba si un mensaje está en mis favoritos
-	this.checkFavorite = function(msgid) { return (listamsgfav.indexOf(msgid) >= 0); };
+	this.checkFavorite = function(msgid) { return (FAVORITES.indexOf(msgid) >= 0); };
 
 	/* Agegar mensake a favoritos */
 	this.addFavorite = function(msgID, callback) {
@@ -308,8 +290,8 @@ function EskupApi() {
 				var msg = data.mensajes[0];
 				THAT.buildMessage(msg, data.perfilesUsuarios);
 				localStorage[msgID] = JSON.stringify(msg);
-				listamsgfav.push(msgID);
-				localStorage["msg_fav"] = JSON.stringify(listamsgfav);
+				FAVORITES.push(msgID);
+				localStorage["msg_fav"] = JSON.stringify(FAVORITES);
 				callback(0);
 			} else {
 				callback(-1, "Error en la API de Eskup.");
@@ -319,9 +301,9 @@ function EskupApi() {
 
 	/* Eliminar mensake de favoritos */
 	this.removeFavorite = function(msgID, callback) {
-		listamsgfav.splice(listamsgfav.indexOf(msgID), 1);
+		FAVORITES.splice(FAVORITES.indexOf(msgID), 1);
 		localStorage.removeItem(msgID);
-		localStorage["msg_fav"] = JSON.stringify(listamsgfav);
+		localStorage["msg_fav"] = JSON.stringify(FAVORITES);
 		callback();
 	};
 
@@ -329,11 +311,8 @@ function EskupApi() {
 		http://eskup.elpais.com/Outeskup?t=&nummsg=12&p=&f=json&th=1&msg=1356611973-8fe6c2d09824c9e5523f9931a834a641&id=7gTvFkSaO-pa0342AjhqMg&
 	*/
 	this.loadThread = function(threadID, callback) {
-		OUTPARAMS.msg = threadID;
-		OUTPARAMS.th = 1;
-		OUTPARAMS.t = "";
-		OUTPARAMS.p = "";
-		apiCall("GET", OUTESKUP, OUTPARAMS, function (r) {
+		var params = eskupParams({msg: threadID, th: 1});
+		apiCall("GET", OUTESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
 	};

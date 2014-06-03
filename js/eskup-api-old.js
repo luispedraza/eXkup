@@ -24,13 +24,9 @@ var numpagmios = 1;
 var numpagtema = 1;
 var temaactual = "";
 var listatemas = new Array();		// lista de temas que sigo en Eskup
-var listamsgfav = new Array();		// lista de temas favoritos que se almacena en localStorage
+
 var listatemasblock = new Array();	// lista de temas bloqueados en la pestaña "todo"
 var listatemasblockN = new Array();	// nombres de temas bloqueados en la pestaña "todo"
-
-// Mensajes guardados como favoritos:
-if (localStorage["msg_fav"] != "undefined")
-	listamsgfav = JSON.parse(localStorage["msg_fav"]);
 
 function LoadXmlData(data_id, temaid, temanombre)
 {
