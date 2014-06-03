@@ -139,10 +139,10 @@ function uiSelectBoard(board, boardInfo) {
 	// información sobre el tablero actual:
 	$boardTitle = $("#board-title").html("");
 	$boardDescription = $("#board-description").html("");
-	var title = "", description = $("<div>");
+	var title = "", $description = $("<div>");
 	if (board == "sigo") {
 		title = "Mensajes de usuarios y temas que sigo";
-		description
+		$description
 			.append($("<p>").text("Aquí encontrarás todos los mensajes publicados por los usuarios a los que sigues, y en los temas que sigues."));
 	} else if (board == "todo") {
 		title = "Todos los mensajes de Eskup";
@@ -154,17 +154,49 @@ function uiSelectBoard(board, boardInfo) {
 		title = "Mis mensajes favoritos";
 	} else {
 		title = boardInfo.nombre;
-		$("<img>").attr("src", boardInfo.pathfoto).appendTo(description);
-		$("<p>").html(boardInfo.descripcion).appendTo(description);
+		$("<img>").attr("src", boardInfo.pathfoto).appendTo($description);
+		$("<p>").html(boardInfo.descripcion).appendTo($description);
+		var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
 		var boardKey = boardInfo.__key;
-		$themeControl = $("<div>").attr("class", "theme-control").appendTo($boardDescription);
 		var followed = boardKey in API.loadFollowedThemes().perfilesEventos;
 		var writable = boardKey in API.loadWritableThemes().perfilesEventos;
+		var blocked = false;
 		$themeControl.append(
-			$("<div>").attr("class", "control-item" + (followed) ? "follow on" : "follow").text("seguir"));
+			$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
+				.on("click", function() {
+					console.log("follow");
+					$this = $(this);
+					var followed = $this.hasClass('on');
+					new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir este tema", 
+						"Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " este tema en Eskup", 
+						[(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
+						function(result) {
+							if (result == "Cancelar") return;
+							API.followThemes([boardInfo.__key],
+								result == "Comenzar a seguirlo",
+								function(r) {
+								if (r == "OK") {
+									$this.toggleClass('on');
+								} else {
+									new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+								};
+							});
+						});
+				}));
+		$themeControl.append(
+			$("<div>").attr("class", "control-item " + ((writable) ? "writable on" : "writable"))
+				.on("click", function() {
+					console.log("write");
+				}));
+		$themeControl.append(
+			$("<div>").attr("class", "control-item " + ((blocked) ? "block on" : "block"))
+				.on("click", function() {
+					console.log("block");
+				}));
+		$description.append($themeControl);
 	};
 	$boardTitle.html(title);
-	$boardDescription.append(description);
+	$boardDescription.append($description);
 };
 
 /* Carga de una conversación completa */
@@ -381,8 +413,8 @@ function appendMsg(msg, board, themes) {
 	// Mensaje propio
 	if (user == userNickname) {
 		var dDel = document.createElement("div");
-		dDel.className = "btn";
-		dDel.innerHTML = "<i class='fa fa-times-circle'></i> borrar";
+		dDel.className = "btn fa fa-trash-o";
+		dDel.textContent = " borrar";
 		dDel.setAttribute("m_id", m_id);
 		dDel.addEventListener("click", msgDelete);
 		dCtrl.appendChild(dDel);

@@ -1,13 +1,25 @@
+/* colores
+	-verde: #004862
+	- rojo: #F25600
+*/
+
 body {
 	width:600px;
 	/* height: 650px; */
 	overflow-x:hidden;
 	overflow-y:hidden;
-	font-family: 'Roboto', sans-serif;
+	/*font-family: 'Roboto', sans-serif*/;
+	font-family: 'Open Sans', sans-serif;
+	/*font-family: 'Dosis', sans-serif;*/
 	font-size: 14px;
 	margin: 0px;
 }
-
+.fa {
+	font-family: 'Open Sans', sans-serif;
+}
+.fa:before {
+	font-family: 'fontawesome';
+}
 .container {
 	
 }
@@ -198,11 +210,12 @@ ul.navigator li:hover {
 	font-weight: 200;
 	font-size: 12px;
 }
+
 #board-info.on #board-description {
-	height: 115px;
+	height: 180px;
 	padding: 5px;
 	margin-top: 10px;
-	background-color: #555555;
+	/* background-color: #555555; */
 	border-radius: 3px;
 }
 #board-info.on #board-title:before {
@@ -218,6 +231,42 @@ ul.navigator li:hover {
 	overflow-y: scroll;
 	padding-right: 5px;
 }
+/* Control del tema */
+.theme-control {
+	clear: both;
+	padding-top: 5px;
+}
+#board-description .control-item {
+	display: inline-block;
+	background-color: #004862;
+	margin-right: 5px;
+	color: #fff;
+	cursor: pointer;
+	font-size: 11px;
+}
+#board-description .control-item:after {
+	display: block;
+	text-align: center;
+	width: 70px;
+	padding: 5px 0;
+}
+#board-description .control-item.on {
+	background-color: #F25600;
+}
+
+#board-description .control-item.follow:after {
+	content: "seguir";
+}
+
+#board-description .control-item.writable:after {
+	content: "escribir";
+}
+
+#board-description .control-item.block:after {
+	content: "bloquear";
+}
+
+
 
 /***********************/
 /* tablón de mensajes  */
@@ -433,14 +482,11 @@ span.time-tooltip span:first-child {
 	top: 0;
 	overflow: hidden;
 	transition: all .2s ease;
-	font-size: 11px;
+	font-size: 12px;
 	color: #aaa;
 	padding: 3px;
 }
 .modal .msg_control, #replying-message .msg_control {
-	display: none;
-}
-.msg_control .btn {
 	display: none;
 }
 
@@ -453,8 +499,6 @@ span.time-tooltip span:first-child {
 	display: block;
 }
 .msg_control:before {
-	display: block;
-	text-align: right;
 	color: #666;
 	font-size: 12px;
 }
@@ -462,13 +506,11 @@ span.time-tooltip span:first-child {
 	display: none;
 }
 .msg_control .btn {
+	display: none;
 	cursor: pointer;
 	padding: 2px;
 }
-.msg_control .btn.fa {
-	display: block;
-	width: 100%;
-}
+
 .msg_control .btn:hover {
 	color: #666;
 }

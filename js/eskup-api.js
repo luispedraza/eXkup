@@ -176,6 +176,19 @@ function EskupApi() {
 				callback(FOLLOWED_THEMES = eskupParseResponse(r));
 			} : null)));
 	};
+	/* Comenzar a seguir una lista de temas
+		http://eskup.elpais.com/Profileeskup?action=add_eventos&f=json&data=ev1,ev2&id=7gTvFkSaO-pa0342AjhqMg
+		@param themes: lista de temas
+		@param follow: true (seguir) o false (no seguir)
+	*/
+	this.followThemes = function(themes, follow, callback) {
+		PROFILEPARAMS.action = follow ? "add_eventos" : "del_eventos";
+		PROFILEPARAMS.data = themes.join(",");
+		apiCall("GET", PROFILEESKUP, PROFILEPARAMS,
+			function(r) {
+				callback(r);
+			});
+	};
 	/* 	Los temas en los que puedo escribir 
 		http://eskup.elpais.com/Profileeskup?action=list_writers&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
