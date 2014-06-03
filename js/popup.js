@@ -2,6 +2,8 @@ var currentBoard = null;
 var loading = false;
 
 var API = new EskupApi();	// La API de Eskup
+var CURRENT_THEME = null;
+var CURRENT_PAGE = 1;
 
 window.addEventListener("load", initPopup);
 
@@ -17,28 +19,15 @@ function initPopup() {
 			if ((currentBoard == "favs") || loading) return;
 			if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
 				loading = true;
-				loadData(null, function() {
+				loadBoardMessages(null, function() {
 					loading = false;
 				});
 			};
 		});
-		document.getElementById("todo").addEventListener("click", function(){
+		$(".board-selector").on("click", function() {
 			loadBoard(this.id);
-		});
-		document.getElementById("sigo").addEventListener("click", function() {
-			loadBoard(this.id);
-		});
-		document.getElementById("mios").addEventListener("click", function() {
-			loadBoard(this.id);
-		});
-		document.getElementById("priv").addEventListener("click", function() {
-			loadBoard(this.id);
-		});
-		document.getElementById("favs").addEventListener("click", function() {
-			currentBoard = getBoard(this.id);
-			loadFavorites();
-			uiSelectBoard(this.id);
-		});
+		})
+		
 		$("#logout").on("click", function() {
 			API.logOut()
 		});
@@ -110,26 +99,52 @@ function showEditor(show, config, msgID) {
 	};
 };
 
-function dispatchProgress(p) {
-	var event = document.createEvent("Event");
-	event.initEvent("change", true, true);
-	event.customData = p;
-	document.getElementById("progress").dispatchEvent(event);
-};
-
 /* Carga de un tablón en la ventana de mensajes */
 function loadBoard(id) {
-	currentBoard = getBoard(id);
-	loadData(currentBoard, function (data) {
-		var boardKey = id.split("-")[1];
-		var boardInfo = data.perfilesEventos[boardKey];
-		if (boardInfo) boardInfo.__key = boardKey;
-		uiSelectBoard(id, boardInfo);
+	CURRENT_THEME = getBoard(id);
+	if (id=="favs") {	// los mensajes favoritos los guarda la extensión
+		loadFavorites();
+		uiSelectBoard(id);
+	} else {
+		loadBoardMessages(CURRENT_THEME, function (data) {
+			uiSelectBoard(id);
+		});
+	};
+};
+
+/* Carga de mensajes de un tablón */
+function loadBoardMessages(theme, callback) {
+	$("#board").append("<div class='loading'><i class='fa fa-refresh fa-spin'></i>cargando datos...</div>");
+	if (theme) {
+		CURRENT_PAGE = 1;
+		document.getElementById("board").innerHTML = "";	// limpieza
+	} else CURRENT_PAGE++;		// nueva página
+	API.loadMessages(CURRENT_THEME, CURRENT_PAGE, function(info) {
+		if (info) {
+			var messages = info.mensajes;
+			var usersInfo = info.perfilesUsuarios;
+			var themesInfo = info.perfilesEventos;
+			var board = document.getElementById("board");
+			board.style.left = 0;
+			document.getElementById("tree-board").style.left = "450px";
+			if (messages.length == 0) {
+				$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
+			} else {
+				for (var i=0; i<messages.length; i++) {
+					var msg = info.mensajes[i];
+					if (msg.borrado) continue;
+					API.buildMessage(msg, usersInfo);
+					appendMsg(msg, board, themesInfo);
+				};
+			};
+			if (callback) callback(info);	
+		}
+		$("#board").find(".loading").remove();
 	});
 };
 
 /* Selecciona el board actual en la interfaz */
-function uiSelectBoard(board, boardInfo) {
+function uiSelectBoard(board) {
 	// selección del tablón actual en el menú lateral
 	$(".board-selector.on").removeClass("on");
 	$("#"+board).addClass("on");
@@ -150,15 +165,13 @@ function uiSelectBoard(board, boardInfo) {
 	} else if (board == "favs") {
 		title = "Mis mensajes favoritos";
 	} else {
-		console.log(board, boardInfo);
+		var boardInfo = API.loadThemeInfo(board.split("-")[1]);
 		title = boardInfo.nombre;
 		$("<img>").attr("src", boardInfo.pathfoto).appendTo($description);
 		$("<p>").html(boardInfo.descripcion).appendTo($description);
 		var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
-		console.log("info", API.loadThemeInfo(board.split("-")[1]));
-		var boardKey = boardInfo.__key;
-		var followed = boardKey in API.loadFollowedThemes();
-		var writable = boardKey in API.loadWritableThemes();
+		var followed = (boardInfo.estado_seguimiento == 1);
+		var writable = (boardInfo.estado_escritura == 1);
 		var blocked = false;
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
@@ -530,30 +543,6 @@ function msgDelete() {
 		});
 };
 
-/* Carga de un tablón de mensajes */
-function loadData(board, callback) {
-	$("#board").append("<div class='loading'><i class='fa fa-refresh fa-spin'></i>cargando datos...</div>");
-	API.loadBoard(board, function(info) {
-		var messages = info.mensajes;
-		var usersInfo = info.perfilesUsuarios;
-		var themesInfo = info.perfilesEventos;
-		var board = document.getElementById("board");
-		board.style.left = 0;
-		document.getElementById("tree-board").style.left = "450px";
-		if (messages.length == 0) {
-			$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
-		} else {
-			for (var i=0; i<messages.length; i++) {
-				var msg = info.mensajes[i];
-				if (msg.borrado) continue;
-				API.buildMessage(msg, usersInfo);
-				appendMsg(msg, board, themesInfo);
-			};
-		};
-		if (callback) callback(info);
-		$("#board").find(".loading").remove();
-	});
-};
 
 /* Respuesta a un mensaje */
 function replyMessage() {

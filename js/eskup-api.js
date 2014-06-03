@@ -118,23 +118,14 @@ function EskupApi() {
 	/* 	Carga un tablón de mensajes
 		ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
-	this.loadBoard = function(board, callback) {
-		if (board) {
-			if (board == OUTPARAMS.t)		// tablón actual, nada que hacer
-				return;
-			OUTPARAMS.t = board;			// selección de tablón
-			OUTPARAMS.p = 1;				// primera página
-			OUTPARAMS.th = "";				// no thread
-			OUTPARAMS.msg = "";				// no mensaje
-			document.getElementById("board").innerHTML = "";	// limpieza
-		} else { OUTPARAMS.p++; };			// nueva página
+	this.loadMessages = function(board, page, callback) {
+		OUTPARAMS.t = board;			// selección de tablón
+		OUTPARAMS.p = page;				// primera página
+		OUTPARAMS.th = "";				// no thread
+		OUTPARAMS.msg = "";				// no mensaje
 		apiCall("GET", OUTESKUP, OUTPARAMS, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
-	};
-
-	this.msgForward = function() {
-
 	};
 
 	/* Borrar un mensaje de dEskup */

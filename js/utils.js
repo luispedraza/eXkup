@@ -19,9 +19,8 @@ Array.prototype.shuffle = function() {
  	};
 };
 
-function getBoard(id) {
-	return (TABLONES.hasOwnProperty(id)) ? (TABLONES[id]) : (id);
-};
+/* Devuelve el tablón correspondiente a un identificador */
+function getBoard(id) { return TABLONES[id] || id; };
 
 function randomColor() {
 	return '#'+Math.floor(Math.random()*16777215).toString(16);
