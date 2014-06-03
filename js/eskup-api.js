@@ -166,6 +166,10 @@ function EskupApi() {
 		};
 	};
 
+	/* Limpia de caché la lista de temas seguidos */
+	this.clearFollowedThemes = function() {
+		FOLLOWED_THEMES = null;
+	};
 	/* 	Los temas que sigo
 		http://eskup.elpais.com/Profileeskup?action=list_eventos&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/

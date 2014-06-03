@@ -9,9 +9,7 @@ function initPopup() {
 	/* Obtención de la clave pública de usuario, e inicialización del perfil */
 	API.init(function(userID) {
 		TABLONES["mios"] = "t1-" + userID;
-		API.loadFollowedThemes(function(data) {
-			fillThemes(data.perfilesEventos);
-		});
+		fillThemes();
 		// eskupLoadBlockedThemes();
 		// Eventos
 		document.getElementById("search").addEventListener("click", Search);
@@ -177,6 +175,8 @@ function uiSelectBoard(board, boardInfo) {
 								function(r) {
 								if (r == "OK") {
 									$this.toggleClass('on');
+									API.clearFollowedThemes();	// limpiar caché de temas seguidos
+									fillThemes();	// se recarga la lista de temas seguidos
 								} else {
 									new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
 								};

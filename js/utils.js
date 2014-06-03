@@ -134,19 +134,22 @@ function fillFollows(div, users) {
 };
 
 /* Rellenar la lista de temas seguidos en el perfil */
-function fillThemes(themes) {
-	$divThemes = $("#themes-follow");
-	for (var t in themes) {
-		themeID = "ev-"+t;
-		var $item = $("<li>")
-			.attr("class", "board-selector")
-			.attr("id", themeID)
-			.text(themes[t].nombre)
-			.on("click", function() {
-				loadBoard(this.id);
-			})
-			.appendTo($divThemes);
-	};
+function fillThemes() {
+	API.loadFollowedThemes(function(data) {
+		var themes = data.perfilesEventos;
+			$divThemes = $("#themes-follow").html("");
+			for (var t in themes) {
+				themeID = "ev-"+t;
+				var $item = $("<li>")
+					.attr("class", "board-selector")
+					.attr("id", themeID)
+					.text(themes[t].nombre)
+					.on("click", function() {
+						loadBoard(this.id);
+					})
+					.appendTo($divThemes);
+			};
+		});
 };
 
 /* Procesamiendo de enlaces a vídeos contenidos en un mensaje */
