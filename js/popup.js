@@ -130,7 +130,6 @@ function loadBoard(id) {
 
 /* Selecciona el board actual en la interfaz */
 function uiSelectBoard(board, boardInfo) {
-	console.log(boardInfo);
 	// selección del tablón actual en el menú lateral
 	$(".board-selector.on").removeClass("on");
 	$("#"+board).addClass("on");
@@ -151,18 +150,19 @@ function uiSelectBoard(board, boardInfo) {
 	} else if (board == "favs") {
 		title = "Mis mensajes favoritos";
 	} else {
+		console.log(board, boardInfo);
 		title = boardInfo.nombre;
 		$("<img>").attr("src", boardInfo.pathfoto).appendTo($description);
 		$("<p>").html(boardInfo.descripcion).appendTo($description);
 		var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
+		console.log("info", API.loadThemeInfo(board.split("-")[1]));
 		var boardKey = boardInfo.__key;
-		var followed = boardKey in API.loadFollowedThemes().perfilesEventos;
-		var writable = boardKey in API.loadWritableThemes().perfilesEventos;
+		var followed = boardKey in API.loadFollowedThemes();
+		var writable = boardKey in API.loadWritableThemes();
 		var blocked = false;
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
 				.on("click", function() {
-					console.log("follow");
 					$this = $(this);
 					var followed = $this.hasClass('on');
 					new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir este tema", 
@@ -173,20 +173,38 @@ function uiSelectBoard(board, boardInfo) {
 							API.followThemes([boardInfo.__key],
 								result == "Comenzar a seguirlo",
 								function(r) {
-								if (r == "OK") {
-									$this.toggleClass('on');
-									API.clearFollowedThemes();	// limpiar caché de temas seguidos
-									fillThemes();	// se recarga la lista de temas seguidos
-								} else {
-									new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
-								};
-							});
+									if (r == "OK") {
+										$this.toggleClass('on');
+										API.clearFollowedThemes();	// limpiar caché de temas seguidos
+										fillThemes();	// se recarga la lista de temas seguidos
+									} else {
+										new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+									};
+								});
 						});
 				}));
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((writable) ? "writable on" : "writable"))
 				.on("click", function() {
-					console.log("write");
+					$this = $(this);
+					var writable = $this.hasClass('on');
+					new ModalDialog((writable ? "Dejar de" : "Comenzar a") + " escribir en este tema", 
+						"Si continúas, " + (writable ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
+						[(writable ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
+						function(result) {
+							if (result == "Cancelar") return;
+							API.writeThemes([boardInfo.__key],
+								result == "Comenzar a escribir",
+								function(r) {
+									console.log(r);
+									if (r == "OK") {
+										$this.toggleClass('on');
+										API.clearWritableThemes();	// limpiar caché de temas en que escribo
+									} else {
+										new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+									};
+								});
+						});
 				}));
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((blocked) ? "block on" : "block"))
