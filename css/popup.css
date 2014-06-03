@@ -141,7 +141,7 @@ ul.navigator li:hover {
 }
 #messages-header {
 	padding: 10px;
-	background-color: #666;
+	background-color: rgba(100,100,100,.5);
 	position:relative;
 	z-index: 100;
 	border-bottom: 1px solid #fff;
@@ -300,11 +300,11 @@ ul.navigator li:hover {
 	width: 450px;
 }
 #board {
+	padding-top: 40px;
 	position: absolute;
-	/* width: 450px; */
 	height: 475px;
 	overflow-y: scroll;
-	top: 40px;
+	top: 0;
 }
 #tree-board {
 	position: absolute;
