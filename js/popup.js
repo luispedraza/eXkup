@@ -167,15 +167,17 @@ function uiSelectBoard(board) {
 		$("<img>").attr("src", themeInfo.pathfoto).appendTo($description);
 		$("<p>").html(themeInfo.descripcion).appendTo($description);
 		var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
-		var $apoyos = $("<ul>").attr("class", "links");
+		var $apoyos = null;
 		for (var a in themeInfo.apoyos) {
 			var apoyo = themeInfo.apoyos[a];
 			var apoyo_title = apoyo.titulo_apoyo;
 			var apoyo_link = apoyo.enlace_apoyo;
 			if (apoyo_title) {
+				$apoyos = ($apoyos || $("<ul>").attr("class", "links"));
 				$apoyos.append($("<li>").html( apoyo_link ? makeLink(apoyo_title, apoyo_link) : apoyo_title));
 			};
 		};
+		if ($apoyos) $description.append($apoyos);
 		// control de seguimiento
 		var followed = (themeInfo.estado_seguimiento == 1);
 		$themeControl.append(
@@ -242,7 +244,7 @@ function uiSelectBoard(board) {
 						};
 					}));			
 		};
-		$description.append($apoyos).append($themeControl);
+		$description.append($themeControl);
 	};
 	$boardTitle.html(title);
 	$boardDescription.append($description);

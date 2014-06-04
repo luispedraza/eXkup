@@ -55,6 +55,8 @@ ul.navigator {
 	color: #666;
 	font-weight: 300;
 	margin: 3px 0;
+	max-height: 300px;
+	overflow-y: scroll;
 }
 ul.navigator li {
 	overflow: hidden;
@@ -156,8 +158,8 @@ ul.navigator li:hover {
 	height: 23px;
 }
 #messages-header.on {
-	background-color: rgba(100,100,100,.95);
-	height: 250px;
+	background-color: rgba(0,0,0,.9);
+	height: 260px;
 }
 #messages-header .search {
 	float: right;
@@ -239,16 +241,22 @@ ul.navigator li:hover {
 	padding: 0;
 	margin: 0;
 }
+#board-description .links:before {
+	content: "Más información:";
+	display: block;
+	padding: 0 3px;
+}
 #board-description .links li {
 	
 	padding: 2px;
-	border-bottom: 1px solid #ccc;
+	border-top: 1px dotted #ccc;
 }
 #board-description .links a {
 	text-decoration: none;
 	background-color: #555;
 	padding: 1px 5px;
 	display: block;
+	color: #fff
 }
 #board-description .links a:hover {
 	background-color:#F25600;
