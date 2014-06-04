@@ -12,9 +12,8 @@ function initPopup() {
 	API.init(function(userID) {
 		TABLONES["mios"] = "t1-" + userID;
 		fillThemes();
-		// eskupLoadBlockedThemes();
 		// Eventos
-		document.getElementById("search").addEventListener("click", Search);
+		// document.getElementById("search").addEventListener("click", Search);
 		document.getElementById("board").addEventListener("scroll", function() {
 			if ((currentBoard == "favs") || loading) return;
 			if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {

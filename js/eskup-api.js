@@ -5,7 +5,6 @@ function EskupApi() {
 	var USER_ID = "";
 	var WRITABLE_THEMES = null;	// temas en los que puedo escribir
 	var FOLLOWED_THEMES = null;	// temas que sigo
-	var BLOCKED_THEMES = null;	// temas que he bloqueado
 	var THEMES_INFO = {}; 	// información sobre eventos
 	var USER_PROFILE = null;
 	var FAVORITES = (localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : new Array();	// lista de temas favoritos que se almacena en localStorage
@@ -292,8 +291,6 @@ function EskupApi() {
 
 	/* Comprueba si sigo un tema */
 	this.checkThemeFollowed = function(theme) { return theme in FOLLOWED_THEMES; };
-	// Comprueba si he bloqueado un tema
-	this.checkThemeBlocked = function(theme) { return theme in BLOCKED_THEMES; };
 
 	// Comprueba si un mensaje está en mis favoritos
 	this.checkFavorite = function(msgid) { return (FAVORITES.indexOf(msgid) >= 0); };
@@ -331,25 +328,5 @@ function EskupApi() {
 		apiCall("GET", OUTESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
-	};
-
-	/* 	Carga los temas bloqueados */
-	this.eskupLoadBlockedThemes = function() {
-		if (typeof(localStorage["temas_block"]) != "undefined") {
-			listatemasblock = JSON.parse(localStorage["temas_block"]);
-			listatemasblockN = JSON.parse(localStorage["temas_blockN"]);
-			divtemasblock = document.getElementById("temas_block_lista");
-			divtemasblock.innerHTML = "";
-			for (var cont=0; cont < listatemasblock.length; cont++) {
-				var temaitem = document.createElement("li");			
-				var temalink = document.createElement("a");
-				var temaid = listatemasblock[cont];
-				var evento = "ev-" + temaid;
-				temalink.href = "javascript:LoadXmlData('tema', '" + evento + "', '" + temaid + "')";
-				temalink.innerHTML = listatemasblockN[cont];
-				temaitem.appendChild(temalink);
-				divtemasblock.appendChild(temaitem);			
-			};
-		};
 	};
 };
