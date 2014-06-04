@@ -106,19 +106,24 @@ function showThemesSelector() {
 		};
 		new ModalDialog("¿A qué temas enviarás tu mensaje?", $listThemes, ["OK", "Cancelar"], function(button, data) {
 			if (button == "OK") {
-				API.loadWritableThemes(function(writable) {
-					$("#send2theme")
-						.attr("data-send2theme", JSON.stringify(data))
-						.find(".count").text(data.length);
-					$list = $("#send2theme-list").html("");	// limpieza de selecciones anteriores
-					for (var t=0; t<data.length; t++) {
-						var theme = writable[data[t]];
-						$("<li></li>").text(theme.nombre).appendTo($list);
-					};
-				});
+				editorAddThemes(data);
 			};
 		});
 	});	
+};
+
+/* Añadir temas para enviar al mensaje al selector */
+function editorAddThemes(data) {
+	API.loadWritableThemes(function(writable) {
+			$("#send2theme")
+				.attr("data-send2theme", JSON.stringify(data))
+				.find(".count").text(data.length);
+			$list = $("#send2theme-list").html("");	// limpieza de selecciones anteriores
+			for (var t=0; t<data.length; t++) {
+				var theme = writable[data[t]];
+				$("<li></li>").text(theme.nombre).appendTo($list);
+			};
+		});
 };
 
 /* Temas seleccionados para enviar el mensaje */

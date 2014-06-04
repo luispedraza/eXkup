@@ -67,9 +67,34 @@ function initPopup() {
 	});
 };
 
-/* Gestión de la ventana de edición */
-function showEditor(show, config, msgID) {
-	if (typeof config == "undefined") config = "reset";
+/* Gestión de la ventana de edición 
+	@param show: controla si se muestra o no el editor
+	@param config: reply, forward
+	@param msgID: id del mensaje a contestar o reenviar
+	@param themes: temas a los que se enviará el mensaje
+*/
+function showEditor(show, config, msgID, themes) {
+	if (typeof config === "undefined") config = "reset";
+	// los temas a los que se envía el mensaje (forward o repy):
+	if ((config=="reply") && (typeof themes != "undefined")) {
+		themes = themes.split(",");
+		API.loadWritableThemes(function(wthemes) {
+			var goodThemes = [], badThemes = [];
+			themes.forEach(function(d) {
+				(d in wthemes) ? goodThemes.push(d) : badThemes.push(d);
+			});
+			editorAddThemes(goodThemes);	// temas a los que se puede enviar el mensaje
+			$ulThemes = $("<ul>");
+			goodThemes.forEach(function(d) {
+				$ulThemes.append($("<li>").text(wthemes[d].nombre));
+			});
+			$modalContent = $("<div>").append($("<p>").text(
+				"Tu respuesta aparecerá en los siguientes temas, en los que tienes permiso de escritura:"))
+				.append($ulThemes);
+			new ModalDialog("Información sobre tu respuesta", 
+				$modalContent, ["OK"], null);
+		});
+	};
 	$edit = $("#edit-section");
 	(show == null) ? $edit.toggleClass("on") : $edit.toggleClass("on", show);
 	switch (config) {
@@ -484,22 +509,15 @@ function appendMsg(msg, board, themes, before) {
 	}
 	dHead.appendChild(dCtrl);
 	// Temas del mensaje
-	var themesFound = false;
 	if (themes) {
-		var $divThemes = $("<ul class='themes'></ul>");
-		var msgThemes = msg.CopiaEnTablones.split( "," );	// temas del mensaje
-		for (var t=0, len = msgThemes.length; t < len; t++) {
-			var themeKey = msgThemes[t];
-			var themeData = themeKey.split("-");
-			if (themeData[0] == "ev") {
-				themesFound = true;
-				var themeID = themeData[1];
+		var $divThemes = null;
+		var msgThemes = msg.CopiaEnTablones.split( "," ).filter(function(d) {return d.split("-")[0] == "ev"});	// temas del mensaje
+		if (msgThemes.length) {
+			$divThemes = $("<ul class='themes'></ul>");
+			for (var t=0, len = msgThemes.length; t < len; t++) {
+				var themeKey = msgThemes[t];
+				var themeID = themeKey.split("-")[1];
 				var themeInfo = themes[themeID];	// información sobre el tema, de la API
-				// BLOQUEDO DE TEMAS:
-				// if ((locationid == "todo") && (CheckBlockTema(temaid) != -1)) continue;
-				// else msgbloqueado = false;
-				// if (CheckSigoTema(temaid) == 1) temali.className = "seguido";					
-				// else temali.className = "noseguido";
 				var themeName = themeInfo.nombre;
 				var $themeElement = $("<li>")
 					.attr("data-board", themeKey)
@@ -509,12 +527,13 @@ function appendMsg(msg, board, themes, before) {
 					})
 					.appendTo($divThemes);
 			};
+			div_msg.setAttribute("data-themes", msgThemes.map(function(d){return d.split("-")[1];}).toString());
 		};
 	};
 	// Construcción final y agregación
 	div_msg.appendChild(dHead);
 	div_msg.appendChild(div_cont);
-	if (themesFound) $(div_msg).append($divThemes);
+	if ($divThemes) $(div_msg).append($divThemes);
 	// agregación final del mensaje:
 	if (before) $(div_msg).insertBefore(before);
 	else board.appendChild(div_msg);
@@ -586,7 +605,7 @@ function replyMessage() {
 	$("#editor").before($("<div>")
 		.attr("id", "replying-message")
 		.html(msg.outerHTML));
-	showEditor(true, "reply", msg.id);
+	showEditor(true, "reply", msg.id, msg.getAttribute("data-themes"));
 };
 
 /* Reenvío de un mensaje */
@@ -595,7 +614,7 @@ function forwardMessage() {
 	var msg = $(this).closest('.message').get(0);
 	var user = this.getAttribute("data-user");
 	var msgID = this.getAttribute("data-id");
-	showEditor(true, "forward", msgID);
+	showEditor(true, "forward", msgID, msg.getAttribute("data-themes"));
 	var messageContent = "fwd @" + user + ": " + $(msg).find(".msg_content").get(0).innerHTML;
 	$("#newmessage").html(messageContent);
 };
