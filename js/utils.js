@@ -140,15 +140,18 @@ function fillFollows(div, users) {
 function fillThemes() {
 	API.loadFollowedThemes(function(themes) {
 		$divThemes = $("#themes-follow").html("");
-		for (var t in themes) {
-			themeID = "ev-"+t;
+		themes = makeArray(themes).sort(function(a,b) {
+			// ordenamos alfabéticamente la lista de temas
+			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
+		});
+		for (var t=0, len=themes.length; t<len; t++) {
+			var theme = themes[t];
+			themeID = "ev-"+theme.__key;
 			var $item = $("<li>")
 				.attr("class", "board-selector")
 				.attr("id", themeID)
-				.text(themes[t].nombre)
-				.on("click", function() {
-					loadBoard(this.id);
-				})
+				.text(theme.nombre)
+				.on("click", function() { loadBoard(this.id); })
 				.appendTo($divThemes);
 		};
 	});
