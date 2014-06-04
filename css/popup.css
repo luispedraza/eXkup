@@ -139,17 +139,30 @@ ul.navigator li:hover {
 	overflow-y: hidden;
 	overflow-x: hidden;
 }
-#messages-header {
+.messages-header {
+	position: absolute;
+	top:0;
+	left: 0;
+	right: 0;
 	padding: 10px;
-	background-color: rgba(100,100,100,.5);
-	position:relative;
+}
+
+#messages-header {
+	background-color: rgba(100,100,100,.7);
 	z-index: 100;
 	border-bottom: 1px solid #fff;
+	transition: all .25s ease;
+	overflow: hidden;
+	height: 23px;
+}
+#messages-header.on {
+	background-color: rgba(100,100,100,.9);
+	height: 200px;
 }
 #messages-header .search {
 	float: right;
 	background-color: #fff;
-	border-radius: 3px;
+	/* border-radius: 3px; */
 	border: 1px solid #fff;
 }
 #messages-header .search a {
@@ -158,8 +171,8 @@ ul.navigator li:hover {
 	background-color: #666;
 	color: #fff;
 	margin: 0;
-	border-top-right-radius: 3px;
-	border-bottom-right-radius: 3px;
+	/* border-top-right-radius: 3px; */
+	/* border-bottom-right-radius: 3px; */
 	cursor: pointer;
 	padding: 4px;
 }
@@ -180,22 +193,20 @@ ul.navigator li:hover {
 	width: 120px;	
 }
 
-#messages-title {
-	color: #fff;
-	font-weight: 300;
-}
-
 #board-info {
 	color: #fff;
 }
 
 #board-title {
+	text-shadow: 1px 1px 5px rgba(150, 150, 150, 1);
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	cursor: pointer;
 	font-weight: bold;
 	font-size: 16px;
+	/* clear: none; */
+	display: block;
 }
 #board-title:before {
 	display:inline-block;
@@ -203,33 +214,24 @@ ul.navigator li:hover {
 	transition: all .25s ease;
 }
 #board-description {
-	height: 0;
-	overflow: hidden;
-	transition: all .25s ease;
 	clear: both;
 	font-weight: 200;
 	font-size: 12px;
+	margin-top: 20px;
 }
 
-#board-info.on #board-description {
-	height: 180px;
-	padding: 5px;
-	margin-top: 10px;
-	/* background-color: #555555; */
-	border-radius: 3px;
-}
-#board-info.on #board-title:before {
+#messages-header.on #board-title:before {
 	-webkit-transform:rotate(180deg);
 }
 
 #board-description img {
-	border: 1px solid #fff;
 	float: right;
+	height: 100px;
+	margin-left: 10px;
 }
 #board-description p {
-	max-height: 100px;
+	height: 100px;
 	overflow-y: scroll;
-	padding-right: 5px;
 }
 /* Control del tema */
 .theme-control {

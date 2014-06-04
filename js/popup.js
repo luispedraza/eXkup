@@ -24,6 +24,7 @@ function initPopup() {
 				});
 			};
 		});
+
 		$(".board-selector").on("click", function() {
 			loadBoard(this.id);
 		})
@@ -52,13 +53,6 @@ function initPopup() {
 				$("#profile-container").toggleClass('on');
 			});
 		});
-
-		// $.fn.appearElement("#board");
-		// $(document.body).on('appear', '.message', function(e, $affected) {
-		// 	// add class called “appeared” for each appeared element
-		// 	$(this).addClass("appeared");
-		// });
-
 		// cargar tablón de eventos seguidos
 		(function() {
 			var evObj = document.createEvent('MouseEvents');
@@ -68,7 +62,7 @@ function initPopup() {
 
 		/* Información sobre el tablón actual */
 		$("#board-title").on("click", function() {
-			$("#board-info").toggleClass("on");
+			$("#messages-header").toggleClass("on");
 		});
 	});
 };
@@ -127,6 +121,7 @@ function loadBoardMessages(theme, callback) {
 			var board = document.getElementById("board");
 			board.style.left = 0;
 			document.getElementById("tree-board").style.left = "450px";
+			console.log(messages);
 			if (messages.length == 0) {
 				$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
 			} else {
@@ -219,11 +214,6 @@ function uiSelectBoard(board) {
 									};
 								});
 						});
-				}));
-		$themeControl.append(
-			$("<div>").attr("class", "control-item " + ((blocked) ? "block on" : "block"))
-				.on("click", function() {
-					console.log("block");
 				}));
 		$description.append($themeControl);
 	};
