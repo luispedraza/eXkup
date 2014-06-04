@@ -319,8 +319,12 @@ function setFavorite() {
 	@param msg: mensaje a agregar
 	@param board: tablón que contendrá el mensaje
 	@themes: información complementaria (temas)
+	@before: elemento antes del cual se va a insertar el mensaje
+
+	@return: nuevo mensaje agregado
 */
-function appendMsg(msg, board, themes) {
+function appendMsg(msg, board, themes, before) {
+	if (typeof board === "string") board = document.getElementById(board);
 	var userNickname = API.getUserNickname();
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
@@ -419,12 +423,17 @@ function appendMsg(msg, board, themes) {
 		div_reply.title = "Respuesta a";
 		div_reply.setAttribute("data-reply", msg.idMsgRespuesta);
 		div_reply.addEventListener("click", function() {
-			var THAT = this;
-			API.getMessage(this.getAttribute("data-reply"), function(data) {
+			var $THAT = $(this);
+			API.getMessage($THAT.attr("data-reply"), function(data) {
 				var repliedMsg = data.mensajes[0];
 				API.buildMessage(repliedMsg, data.perfilesUsuarios);
-				// agrego el mensaje respondido como hijo del mensaje actual
-				appendMsg(repliedMsg, $(THAT).closest(".message").addClass("conversation").get(0), data.perfilesEventos);
+				// agrego el mensaje respondido
+				var $message = $THAT.closest('.message');
+				$message.addClass('conversation');
+				$newmsg = $(appendMsg(repliedMsg, "board", data.perfilesEventos, $message)).addClass('conversation mark');
+				setTimeout(function() {
+					$newmsg.addClass('show');	
+				}, 500);
 			});
 		});
 		dHead.innerHTML += "<br />"
@@ -437,20 +446,25 @@ function appendMsg(msg, board, themes) {
 		div_thread.addEventListener("click", loadThread);
 		dCtrl.appendChild(div_thread);
 	};
-	// Mensaje reenviado 
+	// Mensaje reenviado
 	if (msg.reenvio) {
 		var div_forward = document.createElement("a");
 		div_forward.className = "reply2link fa fa-retweet";
 		div_forward.textContent = "mensaje reenviado";
 		div_forward.setAttribute("data-forward", msg.reenvio);
 		div_forward.addEventListener("click", function() {
-			var THAT = this;
+			var $THAT = $(this);
 			API.getMessage(this.getAttribute("data-forward"), function(data) {
 				var forwardedMsg = data.mensajes[0];
 				if (forwardedMsg) {
 					API.buildMessage(forwardedMsg, data.perfilesUsuarios);
-					// agrego el mensaje respondido como hijo del mensaje actual
-					appendMsg(forwardedMsg, $(THAT).closest(".message").addClass("conversation").get(0), data.perfilesEventos);
+					// agrego el mensaje reenviado
+					var $message = $THAT.closest('.message');
+					$message.addClass('conversation');
+					$newmsg = $(appendMsg(forwardedMsg, "board", data.perfilesEventos, $message)).addClass('conversation mark forwarded');
+					setTimeout(function() {
+						$newmsg.addClass('show');
+					}, 500);
 				} else {	// el mensaje original puede estar elminado
 					new ModalDialog("El mensaje original ha sido eliminado", null, ["Aceptar"], null, 2000);
 				};
@@ -501,7 +515,10 @@ function appendMsg(msg, board, themes) {
 	div_msg.appendChild(dHead);
 	div_msg.appendChild(div_cont);
 	if (themesFound) $(div_msg).append($divThemes);
-	board.appendChild(div_msg);
+	// agregación final del mensaje:
+	if (before) $(div_msg).insertBefore(before);
+	else board.appendChild(div_msg);
+	return $(div_msg);
 };
 
 /* Carga de mdensajes favoritos */
