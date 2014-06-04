@@ -170,6 +170,16 @@ function uiSelectBoard(board) {
 		var followed = (themeInfo.estado_seguimiento == 1);
 		var writable = (themeInfo.estado_escritura == 1);
 		var blocked = false;
+		var $apoyos = $("<ul>").attr("class", "links");
+		for (var a in themeInfo.apoyos) {
+			var apoyo = themeInfo.apoyos[a];
+			var apoyo_title = apoyo.titulo_apoyo;
+			var apoyo_link = apoyo.enlace_apoyo;
+			if (apoyo_title) {
+				$apoyos.append($("<li>").html( apoyo_link ? apoyo_title.link(apoyo_link) : apoyo_title));
+			};
+		};
+		// control de seguimiento
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
 				.on("click", function() {
@@ -194,29 +204,34 @@ function uiSelectBoard(board) {
 						});
 				})
 				);
-		$themeControl.append(
-			$("<div>").attr("class", "control-item " + ((writable) ? "writable on" : "writable"))
-				.on("click", function() {
-					$this = $(this);
-					var writable = $this.hasClass('on');
-					new ModalDialog((writable ? "Dejar de" : "Comenzar a") + " escribir en este tema", 
-						"Si continúas, " + (writable ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
-						[(writable ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
-						function(result) {
-							if (result == "Cancelar") return;
-							API.writeThemes([theme],
-								result == "Comenzar a escribir",
-								function(r) {
-									if (r == "OK") {
-										$this.toggleClass('on');
-										API.clearWritableThemes();	// limpiar caché de temas en que escribo
-									} else {
-										new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
-									};
-								});
-						});
-				}));
-		$description.append($themeControl);
+		// control de escritura
+		if (themeInfo.tipo_suscripcion != 0) {
+			$themeControl.append(
+				$("<div>").attr("class", "control-item " + ((writable) ? "writable on" : "writable"))
+					.attr("data-tiposuscripcion", themeInfo.tipo_suscripcion)
+					.attr("data-tipoevento", themeInfo.tipo_evento)
+					.on("click", function() {
+						$this = $(this);
+						var writable = $this.hasClass('on');
+						new ModalDialog((writable ? "Dejar de" : "Comenzar a") + " escribir en este tema", 
+							"Si continúas, " + (writable ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
+							[(writable ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
+							function(result) {
+								if (result == "Cancelar") return;
+								API.writeThemes([theme],
+									result == "Comenzar a escribir",
+									function(r) {
+										if (r == "OK") {
+											$this.toggleClass('on');
+											API.clearWritableThemes();	// limpiar caché de temas en que escribo
+										} else {
+											new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+										};
+									});
+							});
+					}));			
+		};
+		$description.append($apoyos).append($themeControl);
 	};
 	$boardTitle.html(title);
 	$boardDescription.append($description);

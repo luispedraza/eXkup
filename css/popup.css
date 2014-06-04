@@ -226,51 +226,67 @@ ul.navigator li:hover {
 
 #board-description img {
 	float: right;
-	height: 100px;
+	width: 130px;
 	margin-left: 10px;
 }
 #board-description p {
 	height: 100px;
 	overflow-y: scroll;
 }
+
+#board-description .links {
+	float: left;
+	padding: 0;
+	margin: 0;
+}
+#board-description .links li {
+	background-color: #555;
+	padding: 2px;
+	border-bottom: 1px solid #ccc;
+}
 /* Control del tema */
 .theme-control {
-	clear: both;
-	padding-top: 5px;
+	/* clear: both; */
+	/* padding-top: 5px; */
 	perspective: 800px;
+	float: right;
 }
 #board-description .control-item {
-	display: inline-block;
+	/* display: inline-block; */
 	background-color: #004862;
-	margin-right: 5px;
+	margin-bottom: 5px;
 	color: #fff;
 	cursor: pointer;
 	font-size: 11px;
-	-webkit-transform-style: preserve-3d;
-	transition: -webkit-transform .2s;
 	position: relative;
-	width: 70px;
-	height: 40px;
+	width: 130px;
+	height: 20px;
+	overflow: hidden;
 }
-#board-description .control-item.rotated {
-	-webkit-transform: rotateY( 180deg );
+#board-description .control-item:hover:before {
+	top: -40px;
 }
+#board-description .control-item:hover:after {
+	top: 0;
+}
+
 #board-description .control-item:before {
 	display: block;
 	text-align: center;
-	-webkit-backface-visibility: hidden;
 	position: absolute;
 	width: 100%;
 	height: 100%;
+	top: 0;
+	transition: top .25s ease;
 }
 #board-description .control-item:after {
 	display: block;
 	text-align: center;
-	-webkit-backface-visibility: hidden;
 	position: absolute;
 	width: 100%;
 	height: 100%;
-	-webkit-transform: rotateY( 180deg );
+	top: 40px;
+	transition: top .25s ease;
 }
 #board-description .control-item.on {
 	background-color: #F25600;
