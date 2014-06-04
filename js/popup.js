@@ -167,19 +167,17 @@ function uiSelectBoard(board) {
 		$("<img>").attr("src", themeInfo.pathfoto).appendTo($description);
 		$("<p>").html(themeInfo.descripcion).appendTo($description);
 		var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
-		var followed = (themeInfo.estado_seguimiento == 1);
-		var writable = (themeInfo.estado_escritura == 1);
-		var blocked = false;
 		var $apoyos = $("<ul>").attr("class", "links");
 		for (var a in themeInfo.apoyos) {
 			var apoyo = themeInfo.apoyos[a];
 			var apoyo_title = apoyo.titulo_apoyo;
 			var apoyo_link = apoyo.enlace_apoyo;
 			if (apoyo_title) {
-				$apoyos.append($("<li>").html( apoyo_link ? apoyo_title.link(apoyo_link) : apoyo_title));
+				$apoyos.append($("<li>").html( apoyo_link ? makeLink(apoyo_title, apoyo_link) : apoyo_title));
 			};
 		};
 		// control de seguimiento
+		var followed = (themeInfo.estado_seguimiento == 1);
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
 				.on("click", function() {
@@ -196,6 +194,7 @@ function uiSelectBoard(board) {
 									if (r == "OK") {
 										$this.toggleClass('on');
 										API.clearFollowedThemes();	// limpiar caché de temas seguidos
+										API.clearThemeInfo(theme);			// borrar la inforamción del tema
 										fillThemes();	// se recarga la lista de temas seguidos
 									} else {
 										new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
@@ -205,30 +204,42 @@ function uiSelectBoard(board) {
 				})
 				);
 		// control de escritura
-		if (themeInfo.tipo_suscripcion != 0) {
+		var writable = (themeInfo.estado_escritura == 1);
+		if (themeInfo.tipo_suscripcion == 1) {
 			$themeControl.append(
 				$("<div>").attr("class", "control-item " + ((writable) ? "writable on" : "writable"))
 					.attr("data-tiposuscripcion", themeInfo.tipo_suscripcion)
 					.attr("data-tipoevento", themeInfo.tipo_evento)
+					.attr("data-writable", themeInfo.estado_escritura)
 					.on("click", function() {
 						$this = $(this);
-						var writable = $this.hasClass('on');
-						new ModalDialog((writable ? "Dejar de" : "Comenzar a") + " escribir en este tema", 
-							"Si continúas, " + (writable ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
-							[(writable ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
-							function(result) {
-								if (result == "Cancelar") return;
-								API.writeThemes([theme],
-									result == "Comenzar a escribir",
-									function(r) {
-										if (r == "OK") {
-											$this.toggleClass('on');
-											API.clearWritableThemes();	// limpiar caché de temas en que escribo
-										} else {
-											new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
-										};
-									});
-							});
+						var typesuscription = $this.attr('data-tiposuscripcion');
+						var typeevent = $this.attr('data-tipoevento');
+						var writable = $this.attr('data-writable');
+						if (typesuscription == "1") {
+							// no se precisa autorización
+							new ModalDialog(((writable=="1") ? "Dejar de" : "Comenzar a") + " escribir en este tema",
+								"Si continúas, " + ((writable=="1") ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
+								[((writable=="1") ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
+								function(result) {
+									if (result == "Cancelar") return;
+									API.writeThemes([theme],
+										result == "Comenzar a escribir",
+										function(r) {
+											if (!r.match(/^error/)) {
+												$this.toggleClass('on');
+												$this.attr("data-writable", ((writable == "1") ? "0" : "1" ));	// cambio estado escritura
+												API.clearWritableThemes();			// limpiar caché de temas en que escribo
+												API.clearThemeInfo(theme);			// borrar la inforamción del tema
+											} else {
+												new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+											};
+										});
+								});
+						} else if (typesuscription == "2") {
+							// se precisa autorización
+							// TODO: hay que hacerlo, pero no sé si quedan eventos de este tipo 
+						};
 					}));			
 		};
 		$description.append($apoyos).append($themeControl);

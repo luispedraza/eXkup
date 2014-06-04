@@ -156,8 +156,8 @@ ul.navigator li:hover {
 	height: 23px;
 }
 #messages-header.on {
-	background-color: rgba(100,100,100,.9);
-	height: 200px;
+	background-color: rgba(100,100,100,.95);
+	height: 250px;
 }
 #messages-header .search {
 	float: right;
@@ -240,9 +240,19 @@ ul.navigator li:hover {
 	margin: 0;
 }
 #board-description .links li {
-	background-color: #555;
+	
 	padding: 2px;
 	border-bottom: 1px solid #ccc;
+}
+#board-description .links a {
+	text-decoration: none;
+	background-color: #555;
+	padding: 1px 5px;
+	display: block;
+}
+#board-description .links a:hover {
+	background-color:#F25600;
+	color: #fff;
 }
 /* Control del tema */
 .theme-control {
@@ -293,17 +303,30 @@ ul.navigator li:hover {
 }
 
 #board-description .control-item.follow:before {
-	content: "seguir";
+	content: "no sigues este tema";
+}
+#board-description .control-item.follow:after {
+	content: "comenzar a seguirlo";
+}
+#board-description .control-item.follow.on:before {
+	content: "sigues este tema";
 }
 #board-description .control-item.follow.on:after {
 	content: "dejar de seguirlo";
-	transform: rotateY( 180deg );
 }
 
 #board-description .control-item.writable:before {
-	content: "escribir";
+	content: "no puedes escribir aquí";
 }
-
+#board-description .control-item.writable:after {
+	content: "comenzar a escribir";
+}
+#board-description .control-item.writable.on:before {
+	content: "puedes escribir aquí";
+}
+#board-description .control-item.writable.on:after {
+	content: "dejar de escribir";
+}
 
 
 
@@ -413,7 +436,7 @@ ul.navigator li:hover {
 	border: 1px solid #dfdfdf;
 	font-size: 1em;
 	background-color: white;
-	margin: 10px;
+	margin: 5px 10px;
 	padding: 10px;
 	box-shadow: 0 1px 2px #d9d9d9;
 }

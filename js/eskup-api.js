@@ -152,7 +152,7 @@ function EskupApi() {
 
 	/* Limpia la información sobre un tema */
 	this.clearThemeInfo = function(theme) {
-
+		THEMES_INFO[theme] = null;
 	};
 
 	/* carga información sobre un tema */

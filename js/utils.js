@@ -18,6 +18,10 @@ Array.prototype.shuffle = function() {
   	this[p] = t;
  	};
 };
+function makeLink(text, href, target) {
+	if (typeof target === "undefined") target = "_blank";
+	return "<a href='"+ href + "' target='" + target + "'>" + text + "</a>";
+}
 
 /* Devuelve el tablón correspondiente a un identificador */
 function getBoard(id) { return TABLONES[id] || id; };
