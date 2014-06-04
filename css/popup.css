@@ -426,7 +426,7 @@ ul.navigator li:hover {
 #edit-section.on {
 	height: 550px;
 }
-#edit-section.on h1 .fa-chevron-up {
+#edit-section.on h1 .fa {
 	-webkit-transform:rotate(180deg);
 }
 /* Profile */
