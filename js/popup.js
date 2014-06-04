@@ -121,7 +121,6 @@ function loadBoardMessages(theme, callback) {
 			var board = document.getElementById("board");
 			board.style.left = 0;
 			document.getElementById("tree-board").style.left = "450px";
-			console.log(messages);
 			if (messages.length == 0) {
 				$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
 			} else {
@@ -162,7 +161,6 @@ function uiSelectBoard(board) {
 	} else {
 		var theme = board.split("-")[1];
 		var themeInfo = API.loadThemeInfo(theme);
-		console.log(themeInfo);
 		title = themeInfo.nombre;
 		$("<img>").attr("src", themeInfo.pathfoto).appendTo($description);
 		$("<p>").html(themeInfo.descripcion).appendTo($description);

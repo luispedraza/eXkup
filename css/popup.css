@@ -67,7 +67,7 @@ ul.navigator li {
 	padding: 2px;
 }
 ul.navigator li.on {
-	color: #004862;
+	color:#F25600;
 	font-weight: 400;
 }
 ul.navigator li:hover {
