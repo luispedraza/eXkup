@@ -237,6 +237,7 @@ ul.navigator li:hover {
 .theme-control {
 	clear: both;
 	padding-top: 5px;
+	perspective: 800px;
 }
 #board-description .control-item {
 	display: inline-block;
@@ -245,28 +246,48 @@ ul.navigator li:hover {
 	color: #fff;
 	cursor: pointer;
 	font-size: 11px;
+	-webkit-transform-style: preserve-3d;
+	transition: -webkit-transform .2s;
+	position: relative;
+	width: 70px;
+	height: 40px;
+}
+#board-description .control-item.rotated {
+	-webkit-transform: rotateY( 180deg );
+}
+#board-description .control-item:before {
+	display: block;
+	text-align: center;
+	-webkit-backface-visibility: hidden;
+	position: absolute;
+	width: 100%;
+	height: 100%;
 }
 #board-description .control-item:after {
 	display: block;
 	text-align: center;
-	width: 70px;
-	padding: 5px 0;
+	-webkit-backface-visibility: hidden;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	-webkit-transform: rotateY( 180deg );
 }
 #board-description .control-item.on {
 	background-color: #F25600;
 }
 
-#board-description .control-item.follow:after {
+#board-description .control-item.follow:before {
 	content: "seguir";
 }
+#board-description .control-item.follow.on:after {
+	content: "dejar de seguirlo";
+	transform: rotateY( 180deg );
+}
 
-#board-description .control-item.writable:after {
+#board-description .control-item.writable:before {
 	content: "escribir";
 }
 
-#board-description .control-item.block:after {
-	content: "bloquear";
-}
 
 
 

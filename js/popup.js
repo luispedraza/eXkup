@@ -192,7 +192,8 @@ function uiSelectBoard(board) {
 									};
 								});
 						});
-				}));
+				})
+				);
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((writable) ? "writable on" : "writable"))
 				.on("click", function() {
