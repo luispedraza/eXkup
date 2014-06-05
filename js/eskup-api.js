@@ -108,11 +108,15 @@ function EskupApi() {
 		msg.usuarioOrigenNombre = (user.nombre + " " + user.apellidos).trim();
 		if (msg.idMsgRespuesta) {
 			user = usersInfo[msg.autorMsgRespuesta];
-			msg.pathfotoRespuesta = checkUserPhoto(user.pathfoto);
 			msg.usuarioRespuestaNombre = (user.nombre + " " + user.apellidos).trim();
 		};
 	};
-
+	/* Completa la información de un mensaje  para un thread (omitida información de respuesta */
+	this.buildThreadMessage = function(msg, usersInfo) {
+		var user = usersInfo[msg.usuarioOrigen];
+		msg.pathfoto = checkUserPhoto(user.pathfoto);
+		msg.usuarioOrigenNombre = (user.nombre + " " + user.apellidos).trim();
+	};
 	/* 	Carga un tablón de mensajes
 		ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/

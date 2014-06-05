@@ -228,39 +228,6 @@ function makeArray(obj) {
 
 
 
-
-
-
-/* Muestra el árbol de mensajes de una conversación */
-function showMsgTree(infoTree, board, last) {
-	var divNode = document.createElement("div");
-	divNode.className = (last ? "node last" : "node"); 
-	var divItem = document.createElement("div");
-	divItem.className = "item";
-	var divContent = document.createElement("div")
-	divContent.className = "content";
-	appendMsg(infoTree, divContent);
-	divItem.appendChild(divContent);
-	divNode.appendChild(divItem);
-	if (infoTree.children.length) {
-		var divChildren = document.createElement("div");
-		divChildren.className = "children";
-		var divNrep = document.createElement("div");
-		divNrep.className = "more";
-		divNrep.innerText = infoTree.nRep + " respuestas";
-		divNrep.onclick = function(e) {
-			this.className = (this.className.match("on") ? "more" : "more on");
-			this.parentNode.className = (this.parentNode.className.match("on") ? "children" : "children on");
-		}
-		divChildren.appendChild(divNrep);
-		for (var m=0; m<infoTree.children.length; m++) {
-			showMsgTree(infoTree.children[m], divChildren, (m==infoTree.children.length-1));
-		}
-		divNode.appendChild(divChildren);
-	}
-	board.appendChild(divNode);
-};
-
 /* Visualización de una conversación */
 function showNodeLinkTree(infoTree) {
 	var diameter = 600;

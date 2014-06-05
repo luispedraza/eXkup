@@ -158,14 +158,13 @@ ul.navigator li:hover {
 	height: 23px;
 }
 #messages-header.on {
-	background-color: rgba(0,0,0,.9);
+	background-color: rgba(50,50,50,.85);
 	height: 260px;
 }
 #messages-header .search {
 	float: right;
 	background-color: #fff;
 	border: 1px solid #fff;
-	/*display: none;*/
 }
 #messages-header .search a {
 	border: 0;

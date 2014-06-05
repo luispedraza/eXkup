@@ -273,7 +273,7 @@ function uiSelectBoard(board) {
 };
 
 /* Carga de una conversación completa */
-function loadThread() {
+function showThread() {
 	var threadID = this.getAttribute("data-thread");
 	API.loadThread(threadID, function(info) {
 		var infoTree = new Object();
@@ -283,27 +283,56 @@ function loadThread() {
 			else if (tree.idMsg == parent) {
 				tree.children.push(node);
 				tree.nRep = tree.children.length;
-				for (var n=0; n<tree.children.length; n++)
-					tree.nRep += tree.children[n].nRep;
+				tree.children.forEach(function(c) {
+					tree.nRep += c.nRep;
+				});
 			}
-			else for (var n=0; n<tree.children.length; n++)
-				addNode(node, parent, tree.children[n]);
-		}
-		for (var m=0; m<info.mensajes.length; m++) {
-			var node = info.mensajes[m];
-			API.buildMessage(node, info.perfilesUsuarios);
-			node.children = [];
-			node.nRep = 0;
-			parentId = node.idMsgRespuesta;
-			infoTree = addNode(node, parentId, infoTree) || infoTree;
-		}
-		var divtree = document.getElementById("tree");
-		divtree.innerHTML = "";
+			else tree.children.forEach(function(c) {
+				addNode(node, parent, c);
+			});
+		};
+		info.mensajes.forEach(function(m) {
+			API.buildThreadMessage(m, info.perfilesUsuarios);
+			m.children = [];
+			m.nRep = 0;
+			infoTree = addNode(m, m.idMsgRespuesta, infoTree) || infoTree;
+		});
+		var $divtree = $("#tree").html("");
 		document.getElementById("tree-board").style.left = "0px";
 		document.getElementById("board").style.left = "-450px";
-		// showNodeLinkTree(infoTree);
+		console.log(infoTree);
 		showMsgTree(infoTree, document.getElementById("tree"), true);
 	});
+};
+
+/* Muestra el árbol de mensajes de una conversación */
+function showMsgTree(infoTree, board, last) {
+	var divNode = document.createElement("div");
+	divNode.className = (last ? "node last" : "node"); 
+	var divItem = document.createElement("div");
+	divItem.className = "item";
+	var divContent = document.createElement("div")
+	divContent.className = "content";
+	appendMsg(infoTree, divContent);
+	divItem.appendChild(divContent);
+	divNode.appendChild(divItem);
+	if (infoTree.children.length) {
+		var divChildren = document.createElement("div");
+		divChildren.className = "children";
+		var divNrep = document.createElement("div");
+		divNrep.className = "more";
+		divNrep.innerText = infoTree.nRep + " respuestas";
+		divNrep.onclick = function(e) {
+			this.className = (this.className.match("on") ? "more" : "more on");
+			this.parentNode.className = (this.parentNode.className.match("on") ? "children" : "children on");
+		};
+		divChildren.appendChild(divNrep);
+		for (var m=0; m<infoTree.children.length; m++) {
+			showMsgTree(infoTree.children[m], divChildren, (m==infoTree.children.length-1));
+		}
+		divNode.appendChild(divChildren);
+	};
+	board.appendChild(divNode);
 };
 
 /* Agrega o elimina un mensaje de la lista de favoritos */
@@ -467,7 +496,7 @@ function appendMsg(msg, board, themes, before) {
 		div_thread.innerHTML = "<i class='fa fa-comments'></i> charla";
 		div_thread.title = "sigue el hilo";
 		div_thread.setAttribute("data-thread", msg.hilo);
-		div_thread.addEventListener("click", loadThread);
+		div_thread.addEventListener("click", showThread);
 		dCtrl.appendChild(div_thread);
 	};
 	// Mensaje reenviado
