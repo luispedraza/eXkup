@@ -2,33 +2,29 @@
 #tree {
 	padding: 5px;
 }
-.node {
-	border-left: 1px dotted black;
-	padding-left: 10px;
+.node .node {
+	border-left: 1px solid #bbb;
+	padding-left: 8px;
 }
 .node:last-child {
-	height: 41px;
+	border: none;
 }
-.node:after {
-	visibility: hidden;
-	display: block;
-	font-size: 0;
-	content: " ";
-	clear: both;
-	height: 0; 
-}
+
 .item {
 	position: relative;
 	padding-top: 10px;
-
 }
 .item:before {
-	border-top: 1px dotted black;
+	border-bottom: 1px solid #bbb;
 	content: " ";
 	position: absolute;
-	top: 40px;
-	left: -10px;
-	width: 10px;
+	top: 0;
+	left: -8px;
+	width: 8px;
+	height: 40px;
+}
+.node:last-child > .item:before {
+	border-left: 1px solid #bbb;
 }
 
 .node .message {
@@ -38,14 +34,10 @@
 .children {
 	overflow: hidden;
 	clear: both;
-	
-	
 	padding-left: 10px;
 }
 .children.on {
 	height: auto;
-	
-
 }
 
 .more {
@@ -58,6 +50,7 @@
 	background-repeat: no-repeat;
 	padding-left: 15px;
 }
+
 .more.on {
 	background-color: white;
 	background-image: url('/icon/less.png');

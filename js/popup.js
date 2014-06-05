@@ -283,7 +283,7 @@ function showThread() {
 		var newNode, newItem, newContent;
 		function addNode(msg, parentID) {
 			newNode = document.createElement("div");
-			newNode.className = "node last";
+			newNode.className = "node";
 			newItem = document.createElement("div");
 			newItem.className = "item";
 			// newContent = document.createElement("div");
@@ -298,7 +298,6 @@ function showThread() {
 				return;
 			};
 			var parent = aux[parentID];
-			parent.node.className = "node";
 			if (!parent.children) {
 				parent.children = document.createElement("div");
 				parent.children.className = "children on";
