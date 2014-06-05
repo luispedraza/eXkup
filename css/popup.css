@@ -340,6 +340,26 @@ ul.navigator li:hover {
 /***********************/
 /* tablón de mensajes  */
 /***********************/
+.board {
+	position: absolute;
+	top: 40px;
+	height: 475px;
+	transition: left .5s ease;
+	width: 450px;
+	overflow-y: scroll;
+}
+#board {
+	left: 0;
+}
+#tree-board {
+	left: 450px;
+}
+#board.switch {
+	left: -450px;
+}
+#tree-board.switch {
+	left: 0;
+}
 #board .no-messages {
 	margin: 10px;
 	padding: 10px;
@@ -364,25 +384,7 @@ ul.navigator li:hover {
 #board .loading .fa {
 	margin-right: 10px;
 }
-#board, #tree-board {
-	transition: all .5s ease;
-	width: 450px;
-}
-#board {
-	padding-top: 40px;
-	position: absolute;
-	height: 475px;
-	overflow-y: scroll;
-	top: 0;
-}
-#tree-board {
-	position: absolute;
-	left: 450px;
-	height: 475px;
-	top: 40px;
-	overflow-y: scroll;
-	/* width: 450px; */
-}
+
 #closetree {
 	display: block;
 }

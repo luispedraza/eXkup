@@ -1,9 +1,9 @@
 /* Show a modal dialog onscreen */
 function ModalDialog(msg, extra, buttons, callback, timeout) {
 	function removeDialog() {
-		var m = modalDialog.modal;
-		m.fadeOut(function() { this.remove(); });
+		modalDialog.modal.fadeOut(function() { this.remove(); });
 	};
+	this.close = removeDialog;
 	var modalDialog = this;
 	var modal = this.modal = $("<div class='modal'><div class='dlg'></div></div>");
 	var dlg = modal.find(".dlg");

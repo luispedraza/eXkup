@@ -32,8 +32,7 @@ function initPopup() {
 			API.logOut()
 		});
 		document.getElementById("closetree").addEventListener("click", function() {
-			document.getElementById("board").style.left = 0;
-			document.getElementById("tree-board").style.left = "450px";
+			showTreeBoard(false);
 		});
 		$("#edit-section-h1").on("click", function() {
 			showEditor();
@@ -143,8 +142,6 @@ function loadBoardMessages(theme, callback) {
 			var usersInfo = info.perfilesUsuarios;
 			var themesInfo = info.perfilesEventos;
 			var board = document.getElementById("board");
-			board.style.left = 0;
-			document.getElementById("tree-board").style.left = "450px";
 			if (messages.length == 0) {
 				$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
 			} else {
@@ -155,7 +152,8 @@ function loadBoardMessages(theme, callback) {
 					appendMsg(msg, board, themesInfo);
 				};
 			};
-			if (callback) callback(info);	
+			showTreeBoard(false);
+			if (callback) callback(info);
 		}
 		$("#board").find(".loading").remove();
 	});
@@ -274,6 +272,9 @@ function uiSelectBoard(board) {
 
 /* Carga de una conversación completa */
 function showThread() {
+	var modal = new ModalDialog("Cargando datos", 
+		"<div class='loading'><i class='fa fa-refresh fa-spin'></i>Por favor, espera mientras se carga la conversación</div>", 
+		[]);
 	var threadID = this.getAttribute("data-thread");
 	var originalMsgID = $(this).closest(".message").attr("id");
 	API.loadThread(threadID, function(info) {
@@ -312,14 +313,18 @@ function showThread() {
 		messages.forEach(function(m) {
 			addNode(API.buildThreadMessage(m, info.perfilesUsuarios), m.idMsgRespuesta);
 		});
-		document.getElementById("tree-board").style.left = "0px";
-		document.getElementById("board").style.left = "-450px";
+		showTreeBoard(true);	// mostramos el resultado
 		$treeBoard = $("#tree-board");
 		setTimeout(function() {
+			// scroll hasta el mensaje de punto de entrada
 			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);
-			console.log($highlightedMsg.offset().top, $treeBoard.offset().top);
-		}, 500);
+			modal.close();	// ocultamos el diálogo informativo de carga
+		}, 1000);
 	});
+};
+
+function showTreeBoard(show) {
+	$(".board").toggleClass('switch', show);
 };
 
 /* Agrega o elimina un mensaje de la lista de favoritos */
