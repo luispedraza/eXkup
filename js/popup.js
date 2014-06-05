@@ -276,63 +276,40 @@ function uiSelectBoard(board) {
 function showThread() {
 	var threadID = this.getAttribute("data-thread");
 	API.loadThread(threadID, function(info) {
-		var infoTree = new Object();
-		infoTree.id = null;
-		function addNode(node, parent, tree) {
-			if (!tree.idMsg) return node;
-			else if (tree.idMsg == parent) {
-				tree.children.push(node);
-				tree.nRep = tree.children.length;
-				tree.children.forEach(function(c) {
-					tree.nRep += c.nRep;
-				});
-			}
-			else tree.children.forEach(function(c) {
-				addNode(node, parent, c);
-			});
+		var treeDiv = document.getElementById("tree");
+		treeDiv.innerHTML = "";
+		var aux = {};
+		/* agregar un nuevo nodo: item + children */
+		function addNode(msg, parentID) {
+			newNode = document.createElement("div");
+			newNode.className = "node last";
+			newItem = document.createElement("div");
+			newItem.className = "item";
+			newNode.appendChild(newItem);
+			appendMsg(msg, newItem);
+			aux[msg.idMsg] = {node: newNode};
+			if (parentID == null) {
+				treeDiv.appendChild(newNode);
+				return;
+			};
+			var parent = aux[parentID];
+			parent.node.className = "node";
+			if (!parent.children) {
+				parent.children = document.createElement("div");
+				parent.children.className = "children on";
+				parent.node.appendChild(parent.children);
+			};
+			parent.children.appendChild(newNode);
 		};
-		info.mensajes.forEach(function(m) {
-			API.buildThreadMessage(m, info.perfilesUsuarios);
-			m.children = [];
-			m.nRep = 0;
-			infoTree = addNode(m, m.idMsgRespuesta, infoTree) || infoTree;
+		var messages = info.mensajes;
+		addNode(API.buildThreadMessage(messages[0], info.perfilesUsuarios), null);
+		messages.splice(0,1);	// elmino el primer nodo, raíz
+		messages.forEach(function(m) {
+			addNode(API.buildThreadMessage(m, info.perfilesUsuarios), m.idMsgRespuesta);
 		});
-		var $divtree = $("#tree").html("");
 		document.getElementById("tree-board").style.left = "0px";
 		document.getElementById("board").style.left = "-450px";
-		console.log(infoTree);
-		showMsgTree(infoTree, document.getElementById("tree"), true);
 	});
-};
-
-/* Muestra el árbol de mensajes de una conversación */
-function showMsgTree(infoTree, board, last) {
-	var divNode = document.createElement("div");
-	divNode.className = (last ? "node last" : "node"); 
-	var divItem = document.createElement("div");
-	divItem.className = "item";
-	var divContent = document.createElement("div")
-	divContent.className = "content";
-	appendMsg(infoTree, divContent);
-	divItem.appendChild(divContent);
-	divNode.appendChild(divItem);
-	if (infoTree.children.length) {
-		var divChildren = document.createElement("div");
-		divChildren.className = "children";
-		var divNrep = document.createElement("div");
-		divNrep.className = "more";
-		divNrep.innerText = infoTree.nRep + " respuestas";
-		divNrep.onclick = function(e) {
-			this.className = (this.className.match("on") ? "more" : "more on");
-			this.parentNode.className = (this.parentNode.className.match("on") ? "children" : "children on");
-		};
-		divChildren.appendChild(divNrep);
-		for (var m=0; m<infoTree.children.length; m++) {
-			showMsgTree(infoTree.children[m], divChildren, (m==infoTree.children.length-1));
-		}
-		divNode.appendChild(divChildren);
-	};
-	board.appendChild(divNode);
 };
 
 /* Agrega o elimina un mensaje de la lista de favoritos */
