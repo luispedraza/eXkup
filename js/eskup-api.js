@@ -1,7 +1,6 @@
 function EskupApi() {
 	var THAT = this;
 	var PUBLIC_KEY = "";
-	var NICKNAME = "";
 	var USER_ID = "";
 	var WRITABLE_THEMES = null;	// temas en los que puedo escribir
 	var FOLLOWED_THEMES = null;	// temas que sigo
@@ -144,13 +143,9 @@ function EskupApi() {
 		if (USER_PROFILE != null) {
 			callback(USER_PROFILE);
 		} else {
-			var params = eskupParams({c: "info_usuarios"});
+			var params = eskupParams({action: "info_usuarios"});
 			apiCall("GET", PROFILEESKUP, params, function(r) {
-				perfiles = eskupParseResponse(r).perfilesUsuarios;
-				for (var u in perfiles) {
-					USER_PROFILE = perfiles[u];
-				};
-				callback(USER_PROFILE);
+				callback(USER_PROFILE = eskupParseResponse(r).perfilesUsuarios[USER_ID]);
 			});
 		};
 	};

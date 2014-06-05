@@ -44,6 +44,7 @@ function initPopup() {
 		$("#profile-item").on("click", function() {
 			$(this).toggleClass('on');
 			API.loadProfile(function(user) {
+				console.log(user);
 				fillHeader(user);
 				fillProfile(user);
 				LoadFollowTo();
@@ -319,7 +320,7 @@ function showThread() {
 			// scroll hasta el mensaje de punto de entrada
 			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);
 			modal.close();	// ocultamos el diálogo informativo de carga
-		}, 1000);
+		}, 1500);
 	});
 };
 
