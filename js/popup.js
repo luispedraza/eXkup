@@ -275,24 +275,25 @@ function uiSelectBoard(board) {
 /* Carga de una conversación completa */
 function showThread() {
 	var threadID = this.getAttribute("data-thread");
+	var originalMsgID = $(this).closest(".message").attr("id");
 	API.loadThread(threadID, function(info) {
 		var treeDiv = document.getElementById("tree");
 		treeDiv.innerHTML = "";
 		var aux = {};
 		/* agregar un nuevo nodo: item + children */
 		var newNode, newItem, newContent;
+		var $highlightedMsg = null;
 		function addNode(msg, parentID) {
 			newNode = document.createElement("div");
 			newNode.className = "node";
 			newItem = document.createElement("div");
 			newItem.className = "item";
-			// newContent = document.createElement("div");
-			// newContent.className = "content";
-			// newItem.appendChild(newContent);
-			// appendMsg(msg, newContent);
 			newNode.appendChild(newItem);
-			appendMsg(msg, newItem);
-			aux[msg.idMsg] = {node: newNode};
+			var $newMsg = appendMsg(msg, newItem);
+			var msgID = msg.idMsg;
+			if (msgID == originalMsgID) 
+				$highlightedMsg = $newMsg.addClass('highlighted');	// resaltamos el mensaje de entrada al hilo
+			aux[msgID] = {node: newNode};
 			if (parentID == null) {
 				treeDiv.appendChild(newNode);
 				return;
@@ -313,6 +314,11 @@ function showThread() {
 		});
 		document.getElementById("tree-board").style.left = "0px";
 		document.getElementById("board").style.left = "-450px";
+		$treeBoard = $("#tree-board");
+		setTimeout(function() {
+			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);
+			console.log($highlightedMsg.offset().top, $treeBoard.offset().top);
+		}, 500);
 	});
 };
 

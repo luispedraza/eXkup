@@ -447,6 +447,9 @@ ul.navigator li:hover {
 	padding: 10px;
 	box-shadow: 0 1px 2px #d9d9d9;
 }
+.message.highlighted {
+	background-color: #ffeba7;
+}
 .card {
     -webkit-transition: all 400ms ease;
     -moz-transition: all 400ms ease;
