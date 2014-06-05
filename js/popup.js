@@ -280,11 +280,16 @@ function showThread() {
 		treeDiv.innerHTML = "";
 		var aux = {};
 		/* agregar un nuevo nodo: item + children */
+		var newNode, newItem, newContent;
 		function addNode(msg, parentID) {
 			newNode = document.createElement("div");
 			newNode.className = "node last";
 			newItem = document.createElement("div");
 			newItem.className = "item";
+			// newContent = document.createElement("div");
+			// newContent.className = "content";
+			// newItem.appendChild(newContent);
+			// appendMsg(msg, newContent);
 			newNode.appendChild(newItem);
 			appendMsg(msg, newItem);
 			aux[msg.idMsg] = {node: newNode};

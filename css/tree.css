@@ -1,19 +1,47 @@
 /* Arbol de mensajes de un hilo */
 .node {
-	width: 100%;
-	border-left: 1px dotted black;
+	
 }
 .item {
-	padding-left: 10px;
-	padding-top: 20px;
+		
 	border-bottom: 1px dotted black;
+	height: 30px;
 }	
 .node.last{
-	border-left: none;
+
 }
-.node.last > .item {
+.node:after {
+		visibility: hidden;
+        display: block;
+        font-size: 0;
+        content: " ";
+        clear: both;
+        height: 0;
+}
+.node .message {
+	margin: 0;
+	margin-left: 10px;
+}
+
+.children {
+	overflow: hidden;
+	clear: both;
+	margin-left: 20px;
+}
+.children.on {
+	height: auto;
 	border-left: 1px dotted black;
+
 }
+.item:after {
+	visibility: hidden;
+        display: block;
+        font-size: 0;
+        content: " ";
+        clear: both;
+        height: 0;
+}
+
 .more {
 	cursor: pointer;
 	background-color: orange;
@@ -29,56 +57,3 @@
 	background-image: url('/icon/less.png');
 	border-left: 1px dotted black;
 }
-.content {
-	background-color: orange;
-	padding: 3px;
-	margin-bottom: -20px;
-}
-
-.children {
-	margin-top: 20px;
-	margin-left: 20px;
-	height: 1.5em;
-	overflow: hidden;
-}
-.children.on {
-	display: block;
-	height: auto;
-}
-
-/*
-
-
-.node {
-	font: 1em;
-}
-.node circle {
-	fill: #fff;
-	stroke: #03899C;
-	stroke-width: 1px;
-}
-.node rect {
-	cursor: pointer;
-	fill: #fff;
-	fill-opacity: .5;
-	stroke: #3182bd;
-	stroke-width: 1.5px;
-	margin-top: 2px;
-}
-
-.link {
-	fill: none;
-	stroke: #ccc;
-	stroke-width: 1.5px;
-}
-
-.node text {
-	font: 1.2em;
-	pointer-events: none;
-}
-
-path.link {
-	fill: none;
-	stroke: #9ecae1;
-	stroke-width: 1.5px;
-}*/
