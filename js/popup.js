@@ -239,8 +239,6 @@ function uiSelectBoard(board) {
 								function(r) {
 									if (r == "OK") {
 										$this.toggleClass('on');
-										API.clearFollowedThemes();	// limpiar caché de temas seguidos
-										API.clearThemeInfo(theme);			// borrar la inforamción del tema
 										fillThemes();	// se recarga la lista de temas seguidos
 									} else {
 										new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
@@ -275,8 +273,6 @@ function uiSelectBoard(board) {
 											if (!r.match(/^error/)) {
 												$this.toggleClass('on');
 												$this.attr("data-writable", ((writable == "1") ? "0" : "1" ));	// cambio estado escritura
-												API.clearWritableThemes();			// limpiar caché de temas en que escribo
-												API.clearThemeInfo(theme);			// borrar la inforamción del tema
 											} else {
 												new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
 											};
