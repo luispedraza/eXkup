@@ -26,7 +26,7 @@ function initPopup() {
 
 		$(".board-selector").on("click", function() {
 			loadBoard(this.id);
-		})
+		});
 		
 		$("#logout").on("click", function() {
 			API.logOut()
@@ -44,7 +44,6 @@ function initPopup() {
 		$("#profile-item").on("click", function() {
 			$(this).toggleClass('on');
 			API.loadProfile(function(user) {
-				console.log(user);
 				fillHeader(user);
 				fillProfile(user);
 				LoadFollowTo();
@@ -62,6 +61,21 @@ function initPopup() {
 		/* Información sobre el tablón actual */
 		$("#board-title").on("click", function() {
 			$("#messages-header").toggleClass("on");
+		});
+		/* Muestra la visualiación de un thread */
+		$("#show-d3").on("click", function() {
+			var threadID = $("#tree-board").attr("data-thread");
+			API.loadThread(threadID, function(info) {
+				chrome.tabs.create({url:"d3Thread.html", active:false}, function(tab) {
+					var theTabID = tab.id;
+					chrome.tabs.onUpdated.addListener(function(tabId , changedInfo) {
+						if ((tabId == theTabID) && (changedInfo.status == "complete")) {
+							chrome.tabs.sendMessage(theTabID, {info: info});
+							chrome.tabs.update(theTabID, {active: true});	// activamos la nueva pestaña
+						};
+					});
+				});
+			});
 		});
 	});
 };
@@ -274,7 +288,7 @@ function uiSelectBoard(board) {
 /* Carga de una conversación completa */
 function showThread() {
 	var modal = new ModalDialog("Cargando datos", 
-		"<div class='loading'><i class='fa fa-refresh fa-spin'></i>Por favor, espera mientras se carga la conversación</div>", 
+		"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
 		[]);
 	var threadID = this.getAttribute("data-thread");
 	var originalMsgID = $(this).closest(".message").attr("id");
@@ -283,7 +297,7 @@ function showThread() {
 		treeDiv.innerHTML = "";
 		var aux = {};
 		/* agregar un nuevo nodo: item + children */
-		var newNode, newItem, newContent;
+		var newNode, newItem, newContent, newMore;
 		var $highlightedMsg = null;
 		function addNode(msg, parentID) {
 			newNode = document.createElement("div");
@@ -302,20 +316,26 @@ function showThread() {
 			};
 			var parent = aux[parentID];
 			if (!parent.children) {
-				parent.children = document.createElement("div");
-				parent.children.className = "children on";
-				parent.node.appendChild(parent.children);
+				var childrenDiv = (parent.children = document.createElement("div"));
+				childrenDiv.className = "children on";
+				newMore = document.createElement("div");
+				newMore.className = "more fa fa-minus-square";
+				newMore.addEventListener("click", function() {
+					$(this).closest('.children').toggleClass('on');
+				});
+				childrenDiv.appendChild(newMore);
+				parent.node.appendChild(childrenDiv);
 			};
 			parent.children.appendChild(newNode);
 		};
 		var messages = info.mensajes;
 		addNode(API.buildThreadMessage(messages[0], info.perfilesUsuarios), null);
-		messages.splice(0,1);	// elmino el primer nodo, raíz
-		messages.forEach(function(m) {
+		var replies = messages.slice(1);	// cojo todas las respuestas al nodo raíz
+		replies.forEach(function(m) {
 			addNode(API.buildThreadMessage(m, info.perfilesUsuarios), m.idMsgRespuesta);
 		});
 		showTreeBoard(true);	// mostramos el resultado
-		$treeBoard = $("#tree-board");
+		$treeBoard = $("#tree-board").attr("data-thread", threadID);	// lo guardamos en el board, para visualización
 		setTimeout(function() {
 			// scroll hasta el mensaje de punto de entrada
 			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);

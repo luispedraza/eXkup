@@ -60,4 +60,4 @@ function insertConfirm() {
 	var element = canvasEditor.getElement();
 	ctx.drawImage(element, 0, 0, 420, 500);
 	insertCancel();
-}
+};

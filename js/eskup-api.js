@@ -6,7 +6,8 @@ function EskupApi() {
 	var FOLLOWED_THEMES = null;	// temas que sigo
 	var THEMES_INFO = {}; 	// información sobre eventos
 	var USER_PROFILE = null;
-	var FAVORITES = (localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : new Array();	// lista de temas favoritos que se almacena en localStorage
+	var LAST_THREAD = {id: null, info: null};		// guarda el último thread leído
+	var FAVORITES = (typeof localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : new Array();	// lista de temas favoritos que se almacena en localStorage
 	var INESKUP = "http://eskup.elpais.com/Ineskup";
 	// var INPARAMS = {
 	// 	m: "",			// Contenido del mensaje (c=add|reply|edit, ignorado con c=del)
@@ -325,9 +326,16 @@ function EskupApi() {
 		http://eskup.elpais.com/Outeskup?t=&nummsg=12&p=&f=json&th=1&msg=1356611973-8fe6c2d09824c9e5523f9931a834a641&id=7gTvFkSaO-pa0342AjhqMg&
 	*/
 	this.loadThread = function(threadID, callback) {
+		if (LAST_THREAD.id == threadID) {
+			callback(LAST_THREAD.info);
+			return;
+		}; 
 		var params = eskupParams({msg: threadID, th: 1});
 		apiCall("GET", OUTESKUP, params, function (r) {
-			if (callback) callback(eskupParseResponse(r));
+			var info = eskupParseResponse(r);
+			LAST_THREAD.id = threadID;
+			LAST_THREAD.info = info;
+			if (callback) callback(info);
 		});
 	};
 };

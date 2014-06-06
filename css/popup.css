@@ -1,5 +1,5 @@
 /* colores
-	-verde: #004862
+	- azul: #004862
 	- rojo: #F25600
 */
 
@@ -14,6 +14,17 @@ body {
 	font-size: 14px;
 	margin: 0px;
 }
+
+/* algunas clases genéricas */
+.red {
+	background-color: #F25600;
+	color: #fff;
+}
+.blue {
+	background-color: #004862;
+	color: #fff;
+}
+
 .fa {
 	font-family: 'Open Sans', sans-serif;
 }
@@ -335,8 +346,6 @@ ul.navigator li:hover {
 	content: "dejar de escribir";
 }
 
-
-
 /***********************/
 /* tablón de mensajes  */
 /***********************/
@@ -385,9 +394,6 @@ ul.navigator li:hover {
 	margin-right: 10px;
 }
 
-#closetree {
-	display: block;
-}
 /* Editor */
 #edit-section {
 	position: fixed;
@@ -450,7 +456,8 @@ ul.navigator li:hover {
 	box-shadow: 0 1px 2px #d9d9d9;
 }
 .message.highlighted {
-	background-color: #ffeba7;
+	border-color: rgb(15, 127, 187);
+	box-shadow: 0px 0px 3px 0px rgba(15, 127, 187, 0.75);
 }
 .card {
     -webkit-transition: all 400ms ease;
