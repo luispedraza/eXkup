@@ -330,7 +330,10 @@ function showThread() {
 				newMore = document.createElement("div");
 				newMore.className = "more fa fa-minus-square";
 				newMore.addEventListener("click", function() {
-					$(this).closest('.children').toggleClass('on');
+					$(this)
+						.toggleClass('fa-minus-square')
+						.toggleClass('fa-plus-square')
+						.closest('.children').toggleClass('on');
 				});
 				childrenDiv.appendChild(newMore);
 				parent.node.appendChild(childrenDiv);
@@ -648,12 +651,25 @@ function fillFollowTo(pag, loaded) {
 
 /* Carga en el perfil la lista de usuarios que me siguen */
 function fillFollowMe(pag) {
-	if (typeof pag == "undefined") pag = 1;
+	var $ul = $("#follow-me ul");
+	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
+	if (typeof pag == "undefined") pag = 1;			// página requerida
+	if (typeof loaded == "undefined") loaded = 0;	// elementos ya cargados 
 	API.loadFollowMe(pag, function(users) {
-		if (!users) return;
+		console.log(users);
 		if (users.pagina != pag) return;
-		// fillFollows(document.getElementById("follow-me-users"), users);
-		// LoadFollowMe(pag+1);
+		var profiles = users.perfilesUsuarios;
+		for (var u in profiles) {
+			var user = profiles[u];
+			$ul.append(
+				$("<li>")
+					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
+					.append($("<div>").addClass("user-info")
+						.append($("<div>").addClass("user-nickname").text("@" + u))
+						.append($("<div>").addClass("user-fullname").text(user.nombre + " " + user.apellidos))
+						)
+				);
+		};
 	});
 };
 

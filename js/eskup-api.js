@@ -235,7 +235,7 @@ function EskupApi() {
 		ej: http://eskup.elpais.com/Profileeskup?action=list_usuarios&f=xml&pag=1&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadFollowTo = function(pag, callback) {
-		var params = eskupParams({action: "list_usuarios", pag: pag, max: 100});
+		var params = eskupParams({action: "list_usuarios", pag: pag, max: 20});
 		apiCall("GET", PROFILEESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
@@ -245,7 +245,7 @@ function EskupApi() {
 		ej: http://eskup.elpais.com/Profileeskup?action=list_seguidores&f=xml&pag=1&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadFollowMe = function(pag, callback) {
-		var params = eskupParams({action: "list_seguidores", pag: pag, max: 100});
+		var params = eskupParams({action: "list_seguidores", pag: pag, max: 20});
 		apiCall("GET", PROFILEESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
