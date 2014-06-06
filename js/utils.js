@@ -104,27 +104,6 @@ function checkUserPhoto(path) {
 	return path || "img/noimage.jpg";
 };
 
-/* Rellenar la lista de temas seguidos en el perfil */
-function fillThemes() {
-	API.loadFollowedThemes(function(themes) {
-		$divThemes = $("#themes-follow").html("");
-		themes = makeArray(themes).sort(function(a,b) {
-			// ordenamos alfabéticamente la lista de temas
-			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
-		});
-		for (var t=0, len=themes.length; t<len; t++) {
-			var theme = themes[t];
-			themeID = "ev-"+theme.__key;
-			var $item = $("<li>")
-				.attr("class", "board-selector")
-				.attr("id", themeID)
-				.text(theme.nombre)
-				.on("click", function() { loadBoard(this.id); })
-				.appendTo($divThemes);
-		};
-	});
-};
-
 /* Procesamiendo de enlaces a vídeos contenidos en un mensaje */
 function processVideos(msg_content) {
 	return;

@@ -756,18 +756,36 @@ span.time-tooltip span:first-child {
 	border: 1px solid #fff;
 	float:left;
 }
+.selector li img.big {
+	width: 60px;
+}
 .selector li img.online {
 	outline: 2px solid #F25600;
 }
 
-.selector .user-info {
+.selector .puser-info {
 	float: left;
 	margin: 5px;
 }
-.selector .user-nickname {
+.selector .puser-nickname {
 	font-weight: bold;
 }
-.selector .user-fullname {
+.selector .puser-fullname {
+	color: #666;
+}
+.selector .ptheme-info {
+	float: left;
+	margin: 5px;
+}
+.selector .ptheme-name {
+	font-weight: bold;
+}
+.selector .ptheme-description {
+	width: 300px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow-y: scroll;
 	color: #666;
 }
 .selector .unfollow {
@@ -779,10 +797,15 @@ span.time-tooltip span:first-child {
 	padding: 5px;
 	color: #fff;
 	cursor: pointer;
+	display: none;
+}
+.selector li:hover .unfollow {
+	display: block;
 }
 .selector .unfollow:before {
-	content: "dejard de seguir";
+	content: "dejar de seguirlo";
 }
+
 #follow-to {
 	
 }

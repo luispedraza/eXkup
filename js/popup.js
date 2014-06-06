@@ -48,18 +48,10 @@ function initPopup() {
 			$("#profile-section .selector-item").removeClass('on');
 			$(this).closest(".selector-item").addClass('on');
 		});
-		$("#follow-to h4").on("click", function() {
-			fillFollowTo();
-		});
-		$("#follow-me h4").on("click", function() {
-			fillFollowMe();
-		});
-		$("#themes-follow h4").on("click", function() {
-			fillFollowThemes();
-		});
-		$("#themes-write h4").on("click", function() {
-			fillWritableThemes();
-		});
+		$("#follow-to h4").on("click", fillFollowTo);
+		$("#follow-me h4").on("click", fillFollowMe);
+		$("#themes-follow h4").on("click", fillFollowThemes);
+		$("#themes-write h4").on("click", fillWritableThemes);
 		// cargar tablón de eventos seguidos
 		(function() {
 			var evObj = document.createEvent('MouseEvents');
@@ -630,9 +622,9 @@ function fillFollowTo() {
 						console.log("unfollow");
 					}))
 					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
-					.append($("<div>").addClass("user-info")
-						.append($("<div>").addClass("user-nickname").text("@" + nickname))
-						.append($("<div>").addClass("user-fullname").text(user.nombre + " " + user.apellidos))
+					.append($("<div>").addClass("puser-info")
+						.append($("<div>").addClass("puser-nickname").text("@" + nickname))
+						.append($("<div>").addClass("puser-fullname").text(user.nombre + " " + user.apellidos))
 						)
 				);
 		});
@@ -650,9 +642,9 @@ function fillFollowMe() {
 			$ul.append(
 				$("<li>")
 					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
-					.append($("<div>").addClass("user-info")
-						.append($("<div>").addClass("user-nickname").text("@" + nickname))
-						.append($("<div>").addClass("user-fullname").text(user.nombre + " " + user.apellidos))
+					.append($("<div>").addClass("puser-info")
+						.append($("<div>").addClass("puser-nickname").text("@" + nickname))
+						.append($("<div>").addClass("puser-fullname").text(user.nombre + " " + user.apellidos))
 						)
 				);
 		});
@@ -661,13 +653,46 @@ function fillFollowMe() {
 };
 
 /* Carga en el perfil la lista de temas seguidos */
-function fillFollowThemes(pag) {
-
+function fillFollowThemes() {
+	var $ul = $("#themes-follow ul");
+	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
+	API.loadFollowedThemes(function(themes) {
+		for (var t in themes) {
+			var theme = themes[t];
+			$ul.append(
+				$("<li>")
+					.append($("<div>").addClass("unfollow").attr("data-themeid", t).on("click", function() {
+						console.log("unfollow");
+					}))
+					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
+					.append($("<div>").addClass("theme-info")
+						.append($("<div>").addClass("ptheme-name").text(theme.nombre))
+						.append($("<div>").addClass("ptheme-description").html(theme.descripcion))
+						)
+				);
+		};
+		$ul.attr("data-loaded","1");
+	});
 };
 
 /* Carga en el perfil la lista de temas en los que puedo escribir */
-function fillWritableThemes(pag) {
-
+function fillWritableThemes() {
+	var $ul = $("#themes-write ul");
+	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
+	API.loadWritableThemes(function(themes) {
+		for (var t in themes) {
+			var theme = themes[t];
+			$ul.append(
+				$("<li>")
+					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
+					.append($("<div>").addClass("theme-info")
+						.append($("<div>").addClass("ptheme-name").text(theme.nombre))
+						.append($("<div>").addClass("ptheme-description").html(theme.descripcion))
+						)
+				);
+		};
+		$ul.attr("data-loaded","1");
+	});
 };
 
 /* Eliminación de un mensaje */
@@ -718,10 +743,29 @@ function forwardMessage() {
 /* Rellena la cabecera del popup con información del usuario */
 function fillHeader() {
 	API.loadProfile(function(user) {
-		console.log(user);
 		$("#user-avatar").attr("src", user.pathfoto);
 		$("#user-nickname").text("@" + API.getUserNickname());
 		$("#user-fullname").text("(" + user.nombre + " " + user.apellidos + ")");
 	});
 };
 
+/* Rellenar la lista de temas seguidos en el el menú de navegación */
+function fillThemes() {
+	API.loadFollowedThemes(function(themes) {
+		$divThemes = $("#themes-follow").html("");
+		themes = makeArray(themes).sort(function(a,b) {
+			// ordenamos alfabéticamente la lista de temas
+			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
+		});
+		for (var t=0, len=themes.length; t<len; t++) {
+			var theme = themes[t];
+			themeID = "ev-"+theme.__key;
+			var $item = $("<li>")
+				.attr("class", "board-selector")
+				.attr("id", themeID)
+				.text(theme.nombre)
+				.on("click", function() { loadBoard(this.id); })
+				.appendTo($divThemes);
+		};
+	});
+};
