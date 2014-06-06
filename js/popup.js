@@ -283,12 +283,10 @@ function uiSelectBoard(board) {
 };
 
 /* Carga de una conversación completa */
-function showThread() {
+function showThread(threadID, originalMsgID) {
 	var modal = new ModalDialog("Cargando datos", 
 		"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
 		[]);
-	var threadID = this.getAttribute("data-thread");
-	var originalMsgID = $(this).closest(".message").attr("id");
 	API.loadThread(threadID, function(info) {
 		var treeDiv = document.getElementById("tree");
 		treeDiv.innerHTML = "";
@@ -509,7 +507,11 @@ function appendMsg(msg, board, themes, before) {
 		div_thread.innerHTML = "<i class='fa fa-comments'></i> charla";
 		div_thread.title = "sigue el hilo";
 		div_thread.setAttribute("data-thread", msg.hilo);
-		div_thread.addEventListener("click", showThread);
+		div_thread.addEventListener("click", function() {
+			showThread(
+				this.getAttribute("data-thread"),
+				$(this).closest(".message").attr("id"));
+		});
 		dCtrl.appendChild(div_thread);
 	};
 	// Mensaje reenviado
