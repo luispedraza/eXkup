@@ -231,11 +231,11 @@ function EskupApi() {
 			});
 	};
 
-	/*	Usuarios que sigo
+	/*	Usuarios que sigo (una página)
 		ej: http://eskup.elpais.com/Profileeskup?action=list_usuarios&f=xml&pag=1&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadFollowTo = function(pag, callback) {
-		var params = eskupParams({action: "list_usuarios", pag: pag, max: 20});
+		var params = eskupParams({action: "list_usuarios", pag: pag, max: 100});
 		apiCall("GET", PROFILEESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
@@ -245,10 +245,30 @@ function EskupApi() {
 		ej: http://eskup.elpais.com/Profileeskup?action=list_seguidores&f=xml&pag=1&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadFollowMe = function(pag, callback) {
-		var params = eskupParams({action: "list_seguidores", pag: pag, max: 20});
+		var params = eskupParams({action: "list_seguidores", pag: pag, max: 100});
 		apiCall("GET", PROFILEESKUP, params, function (r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
+	};
+
+	/* Todos los usuarios que sigo (option==1) o me siguen (option==2) */
+	this.loadFollowUsers = function(option, callback) {
+		var result = [];
+		var f = (option==1) ? THAT.loadFollowTo : THAT.loadFollowMe;
+		(function addBatch (page) {
+			f(page, function(data) {
+				var N = data.numeroUsuarios;
+				var profiles = data.perfilesUsuarios;
+				var batch = Object.keys(profiles).map(function(k){
+					var item = profiles[k];
+					item.nickname = k;
+					return item;
+				});
+				result = result.concat(batch);
+				if (result.length < N) addBatch(++page);
+				else callback(result);
+			});
+		})(1);
 	};
 
 	/* Carga de mensajes favoritos, por compatibilidad con otras APIs */

@@ -622,54 +622,45 @@ function fillProfile(user) {
 };
 
 /* Carga en el perfil la lista de usuarios a quienes sigo */
-function fillFollowTo(pag, loaded) {
+function fillFollowTo() {
 	var $ul = $("#follow-to ul");
 	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
-	if (typeof pag == "undefined") pag = 1;			// página requerida
-	if (typeof loaded == "undefined") loaded = 0;	// elementos ya cargados 
-	API.loadFollowTo(pag, function(users) {
-		console.log(users);
-		if (users.pagina != pag) return;
-		var profiles = users.perfilesUsuarios;
-		for (var u in profiles) {
-			var user = profiles[u];
+	API.loadFollowUsers(1, function(users) {
+		users.forEach(function(user) {
+			var nickname = user.nickname;
 			$ul.append(
 				$("<li>")
-					.append($("<div>").addClass("unfollow").attr("data-userid", u).on("cick", function() {
+					.append($("<div>").addClass("unfollow").attr("data-userid", nickname).on("click", function() {
 						console.log("unfollow");
 					}))
 					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
 					.append($("<div>").addClass("user-info")
-						.append($("<div>").addClass("user-nickname").text("@" + u))
+						.append($("<div>").addClass("user-nickname").text("@" + nickname))
 						.append($("<div>").addClass("user-fullname").text(user.nombre + " " + user.apellidos))
 						)
 				);
-		};
-		// LoadFollowTo(pag+1);
+		});
+		$ul.attr("data-loaded","1");
 	});
 };
 
 /* Carga en el perfil la lista de usuarios que me siguen */
-function fillFollowMe(pag) {
+function fillFollowMe() {
 	var $ul = $("#follow-me ul");
 	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
-	if (typeof pag == "undefined") pag = 1;			// página requerida
-	if (typeof loaded == "undefined") loaded = 0;	// elementos ya cargados 
-	API.loadFollowMe(pag, function(users) {
-		console.log(users);
-		if (users.pagina != pag) return;
-		var profiles = users.perfilesUsuarios;
-		for (var u in profiles) {
-			var user = profiles[u];
+	API.loadFollowUsers(2, function(users) {
+		users.forEach(function(user) {
+			var nickname = user.nickname;
 			$ul.append(
 				$("<li>")
 					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
 					.append($("<div>").addClass("user-info")
-						.append($("<div>").addClass("user-nickname").text("@" + u))
+						.append($("<div>").addClass("user-nickname").text("@" + nickname))
 						.append($("<div>").addClass("user-fullname").text(user.nombre + " " + user.apellidos))
 						)
 				);
-		};
+		});
+		$ul.attr("data-loaded","1");
 	});
 };
 
