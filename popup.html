@@ -30,8 +30,8 @@
 		</ul>
 		<div id="header-user">
 			<img id="user-avatar" />
-			<span id="user-name">lpedraza</span>
-			<span id="user-fullname">(Luis Pedraza)</span>
+			<span id="user-nickname"></span>
+			<span id="user-fullname"></span>
 		</div>
 	</div><!-- header -->
 
@@ -114,24 +114,31 @@
 	<div id="profile-container" class="container">
 		<!-- SECCION. PERFIL -->
 		<div id="profile-section">
-			<div id="profile-info">
-				<div class="profile-item" id="nombre"><span class="field">Nombre:</span><span class="value"></span></div>
-				<div class="profile-item" id="apellidos"><span class="field">Apellidos:</span><span class="value"></span></div>
-				<div class="profile-item" id="descripcion"><span class="field">Sobre mí:</span><span class="value"></span></div>
-				<div class="profile-item" id="urlpersonal"><span class="field">Página web:</span><span class="value"></span></div>
-				<div class="profile-item" id="urlblog"><span class="field">Blog:</span><span class="value"></span></div>
+			<div class="info">
+				<img id="profile-avatar" />
+				<span id="profile-fullname"></span>
+				<span id="profile-nickname"></span> <br />
+				<span id="profile-description"></span>
+				<div class="profile-social"><span>WEB</span></div>
 			</div>
-
-			<div id="follows">
-				<div id="follow-to">
-					<h4>sigo a: <span class="follow-counter"></span></h4>
-					<div class="follow-to-users" id="follow-to-users"></div>
+			<div class="selector">
+				<div id="follow-to" class="selector-item on">
+					<h4>sigo a <span class="number"></span> usuarios</h4>
+					<ul class="profile-list"></ul>
 				</div>
-				<div id="follow-me">
-					<h4>me siguen: <span class="follow-counter"></span></h4>
-					<div class="follow-me-users" id="follow-me-users"></div>       
+				<div id="follow-me" class="selector-item">
+					<h4>me siguen <span class="number"></span> usuarios</h4>
+					<ul class="profile-list"></ul>
 				</div>
-			</div>
+				<div id="themes-follow" class="selector-item">
+					<h4>sigo <span class="number"></span> temas</h4>
+					<ul class="profile-list"></ul>
+				</div>
+				<div id="themes-write" class="selector-item">
+					<h4>pruedo escribir en <span class="number"></span> temas</h4>
+					<ul class="profile-list"></ul>
+				</div>
+			</div> <!-- selector -->
 		</div>
 	</div> <!-- profile-container -->
 </body>

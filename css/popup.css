@@ -123,13 +123,15 @@ ul.navigator li:hover {
 	border: 1px solid #fff;
 }
 #header span {
-	font-size: 18px;
+	display: inline-block;
 }
-#user-name {
+#user-nickname {
 	font-weight: 400;
+	font-size: 25px;
 }
 #user-fullname {
-	font-weight: 300;
+	font-weight: 200;
+	font-size: 20px;
 }
 
 #navigation {
@@ -441,6 +443,9 @@ ul.navigator li:hover {
 	overflow: auto;
 	padding: 10px;
 }
+#profile-section .info {
+	height: 65px;
+}
 
 /* Mensajes */
 .message-list {
@@ -676,52 +681,107 @@ span.time-tooltip span:first-child {
 }
 
 /* Profile */
-#profile-section img {
-  margin:2px;
-  width:30px;
-  height:auto;
+#profile-avatar {
+  width:50px;
   float:left;
+  margin-right: 10px;
+}
+#profile-nickname {
+	font-size: 20px;
+	font-weight: bold;
+}
+#profile-fullname {
+	font-size: 24px;
+	font-weight: 200;
+}
+#profile-description {
+	color: #666;
 }
 
-.profile-item span {
-	display: inline-block;
-	background-color: #f2f2f2;
-	border: 1px solid #fff;
+.profile-social {
+	
+	/* float: right; */
 }
-.profile-item .field {	
-	width: 100px;
-	text-align: right;
+
+.selector {
+	clear: both;
+	margin-top: 10px;
 }
-.profile-item .value {
-	width: 300px;
-}
-#follow-to, #follow-me {
-	border: 1px solid #ddd;
+.selector-item {
 	padding: 5px;
-	overflow-x: hidden;
-	overflow-y: auto;
-	height: 300px;
+	border-top: 1px solid #666;
+	transition: height .25s ease;
 }
 
-#follow-to {
-	width:270px;
+.selector h4 {
+	font-size: 20px;
+	padding: 3px 0;
+	text-transform: uppercase;
+	color:  #666;
+	font-weight: lighter;
+	margin: 0;
+	cursor: pointer;
+}
+
+.selector h4 .number {
+	font-weight: bold;
+	color: #F25600;
+}
+.selector ul {
+	height: 0;
+	overflow-y: scroll;
+	padding: 0;
+	margin: 0;
+}
+.selector-item.on ul {
+	height: 270px;
+}
+.selector li {
+	list-style: none;
+	border-bottom: 1px solid #ddd;
+	height: 55px;
+	clear: both;
+	font-size: 12px;
+}
+.selector li img {
+	width: 40px;
+	margin: 5px;
+	border: 1px solid #fff;
 	float:left;
+}
+.selector li img.online {
+	outline: 2px solid #F25600;
+}
+
+.selector .user-info {
+	float: left;
+	margin: 5px;
+}
+.selector .user-nickname {
+	font-weight: bold;
+}
+.selector .user-fullname {
+	color: #666;
+}
+.selector .unfollow {
+	float: right;
+	width: 100px;
+	height: 20px;
+	margin: 5px;
+	background-color: #F25600;
+	padding: 5px;
+	color: #fff;
+	cursor: pointer;
+}
+.selector .unfollow:before {
+	content: "dejard de seguir";
+}
+#follow-to {
+	
 }
 
 #follow-me {
-	width:270px;
-	float:right;
+	
 }
 
-#follows img {
-	width:35px;
-	height:auto;
-	padding: 1px;
-	display: inline;
-	border:3px solid #ccc;
-}
-
-#follows img.online {
-	border: 3px solid #004862;
-}
 

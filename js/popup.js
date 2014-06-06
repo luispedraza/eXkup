@@ -10,6 +10,11 @@ window.addEventListener("load", initPopup);
 function initPopup() {
 	/* Obtención de la clave pública de usuario, e inicialización del perfil */
 	API.init(function(userID) {
+		if (!userID) {
+			chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
+			return;
+		};
+		fillHeader();
 		TABLONES["mios"] = "t1-" + userID;
 		fillThemes();
 		// Eventos
@@ -24,32 +29,36 @@ function initPopup() {
 			};
 		});
 
-		$(".board-selector").on("click", function() {
-			loadBoard(this.id);
-		});
+		$(".board-selector").on("click", function() { loadBoard(this.id); });
 		
-		$("#logout").on("click", function() {
-			API.logOut()
-		});
-		document.getElementById("closetree").addEventListener("click", function() {
-			showTreeBoard(false);
-		});
-		$("#edit-section-h1").on("click", function() {
-			showEditor();
-		});
-		$("#cancel").on("click", function() {
-			showEditor(false);
-		});
+		$("#logout").on("click", function() { API.logOut(); });
+
+		$("#closetree").on("click", function() { showTreeBoard(false); });
+		$("#edit-section-h1").on("click", function() { showEditor(); });
+		$("#cancel").on("click", function() { showEditor(false); });
 		/* Mostrar el perfil */
 		$("#profile-item").on("click", function() {
 			$(this).toggleClass('on');
 			API.loadProfile(function(user) {
-				fillHeader(user);
 				fillProfile(user);
-				LoadFollowTo();
-				LoadFollowMe();
-				$("#profile-container").toggleClass('on');
 			});
+		});
+		// Mostrar secciones del perfil
+		$("#profile-section .selector-item h4").on("click", function() {
+			$("#profile-section .selector-item").removeClass('on');
+			$(this).closest(".selector-item").addClass('on');
+		});
+		$("#follow-to h4").on("click", function() {
+			fillFollowTo();
+		});
+		$("#follow-me h4").on("click", function() {
+			fillFollowMe();
+		});
+		$("#themes-follow h4").on("click", function() {
+			fillFollowThemes();
+		});
+		$("#themes-write h4").on("click", function() {
+			fillWritableThemes();
 		});
 		// cargar tablón de eventos seguidos
 		(function() {
@@ -593,26 +602,69 @@ function loadFavorites() {
 	});
 };
 
-/* Cargar usuarios que me siguen */
-function LoadFollowMe(pag) {
+
+/* Rellena la información de usuario en la página de perfil */
+function fillProfile(user) {
+	var urlwebpersonal = user.urlwebpersonal;
+	var urlblog = user.urlblog;
+	$("#profile-avatar").attr("src", checkUserPhoto(user.pathfoto));
+	$("#profile-nickname").text("@" + API.getUserNickname());
+	$("#profile-fullname").text((user.nombre + user.apellidos).trim());
+	$("#profile-description").text(user.descripcion);
+	$("#profile-container").toggleClass('on');
+	$("#follow-to .number").text(user.numero_usuarios);
+	$("#follow-me .number").text(user.numero_seguidores);
+	$("#themes-follow .number").text(user.numero_eventos);
+	$("#themes-write .number").text(user.numero_eventos_escribe);
+};
+
+/* Carga en el perfil la lista de usuarios a quienes sigo */
+function fillFollowTo(pag, loaded) {
+	var $ul = $("#follow-to ul");
+	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
+	if (typeof pag == "undefined") pag = 1;			// página requerida
+	if (typeof loaded == "undefined") loaded = 0;	// elementos ya cargados 
+	API.loadFollowTo(pag, function(users) {
+		console.log(users);
+		if (users.pagina != pag) return;
+		var profiles = users.perfilesUsuarios;
+		for (var u in profiles) {
+			var user = profiles[u];
+			$ul.append(
+				$("<li>")
+					.append($("<div>").addClass("unfollow").attr("data-userid", u).on("cick", function() {
+						console.log("unfollow");
+					}))
+					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
+					.append($("<div>").addClass("user-info")
+						.append($("<div>").addClass("user-nickname").text("@" + u))
+						.append($("<div>").addClass("user-fullname").text(user.nombre + " " + user.apellidos))
+						)
+				);
+		};
+		// LoadFollowTo(pag+1);
+	});
+};
+
+/* Carga en el perfil la lista de usuarios que me siguen */
+function fillFollowMe(pag) {
 	if (typeof pag == "undefined") pag = 1;
 	API.loadFollowMe(pag, function(users) {
 		if (!users) return;
 		if (users.pagina != pag) return;
-		fillFollows(document.getElementById("follow-me-users"), users);
-		LoadFollowMe(pag+1);
+		// fillFollows(document.getElementById("follow-me-users"), users);
+		// LoadFollowMe(pag+1);
 	});
 };
 
-/* Cargar usuarios a los que sigo */
-function LoadFollowTo(pag) {
-	if (typeof pag == "undefined") pag = 1;
-	API.loadFollowTo(pag, function(users) {
-		if (!users) return;
-		if (users.pagina != pag) return;
-		fillFollows(document.getElementById("follow-to-users"), users);
-		LoadFollowTo(pag+1);
-	});
+/* Carga en el perfil la lista de temas seguidos */
+function fillFollowThemes(pag) {
+
+};
+
+/* Carga en el perfil la lista de temas en los que puedo escribir */
+function fillWritableThemes(pag) {
+
 };
 
 /* Eliminación de un mensaje */
@@ -658,5 +710,15 @@ function forwardMessage() {
 	showEditor(true, "forward", msgID, msg.getAttribute("data-themes"));
 	var messageContent = "fwd @" + user + ": " + $(msg).find(".msg_content").get(0).innerHTML;
 	$("#newmessage").html(messageContent);
+};
+
+/* Rellena la cabecera del popup con información del usuario */
+function fillHeader() {
+	API.loadProfile(function(user) {
+		console.log(user);
+		$("#user-avatar").attr("src", user.pathfoto);
+		$("#user-nickname").text("@" + API.getUserNickname());
+		$("#user-fullname").text("(" + user.nombre + " " + user.apellidos + ")");
+	});
 };
 

@@ -104,38 +104,6 @@ function checkUserPhoto(path) {
 	return path || "img/noimage.jpg";
 };
 
-function fillProfile(user) {
-	var urlwebpersonal = user.urlwebpersonal;
-	var urlblog = user.urlblog;
-	$("#nombre .value").html(user.nombre);
-	$("#apellidos .value").html(user.apellidos);
-	$("#descripcion .value").html(user.descripcion);
-	$("#urlpersonal .value").html(urlwebpersonal.link(urlwebpersonal));
-	$("#urlblog .value").html(urlblog.link(urlblog));
-};
-
-function fillHeader(user) {
-	document.getElementById("user-avatar").setAttribute("src", user.pathfoto);
-};
-
-/* Rellenar la lista de usuarios seguidos en el perfil */
-function fillFollows(div, users) {
-	$(div).find(".follow-counter").text(users.numeroUsuarios);
-	for (var u_id in users.perfilesUsuarios) {
-		var user = users.perfilesUsuarios[u_id];
-		var usera = document.createElement("a");
-		usera.href = "http://eskup.elpais.com/" + u_id;
-		usera.target = "_blank";
-		var userimg = document.createElement("img");
-		userimg.src = checkUserPhoto(user.pathfoto);
-		userimg.title = u_id;
-		userimg.alt = u_id;
-		if (user.activo) userimg.className = "online";
-		usera.appendChild(userimg);
-		div.appendChild(usera);
-	};
-};
-
 /* Rellenar la lista de temas seguidos en el perfil */
 function fillThemes() {
 	API.loadFollowedThemes(function(themes) {

@@ -75,8 +75,7 @@ function EskupApi() {
 		apiCall("GET", "http://eskup.elpais.com/Auth/getuserpk.pl", null, function(r) {
 			var info = eskupParseResponse(r);
 			if (info.status == "error") {
-				chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
-				window.close();
+				callback(null);
 				return;
 			} else {
 				PUBLIC_KEY = info.id;
