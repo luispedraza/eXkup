@@ -92,6 +92,14 @@
 	cursor: pointer;
 	content: " ";
 	margin-left: -5px;
+	display: block;
+	overflow: hidden;
+	height: 15px;
+	-webkit-transition: height .5s linear;
+	   -moz-transition: height .5s linear;
+	    -ms-transition: height .5s linear;
+	     -o-transition: height .5s linear;
+	        transition: height .5s linear;
 }
 
 .more.on {
@@ -101,7 +109,4 @@
 }
 .no-indent .more {
     height: 0;
-	
-    overflow: hidden;
-    /* padding: 0; */
 }
