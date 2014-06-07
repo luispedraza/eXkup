@@ -34,6 +34,9 @@ function initPopup() {
 		$("#logout").on("click", function() { API.logOut(); });
 
 		$("#closetree").on("click", function() { showTreeBoard(false); });
+		$("#noindent").on("click", function() { 
+			$("#tree").toggleClass('no-indent');
+		});
 		$("#edit-section-h1").on("click", function() { showEditor(); });
 		$("#cancel").on("click", function() { showEditor(false); });
 		/* Mostrar el perfil */
@@ -282,6 +285,44 @@ function uiSelectBoard(board) {
 	$boardDescription.append($description);
 };
 
+// function Positioner() {
+// 			// Este objeto guardará estado de la posición del scroll del árbol
+// 			var lastFound = 0;
+// 			var messages = [];
+// 			var treeBoard = null;
+// 			var finished = false;
+// 			var checkPos = function(e) {
+// 				var pos = $(messages[e]).offset().top - treeBoard.offset().top;
+// 				return ((pos>0) && (pos<100));
+// 			};
+// 			this.find = function() {
+// 				if (!finished) {
+// 					console.log("buscando");
+// 					var newMessages = $("#tree .message");
+// 					if (newMessages.length != messages.length) {
+// 						messages = newMessages;
+// 					} else {
+// 						finished = true;
+// 					};
+// 				};
+// 				treeBoard = (treeBoard || $("#tree-board"));
+// 				if (!messages) return -1;
+// 				for (var i=lastFound, j=lastFound-1, len=messages.length; ((i<len) || (j>=0)); ((i++)&&(j--)) ) {
+// 					console.log(i,i);
+// 					if ((i<len) && checkPos(i)) {
+// 						lastFound = i; break;
+// 					};
+// 					if ((j>=0) && checkPos(j)) {
+// 						lastFound = j; break;
+// 					};
+// 				};
+// 				console.log("finished");
+// 				return $(messages[lastFound]).offset().left - treeBoard.offset().left;
+// 			};
+// 			this.reset = function() {lastFound=0;};
+// 		};
+// var POSITIONER = new Positioner();	// para posicionar el scroll
+
 /* Carga de una conversación completa */
 function showThread(threadID, originalMsgID) {
 	var modal = new ModalDialog("Cargando datos", 
@@ -333,7 +374,22 @@ function showThread(threadID, originalMsgID) {
 			addNode(API.buildThreadMessage(m, info.perfilesUsuarios), m.idMsgRespuesta);
 		});
 		showTreeBoard(true);	// mostramos el resultado
-		$treeBoard = $("#tree-board").attr("data-thread", threadID);	// lo guardamos en el board, para visualización
+		// POSITIONER.reset();
+		$treeBoard = $("#tree-board").attr("data-thread", threadID)	// lo guardamos en el board, para visualización
+			// .off("scroll").on("scroll", function() {
+			// 	var v = POSITIONER.find();
+			// 	if ((v<20)||(v>40)) {
+			// 		$treeBoard.scrollLeft($treeBoard.scrollLeft() + v - 30);
+			// 	};
+			// })
+			.off("mousemove").on("mousemove", function(e){
+				var treeBoardRect = this.getBoundingClientRect(),
+					treeRect = document.getElementById("tree").getBoundingClientRect();
+				var alfa = (e.clientX - treeBoardRect.left) / treeBoardRect.width;
+				var scroll = Math.floor(alfa*(treeRect.width - treeBoardRect.width));
+				$treeBoard.scrollLeft(scroll);
+			})
+			;
 		setTimeout(function() {
 			// scroll hasta el mensaje de punto de entrada
 			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);

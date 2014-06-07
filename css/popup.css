@@ -364,6 +364,7 @@ ul.navigator li:hover {
 }
 #tree-board {
 	left: 450px;
+	overflow-x: scroll;
 }
 #board.switch {
 	left: -450px;
