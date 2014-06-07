@@ -168,7 +168,7 @@ ul.navigator li:hover {
 	border-bottom: 1px solid #fff;
 	transition: all .25s ease;
 	overflow: hidden;
-	height: 23px;
+	height: 20px;
 }
 #messages-header.on {
 	background-color: rgba(50,50,50,.85);
@@ -212,15 +212,12 @@ ul.navigator li:hover {
 }
 
 #board-title {
-	text-shadow: 1px 1px 5px rgba(150, 150, 150, 1);
+	text-shadow: 1px 1px 5px rgb(150, 150, 150);
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	cursor: pointer;
-	font-weight: bold;
 	font-size: 16px;
-	/* clear: none; */
-	display: block;
 }
 #board-title:before {
 	display:inline-block;
@@ -353,11 +350,12 @@ ul.navigator li:hover {
 /***********************/
 .board {
 	position: absolute;
-	top: 40px;
-	height: 475px;
+	top: 0px;
+	height: 440px;
 	transition: left .5s ease;
 	width: 450px;
 	overflow-y: scroll;
+	padding-top: 50px;
 }
 #board {
 	left: 0;

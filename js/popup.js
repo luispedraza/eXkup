@@ -34,8 +34,12 @@ function initPopup() {
 		$("#logout").on("click", function() { API.logOut(); });
 
 		$("#closetree").on("click", function() { showTreeBoard(false); });
-		$("#noindent").on("click", function() { 
+		$("#noindent").on("click", function() {
+			$(this).toggleClass('on');
 			$("#tree").toggleClass('no-indent');
+		});
+		$("#mouse-follow").on("click", function() {
+			$(this).toggleClass('on');
 		});
 		$("#edit-section-h1").on("click", function() { showEditor(); });
 		$("#cancel").on("click", function() { showEditor(false); });
@@ -87,20 +91,19 @@ function initPopup() {
 					if (location) {
 						var data = location.match(/eskup.elpais.com\/C(.+)'/);
 						if (data && data[1]) {
+							// cargar conversación de la noticia
 							var theCode = data[1];
 							showThread(theCode, theCode);
+						} else {
+							// cargar tablón de eventos seguidos
+							var evObj = document.createEvent('MouseEvents');
+						    evObj.initEvent("click", true, false);
+						    document.getElementById("sigo").dispatchEvent(evObj);
 						};
 					};
 				});	
 			};
 		});
-
-		// cargar tablón de eventos seguidos
-		(function() {
-			var evObj = document.createEvent('MouseEvents');
-		    evObj.initEvent("click", true, false);
-		    document.getElementById("sigo").dispatchEvent(evObj);
-		})();
 	});
 };
 
@@ -402,12 +405,14 @@ function showThread(threadID, originalMsgID) {
 			// 		$treeBoard.scrollLeft($treeBoard.scrollLeft() + v - 30);
 			// 	};
 			// })
-			.off("mousemove").on("mousemove", function(e){
-				var treeBoardRect = this.getBoundingClientRect(),
-					treeRect = document.getElementById("tree").getBoundingClientRect();
-				var alfa = (e.clientX - treeBoardRect.left) / treeBoardRect.width;
-				var scroll = Math.floor(alfa*(treeRect.width - treeBoardRect.width));
-				$treeBoard.scrollLeft(scroll);
+			.off("mousemove").on("mousemove", function(e) {
+				if ($("#mouse-follow").hasClass('on')) {
+					var treeBoardRect = this.getBoundingClientRect(),
+						treeRect = document.getElementById("tree").getBoundingClientRect();
+					var alfa = (e.clientX - treeBoardRect.left) / treeBoardRect.width;
+					var scroll = Math.floor(alfa*(treeRect.width - treeBoardRect.width));
+					$treeBoard.scrollLeft(scroll);
+				};
 			})
 			;
 		setTimeout(function() {
