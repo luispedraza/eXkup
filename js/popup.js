@@ -55,13 +55,6 @@ function initPopup() {
 		$("#follow-me h4").on("click", fillFollowMe);
 		$("#themes-follow h4").on("click", fillFollowThemes);
 		$("#themes-write h4").on("click", fillWritableThemes);
-		// cargar tablón de eventos seguidos
-		(function() {
-			var evObj = document.createEvent('MouseEvents');
-		    evObj.initEvent("click", true, false);
-		    document.getElementById("sigo").dispatchEvent(evObj);
-		})();
-
 		/* Información sobre el tablón actual */
 		$("#board-title").on("click", function() {
 			$("#messages-header").toggleClass("on");
@@ -81,6 +74,33 @@ function initPopup() {
 				});
 			});
 		});
+
+		// Inicialización de contenidos
+		chrome.tabs.query({'currentWindow': true, 'active': true}, function(t) {
+			console.log(t);
+			var currentTab = t[0];
+			var elpaisPattern = RegExp("https?://.*?\.?elpais\.com");
+			if (elpaisPattern.exec(currentTab.url)) {
+				console.log("encontrado");
+				chrome.tabs.executeScript(currentTab.id, { file: "js/elpais.js" }, function(result) {
+					var location = result[0];
+					if (location) {
+						var data = location.match(/eskup.elpais.com\/C(.+)'/);
+						if (data && data[1]) {
+							var theCode = data[1];
+							showThread(theCode, theCode);
+						};
+					};
+				});	
+			};
+		});
+
+		// cargar tablón de eventos seguidos
+		(function() {
+			var evObj = document.createEvent('MouseEvents');
+		    evObj.initEvent("click", true, false);
+		    document.getElementById("sigo").dispatchEvent(evObj);
+		})();
 	});
 };
 
@@ -343,7 +363,7 @@ function showThread(threadID, originalMsgID) {
 			newNode.appendChild(newItem);
 			var $newMsg = appendMsg(msg, newItem);
 			var msgID = msg.idMsg;
-			if (msgID == originalMsgID) 
+			if (msgID == originalMsgID)
 				$highlightedMsg = $newMsg.addClass('highlighted');	// resaltamos el mensaje de entrada al hilo
 			aux[msgID] = {node: newNode};
 			if (parentID == null) {

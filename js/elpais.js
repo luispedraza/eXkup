@@ -1,5 +1,7 @@
 console.log("hola");
 var link = document.querySelector(".bloque_comentarios .conversacion");
+var result = null;
 if (link) {
-	console.log(link.getAttribute("onclick"));
+	result = link.getAttribute("onclick");
 };
+result;
