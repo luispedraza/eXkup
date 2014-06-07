@@ -15,6 +15,7 @@ function makeInfoTree(info) {
 	index[rootMsg.idMsg] = rootMsg;
 	var replies = messages.slice(1);
 	replies.forEach(function(m) {
+		console.log(m.level);
 		var parentID = m.idMsgRespuesta;
 		var parentObj = index[parentID];
 		var children = (parentObj.children || (parentObj.children = []));
