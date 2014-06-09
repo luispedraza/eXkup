@@ -82,7 +82,8 @@ function apiCall(method, url, data, callback) {
 		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
 		data = encodeParams(data);
 	} else if (method == "MULTI") {
-		req.setRequestHeader("Content-Type", "multipart/form-data;");
+		req.setRequestHeader("enctype", "multipart/form-data;");
+		//req.setRequestHeader("Content-Type", "multipart/form-data;");
 		formData = new FormData();
 		for (i in data)
 			formData.append(i, data[i]);

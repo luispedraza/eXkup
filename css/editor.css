@@ -39,10 +39,12 @@
 	margin: 5px;
 	padding: 5px;
 	border: 1px solid #eee;
-	/* border: 1px dotted black; */
-	/* width: 120px; */
 	float: right;
 	position: relative;
+	display: none;
+}
+#newimage.loaded {
+	display: block;
 }
 #newimage:before {
 	display: block;
@@ -58,6 +60,30 @@
 #canvasimage {
 	max-width: 120px;
 	max-height: 100px;
+}
+
+#removeimage {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	display: none;
+	cursor: pointer;
+	background-color: #fff;
+	padding: 5px;
+}
+
+#removeimage:before {
+	color: #F25600;
+	font-size: 20px;
+	margin: 5px;
+	cursor: pointer;
+}
+
+#newimage:hover #removeimage {
+	display: block;
+}
+#newimage:hover canvas {
+	opacity: .2;
 }
 
 #destinations {

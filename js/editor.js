@@ -138,7 +138,7 @@ function sendMessage() {
 	data.themes = getSelectedThemes();
 	data.social = {	fb: $("#send2fb").prop("checked"),
 					tt: $("#send2tt").prop("checked")};
-	var newimg = document.getElementById("canvasimage");
+	var newimg = $("#newimage.loaded canvas").get(0);
 	data.image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
 	var command = data.command = this.getAttribute("data-command");
 	if ((command == "reply") || (command == "forward")) data.msgID = this.getAttribute("data-id");
@@ -176,6 +176,11 @@ function insertImage() {
 					    // Copiamos la imagen en el canvas
 					    var ctx = canvas.getContext("2d");
 					    ctx.drawImage(this, 0, 0);
+					    $("#newimage").addClass('loaded');
+					    $("#removeimage").off().on("click", function() {
+					    	console.log("borrando");
+					    	$("#newimage").removeClass('loaded');
+					    });
 					};
 					img.src = data[0];
 				} else if (r == "Abrir el Editor") {
