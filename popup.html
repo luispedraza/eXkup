@@ -98,7 +98,13 @@
 					<button id="cortas" class="button fa fa-cut" title="acortar enlaces"></button>
 					
 				</div>
-				<div id="newmessage" contenteditable="true"></div>
+				<div id="newmessage-container">
+					<div id="newimage" class="fa fa-paperclip">
+						<canvas id="canvasimage"></canvas>
+					</div> <!-- optional new image -->
+					<div id="newmessage" contenteditable="true">
+					</div>
+				</div>
 				<div id="destinations">
 					<div id="send2theme" class="send2">TEMAS (<span class="count">0</span>)
 						<ul id="send2theme-list"></ul>

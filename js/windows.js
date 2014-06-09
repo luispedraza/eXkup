@@ -43,21 +43,5 @@ function getCurrentURLs(callback) {
 function insertVideo() {
 	chrome.tabs.executeScript({file: 'js/getvideos.js', allFrames: true}, 
 		onVideos);
-}
-
-function insertImage() {
-	window.close();
-	chrome.tabs.create({url:"image_editor.html"});
-}
-
-function insertCancel() {
-	document.getElementById("selector").className = "";
-	//document.getElementById("selector-content").innerHTML = "";
-}
-
-function insertConfirm() {
-	var ctx = document.getElementById("canvasimage").getContext("2d");
-	var element = canvasEditor.getElement();
-	ctx.drawImage(element, 0, 0, 420, 500);
-	insertCancel();
 };
+

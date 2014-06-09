@@ -1,5 +1,4 @@
-var SELECTION = [];
-var MAXCHAR = 280;
+var MAXCHAR = 280;	// máximo de caracteres para el mensaje
 
 window.addEventListener("load", function() {
 	$("#send").on("click", sendMessage);
@@ -160,4 +159,82 @@ function cancel() {
 
 };
 
+/* Inserta una imagen en el mensaje */
+function insertImage() {
+	chrome.tabs.executeScript({ file: "js/getimages.js", allFrames: true }, function(result) {
+		var $selector = $("<div>").addClass('images-selector');
+		var dlg = new ModalDialog("Selecciona la imagen que quieras insertar", 
+			$selector,
+			["Insertar", "Cancelar", "Abrir el Editor"], 
+			function(r, data) {
+				if (r=="Insertar") {
+					var img = new Image();
+					img.onload = function() {
+						var canvas = document.getElementById("canvasimage");
+					    canvas.width = this.width;
+					    canvas.height = this.height;
+					    // Copiamos la imagen en el canvas
+					    var ctx = canvas.getContext("2d");
+					    ctx.drawImage(this, 0, 0);
+					};
+					img.src = data[0];
+				} else if (r == "Abrir el Editor") {
+					// lanzar el editor de imágenes
+					chrome.tabs.create({url:"image_editor.html"});
+				};
+			});
+		loadImages(result, null, function($div) {
+			$selector.append($div);
+			$selector.find("img").on("click", function() {
+				$selector.find("img").removeClass('on');
+				$(this).addClass('on');
+				$selector.attr("data-return", this.src);	// la imagen seleccionada
+			});
+		});
+	});	
+};
+
+/* recibe la lista de imágenes capturadas, para insertar 
+	@param result: array de resutlados de captura de imágenes
+	@para divItem: el lugar en el que insertar las imágenes capturadas
+	@param onClickImage: callback a ejecutar cuando se hace click en una imagen
+*/
+function loadImages(result, divItem, callback) {
+	if (!divItem) {
+		divItem = $("<div>").addClass('images')
+			.append($("<h2>").text("Imágenes encontradas en: " + result[0].title))
+			.append($("<div>").addClass('images-list'));
+	};
+	var $imagesList = divItem.find(".images-list");
+	var urls = [];
+	var images = [];
+	result.forEach(function(d) {urls = urls.concat(d.images)});
+	urls = urls.filter(function(e,i,a){return a.indexOf(e)==i});	// eliminar duplicadas
+	var loadedImages = 0;
+	function checkFinished() {
+		if (loadedImages == urls.length) {
+			// se han cargado todas las imágenes
+			images.sort(function(a,b) {	// ordenación por tamaño
+				return (((a.width*a.height)>(b.width*b.height)) ? -1 : 1);
+			});
+			$imagesList.append(images);
+			callback(divItem);
+		};
+	};
+	urls.forEach(function(url, index, array) {
+		var newImage = new Image();
+		newImage.onload = function() {
+			// la imagen se ha cargado
+			loadedImages++;
+			this.className = ((this.width<20)||(this.height<20)) ? "small" : "normal";
+			images.push(this);
+			checkFinished();
+		};
+		newImage.onerror = function() {
+			loadedImages++;
+			checkFinished();
+		};
+		newImage.src = url;
+	});
+};
 

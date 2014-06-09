@@ -303,10 +303,11 @@ function EskupApi() {
 		else if (data.social.tt) params.d = "1";
 		// imagen
 		if (data.image) {
-			params.p = image;
+			params.p = data.image;
 			method = "MULTI";
 		};
 		apiCall(method, INESKUP, params, function(r) {
+			console.log(r);
 			if (callback) callback(eskupParseResponse(r));
 		});
 	};

@@ -19,17 +19,45 @@
 	left: 120px;
 }
 
-#newmessage {
-	outline: none;
+#newmessage-container {
 	position: absolute;
 	left: 120px;
 	top: 30px;
 	border: 1px solid #eee;
-	height: 110px;
+	height: 130px;
 	width: 450px;
+}
+#newmessage {
+	outline: none;
+	height: 110px;
 	overflow-y: scroll;
 	overflow-x: hidden;
 	padding: 10px;
+}
+
+#newimage {
+	margin: 5px;
+	padding: 5px;
+	border: 1px solid #eee;
+	/* border: 1px dotted black; */
+	/* width: 120px; */
+	float: right;
+	position: relative;
+}
+#newimage:before {
+	display: block;
+	position: absolute;
+	font-size: 25px;
+	top: -20px;
+	right: 0;
+	color: #F25600;
+	-webkit-transform: rotate(70deg);
+	text-outline: 5px 5px #ffffff;
+}
+
+#canvasimage {
+	max-width: 120px;
+	max-height: 100px;
 }
 
 #destinations {
@@ -76,15 +104,6 @@
 .send2:hover {
 	border: 1px solid #aaa;
 	background-color: #eee;
-}
-
-
-#canvasimage {
-	border: 1px dotted black;
-	position: absolute;
-	left: 0;
-	bottom: 0;
-	width: 100px;
 }
 
 #counter {

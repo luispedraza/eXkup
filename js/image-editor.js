@@ -82,8 +82,15 @@ window.onload = function() {
 		canvasEditor.backgroundColor = ev.target.value;
 		canvasEditor.renderAll();
 	})
-	document.getElementById("insert-cancel").addEventListener("click", insertCancel);
-	document.getElementById("insert-confirm").addEventListener("click", insertConfirm);
+	document.getElementById("insert-cancel").addEventListener("click", function() {
+		document.getElementById("selector").className = "";
+	});
+	document.getElementById("insert-confirm").addEventListener("click", function() {
+		var ctx = document.getElementById("canvasimage").getContext("2d");
+		var element = canvasEditor.getElement();
+		ctx.drawImage(element, 0, 0, 420, 500);
+		document.getElementById("selector").className = "";
+	});
 	document.getElementById("hd").addEventListener("change", loadHDImage, false);
 	document.getElementById("show-small").addEventListener("change", showSmall);
 	// Editor 
@@ -219,56 +226,56 @@ function loadHDImage(ev1) {
 //////////////////////////////////////////////////////////
 // recibida lista de imágenes capturadas para insertar
 //////////////////////////////////////////////////////////
-function onImages(result, source) {
-	var divItem;
-	if (source) {
-		divItem = document.getElementById(source);
-		divItem.innerHTML = "";
-	} else {
-		divItem = document.createElement("div");
-		divItem.className = "item";
-		var divTitle = document.createElement("h2");
-		divTitle.innerText = "… desde " + result[0].title;
-		divItem.appendChild(divTitle);
-		var divSelector = document.getElementById("selector-items");
-		divSelector.appendChild(divItem);
-	}
-	var divNormal = document.createElement("div");
-	divNormal.className = "content-normal";
-	var divSmall = document.createElement("div");
-	divSmall.className = "content-small";
-	divSmall.style.display = "none";
+// function onImages(result, source) {
+// 	var divItem;
+// 	if (source) {
+// 		divItem = document.getElementById(source);
+// 		divItem.innerHTML = "";
+// 	} else {
+// 		divItem = document.createElement("div");
+// 		divItem.className = "item";
+// 		var divTitle = document.createElement("h2");
+// 		divTitle.innerText = "… desde " + result[0].title;
+// 		divItem.appendChild(divTitle);
+// 		var divSelector = document.getElementById("selector-items");
+// 		divSelector.appendChild(divItem);
+// 	}
+// 	var divNormal = document.createElement("div");
+// 	divNormal.className = "content-normal";
+// 	var divSmall = document.createElement("div");
+// 	divSmall.className = "content-small";
+// 	divSmall.style.display = "none";
 	
-	var list = [];
-	for (var f=0; f<result.length; f++) list = list.concat(result[f].images);	// resultados de todos los frames
-	for (var i=0; i<list.length; i++) {
-		var isnew = true;
-		for (j=0; j<i; j++) {
-			if (list[i] == list[j])
-			{
-				isnew = false;
-				continue;
-			}
-		}
-		if (!isnew) continue;
+// 	var list = [];
+// 	for (var f=0; f<result.length; f++) list = list.concat(result[f].images);	// resultados de todos los frames
+// 	for (var i=0; i<list.length; i++) {
+// 		var isnew = true;
+// 		for (j=0; j<i; j++) {
+// 			if (list[i] == list[j])
+// 			{
+// 				isnew = false;
+// 				continue;
+// 			}
+// 		}
+// 		if (!isnew) continue;
 		
-		newimg = new Image();
-		newimg.src = list[i];
-		newimg.onclick = canvasInsertImage;
-		newimg.onload = function() {
-			if (this.width > 150) {	
-				divNormal.appendChild(this);
-			}
-			else if (this.width > 20) {
-				divSmall.appendChild(this);
-			}
-		}
-	}
-	// if (divNormal.childNodes.length || divSmall.childNodes.length) {
-	divItem.appendChild(divNormal);
-	divItem.appendChild(divSmall);
-	// }
-}
+// 		newimg = new Image();
+// 		newimg.src = list[i];
+// 		newimg.onclick = canvasInsertImage;
+// 		newimg.onload = function() {
+// 			if (this.width > 150) {
+// 				divNormal.appendChild(this);
+// 			}
+// 			else if (this.width > 20) {
+// 				divSmall.appendChild(this);
+// 			}
+// 		}
+// 	}
+// 	// if (divNormal.childNodes.length || divSmall.childNodes.length) {
+// 	divItem.appendChild(divNormal);
+// 	divItem.appendChild(divSmall);
+// 	// }
+// }
 
 function initImageEditor() { 
 	chrome.tabs.query({'currentWindow': true}, function(tabs){
