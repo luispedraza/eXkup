@@ -262,36 +262,12 @@ function uiSelectBoard(board) {
 		if (themeInfo.tipo_suscripcion == 1) {
 			$themeControl.append(
 				$("<div>").attr("class", "control-item " + ((writable) ? "writable on" : "writable"))
+					.attr("data-theme", theme)
 					.attr("data-tiposuscripcion", themeInfo.tipo_suscripcion)
 					.attr("data-tipoevento", themeInfo.tipo_evento)
 					.attr("data-writable", themeInfo.estado_escritura)
 					.on("click", function() {
-						$this = $(this);
-						var typesuscription = $this.attr('data-tiposuscripcion');
-						var typeevent = $this.attr('data-tipoevento');
-						var writable = $this.attr('data-writable');
-						if (typesuscription == "1") {
-							// no se precisa autorización
-							new ModalDialog(((writable=="1") ? "Dejar de" : "Comenzar a") + " escribir en este tema",
-								"Si continúas, " + ((writable=="1") ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
-								[((writable=="1") ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
-								function(result) {
-									if (result == "Cancelar") return;
-									API.writeThemes([theme],
-										result == "Comenzar a escribir",
-										function(r) {
-											if (!r.match(/^error/)) {
-												$this.toggleClass('on');
-												$this.attr("data-writable", ((writable == "1") ? "0" : "1" ));	// cambio estado escritura
-											} else {
-												new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
-											};
-										});
-								});
-						} else if (typesuscription == "2") {
-							// se precisa autorización
-							// TODO: hay que hacerlo, pero no sé si quedan eventos de este tipo 
-						};
+						onWriteTheme(this);
 					}));			
 		};
 		$description.append($themeControl);
@@ -322,6 +298,37 @@ function onFollowTheme(button, callback) {
 					if (callback) callback();
 				});
 		});
+};
+
+function onWriteTheme(button, callback) {
+	$this = $(button);
+	var theme = $this.attr("data-theme");
+	var typesuscription = $this.attr('data-tiposuscripcion');
+	// var typeevent = $this.attr('data-tipoevento');
+	var writable = $this.attr('data-writable');
+	if ((typeof typesuscription === "undefined")||(typesuscription == "1")) {
+		// no se precisa autorización
+		new ModalDialog(((writable=="1") ? "Dejar de" : "Comenzar a") + " escribir en este tema",
+			"Si continúas, " + ((writable=="1") ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
+			[((writable=="1") ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
+			function(result) {
+				if (result == "Cancelar") return;
+				API.writeThemes([theme],
+					result == "Comenzar a escribir",
+					function(r) {
+						if (!r.match(/^error/)) {
+							$this.toggleClass('on');
+							$this.attr("data-writable", ((writable == "1") ? "0" : "1" ));	// cambio estado escritura
+						} else {
+							new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+						};
+						if (callback) callback();
+					});
+			});
+	} else if (typesuscription == "2") {
+		// se precisa autorización
+		// TODO: hay que hacerlo, pero no sé si quedan eventos de este tipo
+	};
 };
 
 // function Positioner() {
@@ -731,7 +738,7 @@ function fillFollowTo() {
 /* Carga en el perfil la lista de usuarios que me siguen */
 function fillFollowMe() {
 	API.loadFollowUsers(2, function(users) {
-		var $ul = $("#follow-me ul");
+		var $ul = $("#follow-me ul").html("");
 		users.forEach(function(user) {
 			var nickname = user.nickname;
 			$ul.append(
@@ -775,11 +782,20 @@ function fillFollowThemes() {
 /* Carga en el perfil la lista de temas en los que puedo escribir */
 function fillWritableThemes() {
 	API.loadWritableThemes(function(themes) {
-		var $ul = $("#themes-write ul");
+		var $ul = $("#themes-write ul").html("");
 		for (var t in themes) {
 			var theme = themes[t];
 			$ul.append(
 				$("<li>")
+					.append($("<div>").addClass('theme-control').append($("<div>").addClass("control-item writable on")
+						.attr("data-theme", t)
+						.attr("data-writable", "1")
+						.on("click", function() {
+							onWriteTheme(this, function() {
+								fillProfile();
+								fillWritableThemes();	// se recargan los temas en que escribo
+							});
+					})))
 					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
 					.append($("<div>").addClass("theme-info")
 						.append($("<div>").addClass("ptheme-name").text(theme.nombre))
