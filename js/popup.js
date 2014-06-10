@@ -275,6 +275,30 @@ function uiSelectBoard(board) {
 };
 
 /* Dejar de seguir o comenzar a seguir un tema */
+function onFollowUser(button, callback) {
+	$this = $(button);
+	var user = $this.attr("data-user");
+	var followed = $this.hasClass('on');
+	new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir a este usuario", 
+		"Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " a este usuario en Eskup", 
+		[(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
+		function(result) {
+			if (result == "Cancelar") return;
+			API.followUsers([user],
+				result == "Comenzar a seguirlo",
+				function(r) {
+					if (r == "OK") {
+						$this.toggleClass('on');
+						fillFollowTo();
+					} else {
+						new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+					};
+					if (callback) callback();
+				});
+		});
+};
+
+/* Dejar de seguir o comenzar a seguir un tema */
 function onFollowTheme(button, callback) {
 	$this = $(button);
 	var theme = $this.attr("data-theme");
@@ -727,9 +751,14 @@ function fillFollowTo() {
 			var nickname = user.nickname;
 			$ul.append(
 				$("<li>")
-					.append($("<div>").addClass("unfollow").attr("data-userid", nickname).on("click", function() {
-						console.log("unfollow");
-					}))
+					.append($("<div>").addClass('theme-control').append($("<div>").addClass("control-item follow on")
+						.attr("data-user", nickname)
+						.on("click", function() {
+							onFollowUser(this, function() {
+								fillProfile();
+								fillFollowTo();	// se recargan los usuarios seguidos
+							});
+					})))
 					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
 					.append($("<div>").addClass("puser-info")
 						.append($("<div>").addClass("puser-nickname").text("@" + nickname))

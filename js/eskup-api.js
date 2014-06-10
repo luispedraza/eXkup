@@ -273,6 +273,16 @@ function EskupApi() {
 			});
 		})(1);
 	};
+	/* Comenzar a seguir o dejar de seguir a usuarios */
+	this.followUsers = function (users, follow, callback) {
+		var params = eskupParams({action: (follow ? "add_usuarios" : "del_usuarios"), data: users.join(",")});
+		apiCall("GET", PROFILEESKUP, params,
+			function(r) {
+				// limpieza
+				USER_PROFILE = null;
+				callback(r);
+			});
+	};
 
 	/* Carga de mensajes favoritos, por compatibilidad con otras APIs */
 	this.loadFavorites = function(callback) { if (callback) callback(FAVORITES); };

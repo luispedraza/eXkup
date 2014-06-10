@@ -342,18 +342,17 @@ ul.navigator li:hover {
 }
 
 .control-item.follow:before {
-	content: "no sigues este tema";
+	content: "no lo estás siguiendo";
 }
 .control-item.follow:after {
 	content: "comenzar a seguirlo";
 }
 .control-item.follow.on:before {
-	content: "sigues este tema";
+	content: "lo estás siguiendo";
 }
 .control-item.follow.on:after {
 	content: "dejar de seguirlo";
 }
-
 .control-item.writable:before {
 	content: "no puedes escribir aquí";
 }
