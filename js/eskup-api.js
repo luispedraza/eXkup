@@ -5,10 +5,25 @@ function EskupApi() {
 	var WRITABLE_THEMES = null;	// temas en los que puedo escribir
 	var FOLLOWED_THEMES = null;	// temas que sigo
 	var THEMES_INFO = {}; 	// información sobre eventos
-	var USER_PROFILE = null;
+	var USER_PROFILE = {};	// información de perfil de usuarios
 	var LAST_THREAD = {id: null, info: null};		// guarda el último thread leído
 	var FAVORITES = (typeof localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : new Array();	// lista de temas favoritos que se almacena en localStorage
 	var INESKUP = "http://eskup.elpais.com/Ineskup";
+
+	/* Limpia la información sobre un perfil de usuario */
+	function clearUsersInfo (users) {
+		if (typeof users === "undefined") users = [THAT.getUserNickname()];	// el usuario actual
+		users.forEach(function(t) {
+			USER_PROFILE[t] = null;
+		});
+	};
+	/* Limpia la información sobre un array de nombres de temas */
+	function clearThemesInfo (themes) {
+		themes.forEach(function(t) {
+			THEMES_INFO[t] = null;
+		});
+	};
+
 	// var INPARAMS = {
 	// 	m: "",			// Contenido del mensaje (c=add|reply|edit, ignorado con c=del)
 	// 					// obligatorio, excepto cuando se elimina un mensaje (c=del)
@@ -139,22 +154,16 @@ function EskupApi() {
 	/* 	Información de perfil de usuario
 		http://eskup.elpais.com/Profileeskup?action=info_usuarios&f=xml&id=7gTvFkSaO-pa0342AjhqMg
 	*/
-	this.loadProfile = function(callback) {
-		if (USER_PROFILE != null) {
-			callback(USER_PROFILE);
+	this.loadProfile = function(userID, callback) {
+		if (!userID) userID = THAT.getUserNickname();
+		if (USER_PROFILE[userID] != null) {
+			callback(USER_PROFILE[userID]);
 		} else {
-			var params = eskupParams({action: "info_usuarios"});
+			var params = eskupParams({action: "info_usuarios", user: userID});
 			apiCall("GET", PROFILEESKUP, params, function(r) {
-				callback(USER_PROFILE = eskupParseResponse(r).perfilesUsuarios[USER_ID]);
+				callback(USER_PROFILE[userID] = eskupParseResponse(r).perfilesUsuarios[userID]);
 			});
 		};
-	};
-
-	/* Limpia la información sobre un array de nombres de temas */
-	function clearThemesInfo (themes) {
-		themes.forEach(function(t) {
-			THEMES_INFO[t] = null;
-		});
 	};
 
 	/* carga información sobre un tema */
@@ -198,7 +207,7 @@ function EskupApi() {
 			function(r) {
 				// limpieza
 				FOLLOWED_THEMES = null;
-				USER_PROFILE = null;
+				clearUsersInfo();
 				clearThemesInfo(themes);
 				callback(r);
 			});
@@ -228,7 +237,7 @@ function EskupApi() {
 			function(r) {
 				// limpieza
 				WRITABLE_THEMES = null;
-				USER_PROFILE = null;
+				clearUsersInfo();
 				clearThemesInfo(themes);
 				callback(r);
 			});
@@ -279,7 +288,7 @@ function EskupApi() {
 		apiCall("GET", PROFILEESKUP, params,
 			function(r) {
 				// limpieza
-				USER_PROFILE = null;
+				clearUsersInfo();
 				callback(r);
 			});
 	};

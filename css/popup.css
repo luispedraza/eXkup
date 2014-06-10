@@ -254,14 +254,78 @@ ul.navigator li:hover {
 
 #board-description img {
 	float: right;
-	width: 130px;
+	max-width: 130px;
 	margin-left: 10px;
+	max-height:  100px;
+}
+#board-description img {
+	float: right;
+	width: 50px;
+	border: 1px solid #fff;
+	margin-top: 30px;
 }
 #board-description p {
-	height: 100px;
+	max-height: 100px;
 	overflow-y: auto;
 }
-
+#board-description .eskup-info {
+	height: 90px;
+}
+.eskup-info .stats {
+	float: left;
+	background: #F25600;
+	margin-right: 5px;
+	padding: 2px;
+	text-align: center;
+}
+.eskup-info .stats:before {
+	display: block;
+	width: 100%;
+}
+.eskup-info .info-users:before {
+	content: "usuarios";
+}
+.eskup-info .info-messages:before {
+	content: "mensajes";
+}
+.eskup-info .info-themes:before {
+	content: "temas";
+}
+.eskup-info .stats div {
+	display: inline-block;
+	margin: 3px;
+	width: 50px;
+	height: 50px;
+	font-size: 23px;
+	background-color: #fff;
+}
+.eskup-info .stats div a {
+	text-decoration: none;
+}
+.eskup-info .stats div:before {
+	display: block;
+	width: 100%;
+	font-size: 10px;
+	background-color: #F25600;
+}
+.eskup-info .info-users .from:before {
+	content: "sigue a";
+}
+.eskup-info .info-users .to:before {
+	content: "le siguen";
+}
+.eskup-info .info-messages .from:before {
+	content: "enviados";
+}
+.eskup-info .info-messages .to:before {
+	content: "menciones";
+}
+.eskup-info .info-themes .follow:before {
+	content: "sigue";
+}
+.eskup-info .info-themes .write:before {
+	content: "escribe en";
+}
 #board-description .links {
 	float: left;
 	padding: 0;
@@ -278,9 +342,18 @@ ul.navigator li:hover {
 	padding: 0 3px;
 }
 #board-description .links li {
-	
 	padding: 2px;
-	/* border-top: 1px dotted #ccc; */
+	margin-right: 5px;
+}
+#board-description .links li.eskup:before {
+	content: " ";
+	background-repeat: no-repeat;
+	background-image: url(/icon/eskup_logo.png);
+	width: 12px;
+	height: 12px;
+	background-size: 15px;
+	display: inline-block;
+	overflow: visible;
 }
 #board-description .links a {
 	text-decoration: none;
@@ -289,6 +362,7 @@ ul.navigator li:hover {
 	display: inline-block;
 	color: #fff
 }
+
 #board-description .links a:hover {
 	background-color:#F25600;
 	color: #fff;
@@ -805,6 +879,11 @@ span.time-tooltip span:first-child {
 }
 .selector .puser-nickname {
 	font-weight: bold;
+	cursor: pointer;
+}
+.selector .puser-nickname:hover {
+	color: #F25600;
+	text-decoration: underline;
 }
 .selector .puser-fullname {
 	color: #666;

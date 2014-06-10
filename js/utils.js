@@ -19,9 +19,10 @@ Array.prototype.shuffle = function() {
  	};
 };
 function makeLink(text, href, target) {
-	if (typeof target === "undefined") target = "_blank";
-	return "<a href='"+ href + "' target='" + target + "'>" + text + "</a>";
-}
+	return $("<a>").attr("href", "#").attr("data-url", href).text(text).on("click", function() {
+		chrome.tabs.update({url: this.getAttribute("data-url")});
+	});
+};
 
 /* Devuelve el tablón correspondiente a un identificador */
 function getBoard(id) { return TABLONES[id] || id; };
