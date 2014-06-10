@@ -198,6 +198,7 @@ function EskupApi() {
 			function(r) {
 				// limpieza
 				FOLLOWED_THEMES = null;
+				USER_PROFILE = null;
 				clearThemesInfo(themes);
 				callback(r);
 			});
@@ -227,6 +228,7 @@ function EskupApi() {
 			function(r) {
 				// limpieza
 				WRITABLE_THEMES = null;
+				USER_PROFILE = null;
 				clearThemesInfo(themes);
 				callback(r);
 			});

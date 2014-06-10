@@ -48,9 +48,9 @@ function initPopup() {
 		/* Mostrar el perfil */
 		$("#profile-item").on("click", function() {
 			$(this).toggleClass('on');
-			API.loadProfile(function(user) {
-				fillProfile(user);
-			});
+			$("#profile-container").toggleClass('on');
+			$("#profile-container .selector-item").removeClass('on');	// para obligar recarga en click
+			fillProfile();
 		});
 		// Mostrar secciones del perfil
 		$("#profile-section .selector-item h4").on("click", function() {
@@ -252,25 +252,9 @@ function uiSelectBoard(board) {
 		var followed = (themeInfo.estado_seguimiento == 1);
 		$themeControl.append(
 			$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
+				.attr("data-theme", theme)
 				.on("click", function() {
-					$this = $(this);
-					var followed = $this.hasClass('on');
-					new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir este tema", 
-						"Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " este tema en Eskup", 
-						[(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
-						function(result) {
-							if (result == "Cancelar") return;
-							API.followThemes([theme],
-								result == "Comenzar a seguirlo",
-								function(r) {
-									if (r == "OK") {
-										$this.toggleClass('on');
-										fillThemes();	// se recarga la lista de temas seguidos
-									} else {
-										new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
-									};
-								});
-						});
+					onFollowTheme(this);
 				})
 				);
 		// control de escritura
@@ -314,6 +298,30 @@ function uiSelectBoard(board) {
 	};
 	$boardTitle.html(title);
 	$boardDescription.append($description);
+};
+
+/* Dejar de seguir o comenzar a seguir un tema */
+function onFollowTheme(button, callback) {
+	$this = $(button);
+	var theme = $this.attr("data-theme");
+	var followed = $this.hasClass('on');
+	new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir este tema", 
+		"Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " este tema en Eskup", 
+		[(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
+		function(result) {
+			if (result == "Cancelar") return;
+			API.followThemes([theme],
+				result == "Comenzar a seguirlo",
+				function(r) {
+					if (r == "OK") {
+						$this.toggleClass('on');
+						fillThemes();	// se recarga la lista de temas seguidos
+					} else {
+						new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+					};
+					if (callback) callback();
+				});
+		});
 };
 
 // function Positioner() {
@@ -685,27 +693,24 @@ function loadFavorites() {
 	});
 };
 
-
 /* Rellena la información de usuario en la página de perfil */
-function fillProfile(user) {
-	var urlwebpersonal = user.urlwebpersonal;
-	var urlblog = user.urlblog;
-	$("#profile-avatar").attr("src", checkUserPhoto(user.pathfoto));
-	$("#profile-nickname").text("@" + API.getUserNickname());
-	$("#profile-fullname").text((user.nombre + user.apellidos).trim());
-	$("#profile-description").text(user.descripcion);
-	$("#profile-container").toggleClass('on');
-	$("#follow-to .number").text(user.numero_usuarios);
-	$("#follow-me .number").text(user.numero_seguidores);
-	$("#themes-follow .number").text(user.numero_eventos);
-	$("#themes-write .number").text(user.numero_eventos_escribe);
+function fillProfile() {
+	API.loadProfile(function(user) {
+		$("#profile-avatar").attr("src", checkUserPhoto(user.pathfoto));
+		$("#profile-nickname").text("@" + API.getUserNickname());
+		$("#profile-fullname").text((user.nombre + user.apellidos).trim());
+		$("#profile-description").text(user.descripcion);
+		$("#follow-to .number").text(user.numero_usuarios);
+		$("#follow-me .number").text(user.numero_seguidores);
+		$("#themes-follow .number").text(user.numero_eventos);
+		$("#themes-write .number").text(user.numero_eventos_escribe);
+	});
 };
 
 /* Carga en el perfil la lista de usuarios a quienes sigo */
 function fillFollowTo() {
-	var $ul = $("#follow-to ul");
-	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
 	API.loadFollowUsers(1, function(users) {
+		var $ul = $("#follow-to ul").html("");
 		users.forEach(function(user) {
 			var nickname = user.nickname;
 			$ul.append(
@@ -720,15 +725,13 @@ function fillFollowTo() {
 						)
 				);
 		});
-		$ul.attr("data-loaded","1");
 	});
 };
 
 /* Carga en el perfil la lista de usuarios que me siguen */
 function fillFollowMe() {
-	var $ul = $("#follow-me ul");
-	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
 	API.loadFollowUsers(2, function(users) {
+		var $ul = $("#follow-me ul");
 		users.forEach(function(user) {
 			var nickname = user.nickname;
 			$ul.append(
@@ -740,22 +743,25 @@ function fillFollowMe() {
 						)
 				);
 		});
-		$ul.attr("data-loaded","1");
 	});
 };
 
 /* Carga en el perfil la lista de temas seguidos */
 function fillFollowThemes() {
-	var $ul = $("#themes-follow ul");
-	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
 	API.loadFollowedThemes(function(themes) {
+		var $ul = $("#themes-follow ul").html("");
 		for (var t in themes) {
 			var theme = themes[t];
 			$ul.append(
 				$("<li>")
-					.append($("<div>").addClass("unfollow").attr("data-themeid", t).on("click", function() {
-						console.log("unfollow");
-					}))
+					.append($("<div>").addClass('theme-control').append($("<div>").addClass("control-item follow on")
+						.attr("data-theme", t)
+						.on("click", function() {
+							onFollowTheme(this, function() {
+								fillProfile();
+								fillFollowThemes();	// se recargan los temas seguidos
+							});
+					})))
 					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
 					.append($("<div>").addClass("theme-info")
 						.append($("<div>").addClass("ptheme-name").text(theme.nombre))
@@ -763,15 +769,13 @@ function fillFollowThemes() {
 						)
 				);
 		};
-		$ul.attr("data-loaded","1");
 	});
 };
 
 /* Carga en el perfil la lista de temas en los que puedo escribir */
 function fillWritableThemes() {
-	var $ul = $("#themes-write ul");
-	if ($ul.attr("data-loaded") == "1") return;		// ya se ha cargado la información
 	API.loadWritableThemes(function(themes) {
+		var $ul = $("#themes-write ul");
 		for (var t in themes) {
 			var theme = themes[t];
 			$ul.append(
@@ -783,7 +787,6 @@ function fillWritableThemes() {
 						)
 				);
 		};
-		$ul.attr("data-loaded","1");
 	});
 };
 

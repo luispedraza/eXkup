@@ -300,8 +300,7 @@ ul.navigator li:hover {
 	perspective: 800px;
 	float: right;
 }
-#board-description .control-item {
-	/* display: inline-block; */
+.control-item {
 	background-color: #004862;
 	margin-bottom: 5px;
 	color: #fff;
@@ -313,14 +312,14 @@ ul.navigator li:hover {
 	overflow: hidden;
 	text-transform: uppercase;
 }
-#board-description .control-item:hover:before {
+.control-item:hover:before {
 	top: -40px;
 }
-#board-description .control-item:hover:after {
+.control-item:hover:after {
 	top: 5px;
 }
 
-#board-description .control-item:before {
+.control-item:before {
 	display: block;
 	text-align: center;
 	position: absolute;
@@ -329,7 +328,7 @@ ul.navigator li:hover {
 	top: 5px;
 	transition: top .25s ease;
 }
-#board-description .control-item:after {
+.control-item:after {
 	display: block;
 	text-align: center;
 	position: absolute;
@@ -338,33 +337,33 @@ ul.navigator li:hover {
 	top: 25px;
 	transition: top .25s ease;
 }
-#board-description .control-item.on {
+.control-item.on {
 	background-color: #F25600;
 }
 
-#board-description .control-item.follow:before {
+.control-item.follow:before {
 	content: "no sigues este tema";
 }
-#board-description .control-item.follow:after {
+.control-item.follow:after {
 	content: "comenzar a seguirlo";
 }
-#board-description .control-item.follow.on:before {
+.control-item.follow.on:before {
 	content: "sigues este tema";
 }
-#board-description .control-item.follow.on:after {
+.control-item.follow.on:after {
 	content: "dejar de seguirlo";
 }
 
-#board-description .control-item.writable:before {
+.control-item.writable:before {
 	content: "no puedes escribir aquí";
 }
-#board-description .control-item.writable:after {
+.control-item.writable:after {
 	content: "comenzar a escribir";
 }
-#board-description .control-item.writable.on:before {
+.control-item.writable.on:before {
 	content: "puedes escribir aquí";
 }
-#board-description .control-item.writable.on:after {
+.control-item.writable.on:after {
 	content: "dejar de escribir";
 }
 
@@ -826,22 +825,12 @@ span.time-tooltip span:first-child {
 	width: 300px;
 	color: #666;
 }
-.selector .unfollow {
-	float: right;
-	width: 100px;
-	height: 20px;
-	margin: 5px;
-	background-color: #F25600;
-	padding: 5px;
-	color: #fff;
-	cursor: pointer;
+.selector .theme-control {
 	display: none;
+	padding-top: 5px;
 }
-.selector li:hover .unfollow {
+.selector li:hover .theme-control {
 	display: block;
-}
-.selector .unfollow:before {
-	content: "dejar de seguirlo";
 }
 
 #follow-to {
