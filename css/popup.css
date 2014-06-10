@@ -226,13 +226,14 @@ ul.navigator li:hover {
 
 #board-title {
 	text-shadow: 0 0 5px rgba(0, 0, 0, .8);
-	/* overflow: hidden; */
+	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	cursor: pointer;
 	font-size: 16px;
 	margin-top:  4px;
 	margin-left:  5px;
+	display: block;
 }
 #board-title:before {
 	display:inline-block;
@@ -258,11 +259,11 @@ ul.navigator li:hover {
 	margin-left: 10px;
 	max-height:  100px;
 }
-#board-description img {
+#board-description img.avatar {
 	float: right;
-	width: 50px;
+	width: 55px;
 	border: 1px solid #fff;
-	margin-top: 30px;
+	margin-top: 13px;
 }
 #board-description p {
 	max-height: 100px;
@@ -296,10 +297,12 @@ ul.navigator li:hover {
 	margin: 3px;
 	width: 50px;
 	height: 50px;
-	font-size: 23px;
 	background-color: #fff;
 }
 .eskup-info .stats div a {
+	display: block;
+	margin-top: 5px;
+	font-size: 16px;
 	text-decoration: none;
 }
 .eskup-info .stats div:before {
