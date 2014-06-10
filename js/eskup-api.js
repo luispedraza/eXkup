@@ -295,6 +295,10 @@ function EskupApi() {
 				return "*"+d;
 			}).join("|");
 		};
+		// destinatarios de privado
+		if (data.users) {
+			params.t = data.users.join("|");
+		};
 		// destinos sociales
 		if (data.social.fb) {
 			if (data.social.tt) params.d = "1|2";

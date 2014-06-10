@@ -103,8 +103,7 @@
 						<canvas id="canvasimage"></canvas>
 						<div id="removeimage" class="fa fa-trash-o"></div>
 					</div> <!-- optional new image -->
-					<div id="newmessage" contenteditable="true">
-					</div>
+					<div id="newmessage" contenteditable="true"></div>
 				</div>
 				<div id="destinations">
 					<div id="send2theme" class="send2">TEMAS (<span class="count">0</span>)
@@ -117,6 +116,7 @@
 						<input id="send2tt" name="send2tt" type="checkbox"/>
 						<label for="send2tt" class="twitter fa fa-twitter-square"></label>
 					</div>
+					<div id="send2user" class="send2"></div>	<!-- para el envío de privados -->
 				</div>
 			</div>
 		</div>
@@ -125,6 +125,7 @@
 	<div id="profile-container" class="container">
 		<!-- SECCION. PERFIL -->
 		<div id="profile-section">
+			<div id="logout" title="cerrar sesión" class="fa fa-sign-out"></div>
 			<div class="info">
 				<img id="profile-avatar" />
 				<span id="profile-fullname"></span>

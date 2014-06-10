@@ -1,7 +1,5 @@
-var currentBoard = null;
-var loading = false;
-
 var API = new EskupApi();	// La API de Eskup
+var loading = false;
 var CURRENT_THEME = null;
 var CURRENT_PAGE = 1;
 
@@ -14,13 +12,13 @@ function initPopup() {
 			chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
 			return;
 		};
-		fillHeader();
 		TABLONES["mios"] = "t1-" + userID;
+		fillHeader();
 		fillThemes();
 		// Eventos
 		// document.getElementById("search").addEventListener("click", Search);
 		document.getElementById("board").addEventListener("scroll", function() {
-			if ((currentBoard == "favs") || loading) return;
+			if ((CURRENT_THEME == "favs") || loading) return;
 			if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
 				loading = true;
 				loadBoardMessages(null, function() {
@@ -30,9 +28,13 @@ function initPopup() {
 		});
 
 		$(".board-selector").on("click", function() { loadBoard(this.id); });
-		
-		$("#logout").on("click", function() { API.logOut(); });
-
+		$("#logout").on("click", function() { 
+			new ModalDialog("Cerrar sesión", 
+				"¿Deseas cerrar tu sesión en Eskup?", 
+				["Aceptar", "Cancelar"], function(r) {
+					if (r=="Aceptar") API.logOut();
+				});
+		});
 		$("#closetree").on("click", function() { showTreeBoard(false); });
 		$("#noindent").on("click", function() {
 			$(this).toggleClass('on');
@@ -81,11 +83,9 @@ function initPopup() {
 
 		// Inicialización de contenidos
 		chrome.tabs.query({'currentWindow': true, 'active': true}, function(t) {
-			console.log(t);
 			var currentTab = t[0];
 			var elpaisPattern = RegExp("https?://.*?\.?elpais\.com");
 			if (elpaisPattern.exec(currentTab.url)) {
-				console.log("encontrado");
 				chrome.tabs.executeScript(currentTab.id, { file: "js/elpais.js" }, function(result) {
 					var location = result[0];
 					if (location) {
@@ -116,30 +116,38 @@ function initPopup() {
 function showEditor(show, config, msgID, themes) {
 	if (typeof config === "undefined") config = "reset";
 	// los temas a los que se envía el mensaje (forward o repy):
-	if ((config=="reply") && (typeof themes != "undefined")) {
-		themes = themes.split(",");
-		API.loadWritableThemes(function(wthemes) {
-			var goodThemes = [], badThemes = [];
-			themes.forEach(function(d) {
-				(d in wthemes) ? goodThemes.push(d) : badThemes.push(d);
-			});
-			editorAddThemes(goodThemes);	// temas a los que se puede enviar el mensaje
-			$ulThemes = $("<ul>");
-			goodThemes.forEach(function(d) {
-				$ulThemes.append($("<li>").text(wthemes[d].nombre));
-			});
-			$modalContent = $("<div>").append($("<p>").text(
-				"Tu respuesta aparecerá en los siguientes temas, en los que tienes permiso de escritura:"))
-				.append($ulThemes);
-			new ModalDialog("Información sobre tu respuesta", 
-				$modalContent, ["OK"], null);
-		});
-	};
 	$edit = $("#edit-section");
 	(show == null) ? $edit.toggleClass("on") : $edit.toggleClass("on", show);
 	switch (config) {
 		case "reply":
+			if (themes) {
+				themes = themes.split(",");
+				API.loadWritableThemes(function(wthemes) {
+					var goodThemes = [], badThemes = [];
+					themes.forEach(function(d) {
+						(d in wthemes) ? goodThemes.push(d) : badThemes.push(d);
+					});
+					editorAddThemes(goodThemes);	// temas a los que se puede enviar el mensaje
+					$ulThemes = $("<ul>");
+					goodThemes.forEach(function(d) {
+						$ulThemes.append($("<li>").text(wthemes[d].nombre));
+					});
+					$modalContent = $("<div>").append($("<p>").text(
+						"Tu respuesta aparecerá en los siguientes temas, en los que tienes permiso de escritura:"))
+						.append($ulThemes);
+					new ModalDialog("Información sobre tu respuesta", 
+						$modalContent, ["OK"], null);
+				});			
+			};
 			$("#edit-section-h1 .edit-title").html("respondiendo al mensaje:");
+			$("#send").text("RESPONDER")
+				.attr("data-command", "reply")
+				.attr("data-id", msgID);
+			break;
+		case "replyPrivate":
+			console.log(themes);
+			editorAddUsers(themes);
+			$("#edit-section-h1 .edit-title").html("respondiendo al privado:");
 			$("#send").text("RESPONDER")
 				.attr("data-command", "reply")
 				.attr("data-id", msgID);
@@ -449,7 +457,7 @@ function setFavorite() {
 						new ModalDialog("El mensaje se ha eliminado de tus favoritos.", null, [], null, 2000);
 						$favBtn.toggleClass('on');
 						// además lo eliminamos del tablón de favoritos
-						if (currentBoard == "favs") {
+						if (CURRENT_THEME == "favs") {
 							$favBtn.closest('.message').fadeOut(function() {
 								$(this).remove();
 							});
@@ -477,6 +485,7 @@ function appendMsg(msg, board, themes, before) {
 	// Creación del nuevo mensaje:
 	var div_msg = document.createElement("div");
 	div_msg.className = "message";
+	div_msg.setAttribute("data-author", userNickname);	// el autor del mensaje
 	// div_msg.className = "message card";
 	// $(div_msg).appear({force_process: true});
 	div_msg.id = m_id;
@@ -809,7 +818,11 @@ function replyMessage() {
 	$("#editor").before($("<div>")
 		.attr("id", "replying-message")
 		.html(msg.outerHTML));
-	showEditor(true, "reply", msg.id, msg.getAttribute("data-themes"));
+	if (CURRENT_THEME=="3") {	// respuesta a un privado
+		showEditor(true, "replyPrivate", msg.id, msg.getAttribute("data-author"));		
+	} else {					// respuesta normal
+		showEditor(true, "reply", msg.id, msg.getAttribute("data-themes"));
+	};
 };
 
 /* Reenvío de un mensaje */

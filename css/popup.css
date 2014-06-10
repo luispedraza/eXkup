@@ -468,6 +468,18 @@ ul.navigator li:hover {
 	box-shadow: 0px 0px 20px 0px rgba(50, 50, 50, 0.75);
 	border: 1px solid #ccc;
 	height: 470px;
+	position: relative;
+}
+#logout {
+	position: absolute;
+	right: 0;
+	top: 0;
+	padding: 5px;
+	font-size: 18px;
+	cursor: pointer;
+}
+#logout:hover {
+	color: #F25600;
 }
 #profile-section .info {
 	height: 65px;
@@ -738,7 +750,7 @@ span.time-tooltip span:first-child {
 	margin-top: 10px;
 }
 .selector-item {
-	padding: 5px;
+	padding: 5px 0;
 	border-top: 1px solid #666;
 }
 

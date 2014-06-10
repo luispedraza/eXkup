@@ -118,24 +118,34 @@ function editorAddThemes(data) {
 				.attr("data-send2theme", JSON.stringify(data))
 				.find(".count").text(data.length);
 			$list = $("#send2theme-list").html("");	// limpieza de selecciones anteriores
-			for (var t=0; t<data.length; t++) {
-				var theme = writable[data[t]];
+			data.forEach(function(d) {
+				var theme = writable[d];
 				$("<li></li>").text(theme.nombre).appendTo($list);
-			};
+			});
 		});
 };
-
 /* Temas seleccionados para enviar el mensaje */
 function getSelectedThemes() {
 	var selected = $("#send2theme").attr("data-send2theme");
 	return (selected ? JSON.parse(selected) : []);
 };
+/* Añadir destinatarios privados de un mensaje */
+function editorAddUsers(data) {
+	$("#send2user").attr("data-send2user", JSON.stringify(data));
+};
+/* Usuarios seleccionados para enviar privado */
+function getSelectedUsers() {
+	var selected = $("#send2user").attr("data-send2user");
+	return (selected ? JSON.parse(selected) : []);
+};
+
 
 /* Envía un nuevo mensaje */
 function sendMessage() {
 	var data = {};
 	data.message = $("#newmessage").html();
-	data.themes = getSelectedThemes();
+	data.themes = getSelectedThemes();	// tablones destinatarios
+	data.users = getSelectedUsers();	// destinatarios de privado
 	data.social = {	fb: $("#send2fb").prop("checked"),
 					tt: $("#send2tt").prop("checked")};
 	var newimg = $("#newimage.loaded canvas").get(0);
