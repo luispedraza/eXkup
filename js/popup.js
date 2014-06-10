@@ -47,9 +47,7 @@ function initPopup() {
 		$("#cancel").on("click", function() { showEditor(false); });
 		/* Mostrar el perfil */
 		$("#profile-item").on("click", function() {
-			$(this).toggleClass('on');
-			$("#profile-container").toggleClass('on');
-			$("#profile-container .selector-item").removeClass('on');	// para obligar recarga en click
+			showProfile();
 			fillProfile();
 		});
 		// Mostrar secciones del perfil
@@ -668,10 +666,10 @@ function appendMsg(msg, board, themes, before) {
 				var themeInfo = themes[themeID];	// información sobre el tema, de la API
 				var themeName = themeInfo.nombre;
 				var $themeElement = $("<li>")
-					.attr("data-board", themeKey)
+					.attr("data-theme", themeKey)
 					.text(themeName)
 					.on("click", function() {
-						loadBoard($(this).attr("data-board"));
+						loadBoard($(this).attr("data-theme"));
 					})
 					.appendTo($divThemes);
 			};
@@ -712,6 +710,13 @@ function fillProfile() {
 		$("#themes-follow .number").text(user.numero_eventos);
 		$("#themes-write .number").text(user.numero_eventos_escribe);
 	});
+};
+
+/* Muestra u oculta el perfile */
+function showProfile() {
+	$(this).toggleClass('on');
+	$("#profile-container").toggleClass('on');
+	$("#profile-container .selector-item").removeClass('on');	// para obligar recarga en click
 };
 
 /* Carga en el perfil la lista de usuarios a quienes sigo */
@@ -771,7 +776,10 @@ function fillFollowThemes() {
 					})))
 					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
 					.append($("<div>").addClass("theme-info")
-						.append($("<div>").addClass("ptheme-name").text(theme.nombre))
+						.append($("<div>").addClass("ptheme-name").attr("data-theme", "ev-"+t).text(theme.nombre).on("click", function() {
+							loadBoard($(this).attr("data-theme"));
+							showProfile();
+						}))
 						.append($("<div>").addClass("ptheme-description").html(theme.descripcion))
 						)
 				);
@@ -872,15 +880,15 @@ function fillThemes() {
 			// ordenamos alfabéticamente la lista de temas
 			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
 		});
-		for (var t=0, len=themes.length; t<len; t++) {
-			var theme = themes[t];
+		themes.forEach(function(theme) {
 			themeID = "ev-"+theme.__key;
 			var $item = $("<li>")
 				.attr("class", "board-selector")
+				.attr("data-theme", themeID)
 				.attr("id", themeID)
 				.text(theme.nombre)
-				.on("click", function() { loadBoard(this.id); })
+				.on("click", function() { loadBoard($(this).attr("data-theme")); })
 				.appendTo($divThemes);
-		};
+		});
 	});
 };

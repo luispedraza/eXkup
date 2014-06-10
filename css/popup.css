@@ -816,6 +816,11 @@ span.time-tooltip span:first-child {
 }
 .selector .ptheme-name {
 	font-weight: bold;
+	cursor: pointer;
+}
+.selector .ptheme-name:hover {
+	color: #F25600;
+	text-decoration: underline;
 }
 .selector .ptheme-description {
 	display: -webkit-box;
