@@ -806,7 +806,10 @@ function fillWritableThemes() {
 					})))
 					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
 					.append($("<div>").addClass("theme-info")
-						.append($("<div>").addClass("ptheme-name").text(theme.nombre))
+						.append($("<div>").addClass("ptheme-name").attr("data-theme", "ev-"+t).text(theme.nombre).on("click", function() {
+							loadBoard($(this).attr("data-theme"));
+							showProfile();
+						}))
 						.append($("<div>").addClass("ptheme-description").html(theme.descripcion))
 						)
 				);
