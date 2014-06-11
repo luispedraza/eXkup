@@ -80,28 +80,29 @@ function initPopup() {
 		});
 
 		// Inicialización de contenidos
-		chrome.tabs.query({'currentWindow': true, 'active': true}, function(t) {
-			var currentTab = t[0];
-			var elpaisPattern = RegExp("https?://.*?\.?elpais\.com");
-			if (elpaisPattern.exec(currentTab.url)) {
-				chrome.tabs.executeScript(currentTab.id, { file: "js/elpais.js" }, function(result) {
-					var location = result[0];
-					if (location) {
-						var data = location.match(/eskup.elpais.com\/C(.+)'/);
-						if (data && data[1]) {
-							// cargar conversación de la noticia
-							var theCode = data[1];
-							showThread(theCode, theCode);
-						} else {
-							// cargar tablón de eventos seguidos
-							var evObj = document.createEvent('MouseEvents');
-						    evObj.initEvent("click", true, false);
-						    document.getElementById("sigo").dispatchEvent(evObj);
-						};
-					};
-				});	
+
+		chrome.tabs.executeScript({ file: "js/elpais.js" }, function(result) {
+			var data = result[0];
+			console.log(data);
+			if (data) {
+				switch (data.type) {
+					case "thread":
+						showThread(data.id, data.id);
+						break;
+					case "theme":
+						loadBoard("ev-" + data.id);
+						break;
+					case "user":
+						loadBoard("t1-" + data.id);
+						break;
+				};
+			} else {
+				// cargar tablón de eventos seguidos
+				var evObj = document.createEvent('MouseEvents');
+			    evObj.initEvent("click", true, false);
+			    document.getElementById("sigo").dispatchEvent(evObj);
 			};
-		});
+		});	
 	});
 };
 
