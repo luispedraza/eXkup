@@ -707,6 +707,10 @@ span.time-tooltip span:first-child {
 	font-size: 12px;
 	cursor: pointer;
 	color: #aaa;
+	/* clear: both; */
+	display: block;
+	float: left;
+	padding-top: 3px;
 }
 .msg_header .reply2link:before {
 	display: inline-block;

@@ -143,7 +143,6 @@ function showEditor(show, config, msgID, themes) {
 				.attr("data-id", msgID);
 			break;
 		case "replyPrivate":
-			console.log(themes);
 			editorAddUsers(themes);
 			$("#edit-section-h1 .edit-title").html("respondiendo al privado:");
 			$("#send").text("RESPONDER")
@@ -280,7 +279,6 @@ function uiSelectBoard(board) {
 		if (boardInfo[0] == "t1") {
 			var user = boardInfo[1];
 			API.loadProfile(user, function(userInfo) {
-				console.log(userInfo);
 				var userURL = "http://eskup.elpais.com/" + user + "/";
 				$("<img>").addClass("avatar").attr("src", checkUserPhoto(userInfo.pathfoto)).appendTo($boardDescription);
 				$("<p>").html(userInfo.descripcion).appendTo($boardDescription);
@@ -696,10 +694,7 @@ function appendMsg(msg, board, themes, before) {
 	a_user.textContent = "@" + user;
 	a_user.setAttribute("data-user", user);
 	if (msg.usuarioOrigenNombre) {a_user.textContent += " (" + msg.usuarioOrigenNombre + ")"};
-	console.log("agregadn");
-	//a_user.addEventListener("click", function() {loadBoard("t1-" + this.getAttribute("data-user"))});	// muestra los mensajes del usuario
-	// a_user.addEventListener("click", onAuthorClick);	// muestra los mensajes del usuario
-	a_user.onclick = onAuthorClick;	// muestra los mensajes del usuario
+	a_user.addEventListener("click", onAuthorClick);	// muestra los mensajes del usuario
 	dHead.appendChild(a_user);		// user link
 	$(dHead).append(
 		makeLink(getTimeAgo(new Date(tsMessage), new Date()),"http://eskup.elpais.com/" + m_id)
@@ -724,7 +719,7 @@ function appendMsg(msg, board, themes, before) {
 	// Forward
 	var dFwd = document.createElement("div");
 	dFwd.className = "btn fwd fa fa-retweet";
-	dFwd.innerHTML = " reenviar";
+	dFwd.textContent = " reenviar";
 	dFwd.addEventListener("click", onForwardMessageClick);
 	dCtrl.appendChild(dFwd);
 	// Hilos de mensajes
@@ -736,7 +731,6 @@ function appendMsg(msg, board, themes, before) {
 		div_reply.title = "Respuesta a";
 		div_reply.setAttribute("data-reply", msg.idMsgRespuesta);
 		div_reply.addEventListener("click", onReplyClick);
-		dHead.innerHTML += "<br />"
 		dHead.appendChild(div_reply);
 		var div_thread = document.createElement("div");
 		div_thread.className = "btn thlink fa fa-comments";
@@ -760,7 +754,6 @@ function appendMsg(msg, board, themes, before) {
 		div_forward.textContent = "mensaje reenviado";
 		div_forward.setAttribute("data-forward", msg.reenvio);
 		div_forward.addEventListener("click", onForwardedMessageClick);
-		dHead.innerHTML += "<br />"
 		dHead.appendChild(div_forward);
 	};
 	dHead.appendChild(dCtrl);
