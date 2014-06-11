@@ -1,6 +1,8 @@
 var API = new EskupApi();	// La API de Eskup
 var loading = false;
-var CURRENT_THEME = null;
+var CURRENT_THEME = null;	// el tablón actual
+var HISTORY = [];			// historial de tablones, para navegacion
+var HISTORY_POSITION = -1;	// posición sobre HISTORY
 var CURRENT_PAGE = 1;
 
 window.addEventListener("load", initPopup);
@@ -17,6 +19,9 @@ function initPopup() {
 		fillThemes();
 		// Eventos
 		// document.getElementById("search").addEventListener("click", Search);
+		// NAvegación temporal 
+		$("#history-left").on("click", function() {loadBoard(-1);});
+		$("#history-right").on("click", function() {loadBoard(1);});
 		document.getElementById("board").addEventListener("scroll", function() {
 			if ((CURRENT_THEME == "favs") || loading) return;
 			if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
@@ -164,16 +169,28 @@ function showEditor(show, config, msgID, themes) {
 
 /* Carga de un tablón en la ventana de mensajes */
 function loadBoard(id) {
-	CURRENT_THEME = getBoard(id);
-	if (id=="favs") {	// los mensajes favoritos los guarda la extensión
-		loadFavorites();
-		uiSelectBoard(id);
+	if (id === -1) {
+		if (HISTORY_POSITION>0) {
+			CURRENT_THEME = HISTORY[--HISTORY_POSITION];
+		} else return;
+	} else if (id === 1) {
+		if (HISTORY_POSITION<(HISTORY.length-1)) {
+			CURRENT_THEME = HISTORY[++HISTORY_POSITION];
+		} else return;
 	} else {
-		loadBoardMessages(CURRENT_THEME, function (data) {
-			uiSelectBoard(id);
-		});
+		CURRENT_THEME = getBoard(id);
+		HISTORY = HISTORY.slice(0, ++HISTORY_POSITION);
+		HISTORY.push(CURRENT_THEME);
 	};
+	if (CURRENT_THEME == "favs") {	// los mensajes favoritos los guarda la extensión
+		loadFavorites();
+	} else {
+		loadBoardMessages(CURRENT_THEME);
+	};
+	console.log(HISTORY, HISTORY_POSITION);
+	uiSelectBoard(CURRENT_THEME);
 };
+
 
 /* Carga de mensajes de un tablón */
 function loadBoardMessages(theme, callback) {
@@ -213,20 +230,20 @@ function uiSelectBoard(board) {
 	// información sobre el tablero actual:
 	$boardTitle = $("#board-title").html("");
 	$boardDescription = $("#board-description").html("");
-	if (board == "sigo") {
+	if (board == getBoard("sigo")) {
 		$boardDescription
 			.append($("<p>").text("Aquí encontrarás todos los mensajes publicados por los usuarios a los que sigues, y en los temas que sigues."));
 		$boardTitle.html("Mensajes de usuarios y temas que sigo");
-	} else if (board == "todo") {
+	} else if (board == getBoard("todo")) {
 		$boardTitle.html("Todos los mensajes de Eskup");
 		// $boardDescription.append($description);
-	} else if (board == "mios") {
+	} else if (board == getBoard("mios")) {
 		$boardTitle.html("Mensajes enviados por mí");
 		// $boardDescription.append($description);
-	} else if (board == "priv") {
+	} else if (board == getBoard("priv")) {
 		$boardTitle.html("Mis mensajes privados");
 		// $boardDescription.append($description);
-	} else if (board == "favs") {
+	} else if (board == getBoard("favs")) {
 		$boardTitle.html("Mis mensajes favoritos");
 		// $boardDescription.append($description);
 	} else {

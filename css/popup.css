@@ -176,7 +176,8 @@ ul.navigator li:hover {
 }
 
 #messages-header {
-	background-color: rgba(100,100,100,.9);
+	/*background-color: rgba(100,100,100,.9);*/
+	background-color: rgba(242, 86, 0, .9);
 	z-index: 100;
 	border-bottom: 1px solid #fff;
 	transition: all .25s ease;
@@ -187,21 +188,25 @@ ul.navigator li:hover {
 	background-color: rgba(50,50,50,.95);
 	height: 260px;
 }
+#messages-header .nav {
+	float: right;
+	border: 1px solid #fff;
+}
 #messages-header .search {
 	float: right;
 	background-color: #fff;
 	border: 1px solid #fff;
 }
-#messages-header .search a {
+#messages-header .button {
 	border: 0;
-	outline: none;
 	background-color: #666;
 	color: #fff;
-	/* margin: 0; */
-	/* border-top-right-radius: 3px; */
-	/* border-bottom-right-radius: 3px; */
-	cursor: pointer;
 	padding: 4px;
+	cursor: pointer;
+	height: 15px;
+	width: 15px;
+	text-align: center;
+	display: inline-block;
 }
 #messages-header .search a:hover {
 	background-color: #000;
@@ -213,7 +218,7 @@ ul.navigator li:hover {
 	border: 0;
 	margin: 0;
 	padding: 4px;
-	width: 50px;
+	width: 0px;
 	transition: width .25s ease;
 }
 #messages-header .search input[type=text]:focus {

@@ -5,7 +5,8 @@ var TABLONES = {
 	mios: "t1-",
 	sigo: "2",
 	priv: "3",
-	todo: "t1-ULTIMOSMENSAJES"
+	todo: "t1-ULTIMOSMENSAJES",
+	favs: "favs"
 };
 
 Array.prototype.shuffle = function() {
