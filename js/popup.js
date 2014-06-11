@@ -85,17 +85,16 @@ function initPopup() {
 
 		// Inicialización de contenidos
 		chrome.tabs.executeScript({ file: "js/elpais.js" }, function(result) {
-			var data = result[0];
-			if (data) {
-				switch (data.type) {
+			if (result && (result = result[0])) {
+				switch (result.type) {
 					case "thread":
-						showThread(data.id, data.id);
+						showThread(result.id, result.id);
 						break;
 					case "theme":
-						loadBoard("ev-" + data.id);
+						loadBoard("ev-" + result.id);
 						break;
 					case "user":
-						loadBoard("t1-" + data.id);
+						loadBoard("t1-" + result.id);
 						break;
 				};
 			} else {
