@@ -75,10 +75,7 @@ function showThemesSelector() {
 			};
 		};
 		var $listThemes = $("<ul class='themes-list'></ul>");
-		var themes = makeArray(themes).sort(function(a,b) {
-			// ordenamos alfabéticamente la lista de temas
-			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
-		});
+		var themes = sortArray(makeArray(themes), "nombre");	// temas ordenados alfabéticamente
 		for (var t=0, len=themes.length; t<len; t++) {
 			var theme = themes[t];
 			var key = theme.__key;

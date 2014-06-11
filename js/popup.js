@@ -80,10 +80,8 @@ function initPopup() {
 		});
 
 		// Inicialización de contenidos
-
 		chrome.tabs.executeScript({ file: "js/elpais.js" }, function(result) {
 			var data = result[0];
-			console.log(data);
 			if (data) {
 				switch (data.type) {
 					case "thread":
@@ -824,7 +822,7 @@ function showProfile() {
 function fillFollowTo() {
 	API.loadFollowUsers(1, function(users) {
 		var $ul = $("#follow-to ul").html("");
-		users.forEach(function(user) {
+		sortArray(users, "nickname").forEach(function(user) {
 			var nickname = user.nickname;
 			$ul.append(
 				$("<li>")
@@ -853,13 +851,16 @@ function fillFollowTo() {
 function fillFollowMe() {
 	API.loadFollowUsers(2, function(users) {
 		var $ul = $("#follow-me ul").html("");
-		users.forEach(function(user) {
+		sortArray(users, "nickname").forEach(function(user) {
 			var nickname = user.nickname;
 			$ul.append(
 				$("<li>")
 					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
 					.append($("<div>").addClass("puser-info")
-						.append($("<div>").addClass("puser-nickname").text("@" + nickname))
+						.append($("<div>").addClass("puser-nickname").attr("data-user", nickname).text("@" + nickname).on("click", function() {
+							loadBoard("t1-" + $(this).attr("data-user"));
+							showProfile();
+						}))
 						.append($("<div>").addClass("puser-fullname").text(user.nombre + " " + user.apellidos))
 						)
 				);
@@ -939,10 +940,7 @@ function fillHeader() {
 function fillThemes() {
 	API.loadFollowedThemes(function(themes) {
 		$divThemes = $("#themes-follow").html("");
-		themes = makeArray(themes).sort(function(a,b) {
-			// ordenamos alfabéticamente la lista de temas
-			return (a.nombre.toLowerCase() < b.nombre.toLowerCase()) ? -1 : 1;
-		});
+		themes = sortArray(makeArray(themes), "nombre");
 		themes.forEach(function(theme) {
 			themeID = "ev-"+theme.__key;
 			var $item = $("<li>")

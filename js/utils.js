@@ -173,7 +173,12 @@ function makeArray(obj) {
 	return result;
 };
 
-
+/* Función para ordenar un array de objetos alfabéticamente según el campo indicado */
+function sortArray(array, field) {
+	return array.sort(function(a,b) {
+		return (a[field].toLowerCase() < b[field].toLowerCase()) ? -1 : 1;
+	});
+};
 
 /* Visualización de una conversación */
 function showNodeLinkTree(infoTree) {
