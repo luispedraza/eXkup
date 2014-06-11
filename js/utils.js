@@ -19,6 +19,7 @@ Array.prototype.shuffle = function() {
   	this[p] = t;
  	};
 };
+/* Construcción de un link que se puede abrir desde la extensión, sin cerrarla */
 function makeLink(text, href, target) {
 	return $("<a>").attr("href", "#").attr("data-url", href).text(text).on("click", function() {
 		chrome.tabs.update({url: this.getAttribute("data-url")});

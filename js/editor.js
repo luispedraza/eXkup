@@ -111,15 +111,15 @@ function showThemesSelector() {
 /* Añadir temas para enviar al mensaje al selector */
 function editorAddThemes(data) {
 	API.loadWritableThemes(function(writable) {
-			$("#send2theme")
-				.attr("data-send2theme", JSON.stringify(data))
-				.find(".count").text(data.length);
-			$list = $("#send2theme-list").html("");	// limpieza de selecciones anteriores
-			data.forEach(function(d) {
-				var theme = writable[d];
-				$("<li></li>").text(theme.nombre).appendTo($list);
-			});
+		$("#send2theme")
+			.attr("data-send2theme", JSON.stringify(data))
+			.find(".count").text(data.length);
+		$list = $("#send2theme ul").html("");	// limpieza de selecciones anteriores
+		data.forEach(function(d) {
+			var theme = writable[d];
+			$list.append($("<li>").text(theme.nombre));
 		});
+	});
 };
 /* Temas seleccionados para enviar el mensaje */
 function getSelectedThemes() {
@@ -128,7 +128,13 @@ function getSelectedThemes() {
 };
 /* Añadir destinatarios privados de un mensaje */
 function editorAddUsers(data) {
-	$("#send2user").attr("data-send2user", JSON.stringify(data));
+	$list = $("#send2user").attr("data-send2user", JSON.stringify(data))
+		.find("ul");
+	data.forEach(function(d) {
+		$list.append($("<li>").text("@"+d));
+	});
+	$("#send2theme").css("display","none");
+	$("#send2social").css("display","none");
 };
 /* Usuarios seleccionados para enviar privado */
 function getSelectedUsers() {
@@ -163,7 +169,7 @@ function sendMessage() {
 
 /* Cancela el envío de un mensaje */
 function cancel() {
-
+	showEditor(false);
 };
 
 /* Inserta una imagen en el mensaje */

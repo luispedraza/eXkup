@@ -49,7 +49,6 @@ function initPopup() {
 			$(this).toggleClass('on');
 		});
 		$("#edit-section-h1").on("click", function() { showEditor(); });
-		$("#cancel").on("click", function() { showEditor(false); });
 		/* Mostrar el perfil */
 		$("#profile-item").on("click", function() {
 			showProfile();
@@ -113,7 +112,7 @@ function initPopup() {
 	@param show: controla si se muestra o no el editor
 	@param config: reply, forward
 	@param msgID: id del mensaje a contestar o reenviar
-	@param themes: temas a los que se enviará el mensaje
+	@param themes: array temas a los que se enviará el mensaje, o de usuarios para enviar privado
 */
 function showEditor(show, config, msgID, themes) {
 	if (typeof config === "undefined") config = "reset";
@@ -187,7 +186,6 @@ function loadBoard(id) {
 	} else {
 		loadBoardMessages(CURRENT_THEME);
 	};
-	console.log(HISTORY, HISTORY_POSITION);
 	uiSelectBoard(CURRENT_THEME);
 };
 
@@ -618,7 +616,7 @@ function appendMsg(msg, board, themes, before) {
 			.attr("id", "replying-message")
 			.html(msg.outerHTML));
 		if (CURRENT_THEME=="3") {	// respuesta a un privado
-			showEditor(true, "replyPrivate", msgID, msg.getAttribute("data-author"));		
+			showEditor(true, "replyPrivate", msgID, [msg.getAttribute("data-author")]);		
 		} else {					// respuesta normal
 			showEditor(true, "reply", msgID, msg.getAttribute("data-themes"));
 		};
