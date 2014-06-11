@@ -23,7 +23,7 @@ function initPopup() {
 		$("#history-left").on("click", function() {loadBoard(-1);});
 		$("#history-right").on("click", function() {loadBoard(1);});
 		document.getElementById("board").addEventListener("scroll", function() {
-			if ((CURRENT_THEME == "favs") || loading) return;
+			if ((CURRENT_THEME.id == "favs") || loading) return;
 			if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
 				loading = true;
 				loadBoardMessages(null, function() {
@@ -88,7 +88,7 @@ function initPopup() {
 			if (result && (result = result[0])) {
 				switch (result.type) {
 					case "thread":
-						showThread(result.id, result.id);
+						loadBoard(null, result.id, result.id);
 						break;
 					case "theme":
 						loadBoard("ev-" + result.id);
@@ -165,8 +165,13 @@ function showEditor(show, config, msgID, themes) {
 	};
 };
 
-/* Carga de un tablón en la ventana de mensajes */
-function loadBoard(id) {
+/* Carga de un tablón en la ventana de mensajes 
+	@param id: identificador del tablón,
+				-1: retrocede en el historial
+				1: avanza en el historial
+				null: se pide un thread, entonces se usan threadID, originalMsgID
+*/
+function loadBoard(id, threadID, originalMsgID) {
 	if (id === -1) {
 		if (HISTORY_POSITION>0) {
 			CURRENT_THEME = HISTORY[--HISTORY_POSITION];
@@ -176,16 +181,25 @@ function loadBoard(id) {
 			CURRENT_THEME = HISTORY[++HISTORY_POSITION];
 		} else return;
 	} else {
-		CURRENT_THEME = getBoard(id);
+		if (id === null) {	// thread
+			CURRENT_THEME = {type: "thread", id: threadID, original: originalMsgID};
+		} else {			// tablón
+			CURRENT_THEME = {type: "board", id: getBoard(id)};
+		};
 		HISTORY = HISTORY.slice(0, ++HISTORY_POSITION);
 		HISTORY.push(CURRENT_THEME);
 	};
-	if (CURRENT_THEME == "favs") {	// los mensajes favoritos los guarda la extensión
-		loadFavorites();
-	} else {
-		loadBoardMessages(CURRENT_THEME);
+	if (CURRENT_THEME.type == "board") {
+		if (CURRENT_THEME.id == "favs") {	// los mensajes favoritos los guarda la extensión
+			loadFavorites();
+		} else {
+			loadBoardMessages(CURRENT_THEME.id);
+		};
+		uiSelectBoard(CURRENT_THEME.id);
+	} else if (CURRENT_THEME.type == "thread") {
+		showThread(CURRENT_THEME.id, CURRENT_THEME.original);
+		uiSelectThread(CURRENT_THEME);
 	};
-	uiSelectBoard(CURRENT_THEME);
 };
 
 
@@ -196,7 +210,7 @@ function loadBoardMessages(theme, callback) {
 		CURRENT_PAGE = 1;
 		document.getElementById("board").innerHTML = "";	// limpieza
 	} else CURRENT_PAGE++;		// nueva página
-	API.loadMessages(CURRENT_THEME, CURRENT_PAGE, function(info) {
+	API.loadMessages(CURRENT_THEME.id, CURRENT_PAGE, function(info) {
 		if (info) {
 			var messages = info.mensajes;
 			var usersInfo = info.perfilesUsuarios;
@@ -334,6 +348,11 @@ function uiSelectBoard(board) {
 	};
 };
 
+/* Selecciona el thread actual en la interfaz */
+function uiSelectThread(thread) {
+
+};
+
 /* Dejar de seguir o comenzar a seguir un tema */
 function onFollowUser(button, callback) {
 	$this = $(button);
@@ -413,44 +432,6 @@ function onWriteTheme(button, callback) {
 	};
 };
 
-// function Positioner() {
-// 			// Este objeto guardará estado de la posición del scroll del árbol
-// 			var lastFound = 0;
-// 			var messages = [];
-// 			var treeBoard = null;
-// 			var finished = false;
-// 			var checkPos = function(e) {
-// 				var pos = $(messages[e]).offset().top - treeBoard.offset().top;
-// 				return ((pos>0) && (pos<100));
-// 			};
-// 			this.find = function() {
-// 				if (!finished) {
-// 					console.log("buscando");
-// 					var newMessages = $("#tree .message");
-// 					if (newMessages.length != messages.length) {
-// 						messages = newMessages;
-// 					} else {
-// 						finished = true;
-// 					};
-// 				};
-// 				treeBoard = (treeBoard || $("#tree-board"));
-// 				if (!messages) return -1;
-// 				for (var i=lastFound, j=lastFound-1, len=messages.length; ((i<len) || (j>=0)); ((i++)&&(j--)) ) {
-// 					console.log(i,i);
-// 					if ((i<len) && checkPos(i)) {
-// 						lastFound = i; break;
-// 					};
-// 					if ((j>=0) && checkPos(j)) {
-// 						lastFound = j; break;
-// 					};
-// 				};
-// 				console.log("finished");
-// 				return $(messages[lastFound]).offset().left - treeBoard.offset().left;
-// 			};
-// 			this.reset = function() {lastFound=0;};
-// 		};
-// var POSITIONER = new Positioner();	// para posicionar el scroll
-
 /* Carga de una conversación completa */
 function showThread(threadID, originalMsgID) {
 	var modal = new ModalDialog("Cargando datos", 
@@ -502,14 +483,7 @@ function showThread(threadID, originalMsgID) {
 			addNode(API.buildThreadMessage(m, info.perfilesUsuarios), m.idMsgRespuesta);
 		});
 		showTreeBoard(true);	// mostramos el resultado
-		// POSITIONER.reset();
 		$treeBoard = $("#tree-board").attr("data-thread", threadID)	// lo guardamos en el board, para visualización
-			// .off("scroll").on("scroll", function() {
-			// 	var v = POSITIONER.find();
-			// 	if ((v<20)||(v>40)) {
-			// 		$treeBoard.scrollLeft($treeBoard.scrollLeft() + v - 30);
-			// 	};
-			// })
 			.off("mousemove").on("mousemove", function(e) {
 				if ($("#mouse-follow").hasClass('on')) {
 					var treeBoardRect = this.getBoundingClientRect(),
@@ -596,7 +570,7 @@ function appendMsg(msg, board, themes, before) {
 							new ModalDialog("El mensaje se ha eliminado de tus favoritos.", null, [], null, 2000);
 							$favBtn.toggleClass('on');
 							// además lo eliminamos del tablón de favoritos
-							if (CURRENT_THEME == "favs") {
+							if (CURRENT_THEME.id == "favs") {
 								$favBtn.closest('.message').fadeOut(function() {
 									$(this).remove();
 								});
@@ -614,7 +588,7 @@ function appendMsg(msg, board, themes, before) {
 		$("#editor").before($("<div>")
 			.attr("id", "replying-message")
 			.html(msg.outerHTML));
-		if (CURRENT_THEME=="3") {	// respuesta a un privado
+		if (CURRENT_THEME.id=="3") {	// respuesta a un privado
 			showEditor(true, "replyPrivate", msgID, [msg.getAttribute("data-author")]);		
 		} else {					// respuesta normal
 			showEditor(true, "reply", msgID, msg.getAttribute("data-themes"));
@@ -630,7 +604,7 @@ function appendMsg(msg, board, themes, before) {
 	};
 	/* Función que se ejecuta al mostrar el thread al que pertenece un mensaje */
 	function onShowThreadClick() {
-		showThread(this.getAttribute("data-thread"), $(this).closest(".message").attr("data-id"));
+		loadBoard(null, this.getAttribute("data-thread"), $(this).closest(".message").attr("data-id"));
 	};
 	/* Función que se ejecuta al hacer click en el enlace al mensaje reenviados */
 	function onForwardedMessageClick() {

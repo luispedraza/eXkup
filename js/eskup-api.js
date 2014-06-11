@@ -375,7 +375,7 @@ function EskupApi() {
 		if (LAST_THREAD.id == threadID) {
 			callback(LAST_THREAD.info);
 			return;
-		}; 
+		};
 		var params = eskupParams({msg: threadID, th: 1});
 		apiCall("GET", OUTESKUP, params, function (r) {
 			var info = eskupParseResponse(r);
