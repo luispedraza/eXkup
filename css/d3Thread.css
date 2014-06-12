@@ -1,15 +1,15 @@
 svg {
-	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	bottom: 0;
+  position: absolute;
+  left: 200px;
+  top: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .node circle {
   fill: #F25600;
   stroke: #fff;
-  stroke-width: 1px;
+  stroke-width: .1px;
   cursor: pointer;
 }
 
@@ -20,5 +20,37 @@ svg {
 .link {
   fill: none;
   stroke: #999;
-  stroke-width: .5px;
+  stroke-width: .2px;
+}
+
+
+
+
+
+/******************/
+/* Elementos HTML */
+/******************/
+
+.message {
+  position: absolute;
+  background-color: #fff;
+  width: 400px;
+}
+
+#chart-control {
+  width: 200px;
+}
+#users-list {
+  padding: 2px;
+  max-height: 200px;
+  overflow-y: scroll;
+  z-index: 100;
+}
+#users-list li {
+  list-style: none;
+  cursor: pointer;
+}
+#users-list li:hover {
+  background-color: #000;
+  color: #fff;
 }

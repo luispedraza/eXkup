@@ -12,7 +12,7 @@
 	<link rel="stylesheet" href="css/dialog.css" type="text/css" />
 	<link rel="stylesheet" href="css/tree.css" type="text/css" />
 	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
-	<script type="text/javascript" src="js/jquery.appear.js"></script>
+	<!-- <script type="text/javascript" src="js/jquery.appear.js"></script> -->
 	<script type="text/javascript" src="js/utils.js"></script>
 	<script type="text/javascript" src="js/editor.js"></script>
 	<script type="text/javascript" src="js/eskup-api-old.js"></script>
@@ -23,7 +23,7 @@
 </head>
 <body>
 	<div id="header">
-		<div id="profile-item">
+		<div id="profile-item" class="fa fa-chevron-down">
 			<img id="user-avatar" />
 			<span id="user-nickname"></span>
 			<span id="user-fullname"></span>
@@ -57,7 +57,7 @@
 				<a id="search-button" class ="button fa fa-search"></a>
 			</div>
 			<div id="board-info">
-				<div id="board-title" class="fa fa-chevron-circle-down"></div>
+				<div id="board-title" class="fa fa-chevron-down"></div>
 				<div id="board-description"></div>
 			</div>
 		</div>
@@ -85,7 +85,7 @@
 
 		<!-- SECCION. EDITOR -->
 		<div id="edit-section">
-			<h1 id="edit-section-h1" class="fa fa-chevron-circle-up"> NUEVO MENSAJE</h1>
+			<h1 id="edit-section-h1" class="fa fa-chevron-up"> NUEVO MENSAJE</h1>
 			<span class="edit-description">Información</span>
 			<div id="editor">
 				<div id="commands">
@@ -97,9 +97,9 @@
 					<button id="setbold" class="button fa fa-bold" title="negrita"></button>
 					<button id="setitalic" class="button fa fa-italic" title="cursiva"></button>
 					<button id="insertlink" class="button fa fa-link" title="enlazar esta página"></button>
-					<button id="insertvideo" class="button fa fa-video-camera" title="insertar vídeo"></button>
+					<!-- <button id="insertvideo" class="button fa fa-video-camera" title="insertar vídeo"></button> -->
 					<button id="insertimage" class="button fa fa-camera" title="insertar imagen"></button>
-					<button id="cortas" class="button fa fa-cut" title="acortar enlaces"></button>
+					<!-- <button id="cortas" class="button fa fa-cut" title="acortar enlaces"></button> -->
 					
 				</div>
 				<div id="newmessage-container">
