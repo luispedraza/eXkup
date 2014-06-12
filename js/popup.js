@@ -18,7 +18,11 @@ function initPopup() {
 		fillHeader();
 		fillThemes();
 		// Eventos
-		// document.getElementById("search").addEventListener("click", Search);
+		$("#search-button").on("click", function() {
+			$("form.search").toggleClass('on').off().on("submit", function() {
+				console.log("buscando");
+			});
+		});
 		// NAvegación temporal 
 		$("#history-left").on("click", function() {loadBoard(-1);});
 		$("#history-right").on("click", function() {loadBoard(1);});

@@ -11,7 +11,7 @@ if (found) {
 			found = currentLocation.match(/eskup\.elpais\.com\/\*([\w-]+)$/);	// tema
 			if (found) result = {type: "theme", id: found[1]};	
 			else {
-				found = currentLocation.match(/eskup\.elpais\.com\/([\w-]+)\/?.*$/);		// usuario
+				found = currentLocation.match(/eskup\.elpais\.com\/([\w]+)\/?.*$/);		// usuario
 				if (found) result = {type: "user", id: found[1]};		
 			};
 		};
