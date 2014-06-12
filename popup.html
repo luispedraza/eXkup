@@ -23,12 +23,7 @@
 </head>
 <body>
 	<div id="header">
-		<ul id="header-menu">
-			<li id="profile-item">perfil</li>
-			<!-- <li>opciones</li>
-			<li id="logout">desconectar</li> -->
-		</ul>
-		<div id="header-user">
+		<div id="profile-item">
 			<img id="user-avatar" />
 			<span id="user-nickname"></span>
 			<span id="user-fullname"></span>
@@ -54,22 +49,24 @@
 				<ul id="themes-follow" class="navigator"></ul>
 			</div>
 		</div><!-- navigation -->
-		
-		<div id="messages">
-			<div id="messages-header" class="messages-header">
-				<div class="search">
-					<input name="search" type="text" value="" placeholder="buscar…" id="searchtxt_sigo"/>
-					<a id="search" class ="button fa fa-search"></a>
-				</div>
-				<div class="nav">
-					<a id="history-left" class="button fa fa-angle-left"></a>
-					<a id="history-right" class="button fa fa-angle-right"></a>
-				</div>
-				<div id="board-info">
-					<div id="board-title" class="fa fa-chevron-circle-down"></div>
-					<div id="board-description"></div>
-				</div>
+
+		<div id="messages-header" class="messages-header">
+			<div class="search">
+				<input name="search" type="text" value="" placeholder="buscar…" id="searchtxt_sigo"/>
+				<a id="search" class ="button fa fa-search"></a>
 			</div>
+			<div class="nav">
+				<a id="history-left" class="button fa fa-angle-left"></a>
+				<a id="history-right" class="button fa fa-angle-right"></a>
+			</div>
+			<div id="board-info">
+				<div id="board-title" class="fa fa-chevron-circle-down"></div>
+				<div id="board-description"></div>
+			</div>
+		</div>
+
+		<div id="messages">
+			
 			<div id="board" class="message-list board"></div>
 			<div id="tree-board" class="board">
 				<div class="tree-toolbar">
@@ -86,7 +83,7 @@
 
 		<!-- SECCION. EDITOR -->
 		<div id="edit-section">
-			<h1 id="edit-section-h1"><span class="edit-title">escribir nuevo mensaje</span><span class="fa fa-chevron-circle-up"></span></h1>
+			<h1 id="edit-section-h1"><span class="edit-title">NUEVO MENSAJE</span><span class="fa fa-chevron-circle-up"></span></h1>
 			<div id="editor">
 				<div id="commands">
 					<div id="counter">280</div>

@@ -438,6 +438,7 @@ function showThread(threadID, originalMsgID) {
 		"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
 		[]);
 	API.loadThread(threadID, function(info) {
+		console.log("loaded")
 		var treeDiv = document.getElementById("tree");
 		treeDiv.innerHTML = "";
 		var aux = {};
@@ -492,8 +493,8 @@ function showThread(threadID, originalMsgID) {
 					var scroll = Math.floor(alfa*(treeRect.width - treeBoardRect.width));
 					$treeBoard.scrollLeft(scroll);
 				};
-			})
-			;
+			});
+		console.log("terminada la carga");
 		setTimeout(function() {
 			// scroll hasta el mensaje de punto de entrada
 			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);
@@ -900,7 +901,7 @@ function fillWritableThemes() {
 							onWriteTheme(this, function() {
 								fillProfile();
 								fillWritableThemes();	// se recargan los temas en que escribo
-							});
+					ƒAPP		});
 					})))
 					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
 					.append($("<div>").addClass("theme-info")
@@ -920,7 +921,7 @@ function fillHeader() {
 	API.loadProfile(null, function(user) {
 		$("#user-avatar").attr("src", user.pathfoto);
 		$("#user-nickname").text("@" + API.getUserNickname());
-		$("#user-fullname").text("(" + user.nombre + " " + user.apellidos + ")");
+		$("#user-fullname").text(user.nombre + " " + user.apellidos);
 	});
 };
 

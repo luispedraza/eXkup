@@ -100,6 +100,7 @@ ul.navigator li:hover {
 	position: relative;
 	
 	vertical-align:  top;
+	width: 140px;
 }
 #header-menu {
 	position: absolute;
@@ -136,15 +137,15 @@ ul.navigator li:hover {
 	margin-right:  5px;
 }
 #header span {
-	/* display: inline-block; */
+	display: block;
 }
 #user-nickname {
-	font-weight: 400;
-	font-size: 27px;
+	/* font-weight: 400; */
+	font-size: 16px;
 }
 #user-fullname {
 	font-weight: 200;
-	font-size: 16px;
+	font-size: 12px;
 }
 
 #navigation {
@@ -170,9 +171,11 @@ ul.navigator li:hover {
 .messages-header {
 	position: absolute;
 	top:0;
-	left: 0;
+	/* left: 0; */
 	right: 0;
 	padding: 5px;
+	width: 440px;
+	/* height: 20px; */
 }
 
 #messages-header {
@@ -182,7 +185,7 @@ ul.navigator li:hover {
 	border-bottom: 1px solid #fff;
 	transition: all .25s ease;
 	overflow: hidden;
-	height: 27px;
+	height: 37px;
 }
 #messages-header.on {
 	background-color: rgba(50,50,50,.95);
@@ -454,11 +457,11 @@ ul.navigator li:hover {
 .board {
 	position: absolute;
 	top: 0px;
-	height: 459px;
+	height: 100%;
 	transition: left .5s ease;
 	width: 450px;
 	overflow-y: scroll;
-	padding-top: 50px;
+	padding-top: 10px;
 }
 #board {
 	left: 0;
@@ -503,7 +506,7 @@ ul.navigator li:hover {
 	position: fixed;
 	bottom: 0;
 	width: 100%;
-	background-color: #fff;
+	/* background-color: #fff; */
 	height: 40px;
 	border-top: 1px solid #fff;
 	overflow: hidden;
@@ -528,6 +531,7 @@ ul.navigator li:hover {
 	padding: 10px;
 	cursor: pointer;
 	margin: 0;
+	width: 130px;
 }
 
 #edit-section h1 .edit-title {
