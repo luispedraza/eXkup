@@ -42,9 +42,9 @@ svg {
 }
 #users-list {
   padding: 2px;
-  max-height: 200px;
+  max-height: 500px;
   overflow-y: scroll;
-  z-index: 100;
+
 }
 #users-list li {
   list-style: none;
