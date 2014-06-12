@@ -2,12 +2,12 @@
 .tree-toolbar {
 	position: fixed;
 	z-index: 80;
-	width: 100%;
-	padding: 5px;
+	width: 450px;
+	/* padding: 5px; */
 	display: none;
 	background-color: rgba(242, 86, 0, .8);
-	/* height: 20px; */
-	top: 48px;
+	height: 34px;
+	bottom: 0;
 }
 #tree-board.switch .tree-toolbar {
 	display: block;
@@ -29,12 +29,14 @@
 	background-color: #F25600;
 }
 .tree-toolbar .controls {
-	float: right;
-	width: 487px;
+	/* float: right; */
+	/* width: 487px; */
+	padding: 5px;
 }
 
 #closetree {
-	float: left;
+	float: right;
+	padding: 10px;
 }
 #show-d3 {
 	/* float: right; */

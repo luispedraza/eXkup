@@ -483,6 +483,7 @@ form.search .button {
 #tree-board {
 	left: 450px;
 	overflow-x: scroll;
+	height: 505px;
 }
 #board.switch {
 	left: -450px;
@@ -520,7 +521,7 @@ form.search .button {
 	position: fixed;
 	bottom: 0;
 	width: 100%;
-	height: 40px;
+	height: 34px;
 	overflow: hidden;
 	z-index: 200;
 	transition: height .25s ease-in-out;
@@ -541,10 +542,10 @@ form.search .button {
 	font-size: 14px;
 	font-weight: 300;
 	height: 20px;
-	padding: 10px;
+	padding: 10px 5px;
 	cursor: pointer;
 	margin: 0;
-	width: 130px;
+	width: 140px;
 	pointer-events:auto;
 }
 
