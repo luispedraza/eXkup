@@ -727,13 +727,13 @@ span.time-tooltip span:first-child {
 	margin-right: 3px;
 }
 .msg_control {
-	position: absolute;
-	right: 0;
-	top: 0;
-	overflow: hidden;
-	transition: all .2s ease;
+	/* position: absolute; */
+	/* right: 0; */
+	/* top: 0; */
+	/* overflow: hidden; */
+	/* transition: all .2s ease; */
 	font-size: 12px;
-	color: #666;
+	color: #ccc;
 	padding: 3px;
 }
 .modal .msg_control, #replying-message .msg_control {
@@ -741,28 +741,14 @@ span.time-tooltip span:first-child {
 }
 
 .msg_control:hover {
-	border: 1px solid #ccc;
-	background-color: #fff;
-	box-shadow: -3px 2px 8px 0px rgba(50, 50, 50, 0.3);
-}
-.msg_control:hover .btn {
-	display: block;
-}
-.msg_control .btn:hover i {
-	color: #000;
+	color: #999;
 }
 
-.msg_control:before {
-	color: #666;
-	font-size: 12px;
-}
-.msg_control:hover:before {
-	display: none;
-}
 .msg_control .btn {
-	display: none;
+	/* display: none; */
 	cursor: pointer;
-	padding: 4px 2px;
+	/* padding: 4px 2px; */
+	margin-right: 10px;
 }
 
 .msg_control .btn:hover {

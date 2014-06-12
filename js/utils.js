@@ -9,6 +9,14 @@ var TABLONES = {
 	favs: "favs"
 };
 
+var TIC_TOC_TIME = 0;
+function TIC() {
+	TIC_TOC_TIME = new Date();
+};
+function TOC() {
+	return (new Date() - TIC_TOC_TIME);
+};
+
 Array.prototype.shuffle = function() {
  	var len = this.length;
 	var i = len;

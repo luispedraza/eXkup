@@ -376,11 +376,13 @@ function EskupApi() {
 			callback(LAST_THREAD.info);
 			return;
 		};
+		TIC();
 		var params = eskupParams({msg: threadID, th: 1});
 		apiCall("GET", OUTESKUP, params, function (r) {
 			var info = eskupParseResponse(r);
 			LAST_THREAD.id = threadID;
 			LAST_THREAD.info = info;
+			console.log("tiempo adquisición: ", TOC());
 			if (callback) callback(info);
 		});
 	};

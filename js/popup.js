@@ -438,7 +438,7 @@ function showThread(threadID, originalMsgID) {
 		"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
 		[]);
 	API.loadThread(threadID, function(info) {
-		console.log("loaded")
+		TIC();
 		var treeDiv = document.getElementById("tree");
 		treeDiv.innerHTML = "";
 		var aux = {};
@@ -494,7 +494,7 @@ function showThread(threadID, originalMsgID) {
 					$treeBoard.scrollLeft(scroll);
 				};
 			});
-		console.log("terminada la carga");
+		console.log("tiempo construcción: ", TOC());
 		setTimeout(function() {
 			// scroll hasta el mensaje de punto de entrada
 			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);
@@ -661,16 +661,6 @@ function appendMsg(msg, board, themes, before) {
 	// div_msg.className = "message card";
 	// $(div_msg).appear({force_process: true});
 	div_msg.setAttribute("data-id", m_id);
-	// El contenido del mensaje:
-	var div_cont = document.createElement("div");
-	div_cont.className = "msg_content";
-	div_cont.innerHTML = msg.contenido;
-	processVideos(div_cont);
-	if (msg.cont_adicional) {
-		var img_cont = document.createElement("img");
-		img_cont.src = msg.cont_adicional;
-		div_cont.appendChild(img_cont);
-	};
 	// La cabecera:
 	var dHead = document.createElement("div");
 	dHead.className = "msg_header";
@@ -689,9 +679,45 @@ function appendMsg(msg, board, themes, before) {
 			.addClass("time fa fa-clock-o").attr("data-ts", tsMessage)
 			.on("mouseover", onTimeMouseover)
 			.on("mouseout", onTimeMouseout));
+	div_msg.appendChild(dHead);
+
+	// El contenido del mensaje:
+	var div_cont = document.createElement("div");
+	div_cont.className = "msg_content";
+	div_cont.innerHTML = msg.contenido;
+	processVideos(div_cont);
+	if (msg.cont_adicional) {
+		var img_cont = document.createElement("img");
+		img_cont.src = msg.cont_adicional;
+		div_cont.appendChild(img_cont);
+	};
+	div_msg.appendChild(div_cont);
+
+	// Temas del mensaje
+	if (themes) {
+		var msgThemes = msg.CopiaEnTablones.split( "," ).filter(function(d) {return d.split("-")[0] == "ev"});	// temas del mensajes
+		if (msgThemes.length) {
+			var $divThemes = $("<ul class='themes'></ul>");
+			msgThemes.forEach(function(themeKey) {
+				var themeID = themeKey.split("-")[1];
+				var themeInfo = themes[themeID];	// información sobre el tema, de la API
+				var themeName = themeInfo.nombre;
+				var $themeElement = $("<li>")
+					.attr("data-theme", themeKey)
+					.text(themeName)
+					.on("click", function() {
+						loadBoard($(this).attr("data-theme"));
+					})
+					.appendTo($divThemes);
+			});
+			div_msg.setAttribute("data-themes", msgThemes.map(function(d){return d.split("-")[1];}).toString());
+			$(div_msg).append($divThemes);
+		};
+	};
+
 	// Elementos de control:
 	var dCtrl = document.createElement("div");
-	dCtrl.className = "msg_control fa fa-plus-square";
+	dCtrl.className = "msg_control";
 	// Guardar vavorito
 	var dFav = document.createElement("div");
 	dFav.className = "btn fav fa fa-star" + (API.checkFavorite(m_id) ? " on" : "");
@@ -744,30 +770,9 @@ function appendMsg(msg, board, themes, before) {
 		div_forward.addEventListener("click", onForwardedMessageClick);
 		dHead.appendChild(div_forward);
 	};
-	dHead.appendChild(dCtrl);
-	div_msg.appendChild(dHead);
-	div_msg.appendChild(div_cont);
-	// Temas del mensaje
-	if (themes) {
-		var msgThemes = msg.CopiaEnTablones.split( "," ).filter(function(d) {return d.split("-")[0] == "ev"});	// temas del mensajes
-		if (msgThemes.length) {
-			var $divThemes = $("<ul class='themes'></ul>");
-			msgThemes.forEach(function(themeKey) {
-				var themeID = themeKey.split("-")[1];
-				var themeInfo = themes[themeID];	// información sobre el tema, de la API
-				var themeName = themeInfo.nombre;
-				var $themeElement = $("<li>")
-					.attr("data-theme", themeKey)
-					.text(themeName)
-					.on("click", function() {
-						loadBoard($(this).attr("data-theme"));
-					})
-					.appendTo($divThemes);
-			});
-			div_msg.setAttribute("data-themes", msgThemes.map(function(d){return d.split("-")[1];}).toString());
-			$(div_msg).append($divThemes);
-		};
-	};
+	div_msg.appendChild(dCtrl);
+
+
 	// agregación final del mensaje:
 	if (before) $(div_msg).insertBefore(before);
 	else board.appendChild(div_msg);
