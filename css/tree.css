@@ -44,7 +44,7 @@
 
 /* Arbol de mensajes de un hilo */
 #tree {
-	padding: 30px 5px;
+	padding: 5px;
 	display: table;
 }
 .node .node {

@@ -160,14 +160,16 @@ ul.navigator li:hover {
 }
 
 #messages {
-	position: relative;
+	position: absolute;
 	float: right;
 	background-color: #eee;
 	width: 450px;
-	height: 550px;
+	height: 545px;
 	overflow-y: hidden;
 	overflow-x: hidden;
 	/* z-index: 200; */
+	right: 0;
+	top: 0;
 }
 .messages-header {
 	position: absolute;
@@ -476,6 +478,7 @@ form.search .button {
 	width: 450px;
 	overflow-y: scroll;
 	padding-top: 10px;
+	padding-top: 50px;
 }
 #board {
 	left: 0;
@@ -483,7 +486,7 @@ form.search .button {
 #tree-board {
 	left: 450px;
 	overflow-x: scroll;
-	height: 505px;
+	height: 460px;
 }
 #board.switch {
 	left: -450px;

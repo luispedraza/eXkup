@@ -23,6 +23,9 @@ function initPopup() {
 				console.log("buscando");
 			});
 		});
+		$(document).on("keydown", function(e) {
+			console.log(e);
+		});
 		// NAvegación temporal 
 		$("#history-left").on("click", function() {loadBoard(-1);});
 		$("#history-right").on("click", function() {loadBoard(1);});
