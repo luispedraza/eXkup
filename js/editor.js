@@ -191,7 +191,6 @@ function insertImage() {
 					    ctx.drawImage(this, 0, 0);
 					    $("#newimage").addClass('loaded');
 					    $("#removeimage").off().on("click", function() {
-					    	console.log("borrando");
 					    	$("#newimage").removeClass('loaded');
 					    });
 					};

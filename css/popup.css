@@ -538,7 +538,7 @@ form.search .button {
 .board {
 	position: absolute;
 	top: 0px;
-	height: 100%;
+	height: 550px;
 	transition: left .5s ease;
 	width: 450px;
 	overflow-y: scroll;
@@ -848,8 +848,16 @@ span.time-tooltip span:first-child {
 .msg_control .btn:hover {
 	color: #666;
 }
-.msg_control .fav.on {
-	color: red;
+.message.favorite {
+	border-color: #cd9732;
+}
+.message.favorite .fav {
+	color: #cd9732;
+}
+.message.favorite .fav:before {
+	color: #f1b23a;
+	-webkit-text-stroke-width: 1px;
+   	-webkit-text-stroke-color: #cd9732;
 }
 
 .msg_content {
@@ -862,7 +870,7 @@ span.time-tooltip span:first-child {
 
 .msg_content  img {
 	max-width: 100%;
-	margin-top: 5px;
+	margin: 10px 0;
 	display: block;
 }
 #replying-message .msg_content  img {

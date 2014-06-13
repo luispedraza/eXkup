@@ -8,7 +8,9 @@ function EskupApi() {
 	var USER_PROFILE = {};	// información de perfil de usuarios
 	var LAST_THREAD = {id: null, info: null};		// guarda el último thread leído
 	var FAVORITES = (typeof localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : new Array();	// lista de temas favoritos que se almacena en localStorage
-	var INESKUP = "http://eskup.elpais.com/Ineskup";
+	var INESKUP = "http://eskup.elpais.com/Ineskup"
+
+	this.NUMMSG = 50;		// número de mensajes que se pedirán cada vez
 
 	/* Limpia la información sobre un perfil de usuario */
 	function clearUsersInfo (users) {
@@ -137,9 +139,10 @@ function EskupApi() {
 		ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadMessages = function(board, page, callback) {
-		var params = eskupParams({t: board, p: page});
+		console.log("llamada api ", board, page);
+		var params = eskupParams({t: board, p: page, nummsg: THAT.NUMMSG});
 		apiCall("GET", OUTESKUP, params, function (r) {
-			if (callback) callback(eskupParseResponse(r));
+			callback(eskupParseResponse(r));
 		});
 	};
 
@@ -376,13 +379,13 @@ function EskupApi() {
 			callback(LAST_THREAD.info);
 			return;
 		};
-		TIC();
+		// TIC();
 		var params = eskupParams({msg: threadID, th: 1});
 		apiCall("GET", OUTESKUP, params, function (r) {
 			var info = eskupParseResponse(r);
 			LAST_THREAD.id = threadID;
 			LAST_THREAD.info = info;
-			console.log("tiempo adquisición: ", TOC());
+			// console.log("tiempo adquisición: ", TOC());
 			if (callback) callback(info);
 		});
 	};

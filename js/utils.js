@@ -27,10 +27,20 @@ Array.prototype.shuffle = function() {
   	this[p] = t;
  	};
 };
-/* Construcción de un link que se puede abrir desde la extensión, sin cerrarla */
-function makeLink(text, href) {
-	return $("<a>").attr("href", "#").attr("data-url", href).text(text).on("click", function() {
-		chrome.tabs.update({url: this.getAttribute("data-url")});
+/* Construcción de un link que se puede abrir desde la extensión, sin cerrarla 
+	@parama text: texto del enlace
+	@param href: dirección del enlace
+	@param clamp: acortar el texto dejándolo en este número de caracteres (excluyendo http://www.)
+*/
+function makeLink(text, href, clamp) {
+	return $("<a>")
+		.attr("href", "#")
+		.attr("data-url", href)
+		.attr("title", href)
+		.text((clamp) ? text.replace(/^http:\/\/[w\.]*/, "").slice(0,clamp)+"…" : text)
+		.on("click", function() {
+			chrome.tabs.update({url: this.getAttribute("data-url")
+		});
 	});
 };
 
@@ -135,7 +145,6 @@ function processLinks(msg_content) {
 	$links.each(function() {
 		var $this = $(this),
 			href = ($this.attr("title") || $this.attr("href"));	// esto es porque los cort.as traene la url original en el title :)
-		console.log(this, href);
 		if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
 			var videoMatch = href.match(/[?&]v=([^&]+)/);
 			if (videoMatch && videoMatch[1]) {
@@ -161,7 +170,8 @@ function processLinks(msg_content) {
 				$this.remove();
 			};
 		} else {	
-			$this.replaceWith(makeLink(this.textContent,this.href).addClass('a-link'));
+			// $this.replaceWith(makeLink(this.textContent,href).addClass('a-link'));
+			$this.replaceWith(makeLink(href ,href, 20).addClass('a-link'));
 		};
 	});
 };

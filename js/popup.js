@@ -1,5 +1,5 @@
 var API = new EskupApi();	// La API de Eskup
-var loading = false;
+var LOADING = false;
 var CURRENT_THEME = null;	// el tablón actual
 var HISTORY = [];			// historial de tablones, para navegacion
 var HISTORY_POSITION = -1;	// posición sobre HISTORY
@@ -29,13 +29,10 @@ function initPopup() {
 		// NAvegación temporal 
 		$("#history-left").on("click", function() {loadBoard(-1);});
 		$("#history-right").on("click", function() {loadBoard(1);});
-		document.getElementById("board").addEventListener("scroll", function() {
-			if ((CURRENT_THEME.id == "favs") || loading) return;
+		$("#board").on("scroll", function() {
+			if (CURRENT_THEME.id == "favs") return;
 			if (this.scrollTop+this.offsetHeight >= this.scrollHeight) {
-				loading = true;
-				loadBoardMessages(null, function() {
-					loading = false;
-				});
+				loadBoardMessages(null);
 			};
 		});
 
@@ -211,32 +208,55 @@ function loadBoard(id, threadID, originalMsgID) {
 
 
 /* Carga de mensajes de un tablón */
-function loadBoardMessages(theme, callback) {
-	$("#board").append("<div class='loading'><i class='fa fa-refresh fa-spin'></i>cargando datos...</div>");
+function loadBoardMessages(theme) {
+	function noMoreMessages() {
+		CURRENT_PAGE = -1;		// no cargar más páginas en el futuro
+		$board.append("<div class='no-messages'>No hay más mensajes para mostrar.</div>");
+	};
+	function infoShowLoadingMessages() {
+		LOADING = true;
+		$board.append("<div class='loading'><i class='fa fa-refresh fa-spin'></i> CARGANDO...</div>");
+	};
+	function infoHideLoadingMessages() {
+		LOADING = false;
+		$board.find(".loading").remove();
+	};
+	if (LOADING) return;
 	if (theme) {
 		CURRENT_PAGE = 1;
-		document.getElementById("board").innerHTML = "";	// limpieza
-	} else CURRENT_PAGE++;		// nueva página
+	} else if (CURRENT_PAGE<0) {
+		return;
+	} else {
+		CURRENT_PAGE++;		// nueva página
+	};
+	var $board = $("#board");
+	if (CURRENT_PAGE == 1) $board.html("");			// limpieza
+
+	infoShowLoadingMessages();
 	API.loadMessages(CURRENT_THEME.id, CURRENT_PAGE, function(info) {
 		if (info) {
+			console.log(info);
 			var messages = info.mensajes;
 			var usersInfo = info.perfilesUsuarios;
 			var themesInfo = info.perfilesEventos;
 			var board = document.getElementById("board");
 			if (messages.length == 0) {
-				$(board).append("<div class='no-messages'>No hay mensajes que mostrar.</div>");
+				noMoreMessages();
 			} else {
-				for (var i=0; i<messages.length; i++) {
-					var msg = info.mensajes[i];
-					if (msg.borrado) continue;
-					API.buildMessage(msg, usersInfo);
-					appendMsg(msg, board, themesInfo);
+				var board = $board.get(0);
+				messages.forEach(function(m) {
+					if (!m.borrado) {
+						API.buildMessage(m, usersInfo);
+						appendMsg(m, board, themesInfo);
+					};
+				});
+				if (Math.ceil(info.numMensajes / API.NUMMSG) == CURRENT_PAGE) {
+					noMoreMessages();
 				};
 			};
 			showTreeBoard(false);
-			if (callback) callback(info);
-		}
-		$("#board").find(".loading").remove();
+		};
+		infoHideLoadingMessages();
 	});
 };
 
@@ -445,7 +465,6 @@ function showThread(threadID, originalMsgID) {
 		"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
 		[]);
 	API.loadThread(threadID, function(info) {
-		TIC();
 		var treeDiv = document.getElementById("tree");
 		treeDiv.innerHTML = "";
 		var aux = {};
@@ -501,7 +520,6 @@ function showThread(threadID, originalMsgID) {
 					$treeBoard.scrollLeft(scroll);
 				};
 			});
-		console.log("tiempo construcción: ", TOC());
 		setTimeout(function() {
 			// scroll hasta el mensaje de punto de entrada
 			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);
@@ -558,28 +576,29 @@ function appendMsg(msg, board, themes, before) {
 	};
 	/* Agrega o elimina un mensaje de la lista de favoritos */
 	function onAddFavoriteClick() {
-		var $favBtn = $(this);
-		var m_id = $favBtn.closest('.message').attr("data-id");	// id del mensaje
-		if (!$favBtn.hasClass("on")) {		// marvar favorito
+		var $favBtn = $(this),
+			$msg = $favBtn.closest('.message'),
+			m_id = $msg.attr("data-id");	// id del mensaje
+		if (!$msg.hasClass("favorite")) {		// marvar favorito
 			API.addFavorite(m_id, function(status, statusInfo) {
 				if (status == 0) {
 					new ModalDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, 2000);
-					$favBtn.toggleClass('on');
+					$msg.toggleClass('favorite');
 				} else {
 					new ModalDialog("Error: No se pudo agregar el mensaje a favoritos.", statusInfo, [], null, 2000);
 				};
 			});
 		} else {						// desmarcar favorito
 			new ModalDialog("¿Seguro que desea eliminar este mensaje de sus favoritos?",
-				$favBtn.closest(".message")[0].outerHTML,
+				$msg[0].outerHTML,
 				["Sí", "Cancelar"], function(result) {
 					if (result == "Sí") {
 						API.removeFavorite(m_id, function(status, statusInfo) {
 							new ModalDialog("El mensaje se ha eliminado de tus favoritos.", null, [], null, 2000);
-							$favBtn.toggleClass('on');
+							$msg.toggleClass('favorite');
 							// además lo eliminamos del tablón de favoritos
 							if (CURRENT_THEME.id == "favs") {
-								$favBtn.closest('.message').fadeOut(function() {
+								$msg.fadeOut(function() {
 									$(this).remove();
 								});
 							};
@@ -657,7 +676,6 @@ function appendMsg(msg, board, themes, before) {
 			});
 	};
 	if (typeof board === "string") board = document.getElementById(board);
-	console.log(msg);
 	var userNickname = API.getUserNickname();
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
@@ -792,10 +810,10 @@ function loadFavorites() {
 	API.loadFavorites(function(data) {
 		var favs = document.getElementById("board");
 		favs.innerHTML = "";
-		for (var cont=0, len=data.length; cont<len; cont++) {
-			var msg = localStorage.getItem(data[cont]);
-			if (msg) appendMsg(JSON.parse(msg), favs);
-		};
+		data.forEach(function(mID) {
+			var msg = localStorage.getItem(mID);
+			if (msg) appendMsg(JSON.parse(msg), favs).addClass('favorite');
+		});
 	});
 };
 
