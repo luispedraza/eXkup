@@ -116,60 +116,57 @@ function checkUserPhoto(path) {
 	return path || "img/noimage.jpg";
 };
 
-/* Procesamiendo de enlaces a vídeos contenidos en un mensaje */
-function processVideos(msg_content) {
-	return;
-// <iframe src="http://player.vimeo.com/video/55351695" width="WIDTH" height="HEIGHT" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
-// <iframe class="youtube-player" type="text/html" width="300" height="auto" src="http://www.youtube.com/embed/JW5meKfy3fY" frameborder="0">
-// </iframe>
-// <iframe src="http://www.dailymotion.com/embed/video/xl4oyv_sean-paul-feat-alexis-jordan-got-2-luv-u-clip-officiel_music" width="300" height="auto" frameborder="0"></iframe>
-	linktext = msg_content.getElementsByTagName("a");
-	for (var i=0; i in linktext ; i++) { 
-		var rawtext = linktext[i].href;
-		viddiv = document.createElement("div");
-		viddiv.className = "video";
-		if (rawtext.search("www.youtube.com") != -1) {
-			vidid = rawtext.split("v=")[1].split("&")[0];
-			viddiv.innerHTML ='<iframe class="youtube-player" type="text/html" width="345" height="300" src="http://www.youtube.com/embed/' +
-				vidid + '" frameborder="0">';
-			msg_content.replaceChild(viddiv, linktext[i]);
-		};
-		if (rawtext.search("vimeo.com") != -1) {
-			var vimeoreq =  new XMLHttpRequest();
-			vimeoreq.open("POST",
-				"http://vimeo.com/api/oembed.xml?width=345&url=" + rawtext, 
-				false);
-			vimeoreq.onreadystatechange = function()
-			{
-				var vimeoxml = vimeoreq.responseXML;	
-				viddiv.innerHTML = vimeoxml.getElementsByTagName("html")[0].childNodes[0].nodeValue;
-			};
-			vimeoreq.send(null);
 
-			msg_content.replaceChild(viddiv, linktext[i]);
-			break;
+/* Procesamiento del contenido de un mensaje:
+	- adaptación de links
+	- adaptación de vídeos 
+*/
+function processContent(msg_content) {
+	processVideos(msg_content);
+};
+/* Procesamiendo de enlaces a vídeos contenidos en un mensaje
+	A tener en cuenta.
+	https://developer.chrome.com/apps/app_external
+	https://developers.google.com/youtube/player_parameters
+	http://developer.vimeo.com/player/embedding
+*/
+function processVideos(msg_content) {
+	var YOUTUBE_EMBED = "<iframe class='video' type='text/html' src='http://www.youtube.com/embed/_____ID_____?autoplay=0' frameborder='0'/>";
+	var VIMEO_EMBED = "<iframe class='video' src='http://player.vimeo.com/video/_____ID_____' frameborder='0'></iframe>";
+	var ZAPPINTERNET_EMBED = "<iframe class='video' src='http://zappinternet.com/embed/_____ID_____' frameborder='0' scrolling='no'></iframe>";
+	var DAILYMOTION_EMBED = "<iframe class='video' frameborder='0' src='http://www.dailymotion.com/embed/video/_____ID_____'></iframe>";
+	$content = $(msg_content);
+	$links = $content.find("a");
+	$links.each(function() {
+		var $this = $(this),
+			href = ($this.attr("title") || $this.attr("href"));	// esto es porque los cort.as traene la url original en el title :)
+		console.log(this, href);
+		if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
+			var videoMatch = href.match(/[?&]v=([^&]+)/);
+			if (videoMatch && videoMatch[1]) {
+				$(YOUTUBE_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
+				$this.remove();
+			};
+		} else if (href.match(/https?:\/\/[w\.]*vimeo.com/)) {
+			var videoMatch = href.match(/https?:\/\/[w\.]*vimeo.com\/(\d+)/);
+			if (videoMatch && videoMatch[1]) {
+				$(VIMEO_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
+				$this.remove();
+			};
+		} else if (href.match(/https?:\/\/[w\.]*zappinternet.com\/video\//)) {
+			var videoMatch = href.match(/https?:\/\/[w\.]*zappinternet.com\/video\/(.+?)\//);
+			if (videoMatch && videoMatch[1]) {
+				$(ZAPPINTERNET_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
+				$this.remove();
+			};
+		} else if (href.match(/https?:\/\/[w\.]*dailymotion.com\/video\//)) {
+			var videoMatch = href.match(/https?:\/\/[w\.]*dailymotion.com\/video\/([\w-]+)/);
+			if (videoMatch && videoMatch[1]) {
+				$(DAILYMOTION_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
+				$this.remove();
+			};
 		};
-		// if (rawtext.search("dailymotion.com/video") != -1)
-		// {
-		// 	vidid = rawtext.split("dailymotion.com/video/")[1].split("&")[0];
-		// 	viddiv = document.createElement("div");
-		// 	viddiv.className = "video";
-		// 	viddiv.innerHTML ="<object width='345' height='320'><param name='movie' value='http://www.dailymotion.com/swf/video/" + vidid + "'></param><param name='allowFullScreen' value='true'></param></param><embed type='application/x-shockwave-flash' src='http://www.dailymotion.com/swf/video/" + vidid + "' width='345' height='320' allowfullscreen='true' ></embed></object>";		
-		// 	msg_content.replaceChild(viddiv, linktext[i]);
-		// 	break;
-		// }
-		// if (rawtext.search("dailymotion.com/swf") != -1)
-		// {
-		// 	vidid = rawtext.split("dailymotion.com/swf/video")[1].split("#")[0];
-		// 	viddiv = document.createElement("div");
-		// 	viddiv.className = "video";
-		// 	viddiv.innerHTML ="<object width='345' height='320'><param name='movie' value='http://www.dailymotion.com/swf/video/" + vidid + "'></param><param name='allowFullScreen' value='true'></param></param><embed type='application/x-shockwave-flash' src='http://www.dailymotion.com/swf/video/" + vidid + "' width='345' height='320' allowfullscreen='true' ></embed></object>";		
-		// 	msg_content.replaceChild(viddiv, linktext[i]);
-		// 	break;
-		// }		
-	};
-	//message.replaceChild(linktext, null);	
-	//http://www.w3schools.com/Dom/dom_nodes_remove.asp	
+	});
 };
 
 /* Convertir un objeto en una array, por ejemplo para ordenar luego sus elementos */
@@ -188,48 +185,6 @@ function sortArray(array, field) {
 	return array.sort(function(a,b) {
 		return (a[field].toLowerCase() < b[field].toLowerCase()) ? -1 : 1;
 	});
-};
-
-/* Visualización de una conversación */
-function showNodeLinkTree(infoTree) {
-	var diameter = 600;
-	var tree = d3.layout.tree()
-		.size([360, diameter/2])
-		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
-
-	var diagonal = d3.svg.diagonal.radial()
-		.projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
-
-	var svg = d3.select("#graph").append("svg")
-		.attr("width", diameter)
-		.attr("height", diameter)
-		.append("g")
-		.attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
-
-	var nodes = tree.nodes(infoTree),
-		links = tree.links(nodes);
-
-	var link = svg.selectAll(".link")
-		.data(links)
-		.enter().append("path")
-		.attr("class", "link")
-		.attr("d", diagonal);
-
-	var node = svg.selectAll(".node")
-		.data(nodes)
-		.enter().append("g")
-		.attr("class", "node")
-		.attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
-
-	node.append("circle")
-		.attr("r", 4.5);
-
-	node.append("text")
-		.attr("dy", ".31em")
-		.attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
-		.attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
-		.text(function(d) { return d.name; });
-	d3.select(self.frameElement).style("height", diameter - 150 + "px");
 };
 
 

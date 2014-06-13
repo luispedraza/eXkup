@@ -19,6 +19,7 @@
 	position: absolute;
 	top: 0;
 	left: 120px;
+	/* padding: 2px; */
 }
 
 #newmessage-container {
@@ -194,6 +195,7 @@
 	color: #000;
 	cursor: pointer;
 	border: none;
+	transition: background-color .2s ease;
 }
 #toolbar button:hover {
 	background-color: #ddd;

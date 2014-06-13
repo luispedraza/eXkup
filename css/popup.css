@@ -14,6 +14,17 @@ body {
 	margin: 0px;
 }
 
+a {
+	color:#F25600;
+}
+
+.video {
+	/* margin-top:5px; */
+	margin: 5px 0;
+	width: 100%;
+	height: 280px;
+}
+
 /* algunas clases genéricas */
 .red {
 	background-color: #F25600;
@@ -163,6 +174,7 @@ ul.navigator li:hover {
 #user-fullname {
 	font-weight: 200;
 	font-size: 14px;
+	margin-top: 5px;
 }
 
 #navigation {
@@ -184,9 +196,6 @@ ul.navigator li:hover {
 	height: 595px;
 	overflow-y: hidden;
 	overflow-x: hidden;
-	/* z-index: 200; */
-	/* right: 0; */
-	/* top: 0; */
 	margin-top: -45px;
 }
 .messages-header {
@@ -202,23 +211,20 @@ ul.navigator li:hover {
 	z-index: 100;
 	border-bottom: 1px solid #fff;
 	transition: all .25s ease;
-	/* overflow: hidden; */
-	height: 37px;
 }
 #messages-header.on {
 	background-color: rgba(50,50,50,.95);
-	height: 260px;
-}
-#messages-header.on #board-description {
-	border-top: 1px dotted #F25600;
 }
 
 #messages-header .nav {
 	float: right;
 	/* border: 1px solid #fff; */
-	padding: 5px;
+	/* padding: 5px; */
 	/* background-color: #fff; */
 	font-size: 18px;
+	/* display: block; */
+	margin-top: -6px;
+	margin-left: 20px;
 }
 #messages-header .button {
 	border: 0;
@@ -226,10 +232,13 @@ ul.navigator li:hover {
 	color: #fff;
 	padding: 4px;
 	cursor: pointer;
-	height: 15px;
-	width: 15px;
+	height: 20px;
+	width: 20px;
 	text-align: center;
 	display: inline-block;
+}
+#messages-header .button:hover {
+	background-color: #000;
 }
 form.search {
 	position: absolute;
@@ -274,20 +283,20 @@ form.search .button {
 
 #board-info {
 	color: #fff;
+	/* display: block; */
 }
 
 #board-title {
-	/* text-shadow: 0 0 5px rgba(0, 0, 0, .8); */
-	/* overflow: hidden; */
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	cursor: pointer;
 	font-size: 16px;
 	margin-top: 10px;
-	margin-left:  5px;
+	margin-bottom: 11px;
 	display: block;
-	/* overflow: visible; */
-	/* z-index: 500; */
+	/* max-width: 300px; */
+	overflow: hidden;
+	/* margin-right: 42px; */
 }
 #board-title:before {
 	transition: -webkit-transform .25s ease;
@@ -302,13 +311,22 @@ form.search .button {
 	padding: 4px;
 	border-radius: 30px;
 	/* z-index: 500; */
+	border-bottom: 1px solid #fff;
 }
 #board-description {
 	clear: both;
 	font-weight: 200;
 	font-size: 12px;
-	margin-top: 16px;
-	margin-left: 6px;
+	height: 0;
+	overflow: hidden;
+	transition: all .25s ease;
+	padding: 0 5px;
+}
+#messages-header.on #board-description {
+	border-top: 1px dotted #F25600;
+	height: 250px;
+	margin-top: 15px;
+	padding: 18px 5px 5px 5px;
 }
 
 #messages-header.on #board-title:before {
@@ -319,20 +337,26 @@ form.search .button {
 	float: right;
 	max-width: 130px;
 	margin-left: 10px;
-	max-height:  100px;
+	max-height: 100px;
 }
 #board-description img.avatar {
-	float: right;
-	width: 60px;
+	float: left;
+	height: 90px;
 	border: 1px solid #fff;
-	margin-top: 13px;
+	/* margin-top: 13px; */
+	margin-left: 0;
+	margin-right: 10px;
 }
 #board-description p {
-	max-height: 100px;
+	height: 100px;
 	overflow-y: auto;
+	margin: 0;
 }
+
 #board-description .eskup-info {
-	height: 90px;
+	/* height: 90px; */
+	width: 100%;
+	margin-top: 15px;
 }
 .eskup-info .stats {
 	float: left;
@@ -344,6 +368,8 @@ form.search .button {
 .eskup-info .stats:before {
 	display: block;
 	width: 100%;
+	font-size: 14px;
+	text-transform: uppercase;
 }
 .eskup-info .info-users:before {
 	content: "usuarios";
@@ -357,20 +383,20 @@ form.search .button {
 .eskup-info .stats div {
 	display: inline-block;
 	margin: 3px;
-	width: 50px;
+	width: 60px;
 	height: 50px;
 	background-color: #fff;
 }
 .eskup-info .stats div a {
 	display: block;
-	margin-top: 5px;
-	font-size: 16px;
+	margin-top: 4px;
+	font-size: 18px;
 	text-decoration: none;
 }
 .eskup-info .stats div:before {
 	display: block;
 	width: 100%;
-	font-size: 10px;
+	font-size: 12px;
 	background-color: #F25600;
 }
 .eskup-info .info-users .from:before {
@@ -394,10 +420,10 @@ form.search .button {
 #board-description .links {
 	float: left;
 	padding: 0;
-	margin: 0;
+	margin-top: 15px;
 	list-style-type: none;
 	max-width: 290px;
-	height: 96px;
+	height: 120px;
 	overflow-y: auto;
 }
 #board-description .links:before {
@@ -432,8 +458,8 @@ form.search .button {
 }
 /* Control del tema */
 .theme-control {
-	perspective: 800px;
 	float: right;
+	margin-top: 15px;
 }
 .control-item {
 	background-color: #004862;
@@ -594,7 +620,7 @@ form.search .button {
 }
 
 #edit-section.on {
-	height: 550px;
+	height: 552px;
 	pointer-events:auto;
 	background-color: #fff;
 }
@@ -607,7 +633,7 @@ form.search .button {
 	position: absolute;
 	font-size: 8px;
 	left: 69px;
-	top: -9px;
+	top: -7px;
 	background: #666;
 	width: 10px;
 	height: 10px;
@@ -845,6 +871,7 @@ span.time-tooltip span:first-child {
 }
 .themes:before {
 	content: "TEMAS: ";
+	color: #aaa;
 }
 .themes li {
 	display: inline-block;

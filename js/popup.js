@@ -657,6 +657,7 @@ function appendMsg(msg, board, themes, before) {
 			});
 	};
 	if (typeof board === "string") board = document.getElementById(board);
+	console.log(msg);
 	var userNickname = API.getUserNickname();
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
@@ -692,7 +693,7 @@ function appendMsg(msg, board, themes, before) {
 	var div_cont = document.createElement("div");
 	div_cont.className = "msg_content";
 	div_cont.innerHTML = msg.contenido;
-	processVideos(div_cont);
+	processContent(div_cont);			// PROCESAMIENTO DE LOS CONTENIDOS: ENLACES, VÍDEOS...
 	if (msg.cont_adicional) {
 		var img_cont = document.createElement("img");
 		img_cont.src = msg.cont_adicional;
@@ -931,7 +932,7 @@ function fillWritableThemes() {
 /* Rellena la cabecera del popup con información del usuario */
 function fillHeader() {
 	API.loadProfile(null, function(user) {
-		$("#user-avatar").attr("src", user.pathfoto);
+		$("#user-avatar").attr("src", checkUserPhoto(user.pathfoto));
 		$("#user-nickname").text("@" + API.getUserNickname());
 		$("#user-fullname").text(user.nombre + " " + user.apellidos);
 	});
