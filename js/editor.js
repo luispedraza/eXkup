@@ -22,6 +22,7 @@ window.addEventListener("load", function() {
 /* Contador de caracteres del mensaje */
 function Counter() {
 	var message = $("#newmessage").text();
+	console.log(message);
 	message = message.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AFMzx");
 	var remaining = MAXCHAR - message.length;
 	var $counter = $("#counter");
@@ -146,7 +147,7 @@ function getSelectedUsers() {
 /* Envía un nuevo mensaje */
 function sendMessage() {
 	var data = {};
-	data.message = $("#newmessage").html();
+	data.message = $("#newmessage").text();
 	data.themes = getSelectedThemes();	// tablones destinatarios
 	data.users = getSelectedUsers();	// destinatarios de privado
 	data.social = {	fb: $("#send2fb").prop("checked"),

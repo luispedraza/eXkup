@@ -376,6 +376,7 @@ function EskupApi() {
 	*/
 	this.loadThread = function(threadID, callback) {
 		if (LAST_THREAD.id == threadID) {
+			// console.log(JSON.stringify(LAST_THREAD.info));
 			callback(LAST_THREAD.info);
 			return;
 		};
@@ -385,6 +386,7 @@ function EskupApi() {
 			var info = eskupParseResponse(r);
 			LAST_THREAD.id = threadID;
 			LAST_THREAD.info = info;
+			// console.log(JSON.stringify(info));
 			// console.log("tiempo adquisición: ", TOC());
 			if (callback) callback(info);
 		});

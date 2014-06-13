@@ -89,7 +89,7 @@
 }
 
 .link-item:hover {
-	background-color: #F25600;
+	background-color: #f30;
 	color:#fff;
 }
 
@@ -102,7 +102,7 @@
 }
 .link-title {
 	margin-left: 15px;
-	color: #F25600;
+	color: #f30;
 }
 .link-item:hover .link-title {
 	color:#fff;
@@ -188,12 +188,12 @@
 	border: 2px solid #fff;
 }
 .images-selector img.on {
-	border-color: #F25600;
-	box-shadow: 0 1px 8px 0px rgba(242,86,0,1);
+	border-color: #f30;
+	box-shadow: 0 1px 8px 0px rgba(255, 51, 0, .7);
 }
 .images-selector img.small {
 	display: none;
 }
 .images-selector img:not(.on):hover {
-	outline: 2px solid #F25600;
+	outline: 2px solid #f30;
 }

@@ -5,7 +5,7 @@
 	width: 450px;
 	/* padding: 5px; */
 	display: none;
-	background-color: rgba(242, 86, 0, .8);
+	background-color: rgba(255, 51, 0, .85);
 	height: 34px;
 	bottom: 0;
 }
@@ -26,7 +26,7 @@
 	border-right-color: rgba(255,255,255,.4);	
 }
 .tree-toolbar .btn:hover {
-	background-color: #F25600;
+	background-color: #f30;
 }
 .tree-toolbar .controls {
 	/* float: right; */

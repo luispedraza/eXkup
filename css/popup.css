@@ -1,6 +1,6 @@
 /* colores
 	- azul: #004862
-	- rojo: #F25600
+	- rojo: #f30
 */
 
 body {
@@ -8,14 +8,26 @@ body {
 	overflow-x:hidden;
 	overflow-y:hidden;
 	/*font-family: 'Roboto', sans-serif*/;
-	font-family: 'Open Sans', sans-serif;
-	/*font-family: 'Dosis', sans-serif;*/
+	/*font-family: 'Open Sans', sans-serif;*/
+	/*font-family: 'Dosis', sans-serif*/;
+	font-family: 'Muli', sans-serif;
 	font-size: 14px;
 	margin: 0px;
 }
 
+.fa {
+	/*font-family: 'Roboto', sans-serif*/;
+	/*font-family: 'Open Sans', sans-serif;*/
+	/*font-family: 'Dosis', sans-serif*/;
+	font-family: 'Muli', sans-serif;
+}
+.fa:before {
+	font-family: 'fontawesome';
+	display:  inline-block;
+}
+
 a {
-	color:#F25600;
+	color:#f30;
 }
 
 /* enlaces en el cuerpo de los mensajes */
@@ -32,7 +44,7 @@ a {
 
 /* algunas clases genéricas */
 .red {
-	background-color: #F25600;
+	background-color: #f30;
 	color: #fff;
 }
 .blue {
@@ -40,13 +52,7 @@ a {
 	color: #fff;
 }
 
-.fa {
-	font-family: 'Open Sans', sans-serif;
-}
-.fa:before {
-	font-family: 'fontawesome';
-	display:  inline-block;
-}
+
 
 .container {
 	
@@ -96,7 +102,7 @@ ul.navigator li {
 	padding: 2px;
 }
 ul.navigator li.on {
-	color:#F25600;
+	color:#f30;
 	font-weight: 400;
 }
 ul.navigator li:hover {
@@ -212,7 +218,7 @@ ul.navigator li:hover {
 }
 
 #messages-header {
-	background-color: rgba(242, 86, 0, .9);
+	background-color: rgba(255, 51, 0, .85);;
 	z-index: 100;
 	border-bottom: 1px solid #fff;
 	transition: all .25s ease;
@@ -249,7 +255,7 @@ form.search {
 	position: absolute;
 	right: 0;
 	top: 44px;
-	background-color: #F25600;
+	background-color: #f30;
 	z-index: 100;
 	height: 0;
 	padding: 0;
@@ -309,7 +315,7 @@ form.search .button {
 	font-size: 8px;
 	left: 225px;
 	top: 38px;
-	background: #F25600;
+	background: #f30;
 	width: 10px;
 	height: 10px;
 	text-align: center;
@@ -328,7 +334,7 @@ form.search .button {
 	padding: 0 5px;
 }
 #messages-header.on #board-description {
-	border-top: 1px dotted #F25600;
+	border-top: 1px dotted #f30;
 	height: 250px;
 	margin-top: 15px;
 	padding: 18px 5px 5px 5px;
@@ -336,6 +342,7 @@ form.search .button {
 
 #messages-header.on #board-title:before {
 	-webkit-transform:rotate(180deg);
+	border: none;
 }
 
 #board-description img {
@@ -365,7 +372,7 @@ form.search .button {
 }
 .eskup-info .stats {
 	float: left;
-	background: #F25600;
+	background: #f30;
 	margin-right: 5px;
 	padding: 2px;
 	text-align: center;
@@ -402,7 +409,7 @@ form.search .button {
 	display: block;
 	width: 100%;
 	font-size: 12px;
-	background-color: #F25600;
+	background-color: #f30;
 }
 .eskup-info .info-users .from:before {
 	content: "sigue a";
@@ -458,7 +465,7 @@ form.search .button {
 }
 
 #board-description .links a:hover {
-	background-color:#F25600;
+	background-color:#f30;
 	color: #fff;
 }
 /* Control del tema */
@@ -504,7 +511,7 @@ form.search .button {
 	transition: top .25s ease;
 }
 .control-item.on {
-	background-color: #F25600;
+	background-color: #f30;
 }
 
 .control-item.follow:before {
@@ -669,7 +676,7 @@ form.search .button {
 	cursor: pointer;
 }
 #logout:hover {
-	color: #F25600;
+	color: #f30;
 }
 #profile-section .info {
 	height: 65px;
@@ -689,8 +696,8 @@ form.search .button {
 	box-shadow: 0 1px 2px #d9d9d9;
 }
 .message.highlighted {
-	border-color: rgb(15, 127, 187);
-	box-shadow: 0px 0px 3px 0px rgba(15, 127, 187, 0.75);
+	border-color: #f30;
+	box-shadow: 0px 0px 3px 0px rgba(255, 51, 0, .7);
 }
 .card {
     -webkit-transition: all 400ms ease;
@@ -849,15 +856,10 @@ span.time-tooltip span:first-child {
 	color: #666;
 }
 .message.favorite {
-	border-color: #cd9732;
+	border-color: #f30;
 }
 .message.favorite .fav {
-	color: #cd9732;
-}
-.message.favorite .fav:before {
-	color: #f1b23a;
-	-webkit-text-stroke-width: 1px;
-   	-webkit-text-stroke-color: #cd9732;
+	color: #f30;
 }
 
 .msg_content {
@@ -943,7 +945,7 @@ span.time-tooltip span:first-child {
 
 .selector h4 .number {
 	font-weight: bold;
-	color: #F25600;
+	color: #f30;
 }
 .selector ul {
 	height: 0;
@@ -975,7 +977,7 @@ span.time-tooltip span:first-child {
 	width: 60px;
 }
 .selector li img.online {
-	outline: 2px solid #F25600;
+	outline: 2px solid #f30;
 }
 
 .selector .puser-info {
@@ -987,7 +989,7 @@ span.time-tooltip span:first-child {
 	cursor: pointer;
 }
 .selector .puser-nickname:hover {
-	color: #F25600;
+	color: #f30;
 	text-decoration: underline;
 }
 .selector .puser-fullname {
@@ -1002,7 +1004,7 @@ span.time-tooltip span:first-child {
 	cursor: pointer;
 }
 .selector .ptheme-name:hover {
-	color: #F25600;
+	color: #f30;
 	text-decoration: underline;
 }
 .selector .ptheme-description {

@@ -55,7 +55,7 @@
 	font-size: 25px;
 	top: -20px;
 	right: 0;
-	color: #F25600;
+	color: #f30;
 	-webkit-transform: rotate(70deg);
 	text-outline: 5px 5px #ffffff;
 }
@@ -76,7 +76,7 @@
 }
 
 #removeimage:before {
-	color: #F25600;
+	color: #f30;
 	font-size: 20px;
 	margin: 5px;
 	cursor: pointer;
@@ -132,7 +132,7 @@
 	white-space: nowrap;
 	border-top: 1px dotted #ccc;
 	margin-top: 4px;
-	background-color: #F25600;
+	background-color: #f30;
 	color:  #fff;
 }
 

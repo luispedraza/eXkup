@@ -1,13 +1,19 @@
+/*********************/
+/* Elementos del SVG */
+/*********************/
+
 svg {
   position: absolute;
-  left: 200px;
+  /* left: 200px; */
   top: 0;
+  left: 0;
   right: 0;
   bottom: 0;
+  z-index: -1;
 }
 
 .node circle {
-  fill: #F25600;
+  fill: #f30;
   stroke: #fff;
   stroke-width: .1px;
   cursor: pointer;
@@ -23,10 +29,6 @@ svg {
   stroke-width: .2px;
 }
 
-
-
-
-
 /******************/
 /* Elementos HTML */
 /******************/
@@ -39,6 +41,8 @@ svg {
 
 #chart-control {
   width: 200px;
+  margin: 0;
+  float: left;
 }
 #users-list {
   padding: 2px;
