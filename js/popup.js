@@ -693,7 +693,7 @@ function appendMsg(msg, board, themes, before) {
 	var div_cont = document.createElement("div");
 	div_cont.className = "msg_content";
 	div_cont.innerHTML = msg.contenido;
-	processContent(div_cont);			// PROCESAMIENTO DE LOS CONTENIDOS: ENLACES, VÍDEOS...
+	processLinks(div_cont);			// PROCESAMIENTO DE LOS CONTENIDOS: ENLACES, VÍDEOS...
 	if (msg.cont_adicional) {
 		var img_cont = document.createElement("img");
 		img_cont.src = msg.cont_adicional;

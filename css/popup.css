@@ -18,6 +18,11 @@ a {
 	color:#F25600;
 }
 
+/* enlaces en el cuerpo de los mensajes */
+.a-link {
+
+}
+
 .video {
 	/* margin-top:5px; */
 	margin: 5px 0;

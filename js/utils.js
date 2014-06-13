@@ -28,7 +28,7 @@ Array.prototype.shuffle = function() {
  	};
 };
 /* Construcción de un link que se puede abrir desde la extensión, sin cerrarla */
-function makeLink(text, href, target) {
+function makeLink(text, href) {
 	return $("<a>").attr("href", "#").attr("data-url", href).text(text).on("click", function() {
 		chrome.tabs.update({url: this.getAttribute("data-url")});
 	});
@@ -118,19 +118,14 @@ function checkUserPhoto(path) {
 
 
 /* Procesamiento del contenido de un mensaje:
-	- adaptación de links
-	- adaptación de vídeos 
-*/
-function processContent(msg_content) {
-	processVideos(msg_content);
-};
-/* Procesamiendo de enlaces a vídeos contenidos en un mensaje
+	- adaptación de videos
+	- adaptación de resto de links 
 	A tener en cuenta.
 	https://developer.chrome.com/apps/app_external
 	https://developers.google.com/youtube/player_parameters
 	http://developer.vimeo.com/player/embedding
 */
-function processVideos(msg_content) {
+function processLinks(msg_content) {
 	var YOUTUBE_EMBED = "<iframe class='video' type='text/html' src='http://www.youtube.com/embed/_____ID_____?autoplay=0' frameborder='0'/>";
 	var VIMEO_EMBED = "<iframe class='video' src='http://player.vimeo.com/video/_____ID_____' frameborder='0'></iframe>";
 	var ZAPPINTERNET_EMBED = "<iframe class='video' src='http://zappinternet.com/embed/_____ID_____' frameborder='0' scrolling='no'></iframe>";
@@ -165,6 +160,8 @@ function processVideos(msg_content) {
 				$(DAILYMOTION_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
 				$this.remove();
 			};
+		} else {	
+			$this.replaceWith(makeLink(this.textContent,this.href).addClass('a-link'));
 		};
 	});
 };
