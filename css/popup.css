@@ -1,6 +1,5 @@
 /* colores
 	- azul: #1e5070
-		1e5070
 	- rojo: #f30
 */
 
@@ -36,8 +35,19 @@ span.highlight {
 	padding: 0 2px;
 	text-decoration: underline;
 }
+span.highlight.current {
+	background-color: #1e5070;
+}
 a {
 	color:#f30;
+	text-decoration: none;
+	border-radius: 2px;
+	padding: 0 3px;
+	cursor: pointer;
+}
+a:hover {
+	background-color: #f30;
+	color: #fff;
 }
 
 /* enlaces en el cuerpo de los mensajes */
@@ -272,7 +282,8 @@ form.search {
 	height: 0;
 	padding: 0 2px;
 	overflow: hidden;
-	transition: height .2s ease;
+	transition: all .2s ease;
+	/* transition: width .2s ease; */
 }
 form.search.on {
 	height: 28px;
@@ -300,6 +311,20 @@ form.search .button {
 	color:  #fff;
 	padding: 4px;
 	cursor: pointer;
+}
+#searching {
+	color: #fff;
+	font-size: 18px;
+	display: none;
+}
+#searching.on {
+	display: inline-block;;
+}
+
+#search-info {
+	color: #fff;
+	margin-left: 5px;
+	/* width: 46px; */
 }
 
 #board-info {
@@ -762,13 +787,15 @@ form.search .button {
 	position: absolute;
 	content: "mensaje original";
 	left: 150px;
-	top: 38px;
+	top: 43px;
 	font-size: 12px;
 	background-color: #fff;
-	border: 1px solid #ddd;
+	/* border: 1px solid #ddd; */
 	border-radius: 10px;
 	padding: 1px 5px;
 	z-index: 50;
+	background-color: #f30;
+	color:  #fff;
 }
 .conversation .message {
 	border: none;
@@ -782,7 +809,7 @@ form.search .button {
 .msg_header {
 	font-size:1em;
 	position: relative;
-	border-bottom: 1px dotted #ccc;
+	border-bottom: 1px dotted #ddd;
 	height: 40px;
 }
 .msg_header .time {
@@ -794,6 +821,7 @@ form.search .button {
 }
 .msg_header .time:hover {
 	color: #666;
+	background: transparent;
 }
 .msg_header .time:before {
 	margin-right: 3px;
@@ -839,10 +867,10 @@ span.time-tooltip span:first-child {
 }
 .msg_header .reply2link {
 	font-size: 12px;
-	cursor: pointer;
+	
 	color: #aaa;
 	position: absolute;
-	top: 22px;
+	top: 20px;
 	left: 50px;
 }
 .msg_header .reply2link:before {
@@ -858,13 +886,13 @@ span.time-tooltip span:first-child {
 	display: none;
 }
 
-.msg_control .btn {
+.message .btn {
 	cursor: pointer;
 	margin-right: 10px;
 	transition: color .2s ease;
 }
 
-.msg_control .btn:hover {
+.message .btn:hover {
 	color: #666;
 }
 .message.favorite {
@@ -911,7 +939,8 @@ span.time-tooltip span:first-child {
 	margin-bottom: 2px;
 }
 .themes li:hover {
-	text-decoration: underline;
+	background-color: #000;
+	color:#fff;
 }
 
 /* Profile */
