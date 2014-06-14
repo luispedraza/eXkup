@@ -188,7 +188,10 @@ function initPopup() {
 					if (r=="Aceptar") API.logOut();
 				});
 		});
-		$("#closetree").on("click", function() { showTreeBoard(false); });
+		$("#closetree").on("click", function() {
+			loadBoard(-1);
+			// showTreeBoard(false);
+		});
 		$("#noindent").on("click", function() {
 			$(this).toggleClass('on');
 			$("#tree").toggleClass('no-indent');
@@ -321,12 +324,15 @@ function showEditor(show, config, msgID, themes) {
 */
 function loadBoard(id, threadID, originalMsgID) {
 	showSearchForm(false);
+	var previousTheme = null;
 	if (id === -1) {
 		if (HISTORY_POSITION>0) {
+			previousTheme = HISTORY[HISTORY_POSITION];
 			CURRENT_THEME = HISTORY[--HISTORY_POSITION];
 		} else return;
 	} else if (id === 1) {
 		if (HISTORY_POSITION<(HISTORY.length-1)) {
+			previousTheme = HISTORY[HISTORY_POSITION];
 			CURRENT_THEME = HISTORY[++HISTORY_POSITION];
 		} else return;
 	} else {
@@ -341,19 +347,24 @@ function loadBoard(id, threadID, originalMsgID) {
 		HISTORY = HISTORY.slice(0, ++HISTORY_POSITION);
 		HISTORY.push(CURRENT_THEME);
 	};
-	if (CURRENT_THEME.type == "board") {
-		if (CURRENT_THEME.id == "favs") {	// los mensajes favoritos los guarda la extensión
-			loadFavorites();
-		} else {
-			loadBoardMessages(CURRENT_THEME.id);
-		};
-		uiSelectBoard(CURRENT_THEME.id);
-	} else if (CURRENT_THEME.type == "thread") {
-		showThread(CURRENT_THEME.id, CURRENT_THEME.original);
-		uiSelectThread(CURRENT_THEME);
-	};
-};
 
+	if (previousTheme && (previousTheme.type == "thread") && (CURRENT_THEME.type != "thread")) {
+		// esto es que hemos cerrado un thread
+		showTreeBoard(false);
+	} else {
+		// algo habrá que cargar
+		if (CURRENT_THEME.type == "board") {
+			if (CURRENT_THEME.id == "favs") {	// los mensajes favoritos los guarda la extensión
+				loadFavorites();
+			} else {
+				loadBoardMessages(CURRENT_THEME.id);
+			};
+		} else if (CURRENT_THEME.type == "thread") {
+			showThread(CURRENT_THEME.id, CURRENT_THEME.original);
+		};	
+	};
+	uiSelectBoard(CURRENT_THEME.id);
+};
 
 /* Carga de mensajes de un tablón */
 function loadBoardMessages(theme, callback) {
