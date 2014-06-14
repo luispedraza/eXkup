@@ -5,9 +5,65 @@ var HISTORY = [];			// historial de tablones, para navegacion
 var HISTORY_POSITION = -1;	// posición sobre HISTORY
 var CURRENT_PAGE = 1;
 
+/*
+ * jQuery Highlight Regex Plugin v0.1.2
+ *
+ * Based on highlight v3 by Johann Burkard
+ * http://johannburkard.de/blog/programming/javascript/highlight-javascript-text-higlighting-jquery-plugin.html
+ *
+ * (c) 2009-13 Jacob Rothstein
+ * MIT license
+ */!function(a){var b=function(c){if(c&&c.childNodes){var d=a.makeArray(c.childNodes),e=null;a.each(d,function(a,d){3===d.nodeType?""===d.nodeValue?c.removeChild(d):null!==e?(e.nodeValue+=d.nodeValue,c.removeChild(d)):e=d:(e=null,d.childNodes&&b(d))})}};a.fn.highlightRegex=function(c,d){return"object"==typeof c&&"RegExp"!==c.constructor.name&&(d=c,c=void 0),"undefined"==typeof d&&(d={}),d.className=d.className||"highlight",d.tagType=d.tagType||"span",d.attrs=d.attrs||{},"undefined"==typeof c||""===c.source?a(this).find(d.tagType+"."+d.className).each(function(){a(this).replaceWith(a(this).text()),b(a(this).parent().get(0))}):a(this).each(function(){var e=a(this).get(0);b(e),a.each(a.makeArray(e.childNodes),function(e,f){var g,h,i,j,k,l;if(b(f),3==f.nodeType){if(a(f).parent(d.tagType+"."+d.className).length)return;for(;f.data&&(j=f.data.search(c))>=0&&(k=f.data.slice(j).match(c)[0],k.length>0);)g=document.createElement(d.tagType),g.className=d.className,a(g).attr(d.attrs),l=f.parentNode,h=f.splitText(j),f=h.splitText(k.length),i=h.cloneNode(!0),g.appendChild(i),l.replaceChild(g,h)}else a(f).highlightRegex(c,d)})}),a(this)}}(jQuery);
+
+
+function SearchFunction(board) {
+	var $board = $(board);
+	var $allResults = null;
+	var term = null;		// término a buscar
+	var currentResult = 0;
+	var THAT = this;
+	/* Función de búsqueda */
+	var scrollToCurrentResult = function() {
+		$allResults[currentResult].scrollIntoView();
+		$board.scrollTop($board.scrollTop()-50);	// para evitar la barra superior
+	};
+	this.search = function(searchTerm) {
+		if ((searchTerm === 1)||(term === searchTerm)) {	// avance en resultados
+			currentResult++;
+			if (currentResult < $allResults.length) {
+				scrollToCurrentResult();	// vamos al siguiente resultado
+			} else {	// cargar nuevos mensajes
+				loadBoardMessages(null, function($newMessages) {
+					console.log($newMessages);
+				});
+			};
+		} else if (searchTerm === -1) {
+			currentResult--;
+			if (currentResult>=0) {
+				scrollToCurrentResult();
+			};
+		} else {	// nuevo término de búsqueda
+			THAT.clear();
+			term = searchTerm;
+			$allResults = $board.find(".message").highlightRegex(RegExp(term)).find("span.highlight");
+			currentResult = 0;
+			scrollToCurrentResult();
+		};
+	};
+	/* Limpia los resultados de esta búsqueda */
+	this.clear = function() { $board.find(".message").highlightRegex(); };	// limpieza
+};
+
+var SEARCH_BOARD = null,	// para buscar en el tablón
+	SEARCH_TREE = null;		// para buscar en el thread
+
+
+
 window.addEventListener("load", initPopup);
 
 function initPopup() {
+	SEARCH_BOARD = new SearchFunction("#board"),
+	SEARCH_TREE = new SearchFunction("#tree");
 	/* Obtención de la clave pública de usuario, e inicialización del perfil */
 	API.init(function(userID) {
 		if (!userID) {
@@ -18,13 +74,26 @@ function initPopup() {
 		fillHeader();
 		fillThemes();
 		// Eventos
+		$("form.search").on("submit", function(e) {
+			event.preventDefault();
+			SEARCH_BOARD.search($("#searchTXT").val());
+	        return false;
+		});
+		$("#search-down").on("click", function() {
+			SEARCH_BOARD.search(1);
+		});
+		$("#search-up").on("click", function() {
+			SEARCH_BOARD.search(-1);
+		});
 		$("#search-button").on("click", function() {
-			$("form.search").toggleClass('on').off().on("submit", function() {
-				console.log("buscando");
-			});
+			$("form.search").toggleClass('on').find("#searchTXT").focus();
 		});
 		$(document).on("keydown", function(e) {
-			console.log(e);
+			if((event.ctrlKey || event.metaKey) && event.which == 70) {
+				$("form.search").toggleClass('on');
+	            // event.preventDefault();
+	            // return false;
+	        };
 		});
 		// NAvegación temporal 
 		$("#history-left").on("click", function() {loadBoard(-1);});
@@ -186,9 +255,12 @@ function loadBoard(id, threadID, originalMsgID) {
 		} else return;
 	} else {
 		if (id === null) {	// thread
+			if (CURRENT_THEME && (CURRENT_THEME.type == "thread") && (CURRENT_THEME.id == threadID)) return; // se pide el mismo thread
 			CURRENT_THEME = {type: "thread", id: threadID, original: originalMsgID};
 		} else {			// tablón
-			CURRENT_THEME = {type: "board", id: getBoard(id)};
+			var newBoard = getBoard(id);
+			if (CURRENT_THEME && (CURRENT_THEME.type == "board") && (CURRENT_THEME.id == newBoard)) return; 	// se pide el mismo tablón
+			CURRENT_THEME = {type: "board", id: newBoard};
 		};
 		HISTORY = HISTORY.slice(0, ++HISTORY_POSITION);
 		HISTORY.push(CURRENT_THEME);
@@ -208,7 +280,7 @@ function loadBoard(id, threadID, originalMsgID) {
 
 
 /* Carga de mensajes de un tablón */
-function loadBoardMessages(theme) {
+function loadBoardMessages(theme, callback) {
 	function noMoreMessages() {
 		CURRENT_PAGE = -1;		// no cargar más páginas en el futuro
 		$board.append("<div class='no-messages'>No hay más mensajes para mostrar.</div>");
@@ -235,11 +307,11 @@ function loadBoardMessages(theme) {
 	infoShowLoadingMessages();
 	API.loadMessages(CURRENT_THEME.id, CURRENT_PAGE, function(info) {
 		if (info) {
-			console.log(info);
 			var messages = info.mensajes;
 			var usersInfo = info.perfilesUsuarios;
 			var themesInfo = info.perfilesEventos;
 			var board = document.getElementById("board");
+			var $newMessages = $();	// empty selection
 			if (messages.length == 0) {
 				noMoreMessages();
 			} else {
@@ -247,7 +319,7 @@ function loadBoardMessages(theme) {
 				messages.forEach(function(m) {
 					if (!m.borrado) {
 						API.buildMessage(m, usersInfo);
-						appendMsg(m, board, themesInfo);
+						$newMessages = $newMessages.add(appendMsg(m, board, themesInfo));	// se van agregando nuevos mensajes
 					};
 				});
 				if (Math.ceil(info.numMensajes / API.NUMMSG) == CURRENT_PAGE) {
@@ -257,6 +329,7 @@ function loadBoardMessages(theme) {
 			showTreeBoard(false);
 		};
 		infoHideLoadingMessages();
+		if (callback) callback($newMessages);
 	});
 };
 
@@ -797,7 +870,6 @@ function appendMsg(msg, board, themes, before) {
 		dHead.appendChild(div_forward);
 	};
 	div_msg.appendChild(dCtrl);
-
 
 	// agregación final del mensaje:
 	if (before) $(div_msg).insertBefore(before);
