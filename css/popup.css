@@ -7,22 +7,12 @@ body {
 	width:600px;
 	overflow-x:hidden;
 	overflow-y:hidden;
-	/*font-family: 'Roboto', sans-serif*/;
-	/*font-family: 'Open Sans', sans-serif;*/
-	/*font-family: 'Dosis', sans-serif*/;
-	/*font-family: 'Muli', sans-serif;*/
-	/*font-family: 'Noto Sans', sans-serif;*/
 	font-family: 'Quattrocento Sans', sans-serif;
 	font-size: 14px;
 	margin: 0px;
 }
 
 .fa {
-	/*font-family: 'Roboto', sans-serif*/;
-	/*font-family: 'Open Sans', sans-serif;*/
-	/*font-family: 'Dosis', sans-serif*/;
-	/*font-family: 'Muli', sans-serif;*/
-	/*font-family: 'Noto Sans', sans-serif;*/
 	font-family: 'Quattrocento Sans', sans-serif;
 }
 .fa:before {
@@ -284,6 +274,7 @@ form.search {
 	overflow: hidden;
 	transition: all .2s ease;
 	/* transition: width .2s ease; */
+	-webkit-user-select: none;
 }
 form.search.on {
 	height: 28px;

@@ -5,8 +5,6 @@ var HISTORY = [];			// historial de tablones, para navegacion
 var HISTORY_POSITION = -1;	// posición sobre HISTORY
 var CURRENT_PAGE = 1;
 
-var LOAD_MESSAGES_CALLBACK = null;	// este callback se ejecuta al terminar de cargar mensajes, sobre la selección de los mensajes
-									// y es empleado por ejemplo para búsquedas
 /*
  * jQuery Highlight Regex Plugin v0.1.2
  *
@@ -35,7 +33,7 @@ function enableDynamicLoad(enable) {
 function SearchFunction() {
 	var $board = null;
 	var $allResults = null;
-	var term = null;		// término a buscar
+	var term = null;			// término a buscar
 	var termRegexp = null;
 	var currentResult = 0;
 	var nMessages = 0;			// total de mensajes buscados
@@ -46,17 +44,44 @@ function SearchFunction() {
 		if (board) {
 			$board = $(board);
 			scrollable = isScrollable;	// para el tablón de mensajes
+			enableDynamicLoad(false);
 		} else {
-			$board = null;
 			THAT.clear();
+			enableDynamicLoad(true);
 		};
 	};
 	var scrollToCurrentResult = function() {
-		$allResults.removeClass('current');
-		$allResults[currentResult].className += " current";	// resultado actual 
-		$allResults[currentResult].scrollIntoView();
-		$board.scrollTop($board.scrollTop()-80);	// para evitar la barra superior
 		$("#search-info").text((currentResult+1) + " de " + $allResults.length + " en " + nMessages + " mensajes");
+		$allResults.removeClass('current');
+		var current = $allResults[currentResult];
+		if (current) {
+			current.className += " current";	// resultado actual
+			current.scrollIntoView();
+			$board.scrollTop($board.scrollTop()-80);	// para evitar la barra superior
+		};
+	};
+	var updateSearch = function($messages) {
+		nMessages += $messages.length;
+		var $newResults = $messages.highlightRegex(termRegexp).find("span.highlight");
+		if ($newResults.length) {
+			$allResults = $allResults.add($newResults);
+		} else {
+			currentResult = $allResults.length-1;	// se mantiene en el último resultado
+		};
+		scrollToCurrentResult();
+	};
+	/* Construye la expresión regular para búsquedas */
+	var buildRegexp = function(searchTerm) {
+		term = searchTerm;
+		termRegexp = RegExp(term
+			.replace(/[aáàä]/g, "[aáàä]")
+			.replace(/[eéèë]/g, "[eéèë]")
+			.replace(/[iíìï]/g, "[iíìï]")
+			.replace(/[oóòö]/g, "[oóòö]")
+			.replace(/[uúùü]/g, "[uúùü]")
+			.replace(/[ ,\.:;]+/g, "[ ,\.:;]+")
+			, "i");
+		return termRegexp;
 	};
 	this.search = function(searchTerm) {
 		if ((searchTerm === 1)||(term === searchTerm)) {	// avance en resultados
@@ -65,44 +90,41 @@ function SearchFunction() {
 				scrollToCurrentResult();	// vamos al siguiente resultado
 			} else if (scrollable) {
 				// se cargan más mensajes
-				loadBoardMessages(null, function($newMessages) {
-					nMessages += $newMessages.length;
-					var $newResults = $newMessages.highlightRegex(termRegexp).find("span.highlight");
-						if ($newResults.length) {
-							$allResults = $allResults.add($newResults);
-						} else {
-							currentResult = $allResults.length-1;	// se mantiene en el último resultado
-						};
-						scrollToCurrentResult();
-				});
+				loadBoardMessages(null, updateSearch);
+			} else {
+				currentResult = $allResults.length;
 			};
 		} else if (searchTerm === -1) {
 			currentResult--;
-			if (currentResult>=0) { scrollToCurrentResult(); };
-		} else {	// nuevo término de búsqueda
+			if (currentResult>=0) {
+				scrollToCurrentResult();
+			} else {
+				currentResult = 0;
+			};
+		} else {		// nuevo término de búsqueda
 			THAT.clear();
-			term = searchTerm;
-			termRegexp = RegExp(term);
+			buildRegexp(searchTerm);
 			var $messages = $board.find(".message");
-			nMessages = $messages.length;
-			$allResults = $messages.highlightRegex(termRegexp).find("span.highlight");
-			scrollToCurrentResult();
+			updateSearch($messages);
 		};
 	};
 	/* Limpia los resultados de esta búsqueda */
 	this.clear = function() { 
-		$board.find(".message").highlightRegex(); 	// limpieza
-		$("#search-info").text("");
-		$allResults = null;
-		currentResult = 0;
-		nMessages = 0;
+		if ($board) {
+			$board.find(".message").highlightRegex(); 	// limpieza
+			$("#search-info").text("");
+			$allResults = $();
+			currentResult = 0;
+			nMessages = 0;
+			term = null;
+		};
 	};
 };
 
 var SEARCHER = new SearchFunction();	// para buscar en el tablón o en el thread
 
-function showSearchForm() {
-	$form = $("form.search").toggleClass('on');
+function showSearchForm(show) {
+	$form = $("form.search").toggleClass('on', show);
 	if ($form.hasClass('on')) {
 		switch (CURRENT_THEME.type) {
 			case "board":
@@ -298,6 +320,7 @@ function showEditor(show, config, msgID, themes) {
 				null: se pide un thread, entonces se usan threadID, originalMsgID
 */
 function loadBoard(id, threadID, originalMsgID) {
+	showSearchForm(false);
 	if (id === -1) {
 		if (HISTORY_POSITION>0) {
 			CURRENT_THEME = HISTORY[--HISTORY_POSITION];
