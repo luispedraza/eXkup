@@ -537,11 +537,6 @@ function uiSelectBoard(board) {
 	};
 };
 
-/* Selecciona el thread actual en la interfaz */
-function uiSelectThread(thread) {
-
-};
-
 /* Dejar de seguir o comenzar a seguir un tema */
 function onFollowUser(button, callback) {
 	$this = $(button);
