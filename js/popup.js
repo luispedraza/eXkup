@@ -5,6 +5,8 @@ var HISTORY = [];			// historial de tablones, para navegacion
 var HISTORY_POSITION = -1;	// posición sobre HISTORY
 var CURRENT_PAGE = 1;
 
+var LOAD_MESSAGES_CALLBACK = null;	// este callback se ejecuta al terminar de cargar mensajes, sobre la selección de los mensajes
+									// y es empleado por ejemplo para búsquedas
 /*
  * jQuery Highlight Regex Plugin v0.1.2
  *
@@ -19,10 +21,17 @@ var CURRENT_PAGE = 1;
 function SearchFunction(board) {
 	var $board = $(board);
 	var $allResults = null;
+	var results = {ç}
 	var term = null;		// término a buscar
 	var currentResult = 0;
 	var THAT = this;
 	/* Función de búsqueda */
+	this.enableScroll = function() {
+		LOAD_MESSAGES_CALLBACK = function() {}
+	};
+	this.setBoard = function(board) {
+
+	};
 	var scrollToCurrentResult = function() {
 		$allResults[currentResult].scrollIntoView();
 		$board.scrollTop($board.scrollTop()-50);	// para evitar la barra superior
@@ -280,7 +289,7 @@ function loadBoard(id, threadID, originalMsgID) {
 
 
 /* Carga de mensajes de un tablón */
-function loadBoardMessages(theme, callback) {
+function loadBoardMessages(theme) {
 	function noMoreMessages() {
 		CURRENT_PAGE = -1;		// no cargar más páginas en el futuro
 		$board.append("<div class='no-messages'>No hay más mensajes para mostrar.</div>");
@@ -329,7 +338,7 @@ function loadBoardMessages(theme, callback) {
 			showTreeBoard(false);
 		};
 		infoHideLoadingMessages();
-		if (callback) callback($newMessages);
+		if (LOAD_MESSAGES_CALLBACK) LOAD_MESSAGES_CALLBACK($newMessages);
 	});
 };
 

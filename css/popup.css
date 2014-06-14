@@ -1,5 +1,6 @@
 /* colores
-	- azul: #004862
+	- azul: #1e5070
+		1e5070
 	- rojo: #f30
 */
 
@@ -57,7 +58,7 @@ a {
 	color: #fff;
 }
 .blue {
-	background-color: #004862;
+	background-color: #1e5070;
 	color: #fff;
 }
 
@@ -68,7 +69,7 @@ a {
 }
 
 #profile-container {
-	background-color: #004862;
+	background-color: #1e5070;
 	height: 0;
 	width: 100%;
 	position: absolute;
@@ -115,7 +116,7 @@ ul.navigator li.on {
 	font-weight: 400;
 }
 ul.navigator li:hover {
-	background-color: #004862;
+	background-color: #1e5070;
 	color: white;
 }
 
@@ -127,7 +128,7 @@ ul.navigator li:hover {
 #header {
 	height: 37px;
 	padding: 5px 5px;
-	background-color: #004862;
+	background-color: #1e5070;
 	color: #fff;
 	position: relative;
 	
@@ -145,7 +146,7 @@ ul.navigator li:hover {
 	font-size: 8px;
 	left: 64px;
 	top: 33px;
-	background: #004862;
+	background: #1e5070;
 	width: 10px;
 	height: 10px;
 	text-align: center;
@@ -168,11 +169,11 @@ ul.navigator li:hover {
 	text-transform: uppercase;
 	font-size: 12px;
 	font-weight: 300;
-	border-bottom: 2px solid #004862;
+	border-bottom: 2px solid #1e5070;
 }
 #header-menu li.on {
 	background-color: #fff;
-	color: #004862;
+	color: #1e5070;
 	border-bottom: 2px solid #fff;
 }
 #header-menu li:hover {
@@ -485,7 +486,7 @@ form.search .button {
 	margin-top: 15px;
 }
 .control-item {
-	background-color: #004862;
+	background-color: #1e5070;
 	margin-bottom: 5px;
 	color: #fff;
 	cursor: pointer;
