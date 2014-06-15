@@ -16,8 +16,58 @@ function Editor(container, api) {
 		$("#send2theme").on("click", showThemesSelector);	// Destinos de mensaje
 	});
 
+	this.configure = function(config) {
+		// if (typeof config === "undefined") config = "reset";
+		var msgID = config.msgID;
+		switch (config.command) {
+			case "reply":
+				if (config.themes) {
+					themes = config.themes.split(",");
+					API.loadWritableThemes(function(wthemes) {
+						var goodThemes = [], badThemes = [];
+						themes.forEach(function(d) {
+							(d in wthemes) ? goodThemes.push(d) : badThemes.push(d);
+						});
+						editorAddThemes(goodThemes);	// temas a los que se puede enviar el mensaje
+						$ulThemes = $("<ul>");
+						goodThemes.forEach(function(d) {
+							$ulThemes.append($("<li>").text(wthemes[d].nombre));
+						});
+						$modalContent = $("<div>").append($("<p>").text(
+							"Tu respuesta aparecerá en los siguientes temas, en los que tienes permiso de escritura:"))
+							.append($ulThemes);
+						new ModalDialog("Información sobre tu respuesta", 
+							$modalContent, ["OK"], null);
+					});			
+				};
+				$("#edit-section-h1 .edit-title").html("respondiendo al mensaje:");
+				$("#send").text("RESPONDER")
+					.attr("data-command", "reply")
+					.attr("data-id", msgID);
+				break;
+			case "replyPrivate":
+				editorAddUsers(themes);
+				$("#edit-section-h1 .edit-title").html("respondiendo al privado:");
+				$("#send").text("RESPONDER")
+					.attr("data-command", "reply")
+					.attr("data-id", msgID);
+				break;
+			case "forward":
+				$("#edit-section-h1 .edit-title").html("reenviando el mensaje:");
+				$("#send").text("REENVIAR")
+					.attr("data-command", "forward")
+					.attr("data-id", msgID);
+				break;
+			default:
+				$("#edit-section-h1 .edit-title").html("escribir nuevo mensaje");
+				$("#send").text("ENVIAR")
+					.attr("data-command", "send")
+					.removeAttr("data-id");
+		};
+	};
+
 	/* Contador de caracteres del mensaje */
-	function Counter() {
+	function count() {
 		var message = $("#newmessage").text();
 		console.log(message);
 		message = message.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AFMzx");
@@ -33,7 +83,10 @@ function Editor(container, api) {
 	/* Inserción de texto al final del nuevo mensaje */
 	function insertText(txt) {
 		$newmessage = $("#newmessage");
-		$newmessage.html($newmessage.html() + " " + txt + " ");
+		$newmessage.html($newmessage.html() + " " + txt + " ").focus();
+		// $newmessage.focus();
+		// document.execCommand('insertText',false,txt);
+		count();
 	};
 
 	/* Inserta un link a la pestaña actual u otra pestaña abierta */

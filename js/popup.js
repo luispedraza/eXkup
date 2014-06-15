@@ -268,55 +268,13 @@ function initPopup() {
 	@param themes: array temas a los que se enviará el mensaje, o de usuarios para enviar privado
 */
 function showEditor(show, config, msgID, themes) {
-	if (typeof config === "undefined") config = "reset";
-	// los temas a los que se envía el mensaje (forward o repy):
 	$edit = $("#edit-section");
 	(show == null) ? $edit.toggleClass("on") : $edit.toggleClass("on", show);
-	switch (config) {
-		case "reply":
-			if (themes) {
-				themes = themes.split(",");
-				API.loadWritableThemes(function(wthemes) {
-					var goodThemes = [], badThemes = [];
-					themes.forEach(function(d) {
-						(d in wthemes) ? goodThemes.push(d) : badThemes.push(d);
-					});
-					editorAddThemes(goodThemes);	// temas a los que se puede enviar el mensaje
-					$ulThemes = $("<ul>");
-					goodThemes.forEach(function(d) {
-						$ulThemes.append($("<li>").text(wthemes[d].nombre));
-					});
-					$modalContent = $("<div>").append($("<p>").text(
-						"Tu respuesta aparecerá en los siguientes temas, en los que tienes permiso de escritura:"))
-						.append($ulThemes);
-					new ModalDialog("Información sobre tu respuesta", 
-						$modalContent, ["OK"], null);
-				});			
-			};
-			$("#edit-section-h1 .edit-title").html("respondiendo al mensaje:");
-			$("#send").text("RESPONDER")
-				.attr("data-command", "reply")
-				.attr("data-id", msgID);
-			break;
-		case "replyPrivate":
-			editorAddUsers(themes);
-			$("#edit-section-h1 .edit-title").html("respondiendo al privado:");
-			$("#send").text("RESPONDER")
-				.attr("data-command", "reply")
-				.attr("data-id", msgID);
-			break;
-		case "forward":
-			$("#edit-section-h1 .edit-title").html("reenviando el mensaje:");
-			$("#send").text("REENVIAR")
-				.attr("data-command", "forward")
-				.attr("data-id", msgID);
-			break;
-		default:
-			$("#edit-section-h1 .edit-title").html("escribir nuevo mensaje");
-			$("#send").text("ENVIAR")
-				.attr("data-command", "send")
-				.removeAttr("data-id");
-	};
+	EDITOR.configure({
+		command: config,
+		msgID: msgID,
+		themes: themes
+	});
 };
 
 /* Carga de un tablón en la ventana de mensajes 

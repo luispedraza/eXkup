@@ -142,7 +142,7 @@
 }
 
 #counter {
-	font-size:24px;
+	font-size: 28px;
 	font-weight: bold;
 	border: 1px solid #eee;
 	text-align: center;
@@ -173,14 +173,18 @@
 	text-decoration: none;
 }
 
-#commands #send, #commands #cancel {
-	background-color: #666;
+#send, #cancel {
 	color: white;
 	cursor: pointer;
 	margin-top: 10px;
-	padding: 5px;
-
+	padding: 7px 5px;
 	text-align: center;
+}
+#send {
+	background-color: #f30;
+}
+#cancel {
+	background-color: #1e5070;
 }
 #commands #send:hover, #commands #cancel:hover {
 	background-color: #000;
