@@ -8,6 +8,7 @@
     },
   "permissions": [
 	"tabs",
+  "fileSystem",
 	"http://*/*",
   "https://*/*"
   ],

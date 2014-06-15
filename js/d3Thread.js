@@ -221,7 +221,7 @@ function TalkVisualizer(data) {
 
 
 /* se obtiene la información de la extensión */
-var test = 1;
+var test = null;
 if (test === 0) {
 	new TalkVisualizer(testMedium);
 } else if (test === 1) {

@@ -1,22 +1,26 @@
 var MAXCHAR = 280;	// máximo de caracteres para el mensaje
 
 window.addEventListener("load", function() {
-	$("#send").on("click", sendMessage);
-	$("#cancel").on("click", cancel);
-	$("#setitalic").on("click", function() {
-		document.execCommand('italic',false,null);
-	});
-	$("#setbold").on("click", function() {
-		document.execCommand('bold',false,null);
-	});
-	$("#newmessage").on("keyup", Counter);
-	$("#insertvideo").on("click", insertVideo);
-	$("#insertimage").on("click", insertImage);
-	$("#insertlink").on("click", insertLink);
-	// Destinos de mensaje:
-	$("#send2theme").on("click", function() {
-		showThemesSelector();
-	});
+	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
+	$('#edit-section').load(chrome.extension.getURL("editor.html"),
+		function() {
+			$("#send").on("click", sendMessage);
+			$("#cancel").on("click", cancel);
+			$("#setitalic").on("click", function() {
+				document.execCommand('italic',false,null);
+			});
+			$("#setbold").on("click", function() {
+				document.execCommand('bold',false,null);
+			});
+			$("#newmessage").on("keyup", Counter);
+			$("#insertvideo").on("click", insertVideo);
+			$("#insertimage").on("click", insertImage);
+			$("#insertlink").on("click", insertLink);
+			// Destinos de mensaje:
+			$("#send2theme").on("click", function() {
+				showThemesSelector();
+			});		
+		});
 });
 
 /* Contador de caracteres del mensaje */

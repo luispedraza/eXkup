@@ -37,6 +37,7 @@
 #closetree {
 	float: right;
 	padding: 10px;
+	display: none;
 }
 #show-d3 {
 	/* float: right; */

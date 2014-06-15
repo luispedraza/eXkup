@@ -260,6 +260,10 @@ ul.navigator li:hover {
 	text-align: center;
 	display: inline-block;
 }
+#messages-header .button.disabled {
+	pointer-events: none;
+	opacity: 0.2;
+}
 #messages-header .button:hover {
 	background-color: #000;
 }
