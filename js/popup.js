@@ -267,14 +267,26 @@ function initPopup() {
 	@param msgID: id del mensaje a contestar o reenviar
 	@param themes: array temas a los que se enviará el mensaje, o de usuarios para enviar privado
 */
-function showEditor(show, config, msgID, themes) {
-	$edit = $("#edit-section");
-	(show == null) ? $edit.toggleClass("on") : $edit.toggleClass("on", show);
-	EDITOR.configure({
-		command: config,
-		msgID: msgID,
-		themes: themes
-	});
+function showEditor(config, show) {
+	$("#replying-message").remove();
+	$("#edit-section").toggleClass("on", show);
+	if (config) {
+		var $title = $("#edit-section-h1 .edit-title");
+		switch (config.command) {
+			case "reply":	
+				$title.html("respondiendo al mensaje:");
+				break;
+			case "replyPvt":
+				$title.html("respondiendo al privado:");
+				break;
+			case "forward":
+				$title.html("reenviando el mensaje:");
+				break;
+			default:
+				$title.html("escribir nuevo mensaje");
+		};
+		EDITOR.configure(config);	// configuración del editor	
+	};
 };
 
 /* Carga de un tablón en la ventana de mensajes 
@@ -730,25 +742,29 @@ function appendMsg(msg, board, themes, before) {
 	};
 	/* Respuesta a un mensaje */
 	function onReplyMessageClick() {
-		var msg = $(this).closest('.message').get(0);
-		msgID = msg.getAttribute("data-id");
-		$("#replying-message").remove();
+		var $msg = $(this).closest('.message');
+		mID = $msg.attr("data-id");
 		$("#editor").before($("<div>")
 			.attr("id", "replying-message")
-			.html(msg.outerHTML));
+			.html($msg.get(0).outerHTML));
 		if (CURRENT_THEME.id=="3") {	// respuesta a un privado
-			showEditor(true, "replyPrivate", msgID, [msg.getAttribute("data-author")]);		
-		} else {					// respuesta normal
-			showEditor(true, "reply", msgID, msg.getAttribute("data-themes"));
+			showEditor({command: "replyPvt", mID: mID, users: [$msg.attr("data-author")]},
+				true);
+		} else {						// respuesta normal
+			var themes = $msg.attr("data-themes");
+			if (themes) themes = JSON.parse(themes);
+			showEditor({command: "reply", mID: mID, themes: themes},
+				true);
 		};
 	};
 	/* Reenvío de un mensaje */
 	function onForwardMessageClick() {
-		$("#replying-message").remove();
-		var $message = $(this).closest('.message');
-		showEditor(true, "forward", $message.attr("data-id"), $message.attr("data-themes"));
-		var messageContent = "fwd @" + $message.attr("data-author") + ": " + $message.find(".msg_content").get(0).innerHTML;
-		$("#newmessage").html(messageContent);
+		var $msg = $(this).closest('.message');
+		var themes = $message.attr("data-themes");
+		if (themes) themes = JSON.parse(themes);
+		var mContent = "fwd @" + $msg.attr("data-author") + ": " + $msg.find(".msg_content").get(0).innerHTML;
+		showEditor({command: "forward", mID: $msg.attr("data-id"), themes: themes, content: mContent},
+			true);
 	};
 	/* Función que se ejecuta al mostrar el thread al que pertenece un mensaje */
 	function onShowThreadClick() {
@@ -857,7 +873,7 @@ function appendMsg(msg, board, themes, before) {
 					})
 					.appendTo($divThemes);
 			});
-			div_msg.setAttribute("data-themes", msgThemes.map(function(d){return d.split("-")[1];}).toString());
+			div_msg.setAttribute("data-themes", JSON.stringify(msgThemes.map(function(d){return d.split("-")[1];})));
 			$(div_msg).append($divThemes);
 		};
 	};

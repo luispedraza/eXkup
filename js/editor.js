@@ -40,26 +40,23 @@ function Editor(container, api) {
 							$modalContent, ["OK"], null);
 					});			
 				};
-				$("#edit-section-h1 .edit-title").html("respondiendo al mensaje:");
 				$("#send").text("RESPONDER")
 					.attr("data-command", "reply")
 					.attr("data-id", msgID);
 				break;
-			case "replyPrivate":
+			case "replyPvt":
 				editorAddUsers(themes);
-				$("#edit-section-h1 .edit-title").html("respondiendo al privado:");
 				$("#send").text("RESPONDER")
 					.attr("data-command", "reply")
 					.attr("data-id", msgID);
 				break;
 			case "forward":
-				$("#edit-section-h1 .edit-title").html("reenviando el mensaje:");
+				$("#newmessage").html(config.content);
 				$("#send").text("REENVIAR")
 					.attr("data-command", "forward")
 					.attr("data-id", msgID);
 				break;
 			default:
-				$("#edit-section-h1 .edit-title").html("escribir nuevo mensaje");
 				$("#send").text("ENVIAR")
 					.attr("data-command", "send")
 					.removeAttr("data-id");
