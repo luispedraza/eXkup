@@ -391,6 +391,7 @@ function loadBoardMessages(theme, callback) {
 		};
 		infoHideLoadingMessages();
 		if (callback) callback($newMessages);	// acción a realizar sobre los nuevos mensajes cargados
+		$newMessages = null;
 	});
 };
 
@@ -523,7 +524,7 @@ function uiSelectBoard(board) {
 
 /* Dejar de seguir o comenzar a seguir un tema */
 function onFollowUser(button, callback) {
-	$this = $(button);
+	var $this = $(button);
 	var user = $this.attr("data-user");
 	var followed = $this.hasClass('on');
 	new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir a este usuario", 
@@ -543,10 +544,11 @@ function onFollowUser(button, callback) {
 					if (callback) callback();
 				});
 		});
+	$this = null;
 };
 
 function onBlockUser(button, callback) {
-	$this = $(button);
+	var $this = $(button);
 	var user = $this.attr("data-user");
 	var blocked = $this.hasClass('on');
 	new ModalDialog((blocked ? "Desbloquear" : "Bloquear") + " a este usuario", 
@@ -565,11 +567,12 @@ function onBlockUser(button, callback) {
 					if (callback) callback();
 				});
 		});
+	$this = null;
 };
 
 /* Dejar de seguir o comenzar a seguir un tema */
 function onFollowTheme(button, callback) {
-	$this = $(button);
+	var $this = $(button);
 	var theme = $this.attr("data-theme");
 	var followed = $this.hasClass('on');
 	new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir este tema", 
@@ -589,10 +592,11 @@ function onFollowTheme(button, callback) {
 					if (callback) callback();
 				});
 		});
+	$this = null;
 };
 
 function onWriteTheme(button, callback) {
-	$this = $(button);
+	var $this = $(button);
 	var theme = $this.attr("data-theme");
 	var typesuscription = $this.attr('data-tiposuscripcion');
 	// var typeevent = $this.attr('data-tipoevento');
@@ -620,6 +624,7 @@ function onWriteTheme(button, callback) {
 		// se precisa autorización
 		// TODO: hay que hacerlo, pero no sé si quedan eventos de este tipo
 	};
+	$this = null;
 };
 
 /* Carga de una conversación completa */
@@ -890,7 +895,7 @@ function appendMsg(msg, board, themes, before) {
 	if (themes) {
 		var msgThemes = msg.CopiaEnTablones.split( "," ).filter(function(d) {return d.split("-")[0] == "ev"});	// temas del mensajes
 		if (msgThemes.length) {
-			var $divThemes = $("<ul class='themes'></ul>");
+			var $divThemes = $("<ul>").addClass("themes");
 			msgThemes.forEach(function(themeKey) {
 				var themeID = themeKey.split("-")[1];
 				var themeInfo = themes[themeID];	// información sobre el tema, de la API
@@ -971,11 +976,10 @@ function appendMsg(msg, board, themes, before) {
 	return $(div_msg);
 };
 
-/* Carga de mdensajes favoritos */
+/* Carga de mensajes favoritos */
 function loadFavorites() {
 	API.loadFavorites(function(data) {
-		var favs = document.getElementById("board");
-		favs.innerHTML = "";
+		var favs = $("#board").empty().get(0);
 		data.forEach(function(mID) {
 			var msg = localStorage.getItem(mID);
 			if (msg) appendMsg(JSON.parse(msg), favs).addClass('favorite');
