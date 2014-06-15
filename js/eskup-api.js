@@ -296,6 +296,17 @@ function EskupApi() {
 			});
 	};
 
+		/* Comenzar a seguir o dejar de seguir a usuarios */
+	this.blockUsers = function (users, block, callback) {
+		// var params = eskupParams({action: (block ? "add_denegaciones" : "del_denegaciones"), data: users.join(",")});
+		// apiCall("GET", PROFILEESKUP, params,
+		// 	function(r) {
+		// 		// limpieza
+		// 		clearUsersInfo();
+		// 		callback(r);
+		// 	});
+	};
+
 	/* Carga de mensajes favoritos, por compatibilidad con otras APIs */
 	this.loadFavorites = function(callback) { if (callback) callback(FAVORITES); };
 

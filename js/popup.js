@@ -363,7 +363,7 @@ function loadBoardMessages(theme, callback) {
 		CURRENT_PAGE++;		// nueva página
 	};
 	var $board = $("#board");
-	if (CURRENT_PAGE == 1) $board.html("");			// limpieza
+	if (CURRENT_PAGE == 1) $board.empty();			// limpieza
 
 	infoShowLoadingMessages();
 	API.loadMessages(CURRENT_THEME.id, CURRENT_PAGE, function(info) {
@@ -401,7 +401,7 @@ function uiSelectBoard(board) {
 	$("#"+board).addClass("on");
 	// información sobre el tablero actual:
 	$title = $("#board-title").text("");
-	$description = $("<div>").appendTo($("#board-description").html(""));
+	$description = $("<div>").appendTo($("#board-description").empty());
 	if (board == getBoard("sigo")) {
 		$description
 			.append($("<p>").text("Aquí encontrarás todos los mensajes publicados por los usuarios a los que sigues, y en los temas que sigues."));
@@ -466,7 +466,6 @@ function uiSelectBoard(board) {
 				$description.addClass("user-information");
 				var user = boardInfo[1];
 				API.loadProfile(user, function(userInfo) {
-					console.log(userInfo);
 					var userURL = "http://eskup.elpais.com/" + user + "/";
 					// enlaces de usuario
 					var $links = $("<ul>").attr("class", "links");
@@ -1008,7 +1007,7 @@ function showProfile() {
 /* Carga en el perfil la lista de usuarios a quienes sigo */
 function fillFollowTo() {
 	API.loadFollowUsers(1, function(users) {
-		var $ul = $("#follow-to ul").html("");
+		var $ul = $("#follow-to ul").empty();
 		sortArray(users, "nickname").forEach(function(user) {
 			var nickname = user.nickname;
 			$ul.append(
@@ -1037,7 +1036,7 @@ function fillFollowTo() {
 /* Carga en el perfil la lista de usuarios que me siguen */
 function fillFollowMe() {
 	API.loadFollowUsers(2, function(users) {
-		var $ul = $("#follow-me ul").html("");
+		var $ul = $("#follow-me ul").empty();
 		sortArray(users, "nickname").forEach(function(user) {
 			var nickname = user.nickname;
 			$ul.append(
@@ -1058,7 +1057,7 @@ function fillFollowMe() {
 /* Carga en el perfil la lista de temas seguidos */
 function fillFollowThemes() {
 	API.loadFollowedThemes(function(themes) {
-		var $ul = $("#themes-follow ul").html("");
+		var $ul = $("#themes-follow ul").empty();
 		for (var t in themes) {
 			var theme = themes[t];
 			$ul.append(
@@ -1087,7 +1086,7 @@ function fillFollowThemes() {
 /* Carga en el perfil la lista de temas en los que puedo escribir */
 function fillWritableThemes() {
 	API.loadWritableThemes(function(themes) {
-		var $ul = $("#themes-write ul").html("");
+		var $ul = $("#themes-write ul").empty();
 		for (var t in themes) {
 			var theme = themes[t];
 			$ul.append(
@@ -1126,7 +1125,7 @@ function fillHeader() {
 /* Rellenar la lista de temas seguidos en el el menú de navegación */
 function fillThemes() {
 	API.loadFollowedThemes(function(themes) {
-		$divThemes = $("#themes-follow").html("");
+		$divThemes = $("#themes-follow").empty();
 		themes = sortArray(makeArray(themes), "nombre");
 		themes.forEach(function(theme) {
 			themeID = "ev-"+theme.__key;

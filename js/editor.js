@@ -18,7 +18,6 @@ function Editor(container, api, callback) {
 		if (callback) callback();
 	});
 	
-
 	this.configure = function(config) {
 		// if (typeof config === "undefined") config = "reset";
 		var msgID = config.msgID;
@@ -147,7 +146,7 @@ function Editor(container, api, callback) {
 	function editorAddThemes(data) {
 		API.loadWritableThemes(function(writable) {
 			$("#send2theme").find(".count").text(data.length);
-			$list = $("#send2theme ul").html("");	// limpieza de selecciones anteriores
+			$list = $("#send2theme ul").empty();	// limpieza de selecciones anteriores
 			data.forEach(function(d) {
 				var theme = writable[d];
 				$list.append($("<li>").text(theme.nombre));
@@ -184,7 +183,7 @@ function Editor(container, api, callback) {
 	/* Cancela el envío de un mensaje y se resetea el editor */
 	function reset() {
 		$("#replying-message").remove();
-		$("#newmessage").html("");
+		$("#newmessage").empty();
 	};
 	/* Inserta una imagen en el mensaje */
 	function insertImage() {
