@@ -67,33 +67,38 @@
 
 /* Lista de enlaces para inserción */
 .links-list {
-	max-height: 300px;
-	overflow-y: scroll;
 	padding-right: 10px;
 }
-.links-list h1 {
+.links-list ul {
+	padding: 0;
+	margin: 0;
+}
+.links-list ul:before {
+	display: block;
 	padding: 5px;
 	font-size: 12px;
 	background-color: #1e5070;
 	color: #fff;
 }
-
-.link-item {
+.links-list ul.current:before {
+	content: "Enlace a la pestaña actual";
+}
+.links-list ul.other:before {
+	content: "Enlaces a otras pestañas:"
+}
+.links-list li {
 	font-size: 12px;
 	cursor: pointer;
 	background-color: #fff;
 	padding: 2px;
 	margin-bottom: 3px;
-	/* border: 1px dotted #000; */
 	border: 1px solid #ddd;
 }
-
-.link-item:hover {
+.links-list li:hover {
 	background-color: #f30;
 	color:#fff;
 }
-
-.link-item span {
+.links-list li span {
 	padding: 2px;
 	display: block;
 	white-space: nowrap;
@@ -104,7 +109,7 @@
 	margin-left: 15px;
 	color: #f30;
 }
-.link-item:hover .link-title {
+.links-list li:hover .link-title {
 	color:#fff;
 }
 .link-url {

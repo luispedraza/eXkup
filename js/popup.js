@@ -1,4 +1,5 @@
 var API = new EskupApi();	// La API de Eskup
+var EDITOR = null;			// El editor de mensajes
 var LOADING = false;
 var CURRENT_THEME = null;	// el tablón actual
 var HISTORY = [];			// historial de tablones, para navegacion
@@ -150,9 +151,11 @@ function initPopup() {
 			chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
 			return;
 		};
+		EDITOR = new Editor("#editor-container", API);	// se innicializa en este contenedor 
 		TABLONES["mios"] = "t1-" + userID;
 		fillHeader();
 		fillThemes();
+
 		// Eventos
 		/* Elementos de búsqueda de texto */
 		$("form.search").on("submit", function(e) {
