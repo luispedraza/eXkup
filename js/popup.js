@@ -151,7 +151,9 @@ function initPopup() {
 			chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
 			return;
 		};
-		EDITOR = new Editor("#editor-container", API);	// se innicializa en este contenedor 
+		EDITOR = new Editor("#editor-container", API, function() {
+			$("#cancel").on("click", function() {showEditor(null, false);});
+		});	// se innicializa en este contenedor 
 		TABLONES["mios"] = "t1-" + userID;
 		fillHeader();
 		fillThemes();
@@ -185,7 +187,7 @@ function initPopup() {
 		enableDynamicLoad(true);
 		$(".board-selector").on("click", function() { loadBoard(this.id); });
 		$("#logout").on("click", function() { 
-			new ModalDialog("Cerrar sesión", 
+			new ModalDialog("Cerrar sesión",
 				"¿Deseas cerrar tu sesión en Eskup?", 
 				["Aceptar", "Cancelar"], function(r) {
 					if (r=="Aceptar") API.logOut();
@@ -202,7 +204,7 @@ function initPopup() {
 		$("#mouse-follow").on("click", function() {
 			$(this).toggleClass('on');
 		});
-		$("#edit-section-h1").on("click", function() { showEditor(); });
+		$("#edit-section-h1").click(function() { showEditor(); });
 		/* Mostrar el perfil */
 		$("#profile-item").on("click", function() {
 			showProfile();
@@ -268,23 +270,18 @@ function initPopup() {
 	@param themes: array temas a los que se enviará el mensaje, o de usuarios para enviar privado
 */
 function showEditor(config, show) {
-	$("#replying-message").remove();
 	$("#edit-section").toggleClass("on", show);
 	if (config) {
-		var $title = $("#edit-section-h1 .edit-title");
+		var infoMessage = "ESCRIBIENDO UN NUEVO MENSAJE";
 		switch (config.command) {
-			case "reply":	
-				$title.html("respondiendo al mensaje:");
-				break;
-			case "replyPvt":
-				$title.html("respondiendo al privado:");
+			case "reply":
+				infoMessage = "RESPONDIENDO AL " + (config.users ? "MENSAJE:" : "PRIVADO:");
 				break;
 			case "forward":
-				$title.html("reenviando el mensaje:");
+				infoMessage = "REENVIANDO EL MENSAJE:";
 				break;
-			default:
-				$title.html("escribir nuevo mensaje");
 		};
+		$("#edit-section .edit-description").text(infoMessage);
 		EDITOR.configure(config);	// configuración del editor	
 	};
 };
@@ -403,29 +400,30 @@ function uiSelectBoard(board) {
 	$(".board-selector.on").removeClass("on");
 	$("#"+board).addClass("on");
 	// información sobre el tablero actual:
-	$boardTitle = $("#board-title").text("");
-	$boardDescription = $("#board-description").html("");
+	$title = $("#board-title").text("");
+	$description = $("<div>").appendTo($("#board-description").html(""));
 	if (board == getBoard("sigo")) {
-		$boardDescription
+		$description
 			.append($("<p>").text("Aquí encontrarás todos los mensajes publicados por los usuarios a los que sigues, y en los temas que sigues."));
-		$boardTitle.text("Mensajes de usuarios y temas que sigo");
+		$title.text("Mensajes de usuarios y temas que sigo");
 	} else if (board == getBoard("todo")) {
-		$boardTitle.text("Todos los mensajes de Eskup");
+		$title.text("Todos los mensajes de Eskup");
 	} else if (board == getBoard("mios")) {
-		$boardTitle.text("Mensajes enviados por mí");
+		$title.text("Mensajes enviados por mí");
 	} else if (board == getBoard("priv")) {
-		$boardTitle.text("Mis mensajes privados");
+		$title.text("Mis mensajes privados");
 	} else if (board == getBoard("favs")) {
-		$boardTitle.text("Mis mensajes favoritos");
+		$title.text("Mis mensajes favoritos");
 	} else {
 		var boardInfo = board.split("-");
 		switch (boardInfo[0]) {
 			case "ev": 	// UN EVENTO
+				$description.addClass("theme-information");
 				var theme = boardInfo[1];
 				API.loadThemeInfo(theme, function(themeInfo) {
-					$("<img>").attr("src", themeInfo.pathfoto).appendTo($boardDescription);
-					$("<p>").html(themeInfo.descripcion).appendTo($boardDescription);
-					var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($boardDescription));
+					$("<img>").attr("src", themeInfo.pathfoto).appendTo($description);
+					$("<p>").html(themeInfo.descripcion).appendTo($description);
+					var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
 					var $apoyos = null;
 					for (var a in themeInfo.apoyos) {
 						var apoyo = themeInfo.apoyos[a];
@@ -436,7 +434,7 @@ function uiSelectBoard(board) {
 							$apoyos.append($("<li>").append( apoyo_link ? makeLink(apoyo_title, apoyo_link) : apoyo_title));
 						};
 					};
-					if ($apoyos) $boardDescription.append($apoyos);
+					if ($apoyos) $description.append($apoyos);
 					// control de seguimiento
 					var followed = (themeInfo.estado_seguimiento == 1);
 					$themeControl.append(
@@ -459,18 +457,45 @@ function uiSelectBoard(board) {
 									onWriteTheme(this);
 								}));			
 					};
-					$boardDescription.append($themeControl);
-					$boardTitle.text(themeInfo.nombre);
+					$description.append($themeControl);
+					$title.text(themeInfo.nombre);
 				});
 				break;
 
 			case "t1": 	// UN USUARIO
+				$description.addClass("user-information");
 				var user = boardInfo[1];
 				API.loadProfile(user, function(userInfo) {
+					console.log(userInfo);
 					var userURL = "http://eskup.elpais.com/" + user + "/";
-					$("<img>").addClass("avatar").attr("src", checkUserPhoto(userInfo.pathfoto)).appendTo($boardDescription);
-					$("<p>").html(userInfo.descripcion).appendTo($boardDescription);
-					var $eskupinfo = $("<div>").addClass('eskup-info')
+					// enlaces de usuario
+					var $links = $("<ul>").attr("class", "links");
+					$links.append($("<li>").addClass("fa eskup").append(makeLink("Eskup", userURL)));	// perfil de eskup
+					if (userInfo.urlblog) $links.append($("<li>").addClass("fa fa-pencil-square").append(makeLink("Blog", userInfo.urlblog)));
+					if (userInfo.urltwitter) $links.append($("<li>").addClass("fa fa-twitter").append(makeLink("Twitter", userInfo.urltwitter)));
+					if (userInfo.urlwebpersonal) $links.append($("<li>").addClass("fa fa-globe").append(makeLink("Web", userInfo.urlwebpersonal)));
+					$description.append($links);
+					// avatar
+					$("<img>").addClass("avatar").attr("src", checkUserPhoto(userInfo.pathfoto)).appendTo($description);
+					// descripción
+					$("<p>").html(userInfo.descripcion || "[Este usuario no ha proporcionado nincuna descripción.]").appendTo($description);
+					// control de usuario 
+					var $userControl = $("<div>").attr("class", "user-control").appendTo(($description));
+					$userControl
+						.append($("<div>")
+							.attr("class", "control-item " + ((userInfo.seguido == 1) ? "follow on" : "follow"))
+							.attr("data-user", user)
+							.on("click", function() {
+								onFollowUser(this);
+							}))
+						.append($("<div>")
+							.attr("class", "control-item " + ((userInfo.bloqueado == 1) ? "blocked on" : "blocked"))
+							.attr("data-user", user)
+							.on("click", function() {
+								onBlockUser(this);
+							}));
+					// datos de eskup
+					var $stats = $("<div>").addClass('eskup-info')
 						.append($("<div>").addClass('stats info-users')
 							.append($("<div>").addClass("from")
 								.append(makeLink(userInfo.numero_usuarios, userURL + "seguidos")))
@@ -486,29 +511,13 @@ function uiSelectBoard(board) {
 								.append(makeLink(userInfo.numero_eventos, userURL + "temasseguidos")))
 							.append($("<div>").addClass("write")
 								.append(makeLink(userInfo.numero_eventos_escribe, userURL + "temasescritos"))));
-					$boardDescription.append($eskupinfo);
-					var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($boardDescription));
-					// control de seguimiento
-					var followed = (userInfo.seguido == 1);
-					$themeControl.append(
-						$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
-							.attr("data-user", user)
-							.on("click", function() {
-								onFollowUser(this);
-							})
-							);
-					var $links = $("<ul>").attr("class", "links");
-					$links.append($("<li>").addClass("fa eskup").append(makeLink("Eskup", userURL)));	// perfil de eskup
-					if (userInfo.urlblog) $links.append($("<li>").addClass("fa fa-pencil-square").append(makeLink("Blog", userInfo.urlblog)));
-					if (userInfo.urltwitter) $links.append($("<li>").addClass("fa fa-twitter").append(makeLink("Twitter", userInfo.urltwitter)));
-					if (userInfo.urlwebpersonal) $links.append($("<li>").addClass("fa fa-globe").append(makeLink("Web", userInfo.urlwebpersonal)));
-					$boardDescription.append($links);
-					$boardTitle.text("Mensajes de @" + user + " (" + userInfo.nombre + " " + userInfo.apellidos + ")");
+					$description.append($stats);
+
+					$title.text("Mensajes de @" + user + " - " + userInfo.nombre + " " + userInfo.apellidos);
 				});
 				break;
-
 			default: 	// UN THREAD
-				$boardTitle.text("Se está mostrando un thread");
+				$title.text("Se está mostrando un thread");
 		};
 	};
 };
@@ -529,6 +538,28 @@ function onFollowUser(button, callback) {
 					if (r == "OK") {
 						$this.toggleClass('on');
 						fillFollowTo();
+					} else {
+						new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+					};
+					if (callback) callback();
+				});
+		});
+};
+
+function onBlockUser(button, callback) {
+	$this = $(button);
+	var user = $this.attr("data-user");
+	var blocked = $this.hasClass('on');
+	new ModalDialog((blocked ? "Desbloquear" : "Bloquear") + " a este usuario", 
+		"Si continúas, " + (blocked ? "dejarás de bloquear" : "comenzarás a bloquear") + " a este usuario en Eskup", 
+		[(blocked ? "Desbloquear" : "Bloquear"), "Cancelar"],
+		function(result) {
+			if (result == "Cancelar") return;
+			API.blockUsers([user],
+				result == "Bloquear",
+				function(r) {
+					if (r == "OK") {
+						$this.toggleClass('on');
 					} else {
 						new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
 					};
@@ -748,7 +779,7 @@ function appendMsg(msg, board, themes, before) {
 			.attr("id", "replying-message")
 			.html($msg.get(0).outerHTML));
 		if (CURRENT_THEME.id=="3") {	// respuesta a un privado
-			showEditor({command: "replyPvt", mID: mID, users: [$msg.attr("data-author")]},
+			showEditor({command: "reply", mID: mID, users: [$msg.attr("data-author")]},
 				true);
 		} else {						// respuesta normal
 			var themes = $msg.attr("data-themes");
@@ -760,7 +791,7 @@ function appendMsg(msg, board, themes, before) {
 	/* Reenvío de un mensaje */
 	function onForwardMessageClick() {
 		var $msg = $(this).closest('.message');
-		var themes = $message.attr("data-themes");
+		var themes = $msg.attr("data-themes");
 		if (themes) themes = JSON.parse(themes);
 		var mContent = "fwd @" + $msg.attr("data-author") + ": " + $msg.find(".msg_content").get(0).innerHTML;
 		showEditor({command: "forward", mID: $msg.attr("data-id"), themes: themes, content: mContent},

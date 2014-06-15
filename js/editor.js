@@ -1,20 +1,23 @@
 /* Clase para gestionar el editor */
-function Editor(container, api) {
+function Editor(container, api, callback) {
 	var THAT = this;
 	var MAXCHAR = 280;	// máximo de caracteres para el mensaje
 	var API = api;		// el objeto de la api que se emplea para enviar mensaje
+	var CONFIG = null;	// configuración que almacena el editor 
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
-		$("#send").on("click", sendMessage);
-		$("#cancel").on("click", cancel);
+		$("#send").on("click", send);
+		//$("#cancel").on("click", reset);
 		$("#setitalic").on("click", function() { document.execCommand('italic',false,null); });
 		$("#setbold").on("click", function() { document.execCommand('bold',false,null); });
-		$("#newmessage").on("keyup", Counter);				// Contador de caracteres
+		$("#newmessage").on("keyup", count);				// Contador de caracteres
 		$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
 		$("#send2theme").on("click", showThemesSelector);	// Destinos de mensaje
+		if (callback) callback();
 	});
+	
 
 	this.configure = function(config) {
 		// if (typeof config === "undefined") config = "reset";
@@ -22,8 +25,8 @@ function Editor(container, api) {
 		switch (config.command) {
 			case "reply":
 				if (config.themes) {
-					themes = config.themes.split(",");
 					API.loadWritableThemes(function(wthemes) {
+						var themes = config.themes;
 						var goodThemes = [], badThemes = [];
 						themes.forEach(function(d) {
 							(d in wthemes) ? goodThemes.push(d) : badThemes.push(d);
@@ -40,33 +43,23 @@ function Editor(container, api) {
 							$modalContent, ["OK"], null);
 					});			
 				};
-				$("#send").text("RESPONDER")
-					.attr("data-command", "reply")
-					.attr("data-id", msgID);
-				break;
-			case "replyPvt":
-				editorAddUsers(themes);
-				$("#send").text("RESPONDER")
-					.attr("data-command", "reply")
-					.attr("data-id", msgID);
+				if (config.users) {
+					editorAddUsers(users);	
+				};
+				$("#send").text("RESPONDER");
 				break;
 			case "forward":
 				$("#newmessage").html(config.content);
-				$("#send").text("REENVIAR")
-					.attr("data-command", "forward")
-					.attr("data-id", msgID);
+				$("#send").text("REENVIAR");
 				break;
 			default:
-				$("#send").text("ENVIAR")
-					.attr("data-command", "send")
-					.removeAttr("data-id");
+				$("#send").text("ENVIAR");
 		};
 	};
 
 	/* Contador de caracteres del mensaje */
 	function count() {
 		var message = $("#newmessage").text();
-		console.log(message);
 		message = message.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AFMzx");
 		var remaining = MAXCHAR - message.length;
 		var $counter = $("#counter");
@@ -133,7 +126,7 @@ function Editor(container, api) {
 					.appendTo($listThemes);
 			};
 			// marcar elementos ya seleccionados
-			var selected = getSelectedThemes();
+			var selected = CONFIG.themes;
 			if (selected.length) {
 				$listThemes.find(".theme-item").each(function() {
 					$li = $(this);
@@ -153,9 +146,7 @@ function Editor(container, api) {
 	/* Añadir temas para enviar al mensaje al selector */
 	function editorAddThemes(data) {
 		API.loadWritableThemes(function(writable) {
-			$("#send2theme")
-				.attr("data-send2theme", JSON.stringify(data))
-				.find(".count").text(data.length);
+			$("#send2theme").find(".count").text(data.length);
 			$list = $("#send2theme ul").html("");	// limpieza de selecciones anteriores
 			data.forEach(function(d) {
 				var theme = writable[d];
@@ -163,52 +154,37 @@ function Editor(container, api) {
 			});
 		});
 	};
-	/* Temas seleccionados para enviar el mensaje */
-	function getSelectedThemes() {
-		var selected = $("#send2theme").attr("data-send2theme");
-		return (selected ? JSON.parse(selected) : []);
-	};
 	/* Añadir destinatarios privados de un mensaje */
 	function editorAddUsers(data) {
-		$list = $("#send2user").attr("data-send2user", JSON.stringify(data))
-			.find("ul");
+		$list = $("#send2user").find("ul");
 		data.forEach(function(d) {
 			$list.append($("<li>").text("@"+d));
 		});
 		$("#send2theme").css("display","none");
 		$("#send2social").css("display","none");
 	};
-	/* Usuarios seleccionados para enviar privado */
-	function getSelectedUsers() {
-		var selected = $("#send2user").attr("data-send2user");
-		return (selected ? JSON.parse(selected) : []);
-	};
 	/* Envía un nuevo mensaje */
-	function sendMessage() {
-		var data = {};
-		data.message = $("#newmessage").text();
-		data.themes = getSelectedThemes();	// tablones destinatarios
-		data.users = getSelectedUsers();	// destinatarios de privado
-		data.social = {	fb: $("#send2fb").prop("checked"),
-						tt: $("#send2tt").prop("checked")};
+	function send() {
+		CONFIG.message = $("#newmessage").text();
+		CONFIG.social = {	fb: $("#send2fb").prop("checked"),
+							tt: $("#send2tt").prop("checked")};
 		var newimg = $("#newimage.loaded canvas").get(0);
-		data.image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
-		var command = data.command = this.getAttribute("data-command");
-		if ((command == "reply") || (command == "forward")) data.msgID = this.getAttribute("data-id");
-		console.log(data);
-		API.update(data, function (result) {
+		CONFIG.image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
+		console.log(CONFIG);
+		API.update(CONFIG, function (result) {
 			if (result.status == "error") {
 				new ModalDialog("Error a enviar el mensaje", result.info);
 			} else {
 				ModalDialog("Mensaje enviado correctamente", null, ["Aceptar"], function() {
-					$("#newmessage").html("");
+					THAT.reset();
 				}, 1000);
 			};
 		});
 	};
-	/* Cancela el envío de un mensaje */
-	function cancel() {
-		showEditor(false);
+	/* Cancela el envío de un mensaje y se resetea el editor */
+	function reset() {
+		$("#replying-message").remove();
+		$("#newmessage").html("");
 	};
 	/* Inserta una imagen en el mensaje */
 	function insertImage() {

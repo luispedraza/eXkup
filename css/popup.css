@@ -225,8 +225,8 @@ ul.navigator li:hover {
 	position: absolute;
 	top:0;
 	right: 0;
-	padding: 5px;
-	width: 440px;
+	/* padding: 5px; */
+	width: 450px;
 }
 
 #messages-header {
@@ -246,8 +246,8 @@ ul.navigator li:hover {
 	/* background-color: #fff; */
 	font-size: 18px;
 	/* display: block; */
-	margin-top: -6px;
-	margin-left: 20px;
+	margin-top: 10px;
+	margin-right: 10px;
 }
 #messages-header .button {
 	border: 0;
@@ -332,13 +332,15 @@ form.search .button {
 	text-overflow: ellipsis;
 	cursor: pointer;
 	font-size: 16px;
-	margin-top: 10px;
-	margin-bottom: 11px;
+	/* margin-top: 10px; */
+	/* margin-bottom: 21px; */
 	display: block;
 	/* max-width: 300px; */
 	overflow: hidden;
 	/* margin-right: 42px; */
 	font-weight: bold;
+	/* border-bottom: 1px solid #fff; */
+	padding: 10px 5px 21px 5px;
 }
 #board-title:before {
 	transition: -webkit-transform .25s ease;
@@ -352,23 +354,23 @@ form.search .button {
 	text-align: center;
 	padding: 4px;
 	border-radius: 30px;
-	/* z-index: 500; */
+	z-index: 500;
 	/* border-bottom: 1px solid #fff; */
 }
 #board-description {
 	clear: both;
-	font-weight: 200;
 	font-size: 12px;
 	height: 0;
 	overflow: hidden;
 	transition: all .25s ease;
-	padding: 0 5px;
+	padding: 0 10px;
+	position: relative;
 }
 #messages-header.on #board-description {
 	border-top: 1px dotted #f30;
-	height: 250px;
-	margin-top: 15px;
-	padding: 18px 5px 5px 5px;
+	height: 220px;
+	/* margin-top: 15px; */
+	padding-top: 20px;
 }
 
 #messages-header.on #board-title:before {
@@ -384,35 +386,46 @@ form.search .button {
 }
 #board-description img.avatar {
 	float: left;
-	height: 90px;
-	border: 1px solid #fff;
+	height: 80px;
+	/* border: 1px solid #fff; */
 	/* margin-top: 13px; */
 	margin-left: 0;
 	margin-right: 10px;
 }
 #board-description p {
-	height: 100px;
+	height: 90px;
 	overflow-y: auto;
 	margin: 0;
+	margin-bottom: 10px;
+}
+#board-description .user-information p {
+	height: 45px;
 }
 
 #board-description .eskup-info {
-	/* height: 90px; */
-	/* width: 100%; */
 	margin-top: 15px;
-	/* float: left; */
+	background-color: #f30;
+	text-align: center;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 450px;
 }
 .eskup-info .stats {
-	float: left;
-	background: #f30;
-	margin-right: 5px;
-	padding: 2px;
-	text-align: center;
+	/* float: left; */
+	display: inline-block;
+	/* background: #f30; */
+	/* margin-right: 5px; */
+	/* padding: 2px; */
+	text-align: right;
+	font-size: 13px;
+	padding: 10px;
+	/* width: 126px; */
 }
 .eskup-info .stats:before {
 	display: block;
 	width: 100%;
-	font-size: 12px;
+	/* font-size: 12px; */
 	text-transform: uppercase;
 }
 .eskup-info .info-users:before {
@@ -426,22 +439,32 @@ form.search .button {
 }
 .eskup-info .stats div {
 	/* display: inline-block; */
-	margin: 3px;
-	width: 60px;
+	/* margin: 3px; */
+	/* width: 60px; */
 	/* height: 30px; */
-	background-color: #fff;
+	/* background-color: #fff; */
+	margin-top: 10px;
 }
 .eskup-info .stats div a {
-	display: block;
+	display: inline-block;
 	/* margin-top: 10px; */
-	font-size: 18px;
-	text-decoration: none;
+	font-size: 20px;
+	/* text-decoration: none; */
+	background-color: #fff;
+	border-radius: 100px;
+	padding: 5px;
+	min-width: 22px;
+	text-align: center;
+}
+.eskup-info .stats div a:hover {
+	background-color: #000;
 }
 .eskup-info .stats div:before {
-	display: block;
-	width: 100%;
-	font-size: 12px;
-	background-color: #f30;
+	display: inline-block;
+	/* width: 100%; */
+	/* font-size: 12px; */
+	/* background-color: #f30; */
+	margin-right: 6px;
 }
 .eskup-info .info-users .from:before {
 	content: "sigue a";
@@ -467,10 +490,11 @@ form.search .button {
 	margin-top: 15px;
 	list-style-type: none;
 	max-width: 290px;
-	height: 120px;
+	height: 110px;
 	overflow-y: auto;
+	margin: 0;
 }
-#board-description .links:before {
+#board-description .theme-information .links:before {
 	content: "Más información:";
 	display: block;
 	padding: 0 3px;
@@ -478,8 +502,10 @@ form.search .button {
 	color:  #f30;
 }
 #board-description .links li {
-	margin-right: 5px;
+	/* margin-right: 5px; */
 	padding: 2px 3px;
+	display: list-item;
+	margin-top: 2px;
 }
 #board-description .links li.eskup:before {
 	content: " ";
@@ -516,6 +542,10 @@ form.search .button {
 	height: 26px;
 	overflow: hidden;
 	text-transform: uppercase;
+}
+.user-information .control-item {
+	display: inline-block;
+	margin-right: 5px;
 }
 .control-item:hover:before {
 	top: -40px;
@@ -569,6 +599,18 @@ form.search .button {
 }
 .control-item.writable.on:after {
 	content: "dejar de escribir";
+}
+.control-item.blocked:before {
+	content: "no bloqueado";
+}
+.control-item.blocked:after {
+	content: "bloquear privados";
+}
+.control-item.blocked.on:before {
+	content: "usuario bloqueado";
+}
+.control-item.blocked.on:after {
+	content: "desbloquear privados";
 }
 
 /***********************/
