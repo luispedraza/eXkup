@@ -378,7 +378,8 @@ function loadBoardMessages(theme, callback) {
 				messages.forEach(function(m) {
 					if (!m.borrado) {
 						API.buildMessage(m, usersInfo);
-						$newMessages = $newMessages.add(appendMsg(m, $board, themesInfo));	// se van agregando nuevos mensajes
+						// se van agregando nuevos mensajes:
+						$newMessages = $newMessages.add(createMessage(m, themesInfo).appendTo($board));	
 					};
 				});
 				if (Math.ceil(info.numMensajes / API.NUMMSG) == CURRENT_PAGE) {
@@ -633,7 +634,7 @@ function showThread(threadID, originalMsgID) {
 			var msgID = msg.idMsg;
 			$newNode = $("<div>").addClass('node');
 			$newItem = $("<div>").addClass('item').appendTo($newNode);
-			$newMsg = appendMsg(msg, $newItem);
+			$newMsg = createMessage(msg).appendTo($newItem);
 			if (msgID == originalMsgID)
 				$highlightedMsg = $newMsg.addClass('highlighted');	// resaltamos el mensaje de entrada al hilo
 			aux[msgID] = {node: $newNode};
@@ -684,15 +685,13 @@ function showTreeBoard(show) {
 	$(".board").toggleClass('switch', show);
 };
 
-/* Función que agrega un mensaje a un tablón 
+/* Función que crea un nuevo mensaje
 	@param msg: mensaje a agregar
-	@param board: tablón que contendrá el mensaje
 	@themes: información complementaria (temas)
-	@before: elemento antes del cual se va a insertar el mensaje
 
 	@return: nuevo mensaje agregado
 */
-function appendMsg(msg, $board, themes, $before) {	
+function createMessage(msg, themes) {	
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
 	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
@@ -770,11 +769,7 @@ function appendMsg(msg, $board, themes, $before) {
 			.on("click", onDeleteMessageClick));
 	};
 	
-	$msg.append([$head, $content, $themes, $control]);
-	// agregación final del mensaje:
-	if ($before) $msg.insertBefore($before);
-	else $board.append($msg);
-	return $msg;	// se devuelve el mensaje agregado
+	return $msg.append([$head, $content, $themes, $control]);
 };
 
 /* Carga de mensajes favoritos */
@@ -783,7 +778,9 @@ function loadFavorites() {
 		var $favs = $("#board").empty();
 		data.forEach(function(mID) {
 			var msg = localStorage.getItem(mID);
-			if (msg) appendMsg(JSON.parse(msg), $favs).addClass('favorite');
+			if (msg) {
+				$favs.append(createMessage(JSON.parse(msg))).addClass('favorite');	
+			};
 		});
 	});
 };
