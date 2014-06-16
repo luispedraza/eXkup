@@ -805,12 +805,9 @@ form.search .button {
 	margin-bottom: 0;
 	border-bottom: none;	
 	position: relative;
-	opacity:0;
-	transition: opacity .5s ease;
+	display: none;
 }
-.message.conversation.mark.show {
-	opacity:1;
-}
+
 .message.conversation.mark:after {
 	display: block;
 	content:  " ";

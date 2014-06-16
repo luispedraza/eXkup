@@ -28,12 +28,10 @@ function onReplyClick() {
 		var repliedMsg = data.mensajes[0];
 		API.buildMessage(repliedMsg, data.perfilesUsuarios);
 		// agrego el mensaje respondido
-		var $message = $this.closest('.message');
-		$message.addClass('conversation');
-		$newmsg = $(appendMsg(repliedMsg, "board", data.perfilesEventos, $message)).addClass('conversation mark');
-		setTimeout(function() {
-			$newmsg.addClass('show');	
-		}, 500);
+		$message = $this.closest('.message').addClass('conversation');
+		appendMsg(repliedMsg, null, data.perfilesEventos, $message)
+			.addClass('conversation mark')
+			.fadeIn(500);
 	});
 };
 /* Agrega o elimina un mensaje de la lista de favoritos */
@@ -103,16 +101,15 @@ function onShowThreadClick() {
 function onForwardedMessageClick() {
 	var $this = $(this);
 	API.getMessage(this.getAttribute("data-forward"), function(data) {
+		console.log(data);
 		var forwardedMsg = data.mensajes[0];
 		if (forwardedMsg) {
 			API.buildMessage(forwardedMsg, data.perfilesUsuarios);
 			// agrego el mensaje reenviado
-			var $message = $this.closest('.message');
-			$message.addClass('conversation');
-			$newmsg = $(appendMsg(forwardedMsg, "board", data.perfilesEventos, $message)).addClass('conversation mark forwarded');
-			setTimeout(function() {
-				$newmsg.addClass('show');
-			}, 500);
+			var $message = $this.closest('.message').addClass('conversation');
+			appendMsg(forwardedMsg, null, data.perfilesEventos, $message)
+				.addClass('conversation mark forwarded')
+				.fadeIn(500);
 		} else {	// el mensaje original puede estar elminado
 			new ModalDialog("El mensaje original ha sido eliminado", null, ["Aceptar"], null, 2000);
 		};

@@ -772,7 +772,7 @@ function appendMsg(msg, $board, themes, $before) {
 	
 	$msg.append([$head, $content, $themes, $control]);
 	// agregación final del mensaje:
-	if ($before) $(msg).insertBefore($before);
+	if ($before) $msg.insertBefore($before);
 	else $board.append($msg);
 	return $msg;	// se devuelve el mensaje agregado
 };
