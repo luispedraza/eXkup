@@ -126,6 +126,7 @@ function EskupApi() {
 			user = usersInfo[msg.autorMsgRespuesta];
 			msg.usuarioRespuestaNombre = (user.nombre + " " + user.apellidos).trim();
 		};
+		user = null;
 		return msg;
 	};
 	/* Completa la información de un mensaje  para un thread (omitida información de respuesta */

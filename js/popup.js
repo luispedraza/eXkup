@@ -371,16 +371,14 @@ function loadBoardMessages(theme, callback) {
 			var messages = info.mensajes;
 			var usersInfo = info.perfilesUsuarios;
 			var themesInfo = info.perfilesEventos;
-			var board = document.getElementById("board");
 			var $newMessages = $();	// empty selection
 			if (messages.length == 0) {
 				noMoreMessages();
 			} else {
-				var board = $board.get(0);
 				messages.forEach(function(m) {
 					if (!m.borrado) {
 						API.buildMessage(m, usersInfo);
-						$newMessages = $newMessages.add(appendMsg(m, board, themesInfo));	// se van agregando nuevos mensajes
+						$newMessages = $newMessages.add(appendMsg(m, $board, themesInfo));	// se van agregando nuevos mensajes
 					};
 				});
 				if (Math.ceil(info.numMensajes / API.NUMMSG) == CURRENT_PAGE) {
@@ -630,7 +628,7 @@ function onWriteTheme(button, callback) {
 
 /* Carga de una conversación completa */
 function showThread(threadID, originalMsgID) {
-	var modal = new ModalDialog("Cargando datos", 
+	var modal = new ModalDialog("Cargando datos",
 		"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
 		[]);
 	API.loadThread(threadID, function(info) {
@@ -646,7 +644,7 @@ function showThread(threadID, originalMsgID) {
 			newItem = document.createElement("div");
 			newItem.className = "item";
 			newNode.appendChild(newItem);
-			var $newMsg = appendMsg(msg, newItem);
+			var $newMsg = appendMsg(msg, $(newItem));
 			var msgID = msg.idMsg;
 			if (msgID == originalMsgID)
 				$highlightedMsg = $newMsg.addClass('highlighted');	// resaltamos el mensaje de entrada al hilo
@@ -709,279 +707,98 @@ function showTreeBoard(show) {
 
 	@return: nuevo mensaje agregado
 */
-function appendMsg(msg, board, themes, before) {
-	/* Función que se ejecuta al hacer click en el autor de un mensaje */
-	function onAuthorClick() {
-		loadBoard("t1-" + this.getAttribute("data-user"));
-	};
-	/* Función que se ejecuta al pasar el cursor sobre la fecha de publicación */
-	function onTimeMouseover() {
-		var $this = $(this);
-		TIME_TOOLTIP_TIMER = setTimeout(function() {
-			var date = new Date(parseInt($this.attr("data-ts")));
-			$this.append($("<span>").addClass('time-tooltip')
-				.append($("<span>").text(formatDate(date, true)))
-				.append($("<span>").text(date.toLocaleTimeString())));
-		}, 500);
-	};
-	function onTimeMouseout() {
-		clearTimeout(TIME_TOOLTIP_TIMER);
-		$(this).find(".time-tooltip").remove();
-	};
-	/* Functión que se ejecuta al hacer click en el nombre del autor al que se responde */
-	function onReplyClick() {
-		var $this = $(this);
-		API.getMessage($this.attr("data-reply"), function(data) {
-			var repliedMsg = data.mensajes[0];
-			API.buildMessage(repliedMsg, data.perfilesUsuarios);
-			// agrego el mensaje respondido
-			var $message = $this.closest('.message');
-			$message.addClass('conversation');
-			$newmsg = $(appendMsg(repliedMsg, "board", data.perfilesEventos, $message)).addClass('conversation mark');
-			setTimeout(function() {
-				$newmsg.addClass('show');	
-			}, 500);
-		});
-	};
-	/* Agrega o elimina un mensaje de la lista de favoritos */
-	function onAddFavoriteClick() {
-		var $favBtn = $(this),
-			$msg = $favBtn.closest('.message'),
-			m_id = $msg.attr("data-id");	// id del mensaje
-		if (!$msg.hasClass("favorite")) {		// marvar favorito
-			API.addFavorite(m_id, function(status, statusInfo) {
-				if (status == 0) {
-					new ModalDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, 2000);
-					$msg.toggleClass('favorite');
-				} else {
-					new ModalDialog("Error: No se pudo agregar el mensaje a favoritos.", statusInfo, [], null, 2000);
-				};
-			});
-		} else {						// desmarcar favorito
-			new ModalDialog("¿Seguro que desea eliminar este mensaje de sus favoritos?",
-				$msg[0].outerHTML,
-				["Sí", "Cancelar"], function(result) {
-					if (result == "Sí") {
-						API.removeFavorite(m_id, function(status, statusInfo) {
-							new ModalDialog("El mensaje se ha eliminado de tus favoritos.", null, [], null, 2000);
-							$msg.toggleClass('favorite');
-							// además lo eliminamos del tablón de favoritos
-							if (CURRENT_THEME.id == "favs") {
-								$msg.fadeOut(function() {
-									$(this).remove();
-								});
-							};
-						});
-					};
-				});
-		};
-	};
-	/* Respuesta a un mensaje */
-	function onReplyMessageClick() {
-		var $msg = $(this).closest('.message');
-		mID = $msg.attr("data-id");
-		$("#editor").before($("<div>")
-			.attr("id", "replying-message")
-			.html($msg.get(0).outerHTML));
-		if (CURRENT_THEME.id=="3") {	// respuesta a un privado
-			showEditor({command: "reply", mID: mID, users: [$msg.attr("data-author")]},
-				true);
-		} else {						// respuesta normal
-			var themes = $msg.attr("data-themes");
-			if (themes) themes = JSON.parse(themes);
-			showEditor({command: "reply", mID: mID, themes: themes},
-				true);
-		};
-	};
-	/* Reenvío de un mensaje */
-	function onForwardMessageClick() {
-		var $msg = $(this).closest('.message');
-		var themes = $msg.attr("data-themes");
-		if (themes) themes = JSON.parse(themes);
-		var mContent = "fwd @" + $msg.attr("data-author") + ": " + $msg.find(".msg_content").get(0).innerHTML;
-		showEditor({command: "forward", mID: $msg.attr("data-id"), themes: themes, content: mContent},
-			true);
-	};
-	/* Función que se ejecuta al mostrar el thread al que pertenece un mensaje */
-	function onShowThreadClick() {
-		loadBoard(null, this.getAttribute("data-thread"), $(this).closest(".message").attr("data-id"));
-	};
-	/* Función que se ejecuta al hacer click en el enlace al mensaje reenviados */
-	function onForwardedMessageClick() {
-		var $this = $(this);
-		API.getMessage(this.getAttribute("data-forward"), function(data) {
-			var forwardedMsg = data.mensajes[0];
-			if (forwardedMsg) {
-				API.buildMessage(forwardedMsg, data.perfilesUsuarios);
-				// agrego el mensaje reenviado
-				var $message = $this.closest('.message');
-				$message.addClass('conversation');
-				$newmsg = $(appendMsg(forwardedMsg, "board", data.perfilesEventos, $message)).addClass('conversation mark forwarded');
-				setTimeout(function() {
-					$newmsg.addClass('show');
-				}, 500);
-			} else {	// el mensaje original puede estar elminado
-				new ModalDialog("El mensaje original ha sido eliminado", null, ["Aceptar"], null, 2000);
-			};
-		});
-	};
-	/* Eliminación de un mensaje */
-	function onDeleteMessageClick() {
-		var $message = $(this).closest('.message');
-		var msgID = $message.attr("data-id");
-		new ModalDialog("¿Seguro que desea borrar este mensaje?", "", ["Sí", "No"],
-			function(result) {
-				if (result=="No") return;
-				API.deleteMessage(msgID, function(info) {
-					if (info.status=="ok") {
-						new ModalDialog("Eliminación correcta",
-							"El mensaje ha sido eliminado con éxito, aunque el cambio puede tardar en verse reflejado en los servidores de Eskup.",
-							["OK"], null, 2000);
-						$message.remove();
-					} else {
-						new ModalDialog("Se ha producido un error",
-							"No ha sido posible eliminar el mensaje. Vuelve a intentarlo de nuevo más tarde.",
-							["OK"],
-							null,
-							2000);
-					};
-				});
-			});
-	};
-	if (typeof board === "string") board = document.getElementById(board);
-	var userNickname = API.getUserNickname();
+function appendMsg(msg, $board, themes, $before) {	
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
 	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
 	// Creación del nuevo mensaje:
-	var div_msg = document.createElement("div");
-	div_msg.className = "message";
-	div_msg.setAttribute("data-author", user);	// el autor del mensaje
-	div_msg.setAttribute("data-id", m_id);
+	$msg = $("<div>").addClass('message')
+		.attr("data-author", user)
+		.attr("data-id", m_id);
 	// La cabecera:
-	var dHead = document.createElement("div");
-	dHead.className = "msg_header";
-	var img_user = document.createElement("img");
-	img_user.src = msg.pathfoto;
-	dHead.appendChild(img_user);	// user image
-	var a_user = document.createElement("a");
-	a_user.href = "#";
-	a_user.textContent = "@" + user;
-	a_user.setAttribute("data-user", user);
-	if (msg.usuarioOrigenNombre) {a_user.textContent += " (" + msg.usuarioOrigenNombre + ")"};
-	a_user.addEventListener("click", onAuthorClick);	// muestra los mensajes del usuario
-	dHead.appendChild(a_user);		// user link
-	$(dHead).append(
-		makeLink(getTimeAgo(new Date(tsMessage), new Date()),"http://eskup.elpais.com/" + m_id)
-			.addClass("time fa fa-clock-o").attr("data-ts", tsMessage)
-			.on("mouseover", onTimeMouseover)
-			.on("mouseout", onTimeMouseout));
-	div_msg.appendChild(dHead);
-
-	// El contenido del mensaje:
-	var div_cont = document.createElement("div");
-	div_cont.className = "msg_content";
-	div_cont.innerHTML = msg.contenido;
-	processLinks(div_cont);			// PROCESAMIENTO DE LOS CONTENIDOS: ENLACES, VÍDEOS...
-	if (msg.cont_adicional) {
-		var img_cont = document.createElement("img");
-		img_cont.src = msg.cont_adicional;
-		div_cont.appendChild(img_cont);
+	var $head = $("<div>").addClass('msg_header')
+		.append($("<img>").attr("src", msg.pathfoto))
+		.append($("<a>").attr("href", "#")
+			.text("@" + user + (msg.usuarioOrigenNombre ? (" (" + msg.usuarioOrigenNombre + ")") : ""))
+			.attr("data-user", user)
+			.on("click", onAuthorClick))
+		.append(
+			makeLink(getTimeAgo(new Date(tsMessage), new Date()),"http://eskup.elpais.com/" + m_id)
+				.addClass("time fa fa-clock-o").attr("data-ts", tsMessage)
+				.on("mouseover", onTimeMouseover)
+				.on("mouseout", onTimeMouseout));
+	// Mensaje reenviado
+	if (msg.reenvio) {
+		$head.append($("<span>").addClass('btn reply2link fa fa-retweet')
+			.text("mensaje reenviado")
+			.attr("data-forward", msg.reenviado)
+			.on("click", onForwardedMessageClick));
 	};
-	div_msg.appendChild(div_cont);
-
+	// El contenido del mensaje:
+	var $content = $("<div>").addClass('msg_content').html(msg.contenido);
+	// processContent($content);				// PROCESAMIENTO DE LOS CONTENIDOS: ENLACES, VÍDEOS...
+	if (msg.cont_adicional) {
+		$content.append($("<img>").attr("src", msg.cont_adicional));
+	};
 	// Temas del mensaje
+	var $themes = $("<ul>").addClass("themes nodisplay");
 	if (themes) {
 		var msgThemes = msg.CopiaEnTablones.split( "," ).filter(function(d) {return d.split("-")[0] == "ev"});	// temas del mensajes
 		if (msgThemes.length) {
-			var $divThemes = $("<ul>").addClass("themes");
+			$themes.removeClass('nodisplay');
 			msgThemes.forEach(function(themeKey) {
 				var themeID = themeKey.split("-")[1];
-				var themeInfo = themes[themeID];	// información sobre el tema, de la API
-				var themeName = themeInfo.nombre;
-				var $themeElement = $("<li>")
+				$themes.append($("<li>")
 					.attr("data-theme", themeKey)
-					.text(themeName)
-					.on("click", function() {
-						loadBoard($(this).attr("data-theme"));
-					})
-					.appendTo($divThemes);
+					.text(themes[themeID].nombre)
+					.on("click", onThemeClick));
 			});
-			div_msg.setAttribute("data-themes", JSON.stringify(msgThemes.map(function(d){return d.split("-")[1];})));
-			$(div_msg).append($divThemes);
+			$msg.attr("data-themes", JSON.stringify(msgThemes.map(function(d){return d.split("-")[1];})));
 		};
 	};
-
 	// Elementos de control:
-	var dCtrl = document.createElement("div");
-	dCtrl.className = "msg_control";
-	// Guardar vavorito
-	var dFav = document.createElement("div");
-	dFav.className = "btn fav fa fa-star" + (API.checkFavorite(m_id) ? " on" : "");
-	dFav.textContent = " favorito";
-	dFav.addEventListener("click", onAddFavoriteClick);
-	dCtrl.appendChild(dFav);
-	// Respuesta
-	var dReply = document.createElement("div");
-	dReply.className = "btn reply fa fa-mail-reply";
-	dReply.textContent = " responder";
-	dReply.addEventListener("click", onReplyMessageClick);
-	dCtrl.appendChild(dReply);
-	// Forward
-	var dFwd = document.createElement("div");
-	dFwd.className = "btn fwd fa fa-retweet";
-	dFwd.textContent = " reenviar";
-	dFwd.addEventListener("click", onForwardMessageClick);
-	dCtrl.appendChild(dFwd);
+	var $control = $("<div>").addClass('msg_control')
+		.append($("<div>").addClass('btn fav fa fa-star' + (API.checkFavorite(m_id) ? " on" : ""))
+			.text(" favorito")
+			.on("click", onAddFavoriteClick))
+		.append($("<div>").addClass('btn reply fa fa-mail-reply' + (API.checkFavorite(m_id) ? " on" : ""))
+			.text(" responder")
+			.on("click", onReplyMessageClick))
+		.append($("<div>").addClass('btn fwd fa fa-retweet' + (API.checkFavorite(m_id) ? " on" : ""))
+			.text(" reenviar")
+			.on("click", onForwardMessageClick));
 	// Hilos de mensajes
 	if (msg.idMsgRespuesta && (msg.idMsgRespuesta != m_id)) {
-		var div_reply = document.createElement("span");
-		div_reply.className = "btn reply2link fa fa-mail-reply";
-		div_reply.textContent = msg.autorMsgRespuesta;
-		if (msg.usuarioRespuestaNombre) div_reply.textContent += " (" + msg.usuarioRespuestaNombre + ")";
-		div_reply.title = "Respuesta a";
-		div_reply.setAttribute("data-reply", msg.idMsgRespuesta);
-		div_reply.addEventListener("click", onReplyClick);
-		dHead.appendChild(div_reply);
-		var div_thread = document.createElement("div");
-		div_thread.className = "btn thlink fa fa-comments";
-		div_thread.textContent = " charla";
-		div_thread.setAttribute("data-thread", msg.hilo);
-		div_thread.addEventListener("click", onShowThreadClick);
-		dCtrl.appendChild(div_thread);
+		$head.append($("<span>").addClass('btn reply2link fa fa-mail-reply')
+			.text(msg.autorMsgRespuesta + ((msg.usuarioRespuestaNombre) ? (" (" + msg.usuarioRespuestaNombre + ")") : ""))
+			.attr("data-reply", msg.idMsgRespuesta)
+			.on("click", onReplyClick));
+		$control.append($("<div>").addClass('btn thlink fa fa-comments')
+			.text(" charla")
+			.attr("data-thread", msg.hilo)
+			.on("click", onShowThreadClick));
 	};
 	// Mensaje propio
-	if (user == userNickname) {
-		var dDel = document.createElement("div");
-		dDel.className = "btn fa fa-trash-o";
-		dDel.textContent = " borrar";
-		dDel.addEventListener("click", onDeleteMessageClick);
-		dCtrl.appendChild(dDel);
+	if (user == API.getUserNickname()) {
+		$control.append($("<div>").addClass('btn fa fa-trash-o')
+			.text(" borrar")
+			.on("click", onDeleteMessageClick));
 	};
-	// Mensaje reenviado
-	if (msg.reenvio) {
-		var div_forward = document.createElement("span");
-		div_forward.className = "btn reply2link fa fa-retweet";
-		div_forward.textContent = "mensaje reenviado";
-		div_forward.setAttribute("data-forward", msg.reenvio);
-		div_forward.addEventListener("click", onForwardedMessageClick);
-		dHead.appendChild(div_forward);
-	};
-	div_msg.appendChild(dCtrl);
-
+	
+	$msg.append([$head, $content, $themes, $control]);
 	// agregación final del mensaje:
-	if (before) $(div_msg).insertBefore(before);
-	else board.appendChild(div_msg);
-	return $(div_msg);
+	if ($before) $(msg).insertBefore($before);
+	else $board.append($msg);
+	return $msg;	// se devuelve el mensaje agregado
 };
 
 /* Carga de mensajes favoritos */
 function loadFavorites() {
 	API.loadFavorites(function(data) {
-		var favs = $("#board").empty().get(0);
+		var $favs = $("#board").empty();
 		data.forEach(function(mID) {
 			var msg = localStorage.getItem(mID);
-			if (msg) appendMsg(JSON.parse(msg), favs).addClass('favorite');
+			if (msg) appendMsg(JSON.parse(msg), $favs).addClass('favorite');
 		});
 	});
 };

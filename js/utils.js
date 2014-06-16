@@ -135,12 +135,14 @@ function checkUserPhoto(path) {
 	https://developers.google.com/youtube/player_parameters
 	http://developer.vimeo.com/player/embedding
 */
-function processLinks(msg_content) {
+function processContent($content) {
+	function insertVideo($element, id, fragment) {
+		$element.before(fragment.replace("_____ID_____", id)).remove();
+	};
 	var YOUTUBE_EMBED = "<iframe class='video' type='text/html' src='http://www.youtube.com/embed/_____ID_____?autoplay=0' frameborder='0'/>";
 	var VIMEO_EMBED = "<iframe class='video' src='http://player.vimeo.com/video/_____ID_____' frameborder='0'></iframe>";
 	var ZAPPINTERNET_EMBED = "<iframe class='video' src='http://zappinternet.com/embed/_____ID_____' frameborder='0' scrolling='no'></iframe>";
 	var DAILYMOTION_EMBED = "<iframe class='video' frameborder='0' src='http://www.dailymotion.com/embed/video/_____ID_____'></iframe>";
-	$content = $(msg_content);
 	$links = $content.find("a");
 	$links.each(function() {
 		var $this = $(this),
@@ -148,31 +150,29 @@ function processLinks(msg_content) {
 		if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
 			var videoMatch = href.match(/[?&]v=([^&]+)/);
 			if (videoMatch && videoMatch[1]) {
-				$(YOUTUBE_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
-				$this.remove();
+				insertVideo($this, videoMatch[1], YOUTUBE_EMBED);
+				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*vimeo.com/)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*vimeo.com\/(\d+)/);
 			if (videoMatch && videoMatch[1]) {
-				$(VIMEO_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
-				$this.remove();
+				insertVideo($this, videoMatch[1], VIMEO_EMBED);
+				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*zappinternet.com\/video\//)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*zappinternet.com\/video\/(.+?)\//);
 			if (videoMatch && videoMatch[1]) {
-				$(ZAPPINTERNET_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
-				$this.remove();
+				insertVideo($this, videoMatch[1], ZAPPINTERNET_EMBED);
+				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*dailymotion.com\/video\//)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*dailymotion.com\/video\/([\w-]+)/);
 			if (videoMatch && videoMatch[1]) {
-				$(DAILYMOTION_EMBED.replace("_____ID_____", videoMatch[1])).insertBefore($this);
-				$this.remove();
+				insertVideo($this, videoMatch[1], DAILYMOTION_EMBED);
+				return;
 			};
-		} else {	
-			// $this.replaceWith(makeLink(this.textContent,href).addClass('a-link'));
-			$this.replaceWith(makeLink(href ,href, 20).addClass('a-link'));
 		};
+		$this.replaceWith(makeLink(href ,href, 20).addClass('a-link'));
 	});
 };
 

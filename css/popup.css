@@ -12,6 +12,10 @@ body {
 	margin: 0px;
 }
 
+.nodisplay {
+	display: none;
+}
+
 .fa {
 	font-family: 'Quattrocento Sans', sans-serif;
 }
@@ -919,7 +923,7 @@ span.time-tooltip span:first-child {
 .msg_control {
 	font-size: 12px;
 	color: #ccc;
-	margin: 3px 0;
+	margin-top: 8px;
 }
 .modal .msg_control, #replying-message .msg_control {
 	display: none;
