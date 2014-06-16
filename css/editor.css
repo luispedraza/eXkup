@@ -91,38 +91,42 @@
 
 #destinations {
 	position: absolute;
-	left: 120px;
+	left: 0;
 	top: 170px;
 	font-size: 12px;
+	padding: 10px;
+	/* width: 100%; */
 }
 #destinations:before {
 	content: "Enviar a: "
 ;
 	float: left;
 	font-size: 15px;
+	width: 100px;
+	height: 200px;
 }
 
 .send2 {
-	display: inline-block;
-	width: 120px;
+	/* display: block; */
+	/* width: 120px; */
 	border: 1px dotted #ccc;
 	/* border-radius: 2px; */
 	cursor: pointer;
 	padding: 2px;
-	position: relative;
+	/* position: relative; */
 	/* height: 20px; */
-	margin-left: 5px;
-	float: left;
+	margin-left: 110px;
+	/* float: left; */
 }
 .send2 ul {
 	/* position: absolute; */
-	left: 0;
-	bottom: 10px;
+	/* left: 0; */
+	/* bottom: 10px; */
 	/* display: inline-block; */
 	padding: 0;
 	/* background-color: #eee; */
-	max-height: 85px;
-	overflow-y: scroll;
+	/* max-height: 85px; */
+	/* overflow-y: scroll; */
 	margin: 0;
 }
 .send2 ul li {

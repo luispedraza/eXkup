@@ -3,7 +3,8 @@ function Editor(container, api, callback) {
 	var THAT = this;
 	var MAXCHAR = 280;	// máximo de caracteres para el mensaje
 	var API = api;		// el objeto de la api que se emplea para enviar mensaje
-	var CONFIG = null;	// configuración que almacena el editor 
+	var CONFIG = {};	// configuración que almacena el editor 
+	
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
 		$("#send").on("click", send);
@@ -18,33 +19,58 @@ function Editor(container, api, callback) {
 		if (callback) callback();
 	});
 	
+	function configureThemes(themes) {
+		if (!themes) return;
+		API.loadWritableThemes(function(wthemes) {
+			var goodThemes = [], badThemes = [];
+			for (t in themes) {
+				var themeData = {id:t, name:themes[t].nombre};
+				(t in wthemes) ? goodThemes.push(themeData) : badThemes.push(themeData);
+			};
+			$("#send2theme ul").empty().append(goodThemes.map(function(d) {
+				return $("<li>").text(d.name);
+			}));
+			$("#NOsend2theme ul").empty().append(badThemes.map(function(d) {
+				return $("<li>").text(d.name);
+			}));
+
+
+			//editorAddThemes(goodThemes);	// temas a los que se puede enviar el mensaje
+
+			// $bad = $("<ul>").addClass("bad-themes");
+			// badThemes.forEach(function(d) {
+			// 	$ulThemes.append($("<li>").text(wthemes[d].nombre));
+			// });
+			// $modalContent = $("<div>").append($("<p>").text(
+			// 	"Tu respuesta aparecerá en los siguientes temas, en los que tienes permiso de escritura:"))
+			// .append($ulThemes);
+			// new ModalDialog("Información sobre tu respuesta", 
+			// 	$modalContent, ["OK"], null);
+		});
+	};
+
+	/* Configuración del editor.
+		Si el objeto de configuración es null, se resetea
+	*/
 	this.configure = function(config) {
-		// if (typeof config === "undefined") config = "reset";
-		var msgID = config.msgID;
+		console.log(config);
+		if (config == null) {
+			reset();
+			return;
+		};
+		var msgID = config.mID;
 		switch (config.command) {
 			case "reply":
-				if (config.themes) {
-					API.loadWritableThemes(function(wthemes) {
-						var themes = config.themes;
-						var goodThemes = [], badThemes = [];
-						themes.forEach(function(d) {
-							(d in wthemes) ? goodThemes.push(d) : badThemes.push(d);
-						});
-						editorAddThemes(goodThemes);	// temas a los que se puede enviar el mensaje
-						$ulThemes = $("<ul>");
-						goodThemes.forEach(function(d) {
-							$ulThemes.append($("<li>").text(wthemes[d].nombre));
-						});
-						$modalContent = $("<div>").append($("<p>").text(
-							"Tu respuesta aparecerá en los siguientes temas, en los que tienes permiso de escritura:"))
-							.append($ulThemes);
-						new ModalDialog("Información sobre tu respuesta", 
-							$modalContent, ["OK"], null);
-					});			
-				};
-				if (config.users) {
-					editorAddUsers(users);	
-				};
+				API.getMessage(msgID, function(data) {
+					console.log(data);
+					configureThemes(data.perfilesEventos);
+				});
+
+
+				// 
+				// if (config.users) {
+				// 	editorAddUsers(users);	
+				// };
 				$("#send").text("RESPONDER");
 				break;
 			case "forward":
@@ -166,9 +192,13 @@ function Editor(container, api, callback) {
 	function send() {
 		CONFIG.message = $("#newmessage").text();
 		CONFIG.social = {	fb: $("#send2fb").prop("checked"),
-							tt: $("#send2tt").prop("checked")};
+							tt: $("#send2tt").prop("checked")
+						};
+		// imagen del mensaje
 		var newimg = $("#newimage.loaded canvas").get(0);
-		CONFIG.image = (newimg && newimg.width) ? dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8)) : null;
+		if (newimg && newimg.width) 
+			CONFIG.image = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
+
 		console.log(CONFIG);
 		API.update(CONFIG, function (result) {
 			if (result.status == "error") {
@@ -180,10 +210,10 @@ function Editor(container, api, callback) {
 			};
 		});
 	};
-	/* Cancela el envío de un mensaje y se resetea el editor */
+	/* Se resetea el editor */
 	function reset() {
-		$("#replying-message").remove();
 		$("#newmessage").empty();
+		CONFIG = {};
 	};
 	/* Inserta una imagen en el mensaje */
 	function insertImage() {

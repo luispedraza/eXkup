@@ -142,9 +142,23 @@ function showSearchForm(show) {
 	};
 };
 
-window.addEventListener("load", initPopup);
 
-function initPopup() {
+
+/* Función que se ejecuta al pulsar en nuevo mensaje */
+function onNewMessage() {
+	showEditor(true);
+	$("#edit-section-h1").off();	// se vuelve a cerrar presionando cancel
+};
+
+/* Función que se ejecuta al cancelar en el editor */
+function onCancelEditor() {
+	$("#replying-message").remove();	// si se estuviera respondiendo a un mensaje
+	showEditor(null);					// se oculta y resetea el editor
+	$("#edit-section-h1").off().on("click", onNewMessage);
+};
+
+/* INICIALIZACIÓN DEL POPUP */
+window.addEventListener("load", function() {
 	/* Obtención de la clave pública de usuario, e inicialización del perfil */
 	API.init(function(userID) {
 		if (!userID) {
@@ -152,7 +166,7 @@ function initPopup() {
 			return;
 		};
 		EDITOR = new Editor("#editor-container", API, function() {
-			$("#cancel").on("click", function() {showEditor(null, false);});
+			$("#cancel").on("click", onCancelEditor);
 		});	// se innicializa en este contenedor 
 		TABLONES["mios"] = "t1-" + userID;
 		fillHeader();
@@ -204,7 +218,7 @@ function initPopup() {
 		$("#mouse-follow").on("click", function() {
 			$(this).toggleClass('on');
 		});
-		$("#edit-section-h1").click(function() { showEditor(); });
+		$("#edit-section-h1").on("click", onNewMessage);
 		/* Mostrar el perfil */
 		$("#profile-item").on("click", function() {
 			showProfile();
@@ -261,28 +275,31 @@ function initPopup() {
 			};
 		});	
 	});
-};
+});
 
 /* Gestión de la ventana de edición 
-	@param show: controla si se muestra o no el editor
-	@param config: reply, forward
-	@param msgID: id del mensaje a contestar o reenviar
-	@param themes: array temas a los que se enviará el mensaje, o de usuarios para enviar privado
+	@param config: 	true o false: muestra u oculta el editor
+					null: resetea el editor y lo cierra
+					si se pasa un objeto, se muestra el editor con esa configuración
 */
-function showEditor(config, show) {
-	$("#edit-section").toggleClass("on", show);
-	if (config) {
+function showEditor(config) {
+	if (typeof config === "object") {
 		var infoMessage = "ESCRIBIENDO UN NUEVO MENSAJE";
-		switch (config.command) {
-			case "reply":
-				infoMessage = "RESPONDIENDO AL " + (config.users ? "MENSAJE:" : "PRIVADO:");
-				break;
-			case "forward":
-				infoMessage = "REENVIANDO EL MENSAJE:";
-				break;
+		if (config) {
+			switch (config.command) {
+				case "reply":
+					infoMessage = "RESPONDIENDO AL " + (config.users ? "MENSAJE:" : "PRIVADO:");
+					break;
+				case "forward":
+					infoMessage = "REENVIANDO EL MENSAJE:";
+					break;
+			};
 		};
-		$("#edit-section .edit-description").text(infoMessage);
+		$("#edit-section").toggleClass('on', config != null)
+			.find(".edit-description").text(infoMessage);
 		EDITOR.configure(config);	// configuración del editor	
+	} else {
+		$("#edit-section").toggleClass("on", config);
 	};
 };
 

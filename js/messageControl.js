@@ -66,6 +66,7 @@ function onAddFavoriteClick() {
 			});
 	};
 };
+
 /* Respuesta a un mensaje */
 function onReplyMessageClick() {
 	var $msg = $(this).closest('.message');
@@ -74,13 +75,11 @@ function onReplyMessageClick() {
 		.attr("id", "replying-message")
 		.html($msg.get(0).outerHTML));
 	if (CURRENT_THEME.id=="3") {	// respuesta a un privado
-		showEditor({command: "reply", mID: mID, users: [$msg.attr("data-author")]},
-			true);
+		showEditor({command: "reply", mID: mID, users: [$msg.attr("data-author")]});
 	} else {						// respuesta normal
 		var themes = $msg.attr("data-themes");
 		if (themes) themes = JSON.parse(themes);
-		showEditor({command: "reply", mID: mID, themes: themes},
-			true);
+		showEditor({command: "reply", mID: mID, themes: themes});
 	};
 };
 /* Reenvío de un mensaje */
@@ -89,8 +88,7 @@ function onForwardMessageClick() {
 	var themes = $msg.attr("data-themes");
 	if (themes) themes = JSON.parse(themes);
 	var mContent = "fwd @" + $msg.attr("data-author") + ": " + $msg.find(".msg_content").get(0).innerHTML;
-	showEditor({command: "forward", mID: $msg.attr("data-id"), themes: themes, content: mContent},
-		true);
+	showEditor({command: "forward", mID: $msg.attr("data-id"), themes: themes, content: mContent});
 };
 /* Función que se ejecuta al mostrar el thread al que pertenece un mensaje */
 function onShowThreadClick() {
