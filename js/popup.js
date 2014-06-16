@@ -716,7 +716,7 @@ function appendMsg(msg, $board, themes, $before) {
 	if (msg.reenvio) {
 		$head.append($("<span>").addClass('btn reply2link fa fa-retweet')
 			.text("mensaje reenviado")
-			.attr("data-forward", msg.reenviado)
+			.attr("data-forward", msg.reenvio)
 			.on("click", onForwardedMessageClick));
 	};
 	// El contenido del mensaje:
@@ -746,10 +746,10 @@ function appendMsg(msg, $board, themes, $before) {
 		.append($("<div>").addClass('btn fav fa fa-star' + (API.checkFavorite(m_id) ? " on" : ""))
 			.text(" favorito")
 			.on("click", onAddFavoriteClick))
-		.append($("<div>").addClass('btn reply fa fa-mail-reply' + (API.checkFavorite(m_id) ? " on" : ""))
+		.append($("<div>").addClass('btn reply fa fa-mail-reply')
 			.text(" responder")
 			.on("click", onReplyMessageClick))
-		.append($("<div>").addClass('btn fwd fa fa-retweet' + (API.checkFavorite(m_id) ? " on" : ""))
+		.append($("<div>").addClass('btn fwd fa fa-retweet')
 			.text(" reenviar")
 			.on("click", onForwardMessageClick));
 	// Hilos de mensajes
