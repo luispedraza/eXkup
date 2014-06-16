@@ -33,19 +33,6 @@ function Editor(container, api, callback) {
 			$("#NOsend2theme ul").empty().append(badThemes.map(function(d) {
 				return $("<li>").text(d.name);
 			}));
-
-
-			//editorAddThemes(goodThemes);	// temas a los que se puede enviar el mensaje
-
-			// $bad = $("<ul>").addClass("bad-themes");
-			// badThemes.forEach(function(d) {
-			// 	$ulThemes.append($("<li>").text(wthemes[d].nombre));
-			// });
-			// $modalContent = $("<div>").append($("<p>").text(
-			// 	"Tu respuesta aparecerá en los siguientes temas, en los que tienes permiso de escritura:"))
-			// .append($ulThemes);
-			// new ModalDialog("Información sobre tu respuesta", 
-			// 	$modalContent, ["OK"], null);
 		});
 	};
 
