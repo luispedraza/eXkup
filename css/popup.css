@@ -247,7 +247,7 @@ ul.navigator li:hover {
 	font-size: 18px;
 	/* display: block; */
 	margin-top: 10px;
-	margin-right: 10px;
+	margin-right: 5px;
 }
 #messages-header .button {
 	border: 0;
@@ -279,10 +279,11 @@ form.search {
 	transition: all .2s ease;
 	/* transition: width .2s ease; */
 	-webkit-user-select: none;
+	border-bottom-left-radius: 10px;
 }
 form.search.on {
 	height: 28px;
-	padding: 2px 2px;
+	padding: 5px;
 }
 
 form.search a:hover {
@@ -291,11 +292,12 @@ form.search a:hover {
 form.search input[type=text] {
 	outline: none;
 	border: 0;
-	margin: 2px 1px 2px 5px;
-	padding: 4px;
+	/* margin: 2px 1px 2px 5px; */
+	padding: 6px;
 	width: 120px;
 	transition: width .2s ease;
 	display: inline-block;
+	border-radius: 100px;
 }
 form.search .button {
 	/* background-color: #ddd; */
@@ -318,7 +320,7 @@ form.search .button {
 
 #search-info {
 	color: #fff;
-	margin-left: 5px;
+	/* margin-left: 5px; */
 	/* width: 46px; */
 }
 

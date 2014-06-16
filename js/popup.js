@@ -583,6 +583,7 @@ function onFollowTheme(button, callback) {
 			API.followThemes([theme],
 				result == "Comenzar a seguirlo",
 				function(r) {
+					console.log(r);
 					if (r == "OK") {
 						$this.toggleClass('on');
 						fillThemes();	// se recarga la lista de temas seguidos
