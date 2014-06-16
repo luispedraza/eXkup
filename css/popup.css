@@ -278,8 +278,9 @@ form.search {
 	background-color: rgba(255, 51, 0, .85);
 	z-index: 95;
 	height: 0;
-	padding: 0 2px;
+	padding: 0 5px;
 	overflow: hidden;
+	opacity: 0;
 	transition: all .2s ease;
 	/* transition: width .2s ease; */
 	-webkit-user-select: none;
@@ -288,6 +289,7 @@ form.search {
 form.search.on {
 	height: 28px;
 	padding: 5px;
+	opacity: 1;
 }
 
 form.search a:hover {

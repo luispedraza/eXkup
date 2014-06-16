@@ -27,7 +27,7 @@ function onReplyClick() {
 	API.getMessage($this.attr("data-reply"), function(data) {
 		var repliedMsg = data.mensajes[0];
 		API.buildMessage(repliedMsg, data.perfilesUsuarios);
-		$this.closest('.message').addClass('conversation')
+		$this.off("click").closest('.message').addClass('conversation')
 			.before(createMessage(repliedMsg, data.perfilesEventos)
 				.addClass('conversation mark')
 				.fadeIn(500));
@@ -104,7 +104,7 @@ function onForwardedMessageClick() {
 		if (forwardedMsg) {
 			API.buildMessage(forwardedMsg, data.perfilesUsuarios);
 			// agrego el mensaje reenviado
-			$this.closest('.message').addClass('conversation')
+			$this.off("click").closest('.message').addClass('conversation')
 				.before(createMessage(forwardedMsg, data.perfilesEventos)
 					.addClass('conversation mark forwarded')
 					.fadeIn(500));
@@ -136,3 +136,4 @@ function onDeleteMessageClick() {
 			});
 		});
 };
+
