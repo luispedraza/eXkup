@@ -45,27 +45,22 @@ function Editor(container, api, callback) {
 			reset();
 			return;
 		};
-		var msgID = config.mID;
-		switch (config.command) {
-			case "reply":
-				API.getMessage(msgID, function(data) {
-					console.log(data);
-					configureThemes(data.perfilesEventos);
-				});
-
-
-				// 
-				// if (config.users) {
-				// 	editorAddUsers(users);	
-				// };
-				$("#send").text("RESPONDER");
-				break;
-			case "forward":
-				$("#newmessage").html(config.content);
-				$("#send").text("REENVIAR");
-				break;
-			default:
-				$("#send").text("ENVIAR");
+		var msgID = config.mID,
+			command = config.command;
+		if ((command=="reply") || (command=="forward")) {
+			API.getMessage(msgID, function(data) {
+				console.log(data);
+				configureThemes(data.perfilesEventos);
+				if (command=="reply") {
+					$("#send").text("RESPONDER");
+				} else if (command=="forward") {
+					$("#newmessage").html(data.mensajes[0].contenido);
+					$("#send").text("REENVIAR");
+					// editorAddUsers(users);
+				};
+			});
+		} else {
+			$("#send").text("ENVIAR");
 		};
 	};
 

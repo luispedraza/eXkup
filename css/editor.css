@@ -109,7 +109,7 @@
 .send2 {
 	/* display: block; */
 	/* width: 120px; */
-	border: 1px dotted #ccc;
+	/* border: 1px dotted #ccc; */
 	/* border-radius: 2px; */
 	cursor: pointer;
 	padding: 2px;
@@ -134,10 +134,15 @@
 	/* padding: 2px; */
 	font-size: 12px;
 	white-space: nowrap;
-	border-top: 1px dotted #ccc;
+	/* border-top: 1px dotted #ccc; */
 	margin-top: 4px;
-	background-color: #f30;
+	background-color: #eee;
 	color:  #fff;
+	display: inline-block;
+	max-width: 100px;
+	margin-left: 2px;
+	padding: 2px 5px;
+	color: #666;
 }
 
 .send2:hover {
@@ -219,11 +224,12 @@
 	-webkit-filter: grayscale(90%);
 	/* padding: 2px; */
 	border: 1px solid transparent;
-	display: block;
+	/* display: block; */
 	margin-top: 5px;
 	cursor: pointer;
 	color: #fff;
 	padding: 1px;
+	width: 80px;
 }
 #send2social input:checked + label {
 	-webkit-filter: grayscale(0%);
