@@ -857,8 +857,6 @@ function appendMsg(msg, board, themes, before) {
 	var div_msg = document.createElement("div");
 	div_msg.className = "message";
 	div_msg.setAttribute("data-author", user);	// el autor del mensaje
-	// div_msg.className = "message card";
-	// $(div_msg).appear({force_process: true});
 	div_msg.setAttribute("data-id", m_id);
 	// La cabecera:
 	var dHead = document.createElement("div");
