@@ -291,8 +291,8 @@ function EskupApi() {
 		var params = eskupParams({action: (follow ? "add_usuarios" : "del_usuarios"), data: users.join(",")});
 		apiCall("GET", PROFILEESKUP, params,
 			function(r) {
-				// limpieza
-				clearUsersInfo();
+				// limpieza: todos los users, y también quien hace la petición
+				clearUsersInfo(users.concat([API.getUserNickname()]));
 				callback(r);
 			});
 	};
@@ -302,8 +302,8 @@ function EskupApi() {
 		var params = eskupParams({action: (block ? "add_denegaciones" : "del_denegaciones"), data: users.join(",")});
 		apiCall("GET", PROFILEESKUP, params,
 			function(r) {
-				// limpieza
-				// clearUsersInfo();
+				// limpieza: todos los users, y también quien hace la petición
+				clearUsersInfo(users.concat([API.getUserNickname()]));
 				callback(r);
 			});
 	};

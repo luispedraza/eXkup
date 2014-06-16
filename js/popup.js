@@ -439,10 +439,7 @@ function uiSelectBoard(board) {
 					$themeControl.append(
 						$("<div>").attr("class", "control-item " + ((followed) ? "follow on" : "follow"))
 							.attr("data-theme", theme)
-							.on("click", function() {
-								onFollowTheme(this);
-							})
-							);
+							.on("click", onFollowTheme));
 					// control de escritura
 					var writable = (themeInfo.estado_escritura == 1);
 					if (themeInfo.tipo_suscripcion == 1) {
@@ -452,9 +449,7 @@ function uiSelectBoard(board) {
 								.attr("data-tiposuscripcion", themeInfo.tipo_suscripcion)
 								.attr("data-tipoevento", themeInfo.tipo_evento)
 								.attr("data-writable", themeInfo.estado_escritura)
-								.on("click", function() {
-									onWriteTheme(this);
-								}));			
+								.on("click", onWriteTheme));			
 					};
 					$description.append($themeControl);
 					$title.text(themeInfo.nombre);
@@ -483,9 +478,7 @@ function uiSelectBoard(board) {
 						.append($("<div>")
 							.attr("class", "control-item " + ((userInfo.seguido == 1) ? "follow on" : "follow"))
 							.attr("data-user", user)
-							.on("click", function() {
-								onFollowUser(this);
-							}))
+							.on("click", onFollowUser))
 						.append($("<div>")
 							.attr("class", "control-item " + ((userInfo.bloqueado == 1) ? "blocked on" : "blocked"))
 							.attr("data-user", user)
@@ -520,9 +513,9 @@ function uiSelectBoard(board) {
 	};
 };
 
-/* Dejar de seguir o comenzar a seguir un tema */
-function onFollowUser(button, callback) {
-	var $this = $(button);
+/* Seguir o dejar de seguir a un usuario */
+function onFollowUser() {
+	var $this = $(this);
 	var user = $this.attr("data-user");
 	var followed = $this.hasClass('on');
 	new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir a este usuario", 
@@ -535,18 +528,18 @@ function onFollowUser(button, callback) {
 				function(r) {
 					if (r == "OK") {
 						$this.toggleClass('on');
-						fillFollowTo();
+						fillProfile();
+						fillFollowTo();	// se recargan los usuarios seguidos
 					} else {
 						new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
 					};
-					if (callback) callback();
 				});
 		});
-	$this = null;
 };
 
-function onBlockUser(button, callback) {
-	var $this = $(button);
+/* Bloquear o desbloquear a un usuario */
+function onBlockUser() {
+	var $this = $(this);
 	var user = $this.attr("data-user");
 	var blocked = $this.hasClass('on');
 	new ModalDialog((blocked ? "Desbloquear" : "Bloquear") + " a este usuario", 
@@ -565,12 +558,11 @@ function onBlockUser(button, callback) {
 					if (callback) callback();
 				});
 		});
-	$this = null;
 };
 
-/* Dejar de seguir o comenzar a seguir un tema */
-function onFollowTheme(button, callback) {
-	var $this = $(button);
+/* Seguir o dejar de seguir un tema */
+function onFollowTheme() {
+	var $this = $(this);
 	var theme = $this.attr("data-theme");
 	var followed = $this.hasClass('on');
 	new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir este tema", 
@@ -581,21 +573,21 @@ function onFollowTheme(button, callback) {
 			API.followThemes([theme],
 				result == "Comenzar a seguirlo",
 				function(r) {
-					console.log(r);
 					if (r == "OK") {
 						$this.toggleClass('on');
+						fillProfile();
+						fillFollowThemes();	// se recargan los temas seguidos
 						fillThemes();	// se recarga la lista de temas seguidos
 					} else {
 						new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
 					};
-					if (callback) callback();
 				});
 		});
-	$this = null;
 };
 
-function onWriteTheme(button, callback) {
-	var $this = $(button);
+/* Escribir o dejar de escribir en un tema */
+function onWriteTheme() {
+	var $this = $(this);
 	var theme = $this.attr("data-theme");
 	var typesuscription = $this.attr('data-tiposuscripcion');
 	// var typeevent = $this.attr('data-tipoevento');
@@ -613,17 +605,17 @@ function onWriteTheme(button, callback) {
 						if (!r.match(/^error/)) {
 							$this.toggleClass('on');
 							$this.attr("data-writable", ((writable == "1") ? "0" : "1" ));	// cambio estado escritura
+							fillProfile();
+							fillWritableThemes();	// se recargan los temas en que escribo
 						} else {
 							new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
 						};
-						if (callback) callback();
 					});
 			});
 	} else if (typesuscription == "2") {
 		// se precisa autorización
 		// TODO: hay que hacerlo, pero no sé si quedan eventos de este tipo
 	};
-	$this = null;
 };
 
 /* Carga de una conversación completa */
@@ -632,43 +624,36 @@ function showThread(threadID, originalMsgID) {
 		"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
 		[]);
 	API.loadThread(threadID, function(info) {
-		var treeDiv = document.getElementById("tree");
-		treeDiv.innerHTML = "";
+		var $tree = $("#tree").empty();
 		var aux = {};
 		/* agregar un nuevo nodo: item + children */
-		var newNode, newItem, newContent, newMore;
+		var $newNode, $newItem, $newMsg, newMore;
 		var $highlightedMsg = null;
 		function addNode(msg, parentID) {
-			newNode = document.createElement("div");
-			newNode.className = "node";
-			newItem = document.createElement("div");
-			newItem.className = "item";
-			newNode.appendChild(newItem);
-			var $newMsg = appendMsg(msg, $(newItem));
 			var msgID = msg.idMsg;
+			$newNode = $("<div>").addClass('node');
+			$newItem = $("<div>").addClass('item').appendTo($newNode);
+			$newMsg = appendMsg(msg, $newItem);
 			if (msgID == originalMsgID)
 				$highlightedMsg = $newMsg.addClass('highlighted');	// resaltamos el mensaje de entrada al hilo
-			aux[msgID] = {node: newNode};
+			aux[msgID] = {node: $newNode};
 			if (parentID == null) {
-				treeDiv.appendChild(newNode);
+				$tree.append($newNode);
 				return;
 			};
 			var parent = aux[parentID];
 			if (!parent.children) {
-				var childrenDiv = (parent.children = document.createElement("div"));
-				childrenDiv.className = "children on";
-				newMore = document.createElement("div");
-				newMore.className = "more fa fa-minus-square";
-				newMore.addEventListener("click", function() {
-					$(this)
-						.toggleClass('fa-minus-square')
-						.toggleClass('fa-plus-square')
-						.closest('.children').toggleClass('on');
-				});
-				childrenDiv.appendChild(newMore);
-				parent.node.appendChild(childrenDiv);
+				parent.children = $("<div>").addClass('children on')
+					.appendTo(parent.node)
+					.append($("<div>").addClass('more fa fa-minus-square')
+						.on("click", function() {
+							$(this)
+								.toggleClass('fa-minus-square')
+								.toggleClass('fa-plus-square')
+								.closest('.children').toggleClass('on');
+							}));
 			};
-			parent.children.appendChild(newNode);
+			parent.children.append($newNode);
 		};
 		var messages = info.mensajes;
 		addNode(API.buildThreadMessage(messages[0], info.perfilesUsuarios), null);
@@ -821,7 +806,7 @@ function fillProfile() {
 function showProfile() {
 	$(this).toggleClass('on');
 	$("#profile-container").toggleClass('on');
-	$("#profile-container .selector-item").removeClass('on');	// para obligar recarga en click
+	// $("#profile-container .selector-item").removeClass('on');	// para obligar recarga en click
 };
 
 /* Carga en el perfil la lista de usuarios a quienes sigo */
@@ -832,14 +817,10 @@ function fillFollowTo() {
 			var nickname = user.nickname;
 			$ul.append(
 				$("<li>")
-					.append($("<div>").addClass('theme-control').append($("<div>").addClass("control-item follow on")
-						.attr("data-user", nickname)
-						.on("click", function() {
-							onFollowUser(this, function() {
-								fillProfile();
-								fillFollowTo();	// se recargan los usuarios seguidos
-							});
-					})))
+					.append($("<div>").addClass('theme-control')
+						.append($("<div>").addClass("control-item follow on")
+							.attr("data-user", nickname)
+							.on("click", onFollowUser)))
 					.append($("<img>").attr("src", checkUserPhoto(user.pathfoto)).addClass(user.activo ? "online" : ""))
 					.append($("<div>").addClass("puser-info")
 						.append($("<div>").addClass("puser-nickname").attr("data-user", nickname).text("@" + nickname).on("click", function() {
@@ -882,14 +863,10 @@ function fillFollowThemes() {
 			var theme = themes[t];
 			$ul.append(
 				$("<li>")
-					.append($("<div>").addClass('theme-control').append($("<div>").addClass("control-item follow on")
-						.attr("data-theme", t)
-						.on("click", function() {
-							onFollowTheme(this, function() {
-								fillProfile();
-								fillFollowThemes();	// se recargan los temas seguidos
-							});
-					})))
+					.append($("<div>").addClass('theme-control')
+						.append($("<div>").addClass("control-item follow on")
+							.attr("data-theme", t)
+							.on("click", onFollowTheme)))
 					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
 					.append($("<div>").addClass("theme-info")
 						.append($("<div>").addClass("ptheme-name").attr("data-theme", "ev-"+t).text(theme.nombre).on("click", function() {
@@ -897,8 +874,7 @@ function fillFollowThemes() {
 							showProfile();
 						}))
 						.append($("<div>").addClass("ptheme-description").html(theme.descripcion))
-						)
-				);
+						));
 		};
 	});
 };
@@ -911,15 +887,11 @@ function fillWritableThemes() {
 			var theme = themes[t];
 			$ul.append(
 				$("<li>")
-					.append($("<div>").addClass('theme-control').append($("<div>").addClass("control-item writable on")
-						.attr("data-theme", t)
-						.attr("data-writable", "1")
-						.on("click", function() {
-							onWriteTheme(this, function() {
-								fillProfile();
-								fillWritableThemes();	// se recargan los temas en que escribo
-					ƒAPP		});
-					})))
+					.append($("<div>").addClass('theme-control')
+						.append($("<div>").addClass("control-item writable on")
+							.attr("data-theme", t)
+							.attr("data-writable", "1")
+							.on("click", onWriteTheme)))
 					.append($("<img>").attr("src", theme.pathfoto).addClass("big"))
 					.append($("<div>").addClass("theme-info")
 						.append($("<div>").addClass("ptheme-name").attr("data-theme", "ev-"+t).text(theme.nombre).on("click", function() {
