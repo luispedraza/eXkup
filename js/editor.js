@@ -1,10 +1,10 @@
 /* Clase para gestionar el editor */
 function Editor(container, api, callback) {
 	var THAT = this;
-	var MAXCHAR = 280;	// máximo de caracteres para el mensaje
 	var API = api;		// el objeto de la api que se emplea para enviar mensaje
-	var CONFIG = {};	// configuración que almacena el editor 
-	
+	var MAXCHAR;		// máximo de caracteres para el mensaje
+	var CONFIG;			// configuración que almacena el editor 
+
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
 		$("#send").on("click", send);
@@ -17,10 +17,7 @@ function Editor(container, api, callback) {
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
 		$("#send2theme").on("click", showThemesSelector);	// Destinos de mensaje
-		// Interceptar comando de pegado
-		editor.addEventListener("paste", function(e) {
-			
-		});
+		reset();
 		if (callback) callback();
 	});
 
@@ -34,55 +31,78 @@ function Editor(container, api, callback) {
 		count();
 	};
 	
-	function configureThemes(themes) {
+	/* Configurar los tablones destinatarios de un mensaje */
+	function configureThemes(themes, config) {
+		console.log(themes);
 		if (!themes) return;
 		API.loadWritableThemes(function(wthemes) {
 			var goodThemes = [], badThemes = [];
 			for (t in themes) {
-				var themeData = {id:t, name:themes[t].nombre};
-				(t in wthemes) ? goodThemes.push(themeData) : badThemes.push(themeData);
+				(t in wthemes) ? goodThemes.push(t) : badThemes.push(t);
 			};
-			$("#send2theme ul").empty().append(goodThemes.map(function(d) {
-				return $("<li>").text(d.name);
+			$("#send2theme ul").empty().append(goodThemes.map(function(t) {
+				return $("<li>").text(themes[t].nombre);
 			}));
-			$("#NOsend2theme ul").empty().append(badThemes.map(function(d) {
-				return $("<li>").text(d.name);
+			$("#NOsend2theme ul").empty().append(badThemes.map(function(t) {
+				return $("<li>").text(themes[t].nombre);
 			}));
+			config.themes = goodThemes;	// temas a los que se enviará el mensaje
 		});
+	};
+
+	/* Añadir destinatarios privados de un mensaje */
+	function configureUsers(users, config) {
+		$list = $("#send2user ul").empty().append(users.map(function(u) {
+			return $("<li>").text("@"+u);
+		}));
+		config.users = users;
 	};
 
 	/* Configuración del editor.
 		Si el objeto de configuración es null, se resetea
 	*/
 	this.configure = function(config) {
+		reset();
 		console.log(config);
 		if (config == null) {
 			reset();
 			return;
 		};
-		var msgID = config.mID,
-			command = config.command;
+		var command = config.command;
+		// Temas del mensaje
 		if ((command=="reply") || (command=="forward")) {
-			API.getMessage(msgID, function(data) {
+			API.getMessage(config.mID, function(data) {
 				console.log(data);
-				configureThemes(data.perfilesEventos);
-				if (command=="reply") {
-					$("#send").text("RESPONDER");
+				configureThemes(data.perfilesEventos, CONFIG);
+					if (command=="reply") {
+					CONFIG.mID = config.mID;
+					configureSendButton("RESPONDER");
 				} else if (command=="forward") {
 					$("#newmessage").html(data.mensajes[0].contenido);
-					$("#send").text("REENVIAR");
-					// editorAddUsers(users);
+					$("#newmessage").html($("#newmessage").text());
+					configureSendButton("REENVIAR");
+					count();
 				};
 			});
-		} else {
-			$("#send").text("ENVIAR");
+			
 		};
+		if (command=="replyPrivate") {
+			configureUsers(config.users, CONFIG);// destinatario del privado
+			configureSendButton("RESPONDER");
+		} else {
+			configureSendButton("ENVIAR");
+		};
+		CONFIG.command = command;
+	};
+
+	function configureSendButton(text) {
+		$("#send").text(text);
 	};
 
 	/* Contador de caracteres del mensaje */
 	function count() {
 		var message = $("#newmessage").text();
-		message = message.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AFMzx");
+		message = message.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AAAAA");
 		var remaining = MAXCHAR - message.length;
 		var $counter = $("#counter");
 		$counter.text(remaining.toString());
@@ -121,70 +141,51 @@ function Editor(container, api, callback) {
 
 	/* Muestra el selector de temas a que se quiere enviar un mensaje */
 	function showThemesSelector() {
-		API.loadWritableThemes(function(themes) {
-			function onClickWritableTheme($li) {
-				if ($li.hasClass('closed')) return;	// el tema está cerrado
-				$li.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
-				if ($li.hasClass('fa-check-square-o')) {
-					$li.attr("data-return", $li.attr("data-item"));	
+		API.loadWritableThemes(function(wthemes) {
+			function onClickWritableTheme() {
+				var $this = $(this);
+				if ($this.hasClass('closed')) return;	// el tema está cerrado
+				$this.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
+				if ($this.hasClass('fa-check-square-o')) {
+					$this.attr("data-return", $this.attr("data-item"));	
 				} else {
-					$li.removeAttr('data-return');
+					$this.removeAttr('data-return');
 				};
 			};
-			var $listThemes = $("<ul class='themes-list'></ul>");
-			var themes = sortArray(makeArray(themes), "nombre");	// temas ordenados alfabéticamente
-			for (var t=0, len=themes.length; t<len; t++) {
-				var theme = themes[t];
-				var key = theme.__key;
-				$("<li class='theme-item fa fa-square-o'></li>")
-					.attr("data-item", key)
-					.attr("class", theme.activo ? "theme-item fa fa-square-o" : "theme-item closed fa fa-ban")
-					.append("<span class='theme-name'>" + theme.nombre + "</span>")
-					.append("<img class='theme-image' src='" + theme.pathfoto + "'/>")
-					.append("<span class='theme-description'>" + theme.descripcion)
-					.on("click", function() {
-						onClickWritableTheme($(this));
-					})
-					.appendTo($listThemes);
-			};
+			var themes = sortArray(makeArray(wthemes), "nombre");	// temas ordenados alfabéticamente
+			var $listThemes = $("<ul class='themes-list'></ul>")
+				.append(themes.map(function(theme) {
+					var key = theme.__key;
+					return $("<li class='theme-item fa fa-square-o'></li>")
+						.attr("data-item", key)
+						.attr("class", theme.activo ? "theme-item fa fa-square-o" : "theme-item closed fa fa-ban")
+						.append("<span class='theme-name'>" + theme.nombre + "</span>")
+						.append("<img class='theme-image' src='" + theme.pathfoto + "'/>")
+						.append("<span class='theme-description'>" + theme.descripcion)
+						.on("click", onClickWritableTheme);
+				}));
 			// marcar elementos ya seleccionados
 			var selected = CONFIG.themes;
-			if (selected.length) {
+			if (selected && selected.length) {
 				$listThemes.find(".theme-item").each(function() {
-					$li = $(this);
-					if (selected.indexOf($li.attr("data-item")) >= 0) {
-						onClickWritableTheme($li);
+					var $this = $(this);
+					if (selected.indexOf($this.attr("data-item")) >= 0) {
+						$this.trigger('click');
 					};
 				});
 			};
 			new ModalDialog("¿A qué temas enviarás tu mensaje?", $listThemes, ["OK", "Cancelar"], function(button, data) {
 				if (button == "OK") {
-					editorAddThemes(data);
+					var newThemes = {};
+					data.forEach(function(t) {
+						newThemes[t] = wthemes[t];
+					});
+					configureThemes(newThemes, CONFIG);
 				};
 			});
 		});	
 	};
 
-	/* Añadir temas para enviar al mensaje al selector */
-	function editorAddThemes(data) {
-		API.loadWritableThemes(function(writable) {
-			$("#send2theme").find(".count").text(data.length);
-			$list = $("#send2theme ul").empty();	// limpieza de selecciones anteriores
-			data.forEach(function(d) {
-				var theme = writable[d];
-				$list.append($("<li>").text(theme.nombre));
-			});
-		});
-	};
-	/* Añadir destinatarios privados de un mensaje */
-	function editorAddUsers(data) {
-		$list = $("#send2user").find("ul");
-		data.forEach(function(d) {
-			$list.append($("<li>").text("@"+d));
-		});
-		$("#send2theme").css("display","none");
-		$("#send2social").css("display","none");
-	};
 	/* Envía un nuevo mensaje */
 	function send() {
 		CONFIG.message = $("#newmessage").text();
@@ -199,10 +200,10 @@ function Editor(container, api, callback) {
 		console.log(CONFIG);
 		API.update(CONFIG, function (result) {
 			if (result.status == "error") {
-				new ModalDialog("Error a enviar el mensaje", result.info);
+				new ModalDialog("Error al enviar el mensaje", result.info);
 			} else {
 				ModalDialog("Mensaje enviado correctamente", null, ["Aceptar"], function() {
-					THAT.reset();
+					$("#cancel").trigger("click");
 				}, 1000);
 			};
 		});
@@ -210,7 +211,9 @@ function Editor(container, api, callback) {
 	/* Se resetea el editor */
 	function reset() {
 		$("#newmessage").empty();
-		CONFIG = {};
+		configureSendButton("ENVIAR");
+		CONFIG = {command: "send"};
+		MAXCHAR = 280;
 	};
 	/* Inserta una imagen en el mensaje */
 	function insertImage() {

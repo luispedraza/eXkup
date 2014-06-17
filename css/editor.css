@@ -95,7 +95,6 @@
 	top: 170px;
 	font-size: 12px;
 	padding: 10px;
-	/* width: 100%; */
 }
 #destinations:before {
 	content: "Enviar a: "
@@ -107,35 +106,39 @@
 }
 
 .send2 {
-	/* display: block; */
-	/* width: 120px; */
-	/* border: 1px dotted #ccc; */
-	/* border-radius: 2px; */
-	cursor: pointer;
 	padding: 2px;
-	/* position: relative; */
-	/* height: 20px; */
 	margin-left: 110px;
-	/* float: left; */
+	margin-bottom: 5px;
 }
+
+.send2:before {
+	display: inline-block;
+}
+
+#send2theme:before {
+	content: "TEMAS: ";
+}
+#NOsend2theme:before {
+	content: "No se enviará a: "
+}
+
+#NOsend2theme:after {
+	display: inline-block;
+	content: " porque no puedes escribir en ellos."
+}
+
 .send2 ul {
-	/* position: absolute; */
-	/* left: 0; */
-	/* bottom: 10px; */
-	/* display: inline-block; */
 	padding: 0;
-	/* background-color: #eee; */
-	/* max-height: 85px; */
-	/* overflow-y: scroll; */
 	margin: 0;
+	display: inline-block;
 }
 .send2 ul li {
 	list-style: none;
-	/* padding: 2px; */
 	font-size: 12px;
 	white-space: nowrap;
-	/* border-top: 1px dotted #ccc; */
-	margin-top: 4px;
+	/* margin-top: 4px; */
+	overflow: hidden;
+	text-overflow: ellipsis;
 	background-color: #eee;
 	color:  #fff;
 	display: inline-block;
@@ -143,11 +146,7 @@
 	margin-left: 2px;
 	padding: 2px 5px;
 	color: #666;
-}
-
-.send2:hover {
-	border: 1px solid #aaa;
-	background-color: #eee;
+	margin-bottom: -4px;
 }
 
 #counter {
@@ -215,16 +214,16 @@
 }
 
 /* Enviar a redes sociales */
+#send2social:before {
+	content: "REDES: ";
+}
 #send2social input {
 	display: none;
 }
 #send2social label {
 	font-size: 14px;
-	/* margin-left: 5px; */
 	-webkit-filter: grayscale(90%);
-	/* padding: 2px; */
 	border: 1px solid transparent;
-	/* display: block; */
 	margin-top: 5px;
 	cursor: pointer;
 	color: #fff;
@@ -233,7 +232,6 @@
 }
 #send2social input:checked + label {
 	-webkit-filter: grayscale(0%);
-	/* border-color: #666; */
 }
 
 .facebook {
@@ -242,4 +240,8 @@
 }
 .twitter {
 	background-color: #55acee;
+}
+
+#send2user:before {
+	content: "USUARIOS: ";
 }

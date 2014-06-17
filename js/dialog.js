@@ -38,6 +38,7 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 	if (timeout) {
 		setTimeout(function() {
 			removeDialog();
+			if (callback) callback();
 		}, timeout);
 	};
 	// cerrar el modal cuando se hace click fuera de la ventana 

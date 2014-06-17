@@ -287,8 +287,11 @@ function showEditor(config) {
 		var infoMessage = "ESCRIBIENDO UN NUEVO MENSAJE";
 		if (config) {
 			switch (config.command) {
+				case "replyPrivate":
+					infoMessage = "RESPONDIENDO AL MENSAJE PRIVADO:";
+					break;
 				case "reply":
-					infoMessage = "RESPONDIENDO AL " + (config.users ? "MENSAJE:" : "PRIVADO:");
+					infoMessage = "RESPONDIENDO AL MENSAJE:";
 					break;
 				case "forward":
 					infoMessage = "REENVIANDO EL MENSAJE:";

@@ -324,7 +324,7 @@ function EskupApi() {
 		// comando
 		params.c = commands[data.command];
 		// ID de mensaje a reenviar o contestar:
-		if (data.msgID) params.x = data.msgID;
+		if (data.mID) params.x = data.mID;
 		// temas destino
 		if (data.themes) {
 			params.t = data.themes.map(function(d){
