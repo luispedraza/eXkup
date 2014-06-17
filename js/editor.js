@@ -16,7 +16,7 @@ function Editor(container, api, callback) {
 		$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
-		$("#send2theme").on("click", showThemesSelector);	// Destinos de mensaje
+		$("#add-themes").on("click", showThemesSelector);	// Destinos de mensaje
 		reset();
 		if (callback) callback();
 	});

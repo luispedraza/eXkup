@@ -95,28 +95,35 @@
 	top: 170px;
 	font-size: 12px;
 	padding: 10px;
-}
-#destinations:before {
-	content: "Enviar a: "
-;
-	float: left;
-	font-size: 15px;
-	width: 100px;
-	height: 200px;
+	width: 555px;
+	/* background-color: red; */
 }
 
 .send2 {
-	padding: 2px;
-	margin-left: 110px;
 	margin-bottom: 5px;
+	padding-left: 110px;
+	position: relative;
 }
 
 .send2:before {
 	display: inline-block;
+	/* width: 110px; */
+	/* background-color: red; */
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+#add-themes {
+	background-color: #f30;
+	color: #fff;
+	/* padding: 2px; */
+	cursor: pointer;
+	padding: 2px 5px;
+	margin-left: 5px;
 }
 
 #send2theme:before {
-	content: "TEMAS: ";
+	content: "Enviar a TEMAS:";
 }
 #NOsend2theme:before {
 	content: "No se enviará a: "
@@ -125,12 +132,15 @@
 #NOsend2theme:after {
 	display: inline-block;
 	content: " porque no puedes escribir en ellos."
+;
+	margin-left: 5px;
 }
 
 .send2 ul {
 	padding: 0;
 	margin: 0;
 	display: inline-block;
+	line-height: 1em;
 }
 .send2 ul li {
 	list-style: none;
@@ -146,7 +156,9 @@
 	margin-left: 2px;
 	padding: 2px 5px;
 	color: #666;
-	margin-bottom: -4px;
+	/* margin-bottom: -4px; */
+	cursor: default;
+	/* margin-top: 3px; */
 }
 
 #counter {
@@ -187,10 +199,12 @@
 	margin-top: 10px;
 	padding: 7px 5px;
 	text-align: center;
+	font-weight: bold;
 }
 #send {
 	background-color: #f30;
 }
+
 #cancel {
 	background-color: #1e5070;
 }
@@ -215,7 +229,7 @@
 
 /* Enviar a redes sociales */
 #send2social:before {
-	content: "REDES: ";
+	content: "Enviar a REDES:";
 }
 #send2social input {
 	display: none;
@@ -243,5 +257,5 @@
 }
 
 #send2user:before {
-	content: "USUARIOS: ";
+	content: "Enviar a USUARIOS:";
 }
