@@ -3,30 +3,32 @@
 	overflow: hidden;
 	position: relative;
 	background-color: #fff;
-	margin-top: 15px;
+	/* margin-top: 10px; */
 }
 
 #commands {
 	position: absolute;
 	left: 0;
-	top: 20px;
-	width: 100px;
+	top: 25px;
+	width: 130px;
+	/* background-color: #f2f2f2; */
 	padding: 10px;
 }
 
 #toolbar {
 	position: absolute;
 	top: 0;
-	left: 120px;
+	left: 150px;
+	/* padding: 2px; */
 }
 
 #newmessage-container {
 	position: absolute;
-	left: 120px;
-	top: 30px;
+	left: 150px;
+	top: 35px;
 	border: 1px solid #eee;
 	height: 130px;
-	width: 450px;
+	width: 440px;
 }
 #newmessage {
 	outline: none;
@@ -94,17 +96,20 @@
 	font-size: 12px;
 	padding: 10px;
 	width: 555px;
+	/* background-color: red; */
 }
 
 .send2 {
 	margin-bottom: 5px;
-	padding-left: 110px;
+	padding-left: 140px;
 	position: relative;
 	min-height: 20px;
 }
 
 .send2:before {
 	display: inline-block;
+	/* width: 110px; */
+	/* background-color: red; */
 	position: absolute;
 	top: 2px;
 	left: 0;
@@ -134,7 +139,7 @@
 
 #NOsend2theme:after {
 	display: inline-block;
-	content: " porque no puedes escribir en ellos."
+	content: " porque no puedes escribir en estos temas."
 ;
 	margin-left: 5px;
 }
@@ -150,14 +155,19 @@
 	list-style: none;
 	font-size: 12px;
 	white-space: nowrap;
+	/* margin-top: 4px; */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	background-color: #eee;
+	/* color:  #fff; */
 	display: inline-block;
 	max-width: 100px;
 	margin-right: 2px;
 	padding: 2px;
+	/* color: #666; */
+	/* margin-bottom: -4px; */
 	cursor: default;
+	/* margin-top: 3px; */
 	vertical-align: middle;
 	border: 1px solid #ccc;
 	font-size: 11px;
@@ -171,8 +181,8 @@
 	color:#000;
 }
 #counter {
-	font-size: 28px;
-	font-weight: bold;
+	font-size: 24px;
+	font-weight: 600;
 	border: 1px solid #eee;
 	text-align: center;
 	height: 50px;
@@ -208,12 +218,16 @@
 	margin-top: 10px;
 	padding: 7px 5px;
 	text-align: center;
-	font-weight: bold;
+	/* font-weight: bold; */
+	font-size: 14px;
 }
 #send {
 	background-color: #f30;
+	display: block;
 }
-
+#send:before {
+	margin-right: 10px;
+}
 #cancel {
 	background-color: #1e5070;
 }
@@ -222,7 +236,7 @@
 }
 
 #toolbar button {
-	font-size: 16px;
+	font-size: 14px;
 	width: 30px;
 	height: 30px;
 	background-color: #fff;
@@ -230,10 +244,11 @@
 	color: #000;
 	cursor: pointer;
 	border: none;
-	transition: background-color .2s ease;
+	transition: all .2s ease;
 }
 #toolbar button:hover {
-	background-color: #ddd;
+	background-color: #000;
+	color: #fff;
 }
 
 /* Enviar a redes sociales */
@@ -246,11 +261,15 @@
 #send2social label {
 	font-size: 12px;
 	-webkit-filter: grayscale(90%);
+	/* border: 1px solid transparent; */
+	/* margin-top: 5px; */
 	cursor: pointer;
 	color: #fff;
 	padding: 2px 5px;
 	width: 70px;
 	font-weight: bold;
+	/* vertical-align: middle; */
+	/* display: inline-block; */
 	border-radius: 3px;
 }
 #send2social input:checked + label {

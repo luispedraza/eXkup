@@ -7,7 +7,7 @@ body {
 	width:600px;
 	overflow-x:hidden;
 	overflow-y:hidden;
-	font-family: 'Quattrocento Sans', sans-serif;
+	font-family: 'Open Sans', sans-serif;
 	font-size: 14px;
 	margin: 0px;
 }
@@ -17,7 +17,7 @@ body {
 }
 
 .fa {
-	font-family: 'Quattrocento Sans', sans-serif;
+	font-family: 'Open Sans', sans-serif;
 }
 .fa:before {
 	font-family: 'fontawesome';
@@ -688,11 +688,12 @@ form.search .button {
 }
 /* el mensaje que se está contestanddo */
 #replying-message {
-	background-color: #f8f8f8;
-	border-bottom: 1px dotted #666;
+	/* background-color: #f8f8f8; */
+	border-bottom: 1px dotted #ccc;
+	border-top: 1px dotted #ccc;
 	max-height: 200px;
 	overflow-y: scroll;
-	padding: 5px 20px;
+	padding: 0 20px;
 }
 #edit-section h1 {
 	background-color: #666;
@@ -707,20 +708,28 @@ form.search .button {
 	width: 140px;
 	pointer-events:auto;
 }
-
+#edit-section.on h1 {
+	visibility: hidden;
+	display: none;
+}
 
 #edit-section .edit-description {
     display: none;
+    font-size: 20px;
+    /* padding: 15px 0; */
 }
 
 #edit-section.on {
-	height: 552px;
+	height: 550px;
 	pointer-events:auto;
-	background-color: #fff;
+	background-color: #f8f8f8;
 }
 
 #edit-section.on .edit-description {
-    display: inline;
+    display: block;
+    /* background-color: #666; */
+    padding: 15px 10px;
+    height: 15px;
 }
 #edit-section h1:before {
 	transition: -webkit-transform .25s ease;

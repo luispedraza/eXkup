@@ -83,13 +83,16 @@ function Editor(container, api, callback) {
 		// Temas del mensaje
 		if ((command=="reply") || (command=="forward")) {
 			API.getMessage(config.mID, function(data) {
+				console.log(data);
 				configureThemes(data.perfilesEventos, CONFIG);
 					if (command=="reply") {
 					CONFIG.mID = config.mID;
 					configureSendButton("RESPONDER");
 				} else if (command=="forward") {
-					$("#newmessage").html(data.mensajes[0].contenido);
-					$("#newmessage").html($("#newmessage").text());
+					var msg = data.mensajes[0];
+					var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
+					var $newMsg = $("#newmessage");
+					$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
 					configureSendButton("REENVIAR");
 					count();
 				};
@@ -225,6 +228,7 @@ function Editor(container, api, callback) {
 		configureSendButton("ENVIAR");
 		CONFIG = {command: "send"};
 		MAXCHAR = 280;
+		count();
 	};
 	/* Inserta una imagen en el mensaje */
 	function insertImage() {
