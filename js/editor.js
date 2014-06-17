@@ -11,13 +11,28 @@ function Editor(container, api, callback) {
 		//$("#cancel").on("click", reset);
 		$("#setitalic").on("click", function() { document.execCommand('italic',false,null); });
 		$("#setbold").on("click", function() { document.execCommand('bold',false,null); });
-		$("#newmessage").on("keyup", count);				// Contador de caracteres
+		$("#newmessage").on("keyup", count)					// Contador de caracteres
+			.on("paste", onPaste);							// Interceptar pegadp
 		$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
 		$("#send2theme").on("click", showThemesSelector);	// Destinos de mensaje
+		// Interceptar comando de pegado
+		editor.addEventListener("paste", function(e) {
+			
+		});
 		if (callback) callback();
 	});
+
+	/* Esta función intercepta el comando de pegado para eliminar las etiquetas 
+		//http://stackoverflow.com/questions/12027137/javascript-trick-for-paste-as-plain-text-in-execcommand
+	*/
+	function onPaste(e) {
+		e.preventDefault();
+		var content = e.originalEvent.clipboardData.getData('text/plain');
+		document.execCommand('insertText', false, content);
+		count();
+	};
 	
 	function configureThemes(themes) {
 		if (!themes) return;
