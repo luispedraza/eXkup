@@ -2,7 +2,8 @@
 function Editor(container, api, callback) {
 	var THAT = this;
 	var API = api;		// el objeto de la api que se emplea para enviar mensaje
-	var MAXCHAR;		// máximo de caracteres para el mensaje
+	var MAXCHAR_DEFAULT = 280;
+	var MAXCHAR = MAXCHAR_DEFAULT;		// máximo de caracteres para el mensaje
 	var CONFIG;			// configuración que almacena el editor 
 
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
@@ -17,6 +18,7 @@ function Editor(container, api, callback) {
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
 		$("#add-themes").on("click", showThemesSelector);	// Destinos de mensaje
+		$("#search-user-value").on("keyup", searchUser);		// buscador de usuarios
 		reset();
 		if (callback) callback();
 	});
@@ -29,6 +31,37 @@ function Editor(container, api, callback) {
 		var content = e.originalEvent.clipboardData.getData('text/plain');
 		document.execCommand('insertText', false, content);
 		count();
+	};
+
+	/* Buscador de usuarios para enviar privados */
+	function searchUser(e) {
+		var sel = null;
+		if (e.which == 40) { // keydown
+			sel = 1;
+		} else if (e.which == 38) {	// keyup
+			sel = -1;
+		};
+		if (sel) {
+			e.preventDefault();
+			$list = $("#search-user-results li");
+			var theIndex = Math.max($list.index($("#search-user-results li.on")), 0);
+			$list.each(function(i) {
+				if (i==theIndex) $(this).removeClass("on");
+				else if (i==(theIndex+sel)) $(this).addClass("on").get(0).scrollIntoView();
+			});
+			return;
+		};
+		var value = $("#search-user-value").val();
+		API.findUsers(value, function(users) {
+			if (!users) return;
+			$result = $("#search-user-results").empty()
+				.append(users.answer.map(function(u) {
+					return $("<li>")
+						.append($("<img>").attr("src", checkUserPhoto(u.pathfoto)))
+						.append($("<span>").text("@" + u.nick))
+						.append($("<span>").text(u.nombrebonito));
+				}));
+		});
 	};
 	
 	/* Configurar los tablones destinatarios de un mensaje */
@@ -115,8 +148,8 @@ function Editor(container, api, callback) {
 
 	/* Contador de caracteres del mensaje */
 	function count() {
-		var message = $("#newmessage").text();
-		message = message.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AAAAA");
+		var message = $("#newmessage").text()
+			.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AAAAA");
 		var remaining = MAXCHAR - message.length;
 		var $counter = $("#counter");
 		$counter.text(remaining.toString());
@@ -217,7 +250,7 @@ function Editor(container, api, callback) {
 				new ModalDialog("Error al enviar el mensaje", result.info);
 			} else {
 				ModalDialog("Mensaje enviado correctamente", null, ["Aceptar"], function() {
-					$("#cancel").trigger("click");
+					$("#cancel").trigger("click");	// resetea y oculta el editor
 				}, 1000);
 			};
 		});
@@ -227,7 +260,10 @@ function Editor(container, api, callback) {
 		$("#newmessage").empty();
 		configureSendButton("ENVIAR");
 		CONFIG = {command: "send"};
-		MAXCHAR = 280;
+		MAXCHAR = MAXCHAR_DEFAULT;
+		configureThemes({}, CONFIG);
+		$("#send2fb").prop("checked", false);
+		$("#send2tt").prop("checked", false);
 		count();
 	};
 	/* Inserta una imagen en el mensaje */

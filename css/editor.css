@@ -116,15 +116,14 @@
 }
 #add-themes {
 	cursor: pointer;
-	padding: 3px;
+	padding: 2px;
 	vertical-align: middle;
 	height: 12px;
 	text-align: center;
 	display: inline-block;
 }
 #add-themes:hover {
-	background-color: #000;
-	color: #fff;
+	text-decoration: underline;
 }
 
 #send2theme:before {
@@ -138,44 +137,40 @@
 }
 
 #NOsend2theme:after {
-	display: inline-block;
-	content: " porque no puedes escribir en estos temas."
-;
+	display: inline;
+	content: " porque no puedes escribir en estos temas.";
 	margin-left: 5px;
 }
 
-.send2 ul {
+.send2 ul.linear {
 	padding: 0;
 	margin: 0;
 	display: inline-block;
 	line-height: 1em;
 	vertical-align: middle;
 }
-.send2 ul li {
+.send2 ul.linear li {
 	list-style: none;
 	font-size: 12px;
 	white-space: nowrap;
-	/* margin-top: 4px; */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	background-color: #eee;
-	/* color:  #fff; */
 	display: inline-block;
 	max-width: 100px;
 	margin-right: 2px;
 	padding: 2px;
-	/* color: #666; */
-	/* margin-bottom: -4px; */
 	cursor: default;
-	/* margin-top: 3px; */
 	vertical-align: middle;
 	border: 1px solid #ccc;
 	font-size: 11px;
 	border-radius: 3px;
 }
+
 .send2 .del {
 	margin-right: 2px;
 	cursor: pointer;
+	color: #666;
 }
 .send2 .del:hover {
 	color:#000;
@@ -286,4 +281,47 @@
 
 #send2user:before {
 	content: "Enviar a USUARIOS:";
+}
+
+#search-user {
+	position: relative;
+}
+#search-user-results {
+	position: absolute;
+	left: 0;
+	bottom: 10px;
+	padding: 0;
+	list-style: none;
+	background-color: #fff;
+	width: 130px;
+	border: 1px solid #ccc;
+	max-height: 180px;
+	overflow-y: scroll;
+}
+
+#search-user-results img {
+	width: 25px;
+	float: left;
+	margin-right: 3px;
+	margin-top: 3px;
+}
+
+#search-user-results li {
+	border-top: 1px solid #ccc;
+	clear: both;
+	height: 30px;
+}
+#search-user-results li.on {
+	background-color: #ddd;
+}
+
+#search-user-results span {
+	display: block;
+	float: left;
+	width: 100px;
+	font-size: 10px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	/* background: red; */
 }

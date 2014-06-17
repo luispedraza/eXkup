@@ -68,6 +68,8 @@ function EskupApi() {
 	// 	pag: ""
 	// };
 
+	var SEARCH_USERS = "http://eskup.elpais.com/Scripts/buscaUsuarios.pl";	// buscador de usuarios
+
 	/* Stub de parámetros para una petición de Eskup */
 	function eskupParams(data) {
 		var result = {id: PUBLIC_KEY, f: "json"};
@@ -82,6 +84,13 @@ function EskupApi() {
 			if (response.match(/\{\'/)) response = response.replace(/\'/g, "\"");
 			return JSON.parse(response);	
 		};
+	};
+
+	this.findUsers = function(name, callback) {
+		if (name.length < 3) return null;
+		apiCall("GET", SEARCH_USERS, {q: name}, function(r) {
+			callback(eskupParseResponse(r));
+		});
 	};
 	
 	/* Obtiene el nickname del usuario */
