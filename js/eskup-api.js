@@ -336,11 +336,12 @@ function EskupApi() {
 			params.t = data.users.join("|");
 		};
 		// destinos sociales
-		if (data.social.fb) {
-			if (data.social.tt) params.d = "1|2";
-			else params.d = "2";
-		}
-		else if (data.social.tt) params.d = "1";
+		if (data.social) {
+			params.d = data.social.map(function(s) {
+				if (s=="twitter") return "1";
+				if (s=="facebook") return "2";
+			}).join("|");
+		};
 		// imagen
 		if (data.image) {
 			params.p = data.image;

@@ -189,14 +189,15 @@ function Editor(container, api, callback) {
 	/* Envía un nuevo mensaje */
 	function send() {
 		CONFIG.message = $("#newmessage").text();
-		CONFIG.social = {	fb: $("#send2fb").prop("checked"),
-							tt: $("#send2tt").prop("checked")
-						};
+		// destinos sociales:
+		var social = [];
+		if ($("#send2fb").prop("checked")) social.push("facebook");
+		if ($("#send2tt").prop("checked")) social.push("twitter");
+		if (social.length) CONFIG.social = social;
 		// imagen del mensaje
 		var newimg = $("#newimage.loaded canvas").get(0);
 		if (newimg && newimg.width) 
 			CONFIG.image = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
-
 		console.log(CONFIG);
 		API.update(CONFIG, function (result) {
 			if (result.status == "error") {
