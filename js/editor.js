@@ -33,7 +33,6 @@ function Editor(container, api, callback) {
 	
 	/* Configurar los tablones destinatarios de un mensaje */
 	function configureThemes(themes, config) {
-		console.log(themes);
 		if (!themes) return;
 		API.loadWritableThemes(function(wthemes) {
 			var goodThemes = [], badThemes = [];
@@ -41,11 +40,24 @@ function Editor(container, api, callback) {
 				(t in wthemes) ? goodThemes.push(t) : badThemes.push(t);
 			};
 			$("#send2theme ul").empty().append(goodThemes.map(function(t) {
-				return $("<li>").text(themes[t].nombre);
+				return $("<li>").attr("data-theme", t)
+					.append($("<span>").addClass('del fa fa-times').on("click", function(e) {
+						var thisTheme = $(this).closest("li")
+							.fadeOut(function(){$(this).remove();}).attr("data-theme");
+						config.themes.splice(config.themes.indexOf(thisTheme),1);
+					}))
+					.append($("<span>").text(themes[t].nombre));
 			}));
-			$("#NOsend2theme ul").empty().append(badThemes.map(function(t) {
-				return $("<li>").text(themes[t].nombre);
-			}));
+			if (badThemes.length) {
+				$("#NOsend2theme").show()
+					.find("ul").empty()
+					.append(badThemes.map(function(t) {
+						return $("<li>").text(themes[t].nombre);
+					}));	
+			} else {
+				$("#NOsend2theme").hide();
+			};
+			
 			config.themes = goodThemes;	// temas a los que se enviará el mensaje
 		});
 	};
@@ -63,7 +75,6 @@ function Editor(container, api, callback) {
 	*/
 	this.configure = function(config) {
 		reset();
-		console.log(config);
 		if (config == null) {
 			reset();
 			return;
@@ -72,7 +83,6 @@ function Editor(container, api, callback) {
 		// Temas del mensaje
 		if ((command=="reply") || (command=="forward")) {
 			API.getMessage(config.mID, function(data) {
-				console.log(data);
 				configureThemes(data.perfilesEventos, CONFIG);
 					if (command=="reply") {
 					CONFIG.mID = config.mID;
@@ -87,6 +97,7 @@ function Editor(container, api, callback) {
 			
 		};
 		if (command=="replyPrivate") {
+			CONFIG.mID = config.mID;
 			configureUsers(config.users, CONFIG);// destinatario del privado
 			configureSendButton("RESPONDER");
 		} else {
@@ -198,7 +209,6 @@ function Editor(container, api, callback) {
 		var newimg = $("#newimage.loaded canvas").get(0);
 		if (newimg && newimg.width) 
 			CONFIG.image = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
-		console.log(CONFIG);
 		API.update(CONFIG, function (result) {
 			if (result.status == "error") {
 				new ModalDialog("Error al enviar el mensaje", result.info);

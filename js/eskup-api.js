@@ -315,7 +315,8 @@ function EskupApi() {
 	this.update = function(data, callback) {
 		var commands = {send: "add",
 						forward: "add",
-						reply: "reply",
+						replyPrivate: "add",
+						replyPvt: "add",
 						edit: "edit"};
 		var params = eskupParams();
 		var method = "POST";

@@ -11,7 +11,6 @@
 	left: 0;
 	top: 20px;
 	width: 100px;
-	/* background-color: #f2f2f2; */
 	padding: 10px;
 }
 
@@ -19,7 +18,6 @@
 	position: absolute;
 	top: 0;
 	left: 120px;
-	/* padding: 2px; */
 }
 
 #newmessage-container {
@@ -96,34 +94,39 @@
 	font-size: 12px;
 	padding: 10px;
 	width: 555px;
-	/* background-color: red; */
 }
 
 .send2 {
 	margin-bottom: 5px;
 	padding-left: 110px;
 	position: relative;
+	min-height: 20px;
 }
 
 .send2:before {
 	display: inline-block;
-	/* width: 110px; */
-	/* background-color: red; */
 	position: absolute;
-	top: 0;
+	top: 2px;
 	left: 0;
 }
 #add-themes {
-	background-color: #f30;
-	color: #fff;
-	/* padding: 2px; */
 	cursor: pointer;
-	padding: 2px 5px;
-	margin-left: 5px;
+	padding: 3px;
+	vertical-align: middle;
+	height: 12px;
+	text-align: center;
+	display: inline-block;
+}
+#add-themes:hover {
+	background-color: #000;
+	color: #fff;
 }
 
 #send2theme:before {
 	content: "Enviar a TEMAS:";
+}
+#NOsend2theme {
+	display: none;
 }
 #NOsend2theme:before {
 	content: "No se enviará a: "
@@ -141,26 +144,32 @@
 	margin: 0;
 	display: inline-block;
 	line-height: 1em;
+	vertical-align: middle;
 }
 .send2 ul li {
 	list-style: none;
 	font-size: 12px;
 	white-space: nowrap;
-	/* margin-top: 4px; */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	background-color: #eee;
-	color:  #fff;
 	display: inline-block;
 	max-width: 100px;
-	margin-left: 2px;
-	padding: 2px 5px;
-	color: #666;
-	/* margin-bottom: -4px; */
+	margin-right: 2px;
+	padding: 2px;
 	cursor: default;
-	/* margin-top: 3px; */
+	vertical-align: middle;
+	border: 1px solid #ccc;
+	font-size: 11px;
+	border-radius: 3px;
 }
-
+.send2 .del {
+	margin-right: 2px;
+	cursor: pointer;
+}
+.send2 .del:hover {
+	color:#000;
+}
 #counter {
 	font-size: 28px;
 	font-weight: bold;
@@ -235,14 +244,14 @@
 	display: none;
 }
 #send2social label {
-	font-size: 14px;
+	font-size: 12px;
 	-webkit-filter: grayscale(90%);
-	border: 1px solid transparent;
-	margin-top: 5px;
 	cursor: pointer;
 	color: #fff;
-	padding: 1px;
-	width: 80px;
+	padding: 2px 5px;
+	width: 70px;
+	font-weight: bold;
+	border-radius: 3px;
 }
 #send2social input:checked + label {
 	-webkit-filter: grayscale(0%);
