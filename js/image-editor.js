@@ -10,8 +10,12 @@ fabric.StaticCanvas.prototype.getObjectFromTS = function(ts) {
 		if (this._objects[i].ts == ts) return this._objects[i];
 	}
 }
+var EDITOR = null;
 
 window.onload = function() {
+	EDITOR = new Editor("editor-container");
+
+	
 	canvasEditor = new fabric.Canvas("canvas-editor");
 	canvasEditor.selection = false;		// Desactivada selección de grupo
 	WIDTH = canvasEditor.getWidth();

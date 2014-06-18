@@ -6,6 +6,7 @@
 	<link rel="stylesheet" href="css/editor.css" type="text/css" />
 	<link rel="stylesheet" href="css/image-editor.css" type="text/css" />
 	
+	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="lib/fabric.js"></script>
 	<script type="text/javascript" src="lib/masonry.min.js"></script>
 	<script type="text/javascript" src="lib/caman.3.3.0.full.min.js"></script>
@@ -21,33 +22,7 @@
 <body>
 	<div id="masonry-container"></div>
 
-	<div>
-		<div id="editor">
-			<div id="commands">
-				<div id="counter">280</div>
-				<div class="send" id="send">publicar</div>
-				<div class="cancel" id="cancel">cancelar</div>
-			</div>
-			<div id="toolbar">
-				<img id="setbold" class="button" title="negrita" src="icon/bold.png" />
-				<img id="setitalic" class="button" title="cursiva" src="icon/italic.png" /> 
-				<img id="insertlink" class="button" title="enlazar esta página" src="icon/link.png" />
-				<img id="insertvideo" class="button" title="insertar vídeo" src="icon/video.png" />
-				<img id="insertimage" class="button" title="insertar imagen" src="icon/photo.png" />
-				<img id="cortas" class="button" title="acortar enlaces" src="icon/cortas.png" />
-				<input id="send2fb" type="checkbox" title="facebook"/>
-				<input id="send2tt" type="checkbox" title="twitter"/>
-			</div>
-			<div id="newmessage" contenteditable></div>
-			<div id="newimage">
-				<div id="newimage-control">
-					<div id="insert-cancel" class="button">eliminar</div>
-					<div id="insert-confirm" class="button">insertar</div>
-				</div>
-				<canvas id="canvasimage"></canvas>
-			</div>
-		</div>
-	</div>
+	<div id="editor-container"></div>
 
 	<div id="selector-editor">
 		
@@ -221,7 +196,6 @@
 			<div id="canvas-history"></div>
 
 		</div> <!-- canvas controls -->
-		
 	</div>
 </body>
 </html>

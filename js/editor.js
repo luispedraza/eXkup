@@ -226,6 +226,7 @@ function Editor(container, api, callback) {
 		// Temas del mensaje
 		if ((command=="reply") || (command=="forward")) {
 			API.getMessage(config.mID, function(data) {
+				console.log(data);
 				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
 				if (command=="reply") {
 					CONFIG.mID = config.mID;
@@ -237,6 +238,9 @@ function Editor(container, api, callback) {
 					$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
 					configureSendButton("REENVIAR");
 					count();
+					if (msg.cont_adicional) {
+						configureImage(msg.cont_adicional);
+					};
 				};
 			});
 		};
@@ -327,6 +331,23 @@ function Editor(container, api, callback) {
 		$("#send2tt").prop("checked", false);
 		count();
 	};
+
+	function configureImage(imgURL) {
+		var img = new Image();
+		img.onload = function() {
+			var canvas = document.getElementById("canvasimage");
+		    canvas.width = this.width;
+		    canvas.height = this.height;
+		    // Copiamos la imagen en el canvas
+		    var ctx = canvas.getContext("2d");
+		    ctx.drawImage(this, 0, 0);
+		    $("#newimage").addClass('loaded');
+		    $("#removeimage").off().on("click", function() {
+		    	$("#newimage").removeClass('loaded');
+		    });
+		};
+		img.src = imgURL;
+	};
 	/* Inserta una imagen en el mensaje */
 	function insertImage() {
 		chrome.tabs.executeScript({ file: "js/getimages.js", allFrames: true }, function(result) {
@@ -336,20 +357,7 @@ function Editor(container, api, callback) {
 				["Insertar", "Cancelar", "Abrir el Editor"], 
 				function(r, data) {
 					if (r=="Insertar") {
-						var img = new Image();
-						img.onload = function() {
-							var canvas = document.getElementById("canvasimage");
-						    canvas.width = this.width;
-						    canvas.height = this.height;
-						    // Copiamos la imagen en el canvas
-						    var ctx = canvas.getContext("2d");
-						    ctx.drawImage(this, 0, 0);
-						    $("#newimage").addClass('loaded');
-						    $("#removeimage").off().on("click", function() {
-						    	$("#newimage").removeClass('loaded');
-						    });
-						};
-						img.src = data[0];
+						configureImage(data[0]);	// agrega la imagen al editor
 					} else if (r == "Abrir el Editor") {
 						// lanzar el editor de imágenes
 						chrome.tabs.create({url:"image_editor.html"});
