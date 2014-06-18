@@ -360,22 +360,23 @@ function EskupApi() {
 		params.c = commands[data.command];
 		// ID de mensaje a reenviar o contestar:
 		if (data.mID) params.x = data.mID;
-		// temas destino
-		if (data.themes) {
-			params.t = data.themes.map(function(d){
-				return "*"+d;
-			}).join("|");
-		};
 		// destinatarios de privado
-		if (data.users) {
+		if (data.users && data.users.length) {
 			params.t = data.users.join("|");
-		};
-		// destinos sociales
-		if (data.social) {
-			params.d = data.social.map(function(s) {
-				if (s=="twitter") return "1";
-				if (s=="facebook") return "2";
-			}).join("|");
+		} else {
+			// temas destino
+			if (data.themes && data.themes.length) {
+				params.t = data.themes.map(function(d) {
+					return "*"+d;
+				}).join("|");
+			};
+			// destinos sociales
+			if (data.social) {
+				params.d = data.social.map(function(s) {
+					if (s=="twitter") return "1";
+					if (s=="facebook") return "2";
+				}).join("|");
+			};
 		};
 		// imagen
 		if (data.image) {

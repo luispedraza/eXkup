@@ -27,7 +27,8 @@ function Finder(container, provider, appender) {
 							.attr("data-info", u.nick)
 							.append($("<img>").attr("src", checkUserPhoto(u.pathfoto)))
 							.append($("<span>").addClass("nickname").text("@" + u.nick))
-							.append($("<span>").text(u.nombrebonito));
+							.append($("<span>").text(u.nombrebonito))
+							.on("click", function() {selectItem($(this));});
 						if (i==0) $li.addClass('on');
 						return $li;
 					}));
@@ -41,7 +42,7 @@ function Finder(container, provider, appender) {
 	};
 
 	/* Selección de usuarios de la lista encontrada */
-	function selectValue(e) {
+	function onKeySelector(e) {
 		var move = 0;
 		if (e.which == 40) { // keydown
 			move = 1;
@@ -61,11 +62,7 @@ function Finder(container, provider, appender) {
 			return false;
 		};
 		if (e.which == 13) {	// enter
-			var selected = $found.find("li.on").attr("data-info");
-			if (selected) {
-				appenderFunction([selected]);	// se añade el nuevo usuario
-				$input.val("").trigger("keyup");
-			};
+			selectItem($found.find("li.on"));
 			return false;
 		};
 		if (e.which == 27) {	// escape
@@ -74,10 +71,16 @@ function Finder(container, provider, appender) {
 		};
 		return true;
 	};
+
+	function selectItem($item) {
+		appenderFunction([$item.attr("data-info")]);	// se añade el nuevo resultado
+		$input.val("").trigger("keyup");
+	};
+
 	$input		
 		.on("focus", searchValue)						
 		.on("keyup", searchValue)		// buscar datos en el servidor
-		.on("keydown", selectValue)		// seleccionar de la lista encontrada con cursores
+		.on("keydown", onKeySelector)		// seleccionar de la lista encontrada con cursores
 		.on("blur", function() {
 			$found.fadeOut();		// se ocultan los resultados
 		});
@@ -319,6 +322,7 @@ function Editor(container, api, callback) {
 		CONFIG = {command: "send"};
 		MAXCHAR = MAXCHAR_DEFAULT;
 		configureThemes([]);
+		configureUsers([]);
 		$("#send2fb").prop("checked", false);
 		$("#send2tt").prop("checked", false);
 		count();

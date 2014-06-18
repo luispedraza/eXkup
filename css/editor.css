@@ -327,6 +327,7 @@
 	clear: both;
 	height: 34px;
 	color: #666;
+	cursor: pointer;
 }
 .finder li:last-child {
 	border-bottom: none;
@@ -334,6 +335,9 @@
 .finder li.on {
 	background-color: #f30;
 	color: #fff;
+}
+.finder li:hove {
+	background-color: #ccc;
 }
 .finder li.no-result {
 	padding: 5px;
