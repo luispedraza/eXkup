@@ -20,16 +20,20 @@ function Finder(container, provider, appender) {
 		dataProvider(newValue, function(users) {
 			$found.empty();
 			if (users) {
-				$found.fadeIn()
-					.append(users.answer.map(function(u, i) {
+				$found.fadeIn();
+				if (users.answer.length) {
+					$found.append(users.answer.map(function(u, i) {
 						var $li = $("<li>")
-							.attr("data-user", u.nick)
+							.attr("data-info", u.nick)
 							.append($("<img>").attr("src", checkUserPhoto(u.pathfoto)))
-							.append($("<span>").text("@" + u.nick))
+							.append($("<span>").addClass("nickname").text("@" + u.nick))
 							.append($("<span>").text(u.nombrebonito));
 						if (i==0) $li.addClass('on');
 						return $li;
 					}));
+				} else {
+					$found.append($("<li>").addClass("no-result").text("sin resultados"));
+				};
 			} else {
 				$found.fadeOut();
 			};
@@ -57,7 +61,7 @@ function Finder(container, provider, appender) {
 			return false;
 		};
 		if (e.which == 13) {	// enter
-			var selected = $found.find("li.on").attr("data-user");
+			var selected = $found.find("li.on").attr("data-info");
 			if (selected) {
 				appenderFunction([selected]);	// se añade el nuevo usuario
 				$input.val("").trigger("keyup");
@@ -70,15 +74,14 @@ function Finder(container, provider, appender) {
 		};
 		return true;
 	};
-	$input								
+	$input		
+		.on("focus", searchValue)						
 		.on("keyup", searchValue)		// buscar datos en el servidor
 		.on("keydown", selectValue)		// seleccionar de la lista encontrada con cursores
 		.on("blur", function() {
 			$found.fadeOut();		// se ocultan los resultados
 		});
 };
-
-
 
 /* Clase para gestionar el editor */
 function Editor(container, api, callback) {
@@ -88,6 +91,7 @@ function Editor(container, api, callback) {
 	var MAXCHAR = MAXCHAR_DEFAULT;		// máximo de caracteres para el mensaje
 	var CONFIG;			// configuración que almacena el editor
 	var USER_FINDER = null;
+	var THEME_FINDER = null;
 
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
@@ -100,8 +104,8 @@ function Editor(container, api, callback) {
 		$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
-		$("#add-themes").on("click", showThemesSelector);	// Destinos de mensaje
-		USER_FINDER = new Finder($("#search-user"), API.findUsers, configureUsers);	// buscador de usuarios
+		USER_FINDER = new Finder($("#search-user"), API.findUsers, addUsers);				// buscador de usuarios
+		THEME_FINDER = new Finder($("#search-theme"), API.findWritableThemes, addThemes);	// buscador de temas
 		reset();
 		if (callback) callback();
 	});
@@ -115,44 +119,94 @@ function Editor(container, api, callback) {
 		document.execCommand('insertText', false, content);
 		count();
 	};
+
+	/* Agrega temas destino
+		@param themes: array de nicknames
+	*/
+	function addThemes(themes) {
+		if (CONFIG.themes) themes = CONFIG.themes.concat(themes);
+		configureThemes(themes);
+	};
+	/* Elimina temas destino
+		@param themes: array de nicknames
+	*/
+	function removeThemes(themes) {
+		if (!CONFIG.themes) return;
+		var current = CONFIG.themes.slice(0);	// copia de la configuración actual
+		themes.forEach(function(t) {
+			var position = current.indexOf(t);
+			if (position>=0) current.splice(position,1);
+		});
+		configureThemes(current);
+	};
 	
-	/* Configurar los tablones destinatarios de un mensaje */
-	function configureThemes(themes) {
+	/* Configurar los tablones destinatarios de un mensaje 
+		@param themes: array de identificadores de temas para añadir
+		@param themesInfo: opcional, información sobre los temas que se añaden
+	*/
+	function configureThemes(themes, themesInfo) {
 		if (!themes) return;
 		API.loadWritableThemes(function(wthemes) {
+			if (typeof themesInfo==="undefined") themesInfo = wthemes;
 			var goodThemes = [], badThemes = [];
-			for (t in themes) {
+			themes.forEach(function(t) {
 				(t in wthemes) ? goodThemes.push(t) : badThemes.push(t);
-			};
-			$("#send2theme ul").empty().append(goodThemes.map(function(t) {
+			});
+			$("#send2theme ul.linear").empty().append(goodThemes.map(function(t) {
 				return $("<li>").attr("data-theme", t)
 					.append($("<span>").addClass('del fa fa-times').on("click", function(e) {
-						var thisTheme = $(this).closest("li")
-							.fadeOut(function(){$(this).remove();}).attr("data-theme");
-						CONFIG.themes.splice(CONFIG.themes.indexOf(thisTheme),1);
+						var thisTheme = $(this).closest("li").attr("data-theme");
+						removeThemes([thisTheme]);
 					}))
-					.append($("<span>").text(themes[t].nombre));
+					.append($("<span>").text(themesInfo[t].nombre));
 			}));
 			if (badThemes.length) {
 				$("#NOsend2theme").show()
 					.find("ul").empty()
 					.append(badThemes.map(function(t) {
-						return $("<li>").text("\""+themes[t].nombre+"\"");
+						return $("<li>").text("\""+themesInfo[t].nombre+"\"");
 					}));	
 			} else {
 				$("#NOsend2theme").hide();
 			};
-			
 			CONFIG.themes = goodThemes;	// temas a los que se enviará el mensaje
 		});
 	};
 
-	/* Añadir destinatarios privados de un mensaje */
+	/* Agrega destinatarios privados a la configuración
+		@param users: array de nicknames
+	*/
+	function addUsers(users) {
+		if (CONFIG.users) users = CONFIG.users.concat(users);
+		configureUsers(users);
+	};
+	/* Elimina destinatarios privados a la configuración
+		@param users: array de nicknames
+	*/
+	function removeUsers(users) {
+		if (!CONFIG.users) return;
+		var current = CONFIG.users.slice(0);	// copia de la configuración actual
+		users.forEach(function(t) {
+			var position = current.indexOf(t);
+			if (position>=0) current.splice(position,1);
+		});
+		configureUsers(current);
+	};
+
+	/* Actualiza en el editor los destinatarios privados del mensaje
+	*/
 	function configureUsers(users) {
-		if (!CONFIG.users) CONFIG.users = [];
-		CONFIG.users = CONFIG.users.concat(users);
-		$list = $("#send2user ul.linear").empty().append(CONFIG.users.map(function(u) {
-			return $("<li>").text("@"+u);
+		console.log(users);
+		CONFIG.users = users;
+		$list = $("#send2user ul.linear").empty().append(users.map(function(u) {
+			var $li = $("<li>").attr("data-user", u)
+				.append($("<span>").addClass('del fa fa-times')
+					.on("click", function(e) {
+						var thisUser = $(this).closest("li").attr("data-user");
+						removeUsers([thisUser]);
+					}))
+				.append($("<span>").text("@"+u));
+			return $li;
 		}));
 	};
 
@@ -169,9 +223,8 @@ function Editor(container, api, callback) {
 		// Temas del mensaje
 		if ((command=="reply") || (command=="forward")) {
 			API.getMessage(config.mID, function(data) {
-				console.log(data);
-				configureThemes(data.perfilesEventos);
-					if (command=="reply") {
+				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
+				if (command=="reply") {
 					CONFIG.mID = config.mID;
 					configureSendButton("RESPONDER");
 				} else if (command=="forward") {
@@ -183,11 +236,10 @@ function Editor(container, api, callback) {
 					count();
 				};
 			});
-			
 		};
 		if (command=="replyPrivate") {
 			CONFIG.mID = config.mID;
-			configureUsers(config.users);// destinatario del privado
+			configureUsers([config.user]);		// destinatario del privado
 			configureSendButton("RESPONDER");
 		} else {
 			configureSendButton("ENVIAR");
@@ -204,8 +256,7 @@ function Editor(container, api, callback) {
 		var message = $("#newmessage").text()
 			.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AAAAA");
 		var remaining = MAXCHAR - message.length;
-		var $counter = $("#counter");
-		$counter.text(remaining.toString());
+		var $counter = $("#counter").text(remaining.toString());
 		// coloreado del contador:
 		if (remaining <= 10) $counter.attr('class', 'warning2');
 		else if (remaining <= 50) $counter.attr('class', 'warning1');
@@ -239,53 +290,6 @@ function Editor(container, api, callback) {
 		});
 	};
 
-	/* Muestra el selector de temas a que se quiere enviar un mensaje */
-	function showThemesSelector() {
-		API.loadWritableThemes(function(wthemes) {
-			function onClickWritableTheme() {
-				var $this = $(this);
-				if ($this.hasClass('closed')) return;	// el tema está cerrado
-				$this.toggleClass('fa-square-o').toggleClass('fa-check-square-o');
-				if ($this.hasClass('fa-check-square-o')) {
-					$this.attr("data-return", $this.attr("data-item"));	
-				} else {
-					$this.removeAttr('data-return');
-				};
-			};
-			var themes = sortArray(makeArray(wthemes), "nombre");	// temas ordenados alfabéticamente
-			var $listThemes = $("<ul class='themes-list'></ul>")
-				.append(themes.map(function(theme) {
-					var key = theme.__key;
-					return $("<li class='theme-item fa fa-square-o'></li>")
-						.attr("data-item", key)
-						.attr("class", theme.activo ? "theme-item fa fa-square-o" : "theme-item closed fa fa-ban")
-						.append("<span class='theme-name'>" + theme.nombre + "</span>")
-						.append("<img class='theme-image' src='" + theme.pathfoto + "'/>")
-						.append("<span class='theme-description'>" + theme.descripcion)
-						.on("click", onClickWritableTheme);
-				}));
-			// marcar elementos ya seleccionados
-			var selected = CONFIG.themes;
-			if (selected && selected.length) {
-				$listThemes.find(".theme-item").each(function() {
-					var $this = $(this);
-					if (selected.indexOf($this.attr("data-item")) >= 0) {
-						$this.trigger('click');
-					};
-				});
-			};
-			new ModalDialog("¿A qué temas enviarás tu mensaje?", $listThemes, ["OK", "Cancelar"], function(button, data) {
-				if (button == "OK") {
-					var newThemes = {};
-					data.forEach(function(t) {
-						newThemes[t] = wthemes[t];
-					});
-					configureThemes(newThemes);
-				};
-			});
-		});	
-	};
-
 	/* Envía un nuevo mensaje */
 	function send() {
 		CONFIG.message = $("#newmessage").text();
@@ -314,7 +318,7 @@ function Editor(container, api, callback) {
 		configureSendButton("ENVIAR");
 		CONFIG = {command: "send"};
 		MAXCHAR = MAXCHAR_DEFAULT;
-		configureThemes({});
+		configureThemes([]);
 		$("#send2fb").prop("checked", false);
 		$("#send2tt").prop("checked", false);
 		count();

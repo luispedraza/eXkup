@@ -124,7 +124,7 @@
 #send, #cancel {
 	color: white;
 	cursor: pointer;
-	margin-top: 10px;
+	margin-top: 7px;
 	padding: 7px 5px;
 	text-align: center;
 	/* font-weight: bold; */
@@ -197,18 +197,6 @@
 	left: 140px;
 	margin-left: 140px;
 }
-#add-themes {
-	cursor: pointer;
-	padding: 1px 3px;
-	text-align: center;
-	background-color: #000;
-	color: #fff;
-	border-radius: 2px;
-	float: left;
-}
-#add-themes:hover {
-
-}
 
 .send2 ul {
 	padding: 0;
@@ -232,12 +220,12 @@
 	margin-bottom: 2px;
 }
 
-#send2theme .del {
+.send2 .del {
 	margin-right: 2px;
 	cursor: pointer;
 	color: #666;
 }
-#send2theme .del:hover {
+.send2 .del:hover {
 	color:#000;
 }
 
@@ -261,8 +249,8 @@
 /* Enviar a redes sociales */
 #send2social {
 	position: absolute;
-	right: 10px;
-	top: 5px;
+	right: 9px;
+	top: 10px;
 	font-size: 13px;
 }
 #send2social:before {
@@ -293,6 +281,9 @@
 #search-user {
 	display: inline;
 }
+#search-theme {
+	display:inline;
+}
 
 /* El widget de búsquedas */
 .finder {
@@ -300,7 +291,7 @@
 }
 .finder input {
 	outline: none;
-	width: 40px;
+	width: 45px;
 	transition: width .2s ease;
 	border: 1px solid #ddd;
 	border-radius: 2px;
@@ -325,7 +316,7 @@
 }
 
 .finder ul img {
-	width: 25px;
+	height: 25px;
 	float: left;
 	margin: 3px;
 	border: 1px solid #ddd;
@@ -334,7 +325,7 @@
 .finder li {
 	border-bottom: 1px solid #ccc;
 	clear: both;
-	height: 32px;
+	height: 34px;
 	color: #666;
 }
 .finder li:last-child {
@@ -344,11 +335,17 @@
 	background-color: #f30;
 	color: #fff;
 }
+.finder li.no-result {
+	padding: 5px;
+	height: 20px;
+	background-color: #f30;
+	color: #fff;
+}
 
 .finder span {
 	display: block;
 	float: left;
-	width: 100px;
+	width: 92px;
 	font-size: 11px;
 	overflow: hidden;
 	white-space: nowrap;
@@ -356,4 +353,8 @@
 }
 .finder span.nickname {
 	font-weight: bold;
+}
+
+#search-theme.finder span.nickname {
+	display: none;
 }

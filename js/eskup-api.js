@@ -101,11 +101,19 @@ function EskupApi() {
 	this.findWritableThemes = function(name, callback) {
 		var nameRegexp = makeRegexp(name);
 		THAT.loadWritableThemes(function(themes) {
-			var result = {};
-			var expr = RegExp(name, "i");
+			var result = {answer: [], num: 0, query: name};
 			for (k in themes) {
-				if (k.match(nameRegexp)) result[k] = themes[k];
+				var auxText = [k, themes[k].nombre].join(" ");
+				if (auxText.match(nameRegexp)) {
+					result.answer.push({
+						nick: k,
+						nombrebonito: themes[k].nombre,
+						pathfoto: themes[k].pathfoto
+					});
+					result.num++;
+				};
 			};
+			result.answer = sortArray(result.answer, "nombrebonito");	// ordenación
 			callback(result);
 		});
 	};

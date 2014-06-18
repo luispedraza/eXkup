@@ -75,7 +75,7 @@ function onReplyMessageClick() {
 		.attr("id", "replying-message")
 		.html($msg.get(0).outerHTML));
 	if (CURRENT_THEME.id=="3") {	// respuesta a un privado
-		showEditor({command: "replyPrivate", mID: mID, users: [$msg.attr("data-author")]});
+		showEditor({command: "replyPrivate", mID: mID, user: $msg.attr("data-author")});
 	} else {						// respuesta normal
 		showEditor({command: "reply", mID: mID});
 	};
