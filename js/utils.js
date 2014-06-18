@@ -27,6 +27,20 @@ Array.prototype.shuffle = function() {
   	this[p] = t;
  	};
 };
+
+
+/* Construye la expresión regular para búsquedas */
+function makeRegexp(term) {
+	return RegExp(term
+		.replace(/[aáàä]/g, "[aáàä]")
+		.replace(/[eéèë]/g, "[eéèë]")
+		.replace(/[iíìï]/g, "[iíìï]")
+		.replace(/[oóòö]/g, "[oóòö]")
+		.replace(/[uúùü]/g, "[uúùü]")
+		.replace(/[ ,\.:;]+/g, "[ ,\.:;]+")
+		, "i");
+};
+
 /* Construcción de un link que se puede abrir desde la extensión, sin cerrarla 
 	@parama text: texto del enlace
 	@param href: dirección del enlace

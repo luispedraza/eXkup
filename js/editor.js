@@ -1,10 +1,93 @@
+
+/* Clase especial para reealizar búsquedas con selector 
+	@param container: contenedor del widget
+	@param provider: proveedor de datos
+	@param appender: función para agregar resultados al pulsar enter
+*/
+function Finder(container, provider, appender) {
+	var $container = container,
+		$input = $container.find("input"),	// valor de búsquedda
+		$found = $container.find("ul");		// resultados de búsqueda
+	var dataProvider = provider;
+	var appenderFunction = appender;
+
+	/* Buscador de usuarios para enviar privados */
+	function searchValue(e) {
+		var newValue = $input.val();
+		var oldValue = $input.attr("data-value");
+		if (newValue==oldValue) return;
+		$input.attr("data-value", newValue);
+		dataProvider(newValue, function(users) {
+			$found.empty();
+			if (users) {
+				$found.fadeIn()
+					.append(users.answer.map(function(u, i) {
+						var $li = $("<li>")
+							.attr("data-user", u.nick)
+							.append($("<img>").attr("src", checkUserPhoto(u.pathfoto)))
+							.append($("<span>").text("@" + u.nick))
+							.append($("<span>").text(u.nombrebonito));
+						if (i==0) $li.addClass('on');
+						return $li;
+					}));
+			} else {
+				$found.fadeOut();
+			};
+		});
+	};
+
+	/* Selección de usuarios de la lista encontrada */
+	function selectValue(e) {
+		var move = 0;
+		if (e.which == 40) { // keydown
+			move = 1;
+		} else if (e.which == 38) {	// keyup
+			move = -1;
+		};
+		if (move != 0) {
+			e.preventDefault();
+			$list = $found.find("li");
+			var theIndex = $list.index($found.find("li.on"));
+			var newIndex = theIndex+move;
+			if ((newIndex<0)||(newIndex==$list.length)) return false;
+			$list.each(function(i) {
+				if (i==theIndex) $(this).removeClass("on");
+				else if (i==newIndex) $(this).addClass("on").get(0).scrollIntoView(false);
+			});
+			return false;
+		};
+		if (e.which == 13) {	// enter
+			var selected = $found.find("li.on").attr("data-user");
+			if (selected) {
+				appenderFunction([selected]);	// se añade el nuevo usuario
+				$input.val("").trigger("keyup");
+			};
+			return false;
+		};
+		if (e.which == 27) {	// escape
+			$input.val("").trigger("keyup").blur();
+			return false;
+		};
+		return true;
+	};
+	$input								
+		.on("keyup", searchValue)		// buscar datos en el servidor
+		.on("keydown", selectValue)		// seleccionar de la lista encontrada con cursores
+		.on("blur", function() {
+			$found.fadeOut();		// se ocultan los resultados
+		});
+};
+
+
+
 /* Clase para gestionar el editor */
 function Editor(container, api, callback) {
 	var THAT = this;
 	var API = api;		// el objeto de la api que se emplea para enviar mensaje
 	var MAXCHAR_DEFAULT = 280;
 	var MAXCHAR = MAXCHAR_DEFAULT;		// máximo de caracteres para el mensaje
-	var CONFIG;			// configuración que almacena el editor 
+	var CONFIG;			// configuración que almacena el editor
+	var USER_FINDER = null;
 
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
@@ -18,7 +101,7 @@ function Editor(container, api, callback) {
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
 		$("#add-themes").on("click", showThemesSelector);	// Destinos de mensaje
-		$("#search-user-value").on("keyup", searchUser);		// buscador de usuarios
+		USER_FINDER = new Finder($("#search-user"), API.findUsers, configureUsers);	// buscador de usuarios
 		reset();
 		if (callback) callback();
 	});
@@ -32,40 +115,9 @@ function Editor(container, api, callback) {
 		document.execCommand('insertText', false, content);
 		count();
 	};
-
-	/* Buscador de usuarios para enviar privados */
-	function searchUser(e) {
-		var sel = null;
-		if (e.which == 40) { // keydown
-			sel = 1;
-		} else if (e.which == 38) {	// keyup
-			sel = -1;
-		};
-		if (sel) {
-			e.preventDefault();
-			$list = $("#search-user-results li");
-			var theIndex = Math.max($list.index($("#search-user-results li.on")), 0);
-			$list.each(function(i) {
-				if (i==theIndex) $(this).removeClass("on");
-				else if (i==(theIndex+sel)) $(this).addClass("on").get(0).scrollIntoView();
-			});
-			return;
-		};
-		var value = $("#search-user-value").val();
-		API.findUsers(value, function(users) {
-			if (!users) return;
-			$result = $("#search-user-results").empty()
-				.append(users.answer.map(function(u) {
-					return $("<li>")
-						.append($("<img>").attr("src", checkUserPhoto(u.pathfoto)))
-						.append($("<span>").text("@" + u.nick))
-						.append($("<span>").text(u.nombrebonito));
-				}));
-		});
-	};
 	
 	/* Configurar los tablones destinatarios de un mensaje */
-	function configureThemes(themes, config) {
+	function configureThemes(themes) {
 		if (!themes) return;
 		API.loadWritableThemes(function(wthemes) {
 			var goodThemes = [], badThemes = [];
@@ -77,7 +129,7 @@ function Editor(container, api, callback) {
 					.append($("<span>").addClass('del fa fa-times').on("click", function(e) {
 						var thisTheme = $(this).closest("li")
 							.fadeOut(function(){$(this).remove();}).attr("data-theme");
-						config.themes.splice(config.themes.indexOf(thisTheme),1);
+						CONFIG.themes.splice(CONFIG.themes.indexOf(thisTheme),1);
 					}))
 					.append($("<span>").text(themes[t].nombre));
 			}));
@@ -85,22 +137,23 @@ function Editor(container, api, callback) {
 				$("#NOsend2theme").show()
 					.find("ul").empty()
 					.append(badThemes.map(function(t) {
-						return $("<li>").text(themes[t].nombre);
+						return $("<li>").text("\""+themes[t].nombre+"\"");
 					}));	
 			} else {
 				$("#NOsend2theme").hide();
 			};
 			
-			config.themes = goodThemes;	// temas a los que se enviará el mensaje
+			CONFIG.themes = goodThemes;	// temas a los que se enviará el mensaje
 		});
 	};
 
 	/* Añadir destinatarios privados de un mensaje */
-	function configureUsers(users, config) {
-		$list = $("#send2user ul").empty().append(users.map(function(u) {
+	function configureUsers(users) {
+		if (!CONFIG.users) CONFIG.users = [];
+		CONFIG.users = CONFIG.users.concat(users);
+		$list = $("#send2user ul.linear").empty().append(CONFIG.users.map(function(u) {
 			return $("<li>").text("@"+u);
 		}));
-		config.users = users;
 	};
 
 	/* Configuración del editor.
@@ -117,7 +170,7 @@ function Editor(container, api, callback) {
 		if ((command=="reply") || (command=="forward")) {
 			API.getMessage(config.mID, function(data) {
 				console.log(data);
-				configureThemes(data.perfilesEventos, CONFIG);
+				configureThemes(data.perfilesEventos);
 					if (command=="reply") {
 					CONFIG.mID = config.mID;
 					configureSendButton("RESPONDER");
@@ -134,7 +187,7 @@ function Editor(container, api, callback) {
 		};
 		if (command=="replyPrivate") {
 			CONFIG.mID = config.mID;
-			configureUsers(config.users, CONFIG);// destinatario del privado
+			configureUsers(config.users);// destinatario del privado
 			configureSendButton("RESPONDER");
 		} else {
 			configureSendButton("ENVIAR");
@@ -227,7 +280,7 @@ function Editor(container, api, callback) {
 					data.forEach(function(t) {
 						newThemes[t] = wthemes[t];
 					});
-					configureThemes(newThemes, CONFIG);
+					configureThemes(newThemes);
 				};
 			});
 		});	
@@ -261,7 +314,7 @@ function Editor(container, api, callback) {
 		configureSendButton("ENVIAR");
 		CONFIG = {command: "send"};
 		MAXCHAR = MAXCHAR_DEFAULT;
-		configureThemes({}, CONFIG);
+		configureThemes({});
 		$("#send2fb").prop("checked", false);
 		$("#send2tt").prop("checked", false);
 		count();

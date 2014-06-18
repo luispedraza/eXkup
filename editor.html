@@ -13,6 +13,14 @@
 		<!-- <button id="cortas" class="button fa fa-cut" title="acortar enlaces"></button> -->
 
 	</div>
+
+	<div id="send2social">
+		<input id="send2fb" name="send2fb" type="checkbox"/>
+		<label for="send2fb" class="facebook fa fa-facebook"></label>
+		<input id="send2tt" name="send2tt" type="checkbox"/>
+		<label for="send2tt" class="twitter fa fa-twitter"></label>
+	</div>
+
 	<div id="newmessage-container">
 		<div id="newimage" class="fa fa-paperclip">
 			<canvas id="canvasimage"></canvas>
@@ -21,19 +29,30 @@
 		<div id="newmessage" contenteditable="true"></div>
 	</div>
 	<div id="destinations">
-		<div id="send2theme" class="send2"><ul class="linear"></ul><span id="add-themes">editar...</span></div>
-		<div id="NOsend2theme" class="send2"><ul class="linear"></ul></div>
-		<div id="send2social" class="send2">
-			<input id="send2fb" name="send2fb" type="checkbox"/>
-			<label for="send2fb" class="facebook fa fa-facebook-square"> Facebook</label>
-			<input id="send2tt" name="send2tt" type="checkbox"/>
-			<label for="send2tt" class="twitter fa fa-twitter-square"> Twitter</label>
+		<div id="send2theme" class="send2">
+			<h2>TEMAS <i class="fa fa-chevron-right"></i></h2>
+			<div>
+				<ul class="linear"></ul>
+				<span id="add-themes">editar...</span>
+			</div>
 		</div>
+
+		<div id="NOsend2theme" class="send2">
+			<div>
+				<span class="fa fa-warning"> No se enviará a </span>
+				<ul></ul>
+				<span> porque no puedes escribir en estos temas.</span>
+			</div>
+		</div>
+
 		<div id="send2user" class="send2">
-			<ul></ul>
-			<div id="search-user">
-				<input id="search-user-value" type="text" placeholder="nombre">
-				<ul id="search-user-results"></ul>
+			<h2>USUARIOS <i class="fa fa-chevron-right"></i></h2>
+			<div>
+				<ul class="linear"></ul>
+				<div class="finder" id="search-user">
+					<input type="text" placeholder="nombre">
+					<ul></ul>
+				</div>
 			</div>
 		</div>	<!-- privados -->
 	</div>

@@ -71,19 +71,7 @@ function SearchFunction() {
 		};
 		scrollToCurrentResult();
 	};
-	/* Construye la expresión regular para búsquedas */
-	var buildRegexp = function(searchTerm) {
-		term = searchTerm;
-		termRegexp = RegExp(term
-			.replace(/[aáàä]/g, "[aáàä]")
-			.replace(/[eéèë]/g, "[eéèë]")
-			.replace(/[iíìï]/g, "[iíìï]")
-			.replace(/[oóòö]/g, "[oóòö]")
-			.replace(/[uúùü]/g, "[uúùü]")
-			.replace(/[ ,\.:;]+/g, "[ ,\.:;]+")
-			, "i");
-		return termRegexp;
-	};
+
 	this.search = function(searchTerm) {
 		if ((searchTerm === 1)||(term === searchTerm)) {	// avance en resultados
 			currentResult++;
@@ -104,7 +92,8 @@ function SearchFunction() {
 			};
 		} else {		// nuevo término de búsqueda
 			THAT.clear();
-			buildRegexp(searchTerm);
+			term = searchTerm;
+			termRegexp = makeRegexp(term);
 			var $messages = $board.find(".message");
 			updateSearch($messages);
 		};

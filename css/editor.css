@@ -89,92 +89,6 @@
 	opacity: .2;
 }
 
-#destinations {
-	position: absolute;
-	left: 0;
-	top: 170px;
-	font-size: 12px;
-	padding: 10px;
-	width: 555px;
-	/* background-color: red; */
-}
-
-.send2 {
-	margin-bottom: 5px;
-	padding-left: 140px;
-	position: relative;
-	min-height: 20px;
-}
-
-.send2:before {
-	display: inline-block;
-	/* width: 110px; */
-	/* background-color: red; */
-	position: absolute;
-	top: 2px;
-	left: 0;
-}
-#add-themes {
-	cursor: pointer;
-	padding: 2px;
-	vertical-align: middle;
-	height: 12px;
-	text-align: center;
-	display: inline-block;
-}
-#add-themes:hover {
-	text-decoration: underline;
-}
-
-#send2theme:before {
-	content: "Enviar a TEMAS:";
-}
-#NOsend2theme {
-	display: none;
-}
-#NOsend2theme:before {
-	content: "No se enviará a: "
-}
-
-#NOsend2theme:after {
-	display: inline;
-	content: " porque no puedes escribir en estos temas.";
-	margin-left: 5px;
-}
-
-.send2 ul.linear {
-	padding: 0;
-	margin: 0;
-	display: inline-block;
-	line-height: 1em;
-	vertical-align: middle;
-}
-.send2 ul.linear li {
-	list-style: none;
-	font-size: 12px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	background-color: #eee;
-	display: inline-block;
-	max-width: 100px;
-	margin-right: 2px;
-	padding: 2px;
-	cursor: default;
-	vertical-align: middle;
-	border: 1px solid #ccc;
-	font-size: 11px;
-	border-radius: 3px;
-}
-
-.send2 .del {
-	margin-right: 2px;
-	cursor: pointer;
-	color: #666;
-}
-.send2 .del:hover {
-	color:#000;
-}
 #counter {
 	font-size: 24px;
 	font-weight: 600;
@@ -246,82 +160,200 @@
 	color: #fff;
 }
 
+
+
+
+
+#destinations {
+	position: absolute;
+	left: 0;
+	top: 170px;
+	font-size: 12px;
+	padding: 10px;
+	width: 555px;
+}
+
+.send2 {
+	margin-bottom: 10px;
+	min-height: 20px;
+	clear: both;
+}
+.send2:after {
+	height: 0;
+	/* visibility: hidden; */
+	clear: both;
+	content: " ";
+	display: block;
+}
+.send2 h2 {
+	font-size: 14px;
+	font-weight: lighter;
+	float: left;
+	width: 130px;
+	text-align: right;
+	margin: 0;
+}
+.send2 > div {
+	left: 140px;
+	margin-left: 140px;
+}
+#add-themes {
+	cursor: pointer;
+	padding: 1px 3px;
+	text-align: center;
+	background-color: #000;
+	color: #fff;
+	border-radius: 2px;
+	float: left;
+}
+#add-themes:hover {
+
+}
+
+.send2 ul {
+	padding: 0;
+	margin: 0;
+}
+.send2 ul.linear li {
+	list-style: none;
+	font-size: 12px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	background-color: #eee;
+	float: left;
+	max-width: 100px;
+	margin-right: 2px;
+	padding: 1px 3px;
+	cursor: default;
+	border: 1px solid #ccc;
+	font-size: 11px;
+	border-radius: 2px;
+	margin-bottom: 2px;
+}
+
+#send2theme .del {
+	margin-right: 2px;
+	cursor: pointer;
+	color: #666;
+}
+#send2theme .del:hover {
+	color:#000;
+}
+
+#NOsend2theme {
+	display: none;
+	color: #aaa;
+}
+
+#NOsend2theme ul {
+	display: inline;
+}
+
+#NOsend2theme li {
+	display: inline;
+	font-weight: bold;
+}
+#NOsend2theme li:after {
+	content: ", ";
+}
+
 /* Enviar a redes sociales */
+#send2social {
+	position: absolute;
+	right: 10px;
+	top: 5px;
+	font-size: 13px;
+}
 #send2social:before {
-	content: "Enviar a REDES:";
+	content: "Enviar también a: ";
 }
 #send2social input {
 	display: none;
 }
-#send2social label {
-	font-size: 12px;
-	-webkit-filter: grayscale(90%);
-	/* border: 1px solid transparent; */
-	/* margin-top: 5px; */
+#send2social label {	
+	font-size: 16px;
+	padding: 3px;
 	cursor: pointer;
+	background-color: #ccc;
+	width: 14px;
+	height: 14px;
 	color: #fff;
-	padding: 2px 5px;
-	width: 70px;
-	font-weight: bold;
-	/* vertical-align: middle; */
-	/* display: inline-block; */
-	border-radius: 3px;
+	text-align: center;
+	transition: background-color .2s ease;
 }
-#send2social input:checked + label {
-	-webkit-filter: grayscale(0%);
-}
-
-.facebook {
+#send2social input:checked + .facebook {
 	background-color: #3B5999;
 
 }
-.twitter {
+#send2social input:checked + .twitter {
 	background-color: #55acee;
 }
 
-#send2user:before {
-	content: "Enviar a USUARIOS:";
+#search-user {
+	display: inline;
 }
 
-#search-user {
+/* El widget de búsquedas */
+.finder {
 	position: relative;
 }
-#search-user-results {
+.finder input {
+	outline: none;
+	width: 40px;
+	transition: width .2s ease;
+	border: 1px solid #ddd;
+	border-radius: 2px;
+	padding: 2px 3px;
+	margin: 0;
+}
+.finder input:focus {
+	width: 130px;
+}
+.finder ul {
 	position: absolute;
-	left: 0;
-	bottom: 10px;
+	right: 0;
+	bottom: 20px;
 	padding: 0;
 	list-style: none;
 	background-color: #fff;
-	width: 130px;
+	width: 136px;
 	border: 1px solid #ccc;
-	max-height: 180px;
+	max-height: 175px;
 	overflow-y: scroll;
+	display: none;
 }
 
-#search-user-results img {
+.finder ul img {
 	width: 25px;
 	float: left;
-	margin-right: 3px;
-	margin-top: 3px;
+	margin: 3px;
+	border: 1px solid #ddd;
 }
 
-#search-user-results li {
-	border-top: 1px solid #ccc;
+.finder li {
+	border-bottom: 1px solid #ccc;
 	clear: both;
-	height: 30px;
+	height: 32px;
+	color: #666;
 }
-#search-user-results li.on {
-	background-color: #ddd;
+.finder li:last-child {
+	border-bottom: none;
+}
+.finder li.on {
+	background-color: #f30;
+	color: #fff;
 }
 
-#search-user-results span {
+.finder span {
 	display: block;
 	float: left;
 	width: 100px;
-	font-size: 10px;
+	font-size: 11px;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	/* background: red; */
+}
+.finder span.nickname {
+	font-weight: bold;
 }

@@ -86,10 +86,27 @@ function EskupApi() {
 		};
 	};
 
+	/* Buscador de usuarios */
 	this.findUsers = function(name, callback) {
-		if (name.length < 3) return null;
+		if (name.length < 3) {
+			callback(null);
+			return;
+		};
 		apiCall("GET", SEARCH_USERS, {q: name}, function(r) {
 			callback(eskupParseResponse(r));
+		});
+	};
+
+	/* Buscador de temas para escribir, por comptibilidad con el findUsers para el editor */
+	this.findWritableThemes = function(name, callback) {
+		var nameRegexp = makeRegexp(name);
+		THAT.loadWritableThemes(function(themes) {
+			var result = {};
+			var expr = RegExp(name, "i");
+			for (k in themes) {
+				if (k.match(nameRegexp)) result[k] = themes[k];
+			};
+			callback(result);
 		});
 	};
 	
