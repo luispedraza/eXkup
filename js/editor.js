@@ -152,8 +152,12 @@ function Editor(container, api, callback) {
 		API.loadWritableThemes(function(wthemes) {
 			if (typeof themesInfo==="undefined") themesInfo = wthemes;
 			var goodThemes = [], badThemes = [];
+			var maxChar = null;
 			themes.forEach(function(t) {
 				(t in wthemes) ? goodThemes.push(t) : badThemes.push(t);
+				var nChar = themesInfo[t].numero_caracteres_mensaje;
+				maxChar = (maxChar===null) ? nChar : Math.min(maxChar, nChar);
+				console.log(themesInfo[t]);
 			});
 			$("#send2theme ul.linear").empty().append(goodThemes.map(function(t) {
 				return $("<li>").attr("data-theme", t)
@@ -173,6 +177,7 @@ function Editor(container, api, callback) {
 				$("#NOsend2theme").hide();
 			};
 			CONFIG.themes = goodThemes;	// temas a los que se enviará el mensaje
+			configureMaxChar(maxChar);
 		});
 	};
 
@@ -199,7 +204,6 @@ function Editor(container, api, callback) {
 	/* Actualiza en el editor los destinatarios privados del mensaje
 	*/
 	function configureUsers(users) {
-		console.log(users);
 		CONFIG.users = users;
 		$list = $("#send2user ul.linear").empty().append(users.map(function(u) {
 			var $li = $("<li>").attr("data-user", u)
@@ -227,12 +231,16 @@ function Editor(container, api, callback) {
 		if ((command=="reply") || (command=="forward")) {
 			API.getMessage(config.mID, function(data) {
 				console.log(data);
+				var msg = data.mensajes[0];
 				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
 				if (command=="reply") {
 					CONFIG.mID = config.mID;
+					// INvestigación del hilo:
+					var hilo = msg.hilo;
+					if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios"))
+						configureMaxChar("comments");
 					configureSendButton("RESPONDER");
 				} else if (command=="forward") {
-					var msg = data.mensajes[0];
 					var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
 					var $newMsg = $("#newmessage");
 					$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
@@ -258,6 +266,12 @@ function Editor(container, api, callback) {
 		$("#send").text(text);
 	};
 
+	function configureMaxChar(n) {
+		if (typeof n === "undefined") MAXCHAR = MAXCHAR_DEFAULT;
+		else if (n === "comments") MAXCHAR = 1120;
+		else MAXCHAR = n;
+		count();
+	};
 	/* Contador de caracteres del mensaje */
 	function count() {
 		var message = $("#newmessage").text()
