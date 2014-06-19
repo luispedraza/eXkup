@@ -518,7 +518,7 @@ form.search .button {
 #board-description .links li.eskup:before {
 	content: " ";
 	background-repeat: no-repeat;
-	background-image: url(/icon/eskup_logo.png);
+	background-image: url(/img/eskup_logo.png);
 	width: 12px;
 	height: 12px;
 	background-size: 15px;
