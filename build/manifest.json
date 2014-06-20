@@ -12,7 +12,7 @@
   "https://*/*"
   ],
   "options_page": "options.html",
-  "background": {"scripts": ["js/eskupbckground.js"]},
+  "background": {"scripts": ["js/___eskupbckground.js"]},
   "icons": { "48": "img/eskupicon48.png",
           "128": "img/eskupicon128.png" },
   "content_security_policy": "script-src 'self' https://example.com; object-src 'self' https://vimeo.com",

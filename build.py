@@ -12,29 +12,52 @@ BUILD_DIR = 'build'
 TOOLS_DIR = 'build-tools'
 TEMP_DIR = 'temp'
 
-JS_TOOL = 'yuicompressor-2.4.8.jar'
-CSS_TOOL = 'yuicompressor-2.4.8.jar'
+TOOLS = {
+	'yui': {
+		'command': 'yuicompressor-2.4.8.jar',
+		'params': ['java', '-jar', '__TOOL__', '-o', '__OUPUT__','__INPUT__']
+	},
+	'closure': {
+		'command': 'closure-compiler.jar',
+		'params': ['java', '-jar', '__TOOL__', '--js_output_file', '__OUPUT__','--js', '__INPUT__']
+	}
+}
 
+JS_TOOL = TOOLS.get('yui')
+CSS_TOOL = TOOLS.get('yui')
+
+# directorios de trabajo:
 SOURCE_PATH = os.path.join('.', SOURCE_DIR)
 TEMP_PATH = os.path.join('.', TEMP_DIR)
 BUILD_PATH = os.path.join('.', BUILD_DIR)
-JS_COMPRESSOR = os.path.join('.',TOOLS_DIR, JS_TOOL)
-CSS_COMPRESSOR = os.path.join('.',TOOLS_DIR, CSS_TOOL)
-
 JS_OUPUT_PATH = os.path.join(BUILD_PATH, 'js')
 CSS_OUPUT_PATH = os.path.join(BUILD_PATH, 'css')
 
 try:
+	# cleaning previous output
 	shutil.rmtree(BUILD_PATH)
 	shutil.rmtree(TEMP_PATH)
-	
 except OSError as e:
 	pass
 
 os.mkdir(BUILD_PATH)		# el directorio de destino
-os.mkdir(TEMP_PATH)		# el directorio temporal
+os.mkdir(TEMP_PATH)			# el directorio temporal
 os.mkdir(JS_OUPUT_PATH)
 os.mkdir(CSS_OUPUT_PATH)
+
+# ejecución de una herramient
+def exec_tool(tool, inpath, outpath):
+	command = os.path.join('.', TOOLS_DIR, tool['command'])	#herramienta
+	params = tool['params'][:]
+	for i,p in enumerate(params):
+		if p=='__TOOL__':
+			params[i] = command
+		if p=='__INPUT__':
+			params[i] = inpath
+		if p=='__OUPUT__':
+			params[i] = outpath
+	print params
+	subprocess.call(params)
 
 for path, directories, files in os.walk(SOURCE_PATH):
 	relpath = os.path.relpath(path, SOURCE_PATH)
@@ -44,54 +67,51 @@ for path, directories, files in os.walk(SOURCE_PATH):
 		os.makedirs(dest_path)
 	# manipulación de los archivos
 	for filename in files:
-		file_path = os.path.join(path, filename)		# ruta del archivo html
+		file_path = os.path.join(path, filename)		# ruta del archivo actual
 		name, ext = os.path.splitext(filename)			# extensión del archivo
 		# archivos html
 		if ext == '.html':
 			print "******* HTML *******"
 			print "archivo: " + filename
-			thefile = open(file_path)
-			parsed_html = BS(thefile)
-			thefile.close()
+			html_file = open(file_path)
+			soup = BS(html_file)
+			html_file.close()
 			# procesamiento del html
-			scripts = parsed_html.findAll("script")
+			scripts = soup.findAll("script")
 			if scripts:
 				source = ""
 				for s in scripts:
-					js_file = os.path.join(path,s.get('src'))
-					source += open(js_file).read() + "\n"	# agregar código
-					s.extract()
-
+					js_path = os.path.join(path, s.get('src'))
+					js_file = open(js_path)
+					source += js_file.read() + "\n"	# agregar código
+					js_file.close()
+					s.extract()	# se elimina la etiqueta de script
+				# se guarda todo el js en un archivo temporal
 				temp_file_name = os.path.join(TEMP_PATH, name+".js")	# js de este html
 				temp_file = open(temp_file_name, 'w+')
 				temp_file.write(source)
 				temp_file.close()
-				subprocess.call(['java', 
-					'-jar',
-					JS_COMPRESSOR,
-					'-o',
-					os.path.join(BUILD_PATH, relpath, 'js', name+'.min.js'),
-					temp_file_name])
+				# se compila el js
+				inpath = temp_file_name
+				outpath = os.path.join(BUILD_PATH, relpath, 'js', name+'.min.js')
+				print "compilando " + inpath + " a " + outpath
+				exec_tool(JS_TOOL, inpath, outpath)
+				# se agrega la nueva etiqueta
 				compiled_script = os.path.join(relpath, 'js', name+'.min.js'),
-				new_script = parsed_html.new_tag('script', type="text/javascript", src=compiled_script)
-				parsed_html.body.insert(len(parsed_html.body.contents), new_script)
-
-			new_html = parsed_html.prettify('utf-8')
+				new_script = soup.new_tag('script', type="text/javascript", src=compiled_script)
+				soup.body.insert(len(soup.body.contents), new_script)
+			# se guarda el nuevo html
 			target_html_path = os.path.join(dest_path, filename)
 			with open(target_html_path, 'w+') as target:
-				target.write(new_html)
+				target.write(soup.prettify('utf-8'))
 				target.close()
-			
 
 		#archivos js
 		elif ext == '.js':
+			if filename[0:3] == "___":
+				shutil.copy2(file_path, dest_path)
+		elif ext == '.css':
 			pass
 		# resto de archivos
 		else:
 			shutil.copy2(file_path, dest_path)
-
-
-
-
-			
-

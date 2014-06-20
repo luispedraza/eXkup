@@ -235,15 +235,18 @@ function TalkVisualizer(data) {
 
 
 /* se obtiene la información de la extensión */
-var test = 0;
-if (test === 0) {
-	new TalkVisualizer(testMedium);
-} else if (test === 1) {
-	new TalkVisualizer(testBig);
+if (typeof SAMPLE_DATA != "undefined") {
+	var test = 1;
+	if (test === 0) {
+		new TalkVisualizer(SAMPLE_DATA._testMedium);
+	} else if (test === 1) {
+		new TalkVisualizer(SAMPLE_DATA._testBig);
+	}
 } else {
 	chrome.runtime.onMessage.addListener (
 		function(request, sender) {
 			console.log(request);
 			new TalkVisualizer(request.info);
-		});
+		});	
 };
+
