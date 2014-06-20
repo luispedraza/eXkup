@@ -15,7 +15,6 @@ var EDITOR = null;
 window.onload = function() {
 	EDITOR = new Editor("editor-container");
 
-	
 	canvasEditor = new fabric.Canvas("canvas-editor");
 	canvasEditor.selection = false;		// Desactivada selección de grupo
 	WIDTH = canvasEditor.getWidth();
