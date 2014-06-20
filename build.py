@@ -59,6 +59,22 @@ def exec_tool(tool, inpath, outpath):
 	print params
 	subprocess.call(params)
 
+def join_contents(path, contents, attr, ouput):
+	source = ""
+	for c in contents:
+		try:
+			c_path = os.path.join(path, c.get(attr))
+			c_file = open(c_path)
+			source += c_file.read() + "\n"	# agregar código
+			c_file.close()
+			c.extract()	# se elimina la etiqueta
+		except IOError as e: # puede haber links remotos (fuentes)
+			pass
+	# se guarda todo el js en un archivo temporal
+	temp_file = open(temp_file_name, 'w+')
+	temp_file.write(source)
+	temp_file.close()
+
 for path, directories, files in os.walk(SOURCE_PATH):
 	relpath = os.path.relpath(path, SOURCE_PATH)
 	dest_path = os.path.join(BUILD_PATH, relpath)
@@ -76,7 +92,7 @@ for path, directories, files in os.walk(SOURCE_PATH):
 			html_file = open(file_path)
 			soup = BS(html_file)
 			html_file.close()
-			# procesamiento del html
+			# procesamiento del scripts
 			scripts = soup.findAll("script")
 			if scripts:
 				source = ""
@@ -100,6 +116,22 @@ for path, directories, files in os.walk(SOURCE_PATH):
 				compiled_script = os.path.join(relpath, 'js', name+'.min.js'),
 				new_script = soup.new_tag('script', type="text/javascript", src=compiled_script)
 				soup.body.insert(len(soup.body.contents), new_script)
+
+			# procesamiento de estilos
+			styles = soup.findAll("link", attrs={'rel':'stylesheet'})
+			if styles:
+				temp_file_name = os.path.join(TEMP_PATH, name+".css")	# js de este html
+				join_contents(path, styles, 'href', temp_file_name)
+				# se compila el css
+				inpath = temp_file_name
+				outpath = os.path.join(BUILD_PATH, relpath, 'css', name+'.css')
+				print "compilando " + inpath + " a " + outpath
+				exec_tool(CSS_TOOL, inpath, outpath)
+				# se agrega la nueva etiqueta
+				compiled_css = os.path.join(relpath, 'css', name+'.css'),
+				new_css = soup.new_tag('link', type="text/css", rel="stylesheet", href=compiled_css)
+				soup.head.insert(len(soup.head.contents), new_css)
+
 			# se guarda el nuevo html
 			target_html_path = os.path.join(dest_path, filename)
 			with open(target_html_path, 'w+') as target:

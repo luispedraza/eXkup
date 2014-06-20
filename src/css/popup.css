@@ -201,12 +201,6 @@ ul.navigator li:hover {
     font-weight: bold;
     margin-top: 5px;
 }
-#user-fullname {
-    /* font-weight: 200; */
-    /* font-size: 14px; */
-    margin-top: 5px;
-    font-weight: bold;
-}
 
 #navigation {
     float:left;

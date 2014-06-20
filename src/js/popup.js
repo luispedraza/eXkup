@@ -916,7 +916,6 @@ function fillHeader() {
 	API.loadProfile(null, function(user) {
 		$("#user-avatar").attr("src", checkUserPhoto(user.pathfoto));
 		$("#user-nickname").text("@" + API.getUserNickname());
-		$("#user-fullname").text(user.nombre + " " + user.apellidos);
 	});
 };
 
