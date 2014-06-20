@@ -7,4 +7,6 @@
 *.DS_Store
 *.swp
 *.out
-./build/*
+build/*
+temp/*
+.idea/*
