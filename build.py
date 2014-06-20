@@ -11,6 +11,7 @@ SOURCE_DIR = 'src'
 BUILD_DIR = 'build'
 TOOLS_DIR = 'build-tools'
 TEMP_DIR = 'temp'
+LIBS_DIR = 'lib'
 
 TOOLS = {
 	'yui': {
@@ -56,12 +57,21 @@ def exec_tool(tool, inpath, outpath):
 			params[i] = inpath
 		if p=='__OUPUT__':
 			params[i] = outpath
-	print params
 	subprocess.call(params)
 
-def join_contents(path, contents, attr, ouput):
+def copy_file(origin, destination):
+	if os.path.isfile(destination):
+		return	# el archivo ya existe
+	head, tail = os.path.split(destination)
+	if not os.path.isdir(head):
+		os.makedirs(head)
+	print "copiando ", origin, " a " , destination
+	shutil.copy2(origin, destination)
+
+def join_contents(path, tags, attr, name):
+	temp_file_name = os.path.join(TEMP_PATH, name)	# ruta de archivo temporal
 	source = ""
-	for c in contents:
+	for c in tags:
 		try:
 			c_path = os.path.join(path, c.get(attr))
 			c_file = open(c_path)
@@ -74,15 +84,14 @@ def join_contents(path, contents, attr, ouput):
 	temp_file = open(temp_file_name, 'w+')
 	temp_file.write(source)
 	temp_file.close()
+	return temp_file_name
 
 for path, directories, files in os.walk(SOURCE_PATH):
 	relpath = os.path.relpath(path, SOURCE_PATH)
 	dest_path = os.path.join(BUILD_PATH, relpath)
-	# creación del directorio de destino
-	if not os.path.exists(dest_path):
-		os.makedirs(dest_path)
 	# manipulación de los archivos
 	for filename in files:
+		dest_file_path = os.path.join(dest_path, filename)
 		file_path = os.path.join(path, filename)		# ruta del archivo actual
 		name, ext = os.path.splitext(filename)			# extensión del archivo
 		# archivos html
@@ -95,38 +104,31 @@ for path, directories, files in os.walk(SOURCE_PATH):
 			# procesamiento del scripts
 			scripts = soup.findAll("script")
 			if scripts:
-				source = ""
-				for s in scripts:
-					js_path = os.path.join(path, s.get('src'))
-					js_file = open(js_path)
-					source += js_file.read() + "\n"	# agregar código
-					js_file.close()
-					s.extract()	# se elimina la etiqueta de script
-				# se guarda todo el js en un archivo temporal
-				temp_file_name = os.path.join(TEMP_PATH, name+".js")	# js de este html
-				temp_file = open(temp_file_name, 'w+')
-				temp_file.write(source)
-				temp_file.close()
-				# se compila el js
-				inpath = temp_file_name
-				outpath = os.path.join(BUILD_PATH, relpath, 'js', name+'.min.js')
-				print "compilando " + inpath + " a " + outpath
-				exec_tool(JS_TOOL, inpath, outpath)
-				# se agrega la nueva etiqueta
-				compiled_script = os.path.join(relpath, 'js', name+'.min.js'),
-				new_script = soup.new_tag('script', type="text/javascript", src=compiled_script)
-				soup.body.insert(len(soup.body.contents), new_script)
+				s1 = [s for s in scripts if s.get("minify") == "no"]
+				s2 = [s for s in scripts if s.get("minify") != "no"]
+				if len(s2) != 0:
+					temp_path = join_contents(path, s2, 'src', name+".js")
+					# se compila el js
+					outpath = os.path.join(BUILD_PATH, relpath, 'js', name+'.min.js')
+					exec_tool(JS_TOOL, temp_path, outpath)
+					# se agrega la nueva etiqueta
+					compiled_script = os.path.join(relpath, 'js', name+'.min.js'),
+					new_script = soup.new_tag('script', type="text/javascript", src=compiled_script)
+					soup.body.insert(len(soup.body.contents), new_script)
+				for s in s1:
+					localpath = s.get("src")
+					origin = os.path.join(path, localpath)
+					destination = os.path.join(dest_path, localpath)
+					copy_file(origin, destination)
+
 
 			# procesamiento de estilos
 			styles = soup.findAll("link", attrs={'rel':'stylesheet'})
 			if styles:
-				temp_file_name = os.path.join(TEMP_PATH, name+".css")	# js de este html
-				join_contents(path, styles, 'href', temp_file_name)
+				temp_path = join_contents(path, styles, 'href', name+".css")
 				# se compila el css
-				inpath = temp_file_name
 				outpath = os.path.join(BUILD_PATH, relpath, 'css', name+'.css')
-				print "compilando " + inpath + " a " + outpath
-				exec_tool(CSS_TOOL, inpath, outpath)
+				exec_tool(CSS_TOOL, temp_path, outpath)
 				# se agrega la nueva etiqueta
 				compiled_css = os.path.join(relpath, 'css', name+'.css'),
 				new_css = soup.new_tag('link', type="text/css", rel="stylesheet", href=compiled_css)
@@ -140,10 +142,11 @@ for path, directories, files in os.walk(SOURCE_PATH):
 
 		#archivos js
 		elif ext == '.js':
-			if filename[0:3] == "___":
-				shutil.copy2(file_path, dest_path)
+			if filename[0:3] == "___":	# js especiales
+				copy_file(file_path, dest_file_path)
 		elif ext == '.css':
 			pass
 		# resto de archivos
 		else:
-			shutil.copy2(file_path, dest_path)
+			copy_file(file_path, dest_file_path)
+			
