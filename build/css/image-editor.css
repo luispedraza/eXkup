@@ -1,0 +1,206 @@
+@import url(http://fonts.googleapis.com/css?family=Pathway+Gothic+One);
+
+body {
+	font-family: 'Pathway Gothic One', sans-serif;
+	font-size: 16px;
+}
+
+#selector-editor {
+	width: 1200px;
+	margin-top: 200px;
+	margin-left: 5px;
+}
+
+#canvas-editor {
+	outline: 5px dotted #015965;
+}
+#canvas-controls{
+	float: right;
+	width: 550px;
+	height: 600px;
+	overflow: hidden;
+	background-color: #1b99dd;
+	color: #fff;
+	padding: 5px;
+	
+}
+#canvas-controls input[type='range'] {
+	-webkit-appearance: none;
+	padding-left:2px; padding-right:2px;
+	-webkit-border-radius: 3px;
+	background-image: -webkit-linear-gradient(top, #000000, #333333, #000000);
+}
+#canvas-controls input[type='file'] {
+	-webkit-appearance: none;
+    overflow: hidden;
+    width: 0;
+    height: 0;
+}
+#canvas-controls input[type='text'] {
+	width: 20px;
+}
+
+#canvas-layers .item {
+	cursor: pointer;
+	padding-bottom: 5px;
+	height: auto;
+	-webkit-transition: all .2s ease;
+	position: relative;
+}
+#canvas-layers .item div {
+	background-color: white;
+	height: 42px;
+	width: 100%;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+#canvas-layers .item.hover {
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	border-bottom: 10px solid red;
+}
+
+#canvas-layers .item img {
+	max-height: 40px;
+	margin: 2px;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+#canvas-history img {
+	margin: 5px;
+}
+#canvas-history img:hover {
+	cursor: pointer;
+	outline: 1px solid red;
+}
+
+#selector-content img {
+	max-width: 150px;
+	max-height: 150px;
+	margin: 5px;
+}
+#selector-items {
+	overflow: scroll;
+	padding: 10px;
+}
+#selector-items .item {
+	margin-bottom: 5px;
+}
+
+#selector-content img:hover {
+	outline: 2px solid #ff3300;
+}
+
+h1 {
+	font-size: 1em;
+	color: white;
+}
+h2 {
+	font-size: .9em;
+	color: white;
+}
+
+#draw-options {
+	-webkit-transition: all .5s ease;
+	overflow: hidden;
+}
+#canvas-text + div {
+	-webkit-transition: all .5s ease;
+	overflow: hidden;
+	height: 0;
+	opacity: 0;
+}
+#canvas-text.on + div {
+	height: auto;
+	opacity: 1;
+}
+
+h1 {
+	cursor: pointer;
+}
+h1.off + div {
+	height: 0;
+	overflow: hidden;
+	border-bottom: 1px solid black;
+	-webkit-transition: height .5s ease;
+}
+
+h1.on + div {
+	height: 300px;
+	overflow: scroll;
+	border-bottom: 1px solid black;
+	padding-bottom: 5px;
+	-webkit-transition: height .5s ease;
+}
+
+#masonry-container {
+	display: none;
+	width: 600px;
+	height: 600px;
+}
+
+.btn {
+	width: 35px;
+	height: 35px;
+	font-size: 1.2em;
+	background-color: #FFB673;
+	color: white;
+}
+.btnon {
+	min-width: 35px;
+	min-height: 35px;
+	font-size: 1.2em;
+	background-color: #FF7A00;
+	color: white;
+}
+#canvas-rect {
+	background-image: url("/icon/square.png");
+	background-repeat:  no-repeat;
+}
+#canvas-circle {
+	background-image: url("/icon/circle.png");
+	background-repeat:  no-repeat;
+}
+#canvas-triangle {
+	background-image: url("/icon/triangle.png");
+	background-repeat:  no-repeat;
+}
+#clips-loader {
+	display: none;
+}
+
+/* Opciones de filtrado */
+#filters_custom label {
+	display: inline-block;
+	width: 65px;
+}
+#filters_custom input[type=text] {
+	display: none;
+}
+#filters_custom input[type=range] {
+	width: 200px;
+}
+#filters_custom {
+	width: 300px;
+	border-radius: 5px;
+	border: 1px solid #fff;
+	padding: 5px;
+	float: left;
+}
+#filters_preset {
+	width: 200px;
+	float: right;
+}
+#filters_preset {
+	border: 1px solid #fff;
+	border-radius: 5px;
+	padding: 5px;
+}
+#filters_preset input[type=button] {
+	width: 70px;
+	height: 50px;
+}
+

@@ -1,0 +1,60 @@
+/*********************/
+/* Elementos del SVG */
+/*********************/
+
+svg {
+  position: absolute;
+  /* left: 200px; */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+}
+
+.node circle {
+  fill: #f30;
+  stroke: #fff;
+  stroke-width: .1px;
+  cursor: pointer;
+}
+
+.node {
+  font: 10px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #999;
+  stroke-width: .2px;
+}
+
+/******************/
+/* Elementos HTML */
+/******************/
+
+.message {
+  position: absolute;
+  background-color: #fff;
+  width: 400px;
+}
+
+#chart-control {
+  width: 200px;
+  margin: 0;
+  float: left;
+}
+#users-list {
+  padding: 2px;
+  max-height: 500px;
+  overflow-y: scroll;
+
+}
+#users-list li {
+  list-style: none;
+  cursor: pointer;
+}
+#users-list li:hover {
+  background-color: #000;
+  color: #fff;
+}

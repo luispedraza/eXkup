@@ -1,0 +1,134 @@
+/* toolbar del  hilo */
+.tree-toolbar {
+	position: fixed;
+	z-index: 80;
+	width: 450px;
+	/* padding: 5px; */
+	display: none;
+	background-color: rgba(255, 51, 0, .85);
+	height: 34px;
+	bottom: 0;
+}
+#tree-board.switch .tree-toolbar {
+	display: block;
+}
+.tree-toolbar .btn {
+	padding: 5px;
+	cursor: pointer;
+	font-size: 12px;
+	border: 1px solid transparent;
+	color: #fff;
+}
+.tree-toolbar .btn.on {
+	border-top-color: rgba(0,0,0,.3);
+	border-left-color: rgba(0,0,0,.3);
+	border-bottom-color: rgba(255,255,255,.4);
+	border-right-color: rgba(255,255,255,.4);	
+}
+.tree-toolbar .btn:hover {
+	background-color: #f30;
+}
+.tree-toolbar .controls {
+	/* float: right; */
+	/* width: 487px; */
+	padding: 5px;
+}
+
+#closetree {
+	float: right;
+	padding: 10px;
+	display: none;
+}
+#show-d3 {
+	/* float: right; */
+}
+
+/* Arbol de mensajes de un hilo */
+#tree {
+	padding: 5px;
+	display: table;
+}
+.node .node {
+	border-left: 1px solid #bbb;
+	padding-left: 8px;
+	-webkit-transition: padding-left .5s linear;
+	   -moz-transition: padding-left .5s linear;
+	    -ms-transition: padding-left .5s linear;
+	     -o-transition: padding-left .5s linear;
+	        transition: padding-left .5s linear;
+}
+.no-indent .node .node {
+	padding-left: 0;
+	border-color: transparent;
+}
+
+.node:last-child {
+	border: none;
+}
+
+.item {
+	position: relative;
+	padding-top: 10px;
+}
+.item:before {
+	border-bottom: 1px solid #bbb;
+	content: " ";
+	position: absolute;
+	top: 0;
+	left: -8px;
+	width: 8px;
+	height: 40px;
+}
+.node:last-child > .item:before {
+	border-left: 1px solid #bbb;
+}
+
+.no-indent .item:before {
+	display: none;
+}
+
+.node .message {
+	margin: 0;
+	width: 380px;
+}
+
+.children {
+	overflow: hidden; 
+	padding-left: 10px;
+	height: 14px;
+	-webkit-transition: padding-left .5s linear;
+	   -moz-transition: padding-left .5s linear;
+	    -ms-transition: padding-left .5s linear;
+	     -o-transition: padding-left .5s linear;
+	        transition: padding-left .5s linear;
+}
+.children.on {
+	height: auto;
+}
+
+.no-indent .children {
+	padding-left: 0;
+}
+
+.more {
+	cursor: pointer;
+	content: " ";
+	margin-left: -5px;
+	display: block;
+	overflow: hidden;
+	height: 15px;
+	-webkit-transition: height .5s linear;
+	   -moz-transition: height .5s linear;
+	    -ms-transition: height .5s linear;
+	     -o-transition: height .5s linear;
+	        transition: height .5s linear;
+}
+
+.more.on {
+	background-color: white;
+	background-image: url('/icon/less.png');
+	border-left: 1px dotted black;
+}
+.no-indent .more {
+    height: 0;
+}
