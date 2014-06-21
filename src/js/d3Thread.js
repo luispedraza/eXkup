@@ -145,22 +145,20 @@ function TalkVisualizer(data) {
 				// CLICK event ofr nodes:
 				.on("click", clickOnNode)
 				.on("mouseenter", function(d, e) {
-					currentMessage = document.createElement("div");
-					currentMessage.id = "current-message";
-					$("body").append(currentMessage);
-					appendMsg(d, currentMessage)
-						.css("left", d3.event.offsetX+"px").css("top", d3.event.offsetY);
+					$thisMsg = $("<div>").attr("id", "current-message")
+						.append(createMessage(d).css("left", d3.event.offsetX+"px").css("top", d3.event.offsetY))
+						.appendTo('body');
 					// Función de zoom local
-					chart.selectAll(".node circle")
-						.transition().duration(duration)
-						.attr("r", function(near) {
-							var dx = Math.abs(near.x-d.x);
-							var dy = Math.abs(near.y-d.y);
-							if ((dx<5) && (dy<5)) {
-								return 10 - (8/25) * (dx*dx+dy*dy);
-							};
-							return 2;
-						});
+					// chart.selectAll(".node circle")
+					// 	.transition().duration(duration)
+					// 	.attr("r", function(near) {
+					// 		var dx = Math.abs(near.x-d.x);
+					// 		var dy = Math.abs(near.y-d.y);
+					// 		if ((dx<5) && (dy<5)) {
+					// 			return 10 - (8/25) * (dx*dx+dy*dy);
+					// 		};
+					// 		return 2;
+					// 	});
 
 				})
 				.on("mouseleave", function() {
@@ -236,7 +234,7 @@ function TalkVisualizer(data) {
 
 /* se obtiene la información de la extensión */
 if (typeof SAMPLE_DATA != "undefined") {
-	var test = 1;
+	var test = 0;
 	if (test === 0) {
 		new TalkVisualizer(SAMPLE_DATA._testMedium);
 	} else if (test === 1) {
