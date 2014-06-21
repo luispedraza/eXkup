@@ -286,7 +286,7 @@ function initImageEditor() {
 			if (tabs[i].url.match(/https?:/)) {
 				chrome.tabs.executeScript(
 				tabs[i].id,
-				{file: 'js/getimages.js', allFrames: false},
+				{file: 'exe/getimages.js', allFrames: false},
 				onImages);
 			};
 			

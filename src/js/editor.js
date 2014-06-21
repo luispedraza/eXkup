@@ -364,7 +364,7 @@ function Editor(container, api, callback) {
 	};
 	/* Inserta una imagen en el mensaje */
 	function insertImage() {
-		chrome.tabs.executeScript({ file: "js/getimages.js", allFrames: true }, function(result) {
+		chrome.tabs.executeScript({ file: "exe/getimages.js", allFrames: true }, function(result) {
 			var $selector = $("<div>").addClass('images-selector');
 			var dlg = new ModalDialog("Selecciona la imagen que quieras insertar", 
 				$selector,

@@ -41,7 +41,7 @@ function getCurrentURLs(callback) {
 };
 
 function insertVideo() {
-	chrome.tabs.executeScript({file: 'js/getvideos.js', allFrames: true}, 
+	chrome.tabs.executeScript({file: 'exe/getvideos.js', allFrames: true}, 
 		onVideos);
 };
 

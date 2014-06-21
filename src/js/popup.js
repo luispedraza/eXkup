@@ -243,7 +243,7 @@ window.addEventListener("load", function() {
 		});
 
 		// Inicialización de contenidos
-		chrome.tabs.executeScript({ file: "js/elpais.js" }, function(result) {
+		chrome.tabs.executeScript({ file: "exe/elpais.js" }, function(result) {
 			if (result && (result = result[0])) {
 				switch (result.type) {
 					case "thread":

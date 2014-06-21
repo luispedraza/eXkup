@@ -11,7 +11,6 @@ SOURCE_DIR = 'src'
 BUILD_DIR = 'build'
 TOOLS_DIR = 'build-tools'
 TEMP_DIR = 'temp'
-LIBS_DIR = 'lib'
 
 TOOLS = {
 	'yui': {
@@ -31,23 +30,25 @@ CSS_TOOL = TOOLS.get('yui')
 SOURCE_PATH = os.path.join('.', SOURCE_DIR)
 TEMP_PATH = os.path.join('.', TEMP_DIR)
 BUILD_PATH = os.path.join('.', BUILD_DIR)
-JS_OUPUT_PATH = os.path.join(BUILD_PATH, 'js')
-CSS_OUPUT_PATH = os.path.join(BUILD_PATH, 'css')
 
-try:
-	# cleaning previous output
+try: 	# limpiar resultado anterior
 	shutil.rmtree(BUILD_PATH)
+except OSError as e:
+	pass
+try:	# cleaning previous output
 	shutil.rmtree(TEMP_PATH)
 except OSError as e:
 	pass
 
 os.mkdir(BUILD_PATH)		# el directorio de destino
 os.mkdir(TEMP_PATH)			# el directorio temporal
-os.mkdir(JS_OUPUT_PATH)
-os.mkdir(CSS_OUPUT_PATH)
 
 # ejecución de una herramient
 def exec_tool(tool, inpath, outpath):
+	print "compilando " + inpath + " a " + outpath
+	head, tail = os.path.split(outpath)
+	if not os.path.isdir(head):
+		os.makedirs(head)
 	command = os.path.join('.', TOOLS_DIR, tool['command'])	#herramienta
 	params = tool['params'][:]
 	for i,p in enumerate(params):
@@ -104,8 +105,9 @@ for path, directories, files in os.walk(SOURCE_PATH):
 			# procesamiento del scripts
 			scripts = soup.findAll("script")
 			if scripts:
-				s1 = [s for s in scripts if s.get("minify") == "no"]
-				s2 = [s for s in scripts if s.get("minify") != "no"]
+				s1 = [s for s in scripts if s.get("build") == "no"]
+				s2 = [s for s in scripts if s.get("build") == None]
+				s3 = [s for s in scripts if s.get("build") == "remove"]
 				if len(s2) != 0:
 					temp_path = join_contents(path, s2, 'src', name+".js")
 					# se compila el js
@@ -120,7 +122,8 @@ for path, directories, files in os.walk(SOURCE_PATH):
 					origin = os.path.join(path, localpath)
 					destination = os.path.join(dest_path, localpath)
 					copy_file(origin, destination)
-
+				for s in s3:
+					s.extract()
 
 			# procesamiento de estilos
 			styles = soup.findAll("link", attrs={'rel':'stylesheet'})
@@ -137,13 +140,15 @@ for path, directories, files in os.walk(SOURCE_PATH):
 			# se guarda el nuevo html
 			target_html_path = os.path.join(dest_path, filename)
 			with open(target_html_path, 'w+') as target:
-				target.write(soup.prettify('utf-8'))
+				# target.write(soup.prettify('utf-8'))
+				target.write(str(soup))
 				target.close()
 
 		#archivos js
 		elif ext == '.js':
-			if filename[0:3] == "___":	# js especiales
-				copy_file(file_path, dest_file_path)
+			if relpath == "exe":	# js especiales
+				exec_tool(JS_TOOL, file_path, dest_file_path)
+				# copy_file(file_path, dest_file_path)
 		elif ext == '.css':
 			pass
 		# resto de archivos
