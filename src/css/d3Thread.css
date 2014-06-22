@@ -1,3 +1,6 @@
+body {
+  width: auto;
+}
 /*********************/
 /* Elementos del SVG */
 /*********************/
@@ -33,16 +36,43 @@ svg {
 /* Elementos HTML */
 /******************/
 
-.message {
+#chart-ouput {
+  width: 300px;
+  margin: 0;
+  background-color: rgba(50,50,50,.5);
+  overflow-y: scroll;
+  max-height: 100%;
+  position: fixed;
+  top: 0;
+  left: 150px;
+  bottom: 0;
+  font-size: 12px;
+}
+
+#current-message .message {
   position: absolute;
   background-color: #fff;
   width: 400px;
 }
 
 #chart-control {
-  width: 200px;
+  width: 150px;
   margin: 0;
   float: left;
+  font-size: 12px;
+  padding: 10px;
+}
+#chart-control h1 {
+  color: #fff;
+  background-color: #f30;
+}
+#chart-control h2 {
+  text-transform: uppercase;
+  font-weight: 200;
+  font-size: 14px;
+}
+#chart-control ul {
+  color: #666;
 }
 #users-list {
   padding: 2px;
@@ -57,4 +87,13 @@ svg {
 #users-list li:hover {
   background-color: #000;
   color: #fff;
+}
+
+#chart-control .list {
+  max-height: 150px;
+  overflow-y:scroll;
+}
+
+#chart-control img {
+  max-width: 100px;
 }

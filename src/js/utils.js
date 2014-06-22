@@ -208,4 +208,9 @@ function sortArray(array, field) {
 	});
 };
 
+/* Función que determina si un objecto es de tipo Array */
+function isArray(object) {
+	return object instanceof Array;
+};
+
 

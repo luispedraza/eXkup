@@ -86,7 +86,8 @@ function Finder(container, provider, appender) {
 		});
 };
 
-/* Clase para gestionar el editor */
+/* Clase para gestionar el editor 
+*/
 function Editor(container, api, callback) {
 	var THAT = this;
 	var API = api;		// el objeto de la api que se emplea para enviar mensaje
