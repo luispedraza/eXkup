@@ -79,8 +79,8 @@ svg {
   background-color: cyan;
   min-height: 20px;
   table-layout: fixed;
-  padding-top: 20px;
-  margin-top: 20px;
+  /* padding-top: 4px; */
+  margin-top: -11px;
 }
 #chart-ouput .message {
   margin: 0;

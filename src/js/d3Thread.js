@@ -37,7 +37,7 @@ function populateMessages(tree) {
 		var width = $element.width();
 		var span = width/nChildren;
 		var sum = 0;
-		var m = Math.min(nChildren, 6);		// número de elementos que sufren transformación
+		var m = Math.min(nChildren, 10);		// número de elementos que sufren transformación
 		var virtualSpan = width/m;			// span virtual, considerando solo elementos transformables
 		var xScale = virtualSpan/span;
 		$children.each(function(i) {
@@ -413,7 +413,7 @@ function TalkVisualizer(data) {
 
 
 /* se obtiene la información de la extensión */
-var TEST = 2;
+var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
 		new TalkVisualizer(SAMPLE_DATA._testTiny);
