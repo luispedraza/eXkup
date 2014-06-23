@@ -14,6 +14,60 @@ function onShowEditor() {
 };
 
 function populateMessages(tree) {
+	function expandElement($e) {
+		$e.addClass("current")
+			.add($e.parents(".msg-container")).addClass("on").css("width", "100%").siblings().css( "width", "0" );
+	};
+	function collapseElement($e) {
+		$e.add($e.find(".msg-container.on")).each(function() {
+			var $this = $(this);
+			var width = (100 / ($this.siblings().length + 1)) + "px";
+			$this.removeClass('on current').css("width", width).siblings().css( "width", width);
+		});
+	};
+	function accordion($element, event) {
+		event.stopPropagation();
+		var $children = $element.children();
+		var nChildren = $children.length;
+		if (nChildren == 1) return;	// sólo hay un hijo, no tiene sentido lupa
+		if($children.filter(".on").length) return;	// hay un mensaje hijo mostrado 
+
+		var offset = $element.offset();
+		var x = event.pageX - offset.left;	// origen de coordenadas de la función coseno: (cos(theta)+1)/2
+		var width = $element.width();
+		var span = width/nChildren;
+		var sum = 0;
+		var m = Math.min(nChildren, 6);		// número de elementos que sufren transformación
+		var virtualSpan = width/m;			// span virtual, considerando solo elementos transformables
+		var xScale = virtualSpan/span;
+		$children.each(function(i) {
+			var xPos = ((i*span+span/2)-x) * xScale;
+			if (Math.abs(xPos)<=(width/2)) {
+				var xTheta = xPos*(2*Math.PI/width);
+				sum += (Math.cos(xTheta)+1)/2;
+			};
+		});
+		// var k = width/sum;
+		var k = 100/sum;
+		$children.each(function(i) {
+			var xPos = ((i*span+span/2)-x) * xScale;
+			if (Math.abs(xPos)<=(width/2)) {
+				var xTheta = xPos*(2*Math.PI/width);
+				$(this).css("width", (k*(Math.cos(xTheta)+1)/2) + "%");
+			} else {
+				$(this).css("width", "0px");
+			};
+		});
+		return false;
+	};
+	function accordionReset($element) {
+		var $children = $element.children();
+		if($children.filter(".on").length) return;	// hay un mensaje hijo mostrado 
+		var width = (100/$children.length) +  "%";
+		$children.each(function() {
+			$(this).css("width", width);
+		});
+	};
 	function appendMessage(msg, $container) {
 		var $msg = createMessage(msg);
 		$msg.data = msg;
@@ -23,20 +77,20 @@ function populateMessages(tree) {
 			var $this = $(this);
 			if ($this.hasClass('on')) {
 				var width = (100 / ($this.siblings().length + 1)) + "px";
-				$(this).removeClass('on').css("width", width).siblings().css( "width", width);
+				collapseElement($(this));
 			} else {
-				$(this).addClass("on").css("width", "100%").siblings().css( "width", "0" );
+				expandElement($(this));
 			};
 		});
 		$msgContainer.append($msg);
 		if (msg.children) {
 			var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer);
-			$childrenContainer.on("mousemove", function(e) {
-				e.stopPropagation();
-				var offset = $(this).offset();
-				var relX = e.pageX - offset.left;
-				console.log(relX);
-				return false;
+			$childrenContainer
+			.on("mousemove", function(e) {
+				accordion($(this), e);
+			})
+			.on("mouseout", function(e) {
+				accordionReset($(this));
 			});
 			var width = (100/msg.children.length) +  "%";
 			msg.children.forEach(function(m) {
@@ -46,7 +100,7 @@ function populateMessages(tree) {
 		return $msgContainer;
 	};
 	$rootContainer = $("<div>").addClass('children-container').appendTo($("#chart-ouput"));
-	appendMessage(tree, $rootContainer);	// conversación de mensajes
+	appendMessage(tree, $rootContainer).addClass('on').off();		// conversación de mensajes
 };
 
 
@@ -359,7 +413,7 @@ function TalkVisualizer(data) {
 
 
 /* se obtiene la información de la extensión */
-var TEST = 1;
+var TEST = 2;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
 		new TalkVisualizer(SAMPLE_DATA._testTiny);
