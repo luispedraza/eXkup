@@ -53,22 +53,24 @@ svg {
 }
 #chart-ouput .msg-container {
   display: table-cell;
-  height: 0;
+  height: 10px;
   overflow: hidden;
   transition: width .2s linear;
-  position: relative;
+  /* position: relative; */
   cursor: pointer;
   /* table-layout: fixed; */
+  padding: 0;
 }
 #chart-ouput .msg-container:before {
   width: 100%;
   content: " ";
   background-color: #000;
-  position: absolute;
-  left: 0;
-  top: 0;
+  /* position: absolute; */
+  /* left: 0; */
+  /* top: 0; */
   height: 10px;
   border: 1px solid #fff;
+  display: block;
 }
 #chart-ouput .children-container {
   display: table;
@@ -78,22 +80,22 @@ svg {
   table-layout: fixed;
   /* margin-top: -7px; */
   /* padding-top: 20px; */
-  height: 20px;
-  margin-top: 11px;
+  /* height: 10px; */
+  /* margin-top: 11px; */
 }
 #chart-ouput .message {
   margin: 0;
-  /* padding: 0; */
+  padding: 0;
   overflow: hidden;
   /* display: table-cell; */
   width: 0;
-  height: 0;
+  height: 0px;
   opacity: 0;
   border-collapse: collapse;
   transition: opacity .2s linear;
   border: 0;
   box-sizing: border-box;
-  display: none;
+  /* display: none; */
 }
 #chart-ouput .current > .message {
   background-color: #eee;
