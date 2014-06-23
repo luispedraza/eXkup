@@ -18,7 +18,8 @@ function populateMessages(tree) {
 		var $msg = createMessage(msg);
 		$msg.data = msg;
 		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container);
-		$msgContainer.on("click", function() {
+		$msgContainer.on("click", function(e) {
+			e.stopPropagation();
 			var $this = $(this);
 			if ($this.hasClass('on')) {
 				var width = (100 / ($this.siblings().length + 1)) + "px";
@@ -118,7 +119,6 @@ function DataProcessor(data) {
 	};
 	this.populateImages = function() {
 		var theImages = makeArray(THAT.images);
-		console.log("....", theImages)
 		var li = d3.select("#images-list").selectAll("li").data(theImages);
 		li.enter().append("img")
 			.attr("src", function(d){return d.__key})
@@ -176,18 +176,17 @@ function TalkVisualizer(data) {
 	var RADIUS_DEFAULT = 4,
 		RADIUS = RADIUS_DEFAULT;
 	// Manipulación de los datos
-	console.log(data);
-	console.log(JSON.stringify(data));
+	// console.log(data);
+	// console.log(JSON.stringify(data));
 	var PROCESSOR = new DataProcessor(data);
 	PROCESSOR.populateUsers();
 	PROCESSOR.populateImages();
 	var root = PROCESSOR.tree;
 	populateMessages(root);
 	
-	console.log(root);
+	// console.log(root);
 
 	var center = {x: window.innerWidth/2, y: window.innerHeight/2};
-	console.log(center);
 
 	var node_index = 0,
 	    duration = 500;
