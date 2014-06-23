@@ -54,12 +54,10 @@ svg {
 #chart-ouput .msg-container {
   display: table-cell;
   height: 20px;
-  background-color: red;
   overflow: hidden;
   transition: width .2s linear;
   position: relative;
   cursor: pointer;
-  /* transition: width .2s linear; */
 }
 #chart-ouput .msg-container:before {
   width: 100%;
@@ -74,12 +72,9 @@ svg {
 #chart-ouput .children-container {
   display: table;
   width: 100%;
-  /* border: 1px solid black; */
   border-collapse: collapse;
-  background-color: cyan;
   min-height: 20px;
   table-layout: fixed;
-  /* padding-top: 4px; */
   margin-top: -11px;
 }
 #chart-ouput .message {
