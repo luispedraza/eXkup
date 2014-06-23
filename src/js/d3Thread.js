@@ -225,6 +225,14 @@ function d3PolyPath(r, n) {
     return points.join(" ");
 };
 
+function expandToElement(root, callbackCondition) {
+	if (root.children) {
+		root.children.forEach(function() {
+
+		});
+	};
+};
+
 
 // visualización en árbol:
 function TalkVisualizer(data) {
@@ -234,10 +242,9 @@ function TalkVisualizer(data) {
 	// console.log(data);
 	// console.log(JSON.stringify(data));
 	var PROCESSOR = new DataProcessor(data);
-	PROCESSOR.populateUsers();
-	PROCESSOR.populateImages();
+
 	var root = PROCESSOR.tree;
-	populateMessages(root);
+	
 	
 	// console.log(root);
 
@@ -281,7 +288,12 @@ function TalkVisualizer(data) {
 		// .attr("transform", d3Translate([center.x,center.y]))
 		// .append("g");
 	
-	// root.children.forEach(collapse);
+	//root.children.forEach(collapse);
+	// collapse(root);
+
+	PROCESSOR.populateUsers();
+	PROCESSOR.populateImages();
+	populateMessages(root);
 	var nodes, links;
 	var $currentMessage = null;
 	//root.children.forEach(collapse);
@@ -413,23 +425,24 @@ function TalkVisualizer(data) {
 };
 
 
+var VISUALIZER = null;
 /* se obtiene la información de la extensión */
 var TEST = 2;
+
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
-		new TalkVisualizer(SAMPLE_DATA._testTiny);
+		VISUALIZER = new TalkVisualizer(SAMPLE_DATA._testTiny);
 	} else if (TEST === 1) {
-		new TalkVisualizer(SAMPLE_DATA._testSmall);
+		VISUALIZER = new TalkVisualizer(SAMPLE_DATA._testSmall);
 	} else if (TEST === 2) {
-		new TalkVisualizer(SAMPLE_DATA._testMedium);
+		VISUALIZER = new TalkVisualizer(SAMPLE_DATA._testMedium);
 	} else if (TEST === 3) {
-		new TalkVisualizer(SAMPLE_DATA._testBig);
+		VISUALIZER = new TalkVisualizer(SAMPLE_DATA._testBig);
 	};
 } else {
 	chrome.runtime.onMessage.addListener (
 		function(request, sender) {
-			console.log(request);
-			new TalkVisualizer(request.info);
+			VISUALIZER = new TalkVisualizer(request.info);
 		});	
 };
 
