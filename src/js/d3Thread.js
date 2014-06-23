@@ -58,7 +58,7 @@ function populateMessages(tree) {
 				$(this).css("width", "0px");
 			};
 		});
-		return false;
+		// return false;
 	};
 	function accordionReset($element) {
 		var $children = $element.children();
@@ -90,7 +90,7 @@ function populateMessages(tree) {
 				accordion($(this), e);
 			})
 			.on("mouseout", function(e) {
-				accordionReset($(this));
+				// accordionReset($(this));
 			});
 			var width = (100/msg.children.length) +  "%";
 			msg.children.forEach(function(m) {
