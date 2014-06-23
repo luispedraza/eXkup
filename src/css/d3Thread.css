@@ -37,7 +37,7 @@ svg {
 /******************/
 
 #chart-ouput {
-  width: 300px;
+  width: 400px;
   margin: 0;
   background-color: rgba(50,50,50,.5);
   overflow-y: scroll;
@@ -47,6 +47,39 @@ svg {
   left: 150px;
   bottom: 0;
   font-size: 12px;
+  display: table;
+  border-collapse: collapse;
+  -webkit-box-sizing: border-box; 
+}
+#chart-ouput .msg-container {
+  display: table-cell;
+  height: 20px;
+  background-color: red;
+  outline: 1px solid blue;
+  overflow: hidden;
+  transition: width .2s linear;
+}
+#chart-ouput .children-container {
+  display: table;
+  width: 100%;
+  /* border: 1px solid black; */
+  border-collapse: collapse;
+  background-color: cyan;
+  min-height: 20px;
+  table-layout: fixed;
+  padding-top: 20px;
+  margin-top: 20px;
+}
+#chart-ouput .message {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  /* display: table-cell; */
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border-collapse: collapse;
+  transition: opacity .2s linear;
 }
 
 #current-message .message {

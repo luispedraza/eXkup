@@ -13,6 +13,43 @@ function onShowEditor() {
 	new ModalDialog("Nuevo mensaje", $container, ["Cancelar"]);
 };
 
+function populateMessages(tree) {
+	function appendMessage(msg, $container) {
+		var $msg = createMessage(msg);
+		$msg.data = msg;
+		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container);
+		$msgContainer.on("click", function() {
+			var $this = $(this);
+			if ($this.hasClass('on')) {
+				var width = (100 / ($this.siblings().length + 1)) + "px";
+				$(this).removeClass('on').css("width", width).siblings().css( "width", width);
+			} else {
+				$(this).addClass("on").css("width", "100%").siblings().css( "width", "0" );
+			};
+		});
+		$msgContainer.append($msg);
+		if (msg.children) {
+			var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer);
+			$childrenContainer.on("mousemove", function(e) {
+				e.stopPropagation();
+				var offset = $(this).offset();
+				var relX = e.pageX - offset.left;
+				console.log(relX);
+				return false;
+			});
+			var width = (100/msg.children.length) +  "%";
+			msg.children.forEach(function(m) {
+				appendMessage(m, $childrenContainer).css("width", width);
+			});
+		};
+		return $msgContainer;
+	};
+	$rootContainer = $("<div>").addClass('children-container').appendTo($("#chart-ouput"));
+	appendMessage(tree, $rootContainer);	// conversación de mensajes
+};
+
+
+
 function DataProcessor(data) {
 	var THAT = this;
 	var infoTree;
@@ -136,14 +173,17 @@ function d3PolyPath(r, n) {
 
 // visualización en árbol:
 function TalkVisualizer(data) {
-	var RADIUS_DEFAULT = 3,
+	var RADIUS_DEFAULT = 4,
 		RADIUS = RADIUS_DEFAULT;
 	// Manipulación de los datos
 	console.log(data);
+	console.log(JSON.stringify(data));
 	var PROCESSOR = new DataProcessor(data);
 	PROCESSOR.populateUsers();
 	PROCESSOR.populateImages();
 	var root = PROCESSOR.tree;
+	populateMessages(root);
+	
 	console.log(root);
 
 	var center = {x: window.innerWidth/2, y: window.innerHeight/2};
@@ -250,9 +290,9 @@ function TalkVisualizer(data) {
 				})
 				.on("mouseleave", function() {
 					$("#current-message").remove();
-					chart.selectAll(".node circle")
-						.transition().duration(duration)
-						.attr("r", 2);
+					// chart.selectAll(".node circle")
+					// 	.transition().duration(duration)
+					// 	.attr("r", RADIUS);
 				});
 			nodeEnter.append("circle")
 				.attr("r", RADIUS);
@@ -320,13 +360,17 @@ function TalkVisualizer(data) {
 
 
 /* se obtiene la información de la extensión */
- var TEST = 0;
+var TEST = 0;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
-		new TalkVisualizer(SAMPLE_DATA._testMedium);
+		new TalkVisualizer(SAMPLE_DATA._testTiny);
 	} else if (TEST === 1) {
+		new TalkVisualizer(SAMPLE_DATA._testSmall);
+	} else if (TEST === 2) {
+		new TalkVisualizer(SAMPLE_DATA._testMedium);
+	} else if (TEST === 3) {
 		new TalkVisualizer(SAMPLE_DATA._testBig);
-	}
+	};
 } else {
 	chrome.runtime.onMessage.addListener (
 		function(request, sender) {
