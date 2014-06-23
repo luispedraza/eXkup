@@ -51,6 +51,10 @@ svg {
   border-collapse: collapse;
   -webkit-box-sizing: border-box;
 }
+#chart-ouput:hover {
+  width: 1000px;
+  transition: width .2s linear;
+}
 #chart-ouput .msg-container {
   display: table-cell;
   height: 10px;

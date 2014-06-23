@@ -37,7 +37,7 @@ function populateMessages(tree) {
 		var width = $element.width();
 		var span = width/nChildren;
 		var sum = 0;
-		var m = Math.min(nChildren, 10);		// número de elementos que sufren transformación
+		var m = Math.min(nChildren, 30);		// número de elementos que sufren transformación
 		var virtualSpan = width/m;			// span virtual, considerando solo elementos transformables
 		var xScale = virtualSpan/span;
 		$children.each(function(i) {
@@ -58,11 +58,11 @@ function populateMessages(tree) {
 				$(this).css("width", "0px");
 			};
 		});
-		// return false;
+		return false;
 	};
 	function accordionReset($element) {
 		var $children = $element.children();
-		if($children.filter(".on").length) return;	// hay un mensaje hijo mostrado 
+		if($children.filter(".on").length) return;	// hay un mensaje hijo mostrado
 		var width = (100/$children.length) +  "%";
 		$children.each(function() {
 			$(this).css("width", width);
@@ -99,7 +99,8 @@ function populateMessages(tree) {
 		};
 		return $msgContainer;
 	};
-	$rootContainer = $("<div>").addClass('children-container').appendTo($("#chart-ouput"));
+	$mainContainer = $("#chart-ouput"); // .on("mouseout", function());
+	$rootContainer = $("<div>").addClass('children-container').appendTo($mainContainer);
 	appendMessage(tree, $rootContainer).addClass('on').off();		// conversación de mensajes
 };
 
@@ -413,7 +414,7 @@ function TalkVisualizer(data) {
 
 
 /* se obtiene la información de la extensión */
-var TEST = 1;
+var TEST = 2;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
 		new TalkVisualizer(SAMPLE_DATA._testTiny);
