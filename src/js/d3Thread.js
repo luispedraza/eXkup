@@ -360,7 +360,7 @@ function TalkVisualizer(data) {
 
 
 /* se obtiene la información de la extensión */
-var TEST = 0;
+var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
 		new TalkVisualizer(SAMPLE_DATA._testTiny);
