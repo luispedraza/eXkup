@@ -81,18 +81,23 @@ function populateMessages(tree) {
 		});
 		$msgContainer.append($msg);
 		if (msg.children) {
-			var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer);
-			$childrenContainer
-			.on("mousemove", accordion)
-			.on("mouseleave", accordionReset);
-			var width = (100/msg.children.length) +  "%";
-			msg.children.forEach(function(m) {
-				appendMessage(m, $childrenContainer);//.css("width", width);
+			var children = msg.children.filter(function(c) {
+				return c.needed;
 			});
+			if (children.length) {
+				var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer);
+				$childrenContainer
+				.on("mousemove", accordion)
+				.on("mouseleave", accordionReset);
+				var width = (100/msg.children.length) +  "%";
+				children.forEach(function(m) {
+					appendMessage(m, $childrenContainer);//.css("width", width);
+				});
+			};
 		};
 		return $msgContainer;
 	};
-	$mainContainer = $("#chart-ouput");
+	$mainContainer = $("#chart-ouput").empty();
 	$rootContainer = $("<div>").addClass('children-container').appendTo($mainContainer);
 	appendMessage(tree, $rootContainer).addClass('on').off();		// conversación de mensajes
 };
@@ -114,19 +119,22 @@ function DataProcessor(data, hide) {
 		var messages = info.mensajes;
 		var index = {};		// variable auxiliar para encontrar rápido los mensajes
 		var rootMsg = messages[0];
+		rootMsg.filtered = true;	// el raíz nunca eas filtrado
+		rootMsg.needed = true;		// es necesario mostrar este mensaje siempre
 		index[rootMsg.idMsg] = rootMsg;
 		var replies = messages.slice(1);
+		rootMsg.referencesCounter = replies.length;
 		replies.forEach(function(m) {
 			var parentID = m.idMsgRespuesta;
 			var parentObj = index[parentID];
 			m.parent = parentObj;	// el padre de este mensaje
-			if (hide) {
-				var hidden = (parentObj._hidden || (parentObj._hidden = []));
-				hidden.push(m);
-			} else {
-				var children = (parentObj.children || (parentObj.children = []));
-				children.push(m);
-			};
+			var children = (parentObj.children || (parentObj.children = []));
+			children.push(m);
+
+			m.filtered = !hide;
+			m.needed = !hide;			// necesidad de mostrar el elemento
+			m.referencesCounter = 0;	// contador de referencias a este objeto
+
 			index[m.idMsg] = m;
 			messageProcessor(m);
 		});
@@ -154,18 +162,10 @@ function DataProcessor(data, hide) {
 		function addFound(msg) {
 			var parent = msg.parent;
 			if (!parent) return;
+			parent.needed = true;		
+			parent.referencesCounter++; // se incrementa el contador (número de nodos que dependen de él)
 			var pChildren = (parent.children || (parent.children = []));
 			if (pChildren.indexOf(msg)>=0) return;	// ya está agregado
-			// ¿Es un nodo filtrado?
-			var pHidden = parent._hidden;
-			if (pHidden) {
-				var index = pHidden.indexOf(msg);
-				if (index>=0) {
-					parent.children = pChildren.concat(pHidden.splice(index, 1));
-					addFound(parent);
-					return;
-				};
-			};
 			// ¿Es un nodo colapsado?
 			var pCollapsed = parent._children;
 			if (pCollapsed) {
@@ -181,14 +181,16 @@ function DataProcessor(data, hide) {
 			node = THAT.tree;	// el nodo raíz, que nunca se oculta o filtra
 		} else if (filter.user) {
 			if (node.usuarioOrigen == filter.user) {
+				node.filtered = true;
+				node.needed = true;
 				addFound(node);
 			};
 		};
-		if (node._hidden) {
-			// recursión sobre los hijos filtrados
-			var _hidden = node._hidden;
-			for (var i=_hidden.length-1; i>=0; i--) {
-				THAT.filterAdd(filter, _hidden[i]);
+		if (node.children) {
+			// recursión sobre los hijos
+			var children = node.children;
+			for (var i=children.length-1; i>=0; i--) {
+				THAT.filterAdd(filter, children[i]);
 			};
 		};
 		if (node._children) {
@@ -199,43 +201,26 @@ function DataProcessor(data, hide) {
 			};
 		};
 	};
-	/* Eliminación de un filter */
+	/* Eliminación de un filter
+		@return: la necesidad de este nodo
+	*/
 	this.filterRemove = function(filter, node) {
 		function removeFound(msg) {
 			var parent = msg.parent;
 			if (!parent) return;
-			var pHidden = (parent._hidden || (parent._hidden = []));
-			if (pHidden.indexOf(msg)>=0) return;	// ya está oculto
-			// ¿Es un nodo visible?
-			var pChildren = parent.children;
-			if (pChildren) {
-				var index = pChildren.indexOf(msg);
-				if (index>=0) {
-					parent._hidden = pHidden.concat(pChildren.splice(index, 1));
-					removeFound(parent);
-					return;
-				};
-			};
-			// ¿Es un nodo colapsado?
-			var pCollapsed = parent._children;
-			if (pCollapsed) {
-				var index = pCollapsed.indexOf(msg);
-				if (index>=0) {
-					parent._hidden = pHidden.concat(pCollapsed.splice(index, 1));
-					removeFound(parent);
-					return;
-				};
-			};
+			parent.referencesCounter--;
+			if (parent.referencesCounter==0) parent.needed = false;
 		};
 		if (typeof node === "undefined") {
 			node = THAT.tree;	// el nodo raíz, que nunca se oculta o filtra
 		} else if (filter.user) {
 			if (node.usuarioOrigen == filter.user) {
+				node.filtered = false;
 				removeFound(node);
 			};
 		};
 		if (node.children) {
-			// recursión sobre los hijos no filtrados
+			// recursión sobre los hijos
 			var children = node.children;
 			for (var i=children.length-1; i>=0; i--) {
 				THAT.filterRemove(filter, children[i]);
@@ -245,7 +230,7 @@ function DataProcessor(data, hide) {
 			// recursión sobre los hijos ocultos
 			var _children = node._children;
 			for (var i=_children.length-1; i>=0; i--) {
-				THAT.filterAdd(filter, _children[i]);
+				THAT.filterRemove(filter, _children[i]);
 			};
 		};
 	};
@@ -403,7 +388,7 @@ function TalkVisualizer(data) {
 	// collapse(root);
 
 	CONTROLLER.populate();
-	populateMessages(root);
+	
 	var nodes, links;
 	var $currentMessage = null;
 	update();
@@ -472,7 +457,9 @@ function TalkVisualizer(data) {
 					// 	.attr("r", RADIUS);
 				});
 			nodeEnter.append("circle")
-				.attr("r", RADIUS);
+				.attr("r", function(d) {
+					return d.filtered ? RADIUS : 1e-6;
+				});
 			// Node name:
 			// nodeEnter.append("text")
 			// 	.attr("transform", LAYOUT.textTransform)
@@ -484,7 +471,11 @@ function TalkVisualizer(data) {
 			// Transition nodes to their new position.
 			var nodeUpdate = node.transition()
 				.duration(duration)
-				.attr("transform", nodePosition);
+				.attr("transform", nodePosition)
+				.select("circle")
+				.attr("r", function(d) {
+					return d.filtered ? RADIUS : 1e-6;
+				});
 			// nodeUpdate.select("text")
 			// 	.attr("transform", LAYOUT.textTransform)
 			// 	.attr("text-anchor", LAYOUT.textAnchor)
@@ -527,6 +518,7 @@ function TalkVisualizer(data) {
 			updateNodes();
 			updateTreeLinks();
 		};
+		populateMessages(root);	// los mensajes de la barra izquierda
 		nodes = treeLayout.nodes(root); //.reverse()
 		links = treeLayout.links(nodes);
 		updateSVG();
