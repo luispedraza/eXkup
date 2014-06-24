@@ -1,6 +1,14 @@
 var PREPOSICIONES = {a:true,ante:true,bajo:true,cabe:true,con:true,contra:true,de:true,desde:true,durante:true,en:true,entre:true,hacia:true,hasta:true,mediante:true,para:true,por:true,según:true,sin:true,so:true,sobre:true,tras:true,versus:true,vía:true};
 var VISUALIZER = null;
 
+
+function dispatchFilterUser(username, filter) {
+	var e = document.createEvent("CustomEvent");
+	var detail = {'user': username, 'type': filter ? "add" : "remove"};
+	e.initCustomEvent("updateFilter", false, false, detail);
+	document.getElementById("svg").dispatchEvent(e);
+};
+
 function updateButtons() {
 	// Respuestas a mensajes:
 	$("#chart-ouput .btn.reply").off("click").on("click", function() {
@@ -123,7 +131,7 @@ function DataProcessor(data, hide) {
 		rootMsg.needed = true;		// es necesario mostrar este mensaje siempre
 		index[rootMsg.idMsg] = rootMsg;
 		var replies = messages.slice(1);
-		rootMsg.referencesCounter = replies.length;
+		rootMsg.referencesCounter = 0;
 		replies.forEach(function(m) {
 			var parentID = m.idMsgRespuesta;
 			var parentObj = index[parentID];
@@ -162,25 +170,24 @@ function DataProcessor(data, hide) {
 		function addFound(msg) {
 			var parent = msg.parent;
 			if (!parent) return;
-			parent.needed = true;		
+			parent.needed = true;
 			parent.referencesCounter++; // se incrementa el contador (número de nodos que dependen de él)
 			var pChildren = (parent.children || (parent.children = []));
-			if (pChildren.indexOf(msg)>=0) return;	// ya está agregado
+			if (pChildren.indexOf(msg)>=0) return;	// ya es visible
 			// ¿Es un nodo colapsado?
 			var pCollapsed = parent._children;
 			if (pCollapsed) {
 				var index = pCollapsed.indexOf(msg);
 				if (index>=0) {
 					parent.children = pChildren.concat(pCollapsed.splice(index, 1));
-					addFound(parent);
-					return;
 				};
 			};
+			addFound(parent);
 		};
 		if (typeof node === "undefined") {
 			node = THAT.tree;	// el nodo raíz, que nunca se oculta o filtra
 		} else if (filter.user) {
-			if (node.usuarioOrigen == filter.user) {
+			if ((filter.user == "*")||(node.usuarioOrigen == filter.user)) {
 				node.filtered = true;
 				node.needed = true;
 				addFound(node);
@@ -210,11 +217,12 @@ function DataProcessor(data, hide) {
 			if (!parent) return;
 			parent.referencesCounter--;
 			if (parent.referencesCounter==0) parent.needed = false;
+			removeFound(parent);
 		};
 		if (typeof node === "undefined") {
 			node = THAT.tree;	// el nodo raíz, que nunca se oculta o filtra
 		} else if (filter.user) {
-			if (node.usuarioOrigen == filter.user) {
+			if ((filter.user == "*")||(node.usuarioOrigen == filter.user)) {
 				node.filtered = false;
 				removeFound(node);
 			};
@@ -268,12 +276,7 @@ function ConversationController(processor) {
 			.on("click", function(d) {
 				$this = $(this);
 				$this.toggleClass('on');
-				var e = document.createEvent("CustomEvent");
-				var detail = {'user': d.__key,
-					'type': $this.hasClass('on') ? "add" : "remove"
-					};
-				e.initCustomEvent("updateFilter", false, false, detail);
-				document.getElementById("svg").dispatchEvent(e);
+				dispatchFilterUser(d.__key, $this.hasClass('on'));
 				// insertMessage(THAT.users[d.__key].messages);
 			});
 	};
@@ -500,11 +503,15 @@ function TalkVisualizer(data) {
 				.attr("d", function(d) {
 					var o = {x: source.x0, y: source.y0};
 					return diagonal({source: o, target: o});
-				});
+				})
+				.attr("stroke", "#fff");
 			// Transición a nueva posición
 			link.transition()
 				.duration(duration)
-				.attr("d", diagonal);
+				.attr("d", diagonal)
+				.attr("stroke", function(d) {
+					return d.target.needed ? "#999" : "#fff";
+				});
 			// Transition exiting nodes to the parent's new position.
 			link.exit().transition()
 				.duration(duration)
@@ -512,6 +519,7 @@ function TalkVisualizer(data) {
 					var o = {x: source.x, y: source.y};
 					return diagonal({source: o, target: o});
 				})
+				.attr("stroke", "#fff")
 				.remove();
 		};
 		function updateSVG() {
@@ -527,8 +535,6 @@ function TalkVisualizer(data) {
 		
 	};
 };
-
-
 
 /* se obtiene la información de la extensión */
 var TEST = 0;
@@ -556,5 +562,6 @@ $("#check-all-users").on("click", function() {
 	var $this = $(this);
 	$this.toggleClass('on');
 	$("#users-list li").toggleClass('on', $this.hasClass('on'));
+	dispatchFilterUser("*", $this.hasClass('on'))
 });
 
