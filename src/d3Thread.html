@@ -18,19 +18,23 @@
 	<script type="text/javascript" src="js/editor.js"></script>
 	<script type="text/javascript" src="js/popup.js"></script>
 	<script type="text/javascript" src="js/messageControl.js"></script>
+	<script type="text/javascript" src="js/d3Helpers.js"></script>
 	<script build="remove" type="text/javascript" src="js/d3SampleData.js" exclude="1"></script>
 </head>
 <body>
 	<div id="chart-control">
 		<h1 class="fa fa-comments"> CONVERSACIÓN</h1>
-		<h2>Usuarios</h2>
-		<ul id="users-list" class="list"></ul>
-		<h2>Palabras</h2>
-		<ul id="keywords-list" class="list"></ul>
-		<h2>Imágenes</h2>
-		<ul id="images-list" class="list"></ul>
-		<h2>Vídeos</h2>
-		<ul id="videos-list" class="list"></ul>
+		<div>
+			<h2>Usuarios</h2>
+			<div id="check-all-users" class="check">marcar todo</div>
+			<ul id="users-list" class="list"></ul>
+			<h2>Palabras</h2>
+			<ul id="keywords-list" class="list"></ul>
+			<h2>Imágenes</h2>
+			<ul id="images-list" class="list"></ul>
+			<h2>Vídeos</h2>
+			<ul id="videos-list" class="list"></ul>
+		</div>
 	</div>
 	<div id="chart-ouput">
 	</div>
