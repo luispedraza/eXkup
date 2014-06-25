@@ -20,3 +20,13 @@ function d3PolyPath(r, n) {
     } while (alfa < 2*Math.PI);
     return points.join(" ");
 };
+
+function ColorGenerator() {
+    var current = 0;
+    // var generator = d3.scale.category20();
+    // var generator = d3.scale.category20b();
+    var generator = d3.scale.category20c();
+    this.get = function() {
+        return generator(current++);
+    };
+};

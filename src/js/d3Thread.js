@@ -89,19 +89,14 @@ function populateMessages(tree) {
 		});
 		$msgContainer.append($msg);
 		if (msg.children) {
-			var children = msg.children.filter(function(c) {
-				return c.needed;
-			});
-			if (children.length) {
-				var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer);
-				$childrenContainer
+			var children = msg.children;
+			var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer)
 				.on("mousemove", accordion)
 				.on("mouseleave", accordionReset);
-				var width = (100/msg.children.length) +  "%";
-				children.forEach(function(m) {
-					appendMessage(m, $childrenContainer);//.css("width", width);
-				});
-			};
+			var width = (100/msg.children.length) +  "%";
+			children.forEach(function(m) {
+				appendMessage(m, $childrenContainer).addClass(m.filtered ? "filter" : "nofilter");
+			});
 		};
 		return $msgContainer;
 	};
@@ -114,202 +109,141 @@ function populateMessages(tree) {
 	@param data: datos obtenidos de la api para una conversación
 	@ param hidden: inicialmente todas las respuestas están ocultas
 */
-function DataProcessor(data, hide) {
-	if (typeof hide == "undefined") hide = false;
+function DataProcessor(data, hideAll) {
+	if (typeof hideAll == "undefined") hideAll = false;
 	var THAT = this;
 	this.words = {};
 	this.images = {};
 	this.videos = {};
-	this.messages = {};	// Diccionario de mensaje
+	this.messages = {};	// Diccionario de mensajes, ESCLUIDO EL RAIZ
 	this.users = data.perfilesUsuarios;
 	/* Convierte la estructura de partida en un árbol para d3js */
-	function makeInfoTree(info) {
+	function makeInfoTree(info, hideAll) {
 		var messages = info.mensajes;
-		var index = {};		// variable auxiliar para encontrar rápido los mensajes
 		var rootMsg = messages[0];
-		rootMsg.filtered = true;	// el raíz nunca eas filtrado
-		rootMsg.needed = true;		// es necesario mostrar este mensaje siempre
+		rootMsg.filtered = true;		// el raíz nunca eas filtrado
+		rootMsg.referencesCounter = 0;
+		rootMsg.author = THAT.users[rootMsg.usuarioOrigen];
+		rootMsg.nMessages = 1;
+		var index = {}					// variable auxiliar para encontrar rápido los mensajes
 		index[rootMsg.idMsg] = rootMsg;
 		var replies = messages.slice(1);
-		rootMsg.referencesCounter = 0;
 		replies.forEach(function(m) {
-			var parentID = m.idMsgRespuesta;
-			var parentObj = index[parentID];
-			m.parent = parentObj;	// el padre de este mensaje
-			var children = (parentObj.children || (parentObj.children = []));
-			children.push(m);
-
-			m.filtered = !hide;
-			m.needed = !hide;			// necesidad de mostrar el elemento
+			var parentObj = index[m.idMsgRespuesta];
+			m.parent = parentObj;		// el padre de este mensaje
+			if (hideAll) {
+				var pHidden = (parentObj._hidden || (parentObj._hidden = []));
+				pHidden.push(m);			// se agrega como hijo  OCULTO del padre
+				m.filtered = false;
+			} else {
+				var pChildren = (parentObj.children || (parentObj.children = []));
+				pChildren.push(m);			// se agrega como hijo del padre
+				m.filtered = true;
+				parentObj.referencesCounter++;
+			};
 			m.referencesCounter = 0;	// contador de referencias a este objeto
-
 			index[m.idMsg] = m;
-			messageProcessor(m);
+			messageProcessor(m);		// procesamiento del mensaje para extraer información
 		});
 		return rootMsg;
 	};
 	function messageProcessor(m) {
 		var id = m.idMsg;
-		var users = THAT.users;
 		var images = THAT.images;
 		THAT.messages[id] = m;
 		// usuario
-		var userID = m.usuarioOrigen;
-		var userMsgs = users[userID].messages || (users[userID].messages = []);
-		userMsgs.push(id);
+		var author = THAT.users[m.usuarioOrigen];	// autor del mensaje
+		if (author.nMessages) author.nMessages++; else author.nMessages=1;
+		var authorReplied = THAT.users[m.autorMsgRespuesta];
+		if (authorReplied.nReplies) authorReplied.nReplies++; else authorReplied.nReplies=1;
+		m.author = author;
+		var userMsgs = author.messages || (author.messages = []);
+		userMsgs.push(id);	// todos los mensajes de este usuario
 		// imagen
 		if (m.cont_adicional) {
-			var imgMsgs = images[m.cont_adicional] || (images[m.cont_adicional] = {messages: []});
-			imgMsgs.messages.push(id);
+			var content = m.cont_adicional;
+			var imgElement = images[content] || (images[content] = {'messages': []});
+			imgElement.messages.push(id);
 		};
 	};
-	/* Filtrado de resultados en el árbol 
-		@param filter. de la forma {user: username, word: word, photo: photo_url, video, video_url}
-	*/
-	this.filterAdd = function(filter, node) {
+
+	/* Filtrado de mensajes */
+	this.filter = function(filter) {
 		function addFound(msg) {
 			var parent = msg.parent;
 			if (!parent) return;
-			parent.needed = true;
-			parent.referencesCounter++; // se incrementa el contador (número de nodos que dependen de él)
+			parent.referencesCounter++; 	// se incrementa el contador (número de nodos que dependen de él)
 			var pChildren = (parent.children || (parent.children = []));
-			if (pChildren.indexOf(msg)>=0) return;	// ya es visible
-			// ¿Es un nodo colapsado?
-			var pCollapsed = parent._children;
-			if (pCollapsed) {
-				var index = pCollapsed.indexOf(msg);
-				if (index>=0) {
-					parent.children = pChildren.concat(pCollapsed.splice(index, 1));
+			if (pChildren.indexOf(msg)<0) {
+				if (parent._hidden) {					// ¿Es un nodo oculto?
+					var pHidden = parent._hidden;
+					var index = pHidden.indexOf(msg);
+					if (index>=0) {
+						parent.children = pChildren.concat(pHidden.splice(index, 1));
+						addFound(parent);
+						return;
+					};
+				};
+				if (parent._children) { 			// ¿Es un nodo colapsado?
+					var pCollapsed = parent._children;
+					var index = pCollapsed.indexOf(msg);
+					if (index>=0) {
+						parent.children = pChildren.concat(pCollapsed.splice(index, 1));
+						addFound(parent);
+						return;
+					};
 				};
 			};
 			addFound(parent);
 		};
-		if (typeof node === "undefined") {
-			node = THAT.tree;	// el nodo raíz, que nunca se oculta o filtra
-		} else if (filter.user) {
-			if ((filter.user == "*")||(node.usuarioOrigen == filter.user)) {
-				node.filtered = true;
-				node.needed = true;
-				addFound(node);
-			};
-		};
-		if (node.children) {
-			// recursión sobre los hijos
-			var children = node.children;
-			for (var i=children.length-1; i>=0; i--) {
-				THAT.filterAdd(filter, children[i]);
-			};
-		};
-		if (node._children) {
-			// recursión sobre los hijos ocultos
-			var _children = node._children;
-			for (var i=_children.length-1; i>=0; i--) {
-				THAT.filterAdd(filter, _children[i]);
-			};
-		};
-	};
-	/* Eliminación de un filter
-		@return: la necesidad de este nodo
-	*/
-	this.filterRemove = function(filter, node) {
 		function removeFound(msg) {
 			var parent = msg.parent;
 			if (!parent) return;
 			parent.referencesCounter--;
-			if (parent.referencesCounter==0) parent.needed = false;
+			var needed = (msg.filtered || (msg.referencesCounter!=0));		// necesidad del elemento
+			if (!needed) {
+				var pHidden = (parent._hidden || (parent._hidden = []));
+				if (pHidden.indexOf(msg)<0) {		
+					if (parent.children) {				// ¿Es un nodo visible?
+						var pChildren = parent.children;
+						var index = pChildren.indexOf(msg);
+						if (index>=0) {
+							parent._hidden = pHidden.concat(pChildren.splice(index, 1));
+							removeFound(parent);
+							return;
+						};
+					} else if (parent._children) {		// ¿Es un nodo colapsado?
+						var pCollapsed = parent._children;			
+						var index = pCollapsed.indexOf(msg);
+						if (index>=0) {
+							parent.children = pChildren.concat(pCollapsed.splice(index, 1));
+							removeFound(parent);
+							return;
+						};
+					};
+				};
+			};
 			removeFound(parent);
 		};
-		if (typeof node === "undefined") {
-			node = THAT.tree;	// el nodo raíz, que nunca se oculta o filtra
-		} else if (filter.user) {
-			if ((filter.user == "*")||(node.usuarioOrigen == filter.user)) {
-				node.filtered = false;
-				removeFound(node);
-			};
+		function evaluateMessage(m, add) {
+			m.filtered = add;								// true si se agrega el filtro, false si se elimina
+			(add) ? addFound(m) : removeFound(m);
 		};
-		if (node.children) {
-			// recursión sobre los hijos
-			var children = node.children;
-			for (var i=children.length-1; i>=0; i--) {
-				THAT.filterRemove(filter, children[i]);
+		var filterAdd = (filter.type === "add");
+		var allMessages = THAT.messages;
+		if (filter.user) {
+			if (filter.user == "*") {
+				for (m in allMessages) evaluateMessage(allMessages[m], filterAdd);
+			} else  {
+				var mIDs = THAT.users[filter.user].messages;	// array de ids de mensajes del usuario
+				mIDs.forEach(function(id) {
+					evaluateMessage(allMessages[id], filterAdd);
+				});
 			};
-		};
-		if (node._children) {
-			// recursión sobre los hijos ocultos
-			var _children = node._children;
-			for (var i=_children.length-1; i>=0; i--) {
-				THAT.filterRemove(filter, _children[i]);
-			};
-		};
+		};			
 	};
 	// Procesamiento de los datos:
-	this.tree = makeInfoTree(data);
-};
-
-function ConversationController(processor) {
-	var PROC = processor;
-	function insertMessage(id, clean) {
-		var $ouput = $('#chart-ouput');
-		if (typeof clean == "undefined") clean=true;
-		if (clean) $ouput.empty();
-		if (isArray(id)) id.forEach(function(i) {insertMessage(i, false);});
-		else {
-			$ouput.append(createMessage(THAT.messages[id]));	
-		};
-	};
-	function populateUsers() {
-		var theUsers = makeArray(PROC.users);
-		var li = d3.select("#users-list").selectAll("li").data(theUsers);
-		li.enter().append("li")
-			.text(function(d){return "@"+d.__key})
-			.attr("class", "check")
-			.on("mouseover", function(d) {
-				d3.selectAll("g.node")
-					.attr("opacity", function(n) {
-						return (n.usuarioOrigen == d.__key) ? 1 : .1;
-					});
-			})
-			.on("mouseout", function(d) {
-				d3.selectAll("g.node")
-					.attr("opacity", 1);
-			})
-			.on("click", function(d) {
-				$this = $(this);
-				$this.toggleClass('on');
-				dispatchFilterUser(d.__key, $this.hasClass('on'));
-				// insertMessage(THAT.users[d.__key].messages);
-			});
-	};
-	function populateImages() {
-		var theImages = makeArray(PROC.images);
-		var li = d3.select("#images-list").selectAll("li").data(theImages);
-		li.enter().append("img")
-			.attr("src", function(d){return d.__key})
-			.on("mouseover", function(d) {
-				d3.selectAll("g.node")
-					.attr("opacity", function(n) {
-						return (n.cont_adicional == d.__key) ? 1 : .1;
-					});
-			})
-			.on("click", function(d) {
-				d.messages.forEach(function(id) {
-					// insertMessage(id);
-					// updateButtons();
-				});
-			});
-	};
-	function populateVideos(videos) {
-
-	};
-	function populateWords(words) {
-
-	};
-	this.populate = function() {
-		populateUsers();
-		populateImages();
-		populateVideos();
-		populateWords();
-	};
+	this.tree = makeInfoTree(data, hideAll);
 };
 
 function expandToElement(root, callbackCondition) {
@@ -324,11 +258,11 @@ function expandToElement(root, callbackCondition) {
 function TalkVisualizer(data) {
 	var RADIUS_DEFAULT = 4,
 		RADIUS = RADIUS_DEFAULT;
+	var USER_COLOR = new ColorGenerator();
 	// Manipulación de los datos
 	// console.log(data);
 	// console.log(JSON.stringify(data));
 	var PROCESSOR = new DataProcessor(data, true);
-	var CONTROLLER = new ConversationController(PROCESSOR);
 
 	var root = PROCESSOR.tree;
 	console.log(root);
@@ -377,24 +311,95 @@ function TalkVisualizer(data) {
 
 	/* Actualización de filtros */
 	document.getElementById("svg").addEventListener("updateFilter", function(e) {
-		var type = e.detail.type;
-		if (type==="add") {
-			PROCESSOR.filterAdd(e.detail);
-			update();
-		} else if (type==="remove") {
-			PROCESSOR.filterRemove(e.detail);
-			update();
-		};
+		PROCESSOR.filter(e.detail);
+		console.log("quedando: ", root);
+		update();
 	});
 	
 	//root.children.forEach(collapse);
 	// collapse(root);
 
-	CONTROLLER.populate();
-	
 	var nodes, links;
 	var $currentMessage = null;
+	populateController();
 	update();
+
+	function populateController() {
+		function insertMessage(id, clean) {
+			var $ouput = $('#chart-ouput');
+			if (typeof clean == "undefined") clean=true;
+			if (clean) $ouput.empty();
+			if (isArray(id)) id.forEach(function(i) {insertMessage(i, false);});
+			else {
+				$ouput.append(createMessage(THAT.messages[id]));
+			};
+		};
+		function populateUsers() {
+			var theUsers = PROCESSOR.users;
+			var $list = $("#users-list");
+			for (var u in theUsers) {
+				var user = theUsers[u];
+				var $row = $("<li>").addClass("item")
+					.append($("<span>").addClass("check").text("@"+u).attr("data-user", u)
+						.on("mouseover", function() {
+							var username = this.getAttribute("data-user");
+							d3.selectAll("g.node circle")
+							.transition().duration(duration)
+							.attr("r", function(n) {
+								return (n.usuarioOrigen == username) ? (RADIUS*3) : RADIUS;
+							});
+						})
+						.on("mouseout", function() {
+							d3.selectAll("g.node circle").attr("r", RADIUS);			
+						})
+						.on("click", function() {
+							var username = this.getAttribute("data-user");
+							var user = PROCESSOR.users[username];
+							user.color = user.color || (user.color = USER_COLOR.get());	// color asignado a este usuario
+							dispatchFilterUser(username, $(this).toggleClass('on').hasClass('on'));
+							$(this).closest("li").find(".color-picker").css("background-color", user.color).find("input").val(user.color);
+						}))
+					.append($("<span>").addClass("color-picker")
+						.append($("<input>").attr("type", "color")
+							.on("change", function(e) {
+								var newColor = this.value;
+								$(this).closest('.color-picker').css("background-color", newColor);
+							})))
+					.append($("<span>").text(user.nMessages))
+					.append($("<span>").text("non"))
+					.append($("<span>").text(user.nReplies));
+				$list.append($row);
+			};
+		};
+		function populateImages() {
+			var theImages = makeArray(PROCESSOR.images);
+			var li = d3.select("#images-list").selectAll("li").data(theImages);
+			li.enter().append("img")
+				.attr("src", function(d){return d.__key})
+				.on("mouseover", function(d) {
+					d3.selectAll("g.node")
+						.attr("opacity", function(n) {
+							return (n.cont_adicional == d.__key) ? 1 : .1;
+						});
+				})
+				.on("click", function(d) {
+					d.messages.forEach(function(id) {
+						// insertMessage(id);
+						// updateButtons();
+					});
+				});
+		};
+		function populateVideos(videos) {
+
+		};
+		function populateWords(words) {
+
+		};
+		populateUsers();
+		populateImages();
+		populateVideos();
+		populateWords();
+	};
 
 	function stashPositions() {
 		nodes.forEach(function(d) {
@@ -451,7 +456,6 @@ function TalkVisualizer(data) {
 					// 		};
 					// 		return 2;
 					// 	});
-
 				})
 				.on("mouseleave", function() {
 					$("#current-message").remove();
@@ -460,9 +464,8 @@ function TalkVisualizer(data) {
 					// 	.attr("r", RADIUS);
 				});
 			nodeEnter.append("circle")
-				.attr("r", function(d) {
-					return d.filtered ? RADIUS : 1e-6;
-				});
+				.attr("r", function(d) {return RADIUS})
+				.attr("fill", function(d) {console.log(d); return d.filtered ? (d.author.color || "#f30") : "#eee"});
 			// Node name:
 			// nodeEnter.append("text")
 			// 	.attr("transform", LAYOUT.textTransform)
@@ -476,20 +479,18 @@ function TalkVisualizer(data) {
 				.duration(duration)
 				.attr("transform", nodePosition)
 				.select("circle")
-				.attr("r", function(d) {
-					return d.filtered ? RADIUS : 1e-6;
-				});
+				.attr("fill", function(d) {return d.filtered ? (d.author.color || "#f30") : "#eee"});
 			// nodeUpdate.select("text")
 			// 	.attr("transform", LAYOUT.textTransform)
 			// 	.attr("text-anchor", LAYOUT.textAnchor)
 			// 	.style("fill-opacity", 1);
 			
 			// Transition exiting nodes to the parent's new position.
-			var nodeExit = node.exit().transition()
-				.duration(duration)
+			var nodeExit = node.exit().transition().duration(duration)
 				.attr("transform", function(d) { return nodePosition(source); })
 				.remove();
 			nodeExit.select("circle")
+				.transition().duration(duration)
 				.attr("r", 1e-6);
 			// nodeExit.select("text")
 			// 	.style("fill-opacity", 1e-6);
@@ -504,14 +505,11 @@ function TalkVisualizer(data) {
 					var o = {x: source.x0, y: source.y0};
 					return diagonal({source: o, target: o});
 				})
-				.attr("stroke", "#fff");
+				.attr("stroke", "#999");
 			// Transición a nueva posición
 			link.transition()
 				.duration(duration)
-				.attr("d", diagonal)
-				.attr("stroke", function(d) {
-					return d.target.needed ? "#999" : "#fff";
-				});
+				.attr("d", diagonal);
 			// Transition exiting nodes to the parent's new position.
 			link.exit().transition()
 				.duration(duration)
@@ -519,7 +517,6 @@ function TalkVisualizer(data) {
 					var o = {x: source.x, y: source.y};
 					return diagonal({source: o, target: o});
 				})
-				.attr("stroke", "#fff")
 				.remove();
 		};
 		function updateSVG() {
@@ -532,12 +529,11 @@ function TalkVisualizer(data) {
 		updateSVG();
 		// Stash the old positions for transition.
 		stashPositions();
-		
 	};
 };
 
 /* se obtiene la información de la extensión */
-var TEST = 0;
+var TEST = 3;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
@@ -564,4 +560,17 @@ $("#check-all-users").on("click", function() {
 	$("#users-list li").toggleClass('on', $this.hasClass('on'));
 	dispatchFilterUser("*", $this.hasClass('on'))
 });
-
+$(".expand").on("click", function() {
+	$this = $(this);
+	$this.toggleClass('on');
+	var $expandable = $(this).closest(".expandable");
+	var newSize = "";
+	if ($this.hasClass('on')) {
+		var newSize = $expandable.attr("data-width");
+		if (newSize=="max") {
+			newSize = (window.innerWidth - $expandable.offset().left - 20) + "px";
+		};
+	};
+	$expandable.css("width", newSize);
+	
+});

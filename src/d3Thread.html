@@ -21,12 +21,18 @@
 	<script type="text/javascript" src="js/d3Helpers.js"></script>
 	<script build="remove" type="text/javascript" src="js/d3SampleData.js" exclude="1"></script>
 </head>
-<body>
-	<div id="chart-control">
-		<h1 class="fa fa-comments"> CONVERSACIÓN</h1>
+<body id="conversation">
+	<div id="chart-control" class="expandable" data-width="400px">
+		<h1 class="fa fa-sliders"> CONTROLES<div class="fa fa-chevron-right expand"></div></h1>
 		<div>
 			<h2>Usuarios</h2>
-			<div id="check-all-users" class="check">marcar todo</div>
+			<div class="list-head item">
+				<span id="check-all-users" class="check">marcar todo</span>
+				<span class="color-picker"></span>
+				<span>nº mensajes</span>
+				<span>nº palabras</span>
+				<span>nº respuestas</span>
+			</div>
 			<ul id="users-list" class="list"></ul>
 			<h2>Palabras</h2>
 			<ul id="keywords-list" class="list"></ul>
@@ -36,7 +42,9 @@
 			<ul id="videos-list" class="list"></ul>
 		</div>
 	</div>
-	<div id="chart-ouput">
+	<div id="chart-messages" class="expandable" data-width="max">
+		<h1 class="fa fa-comments"> CONVERSACIÓN<div class="fa fa-chevron-right expand"></div></h1>
+		<div id="chart-ouput"></div>
 	</div>
 
 	<script type="text/javascript" src="js/d3Thread.js"></script>
