@@ -61,18 +61,17 @@ svg {
   padding: 0;
   /* box-sizing: border-box; */
 }
-#chart-ouput .msg-container:before {
+#chart-ouput .msg-container .handle {
   width: 100%;
-  content: " ";
   height: 10px;
   border: 1px solid #fff;
-  display: block;
 }
-#chart-ouput .msg-container.filter:before {
-  background-color: #f30;
+#chart-ouput .msg-container.filter .handle {
+  /*background-color: #f30;*/
+  /*background-color: attr(data-color color);*/
 }
-#chart-ouput .msg-container.nofilter:before {
-  background-color: #eee;
+#chart-ouput .msg-container.nofilter .handle {
+/*  background-color: #eee;*/
 }
 #chart-ouput .children-container {
   display: table;
@@ -273,6 +272,7 @@ span:nth-child(5) {
 }
 #chart-control .list-head .fa:before {
   font-weight: normal;
+  margin-left: 2px;
 }
 
 #chart-control img {

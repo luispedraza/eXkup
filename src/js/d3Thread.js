@@ -2,6 +2,13 @@ var PREPOSICIONES = {a:true,ante:true,bajo:true,cabe:true,con:true,contra:true,d
 var VISUALIZER = null;
 
 
+var USER_COLOR = new ColorGenerator();
+
+/* Obtiene el color de pintado para un mensaje dado */
+function getMsgColor(msg) {
+	return msg.filtered ? msg.author.color : "#ccc";
+};
+
 function dispatchFilterUser(username, filter) {
 	var e = document.createEvent("CustomEvent");
 	var detail = {'user': username, 'type': filter ? "add" : "remove"};
@@ -76,7 +83,7 @@ function populateMessages(tree) {
 	function appendMessage(msg, $container) {
 		var $msg = createMessage(msg);
 		$msg.data = msg;
-		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container);
+		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container);//.attr("data-color", msg.author.color);
 		$msgContainer.on("click", function(e) {
 			e.stopPropagation();
 			var $this = $(this);
@@ -87,6 +94,7 @@ function populateMessages(tree) {
 				expandElement($(this));
 			};
 		});
+		$msgContainer.append($("<div>").addClass('handle').css("background-color", getMsgColor(msg)));	// antes  hecho con pseudoelemento
 		$msgContainer.append($msg);
 		if (msg.children) {
 			var children = msg.children;
@@ -98,6 +106,7 @@ function populateMessages(tree) {
 				appendMessage(m, $childrenContainer).addClass(m.filtered ? "filter" : "nofilter");
 			});
 		};
+		$msgContainer.attr("data-user", msg.usuarioOrigen);
 		return $msgContainer;
 	};
 	$mainContainer = $("#chart-ouput").empty();
@@ -110,37 +119,13 @@ function populateMessages(tree) {
 	@ param hidden: inicialmente todas las respuestas están ocultas
 */
 function DataProcessor(data, hideAll) {
-	if (typeof hideAll == "undefined") hideAll = false;
-	var THAT = this;
-	this.words = {};
-	this.images = {};
-	this.videos = {};
-	this.messages = {};	// Diccionario de mensajes, ESCLUIDO EL RAIZ
-	this.users = data.perfilesUsuarios;
-	/* Convierte la estructura de partida en un árbol para d3js */
-	function makeInfoTree(info, hideAll) {
-		var index = THAT.messages;
-		var messages = info.mensajes;
-		var rootMsg = messages[0];
-		rootMsg.filtered = true;		// el raíz nunca eas filtrado
-		messageProcessor(rootMsg);
-		var replies = messages.slice(1);
-		replies.forEach(function(m) {
-			var parentObj = index[m.idMsgRespuesta];
-			m.parent = parentObj;		// el padre de este mensaje
-			if (hideAll) {
-				var pHidden = (parentObj._hidden || (parentObj._hidden = []));
-				pHidden.push(m);			// se agrega como hijo  OCULTO del padre
-				m.filtered = false;
-			} else {
-				var pChildren = (parentObj.children || (parentObj.children = []));
-				pChildren.push(m);			// se agrega como hijo del padre
-				m.filtered = true;
-				parentObj.referencesCounter++;
-			};
-			messageProcessor(m);		// procesamiento del mensaje para extraer información
+	function generateColors(users) {
+		var userNicknames = Object.keys(users);
+		console.log(userNicknames);
+		var nUsers = Object.keys(users).length;
+		userNicknames.forEach(function(u,i) {
+			users[u].color = d3.hsl(i*360/nUsers, .5, .5).toString();
 		});
-		return rootMsg;
 	};
 	function messageProcessor(m) {
 		var id = m.idMsg;
@@ -239,10 +224,40 @@ function DataProcessor(data, hideAll) {
 					evaluateMessage(allMessages[id], filterAdd);
 				});
 			};
-		};			
+		};
 	};
 	// Procesamiento de los datos:
-	this.tree = makeInfoTree(data, hideAll);
+	if (typeof hideAll == "undefined") hideAll = false;
+	var THAT = this;
+	this.words = {};
+	this.images = {};
+	this.videos = {};
+	this.messages = {};	// Diccionario de mensajes, ESCLUIDO EL RAIZ
+	this.users = data.perfilesUsuarios;
+
+	var index = THAT.messages;
+	var messages = data.mensajes;
+	var rootMsg = messages[0];
+	rootMsg.filtered = true;		// el raíz nunca eas filtrado
+	messageProcessor(rootMsg);
+	var replies = messages.slice(1);
+	replies.forEach(function(m) {
+		var parentObj = index[m.idMsgRespuesta];
+		m.parent = parentObj;		// el padre de este mensaje
+		if (hideAll) {
+			var pHidden = (parentObj._hidden || (parentObj._hidden = []));
+			pHidden.push(m);			// se agrega como hijo  OCULTO del padre
+			m.filtered = false;
+		} else {
+			var pChildren = (parentObj.children || (parentObj.children = []));
+			pChildren.push(m);			// se agrega como hijo del padre
+			m.filtered = true;
+			parentObj.referencesCounter++;
+		};
+		messageProcessor(m);		// procesamiento del mensaje para extraer información
+	});
+	this.tree = rootMsg;
+	generateColors(this.users);
 };
 
 function expandToElement(root, callbackCondition) {
@@ -257,7 +272,6 @@ function expandToElement(root, callbackCondition) {
 function TalkVisualizer(data) {
 	var RADIUS_DEFAULT = 4,
 		RADIUS = RADIUS_DEFAULT;
-	var USER_COLOR = new ColorGenerator();
 	// Manipulación de los datos
 	// console.log(data);
 	// console.log(JSON.stringify(data));
@@ -286,11 +300,11 @@ function TalkVisualizer(data) {
 		.on("zoom", function() {
 			var vector = d3.event.translate;
 			// vector = [center.x+vector[0], center.y+vector[1]];
-			chart.attr("transform", d3Translate(vector) + d3Scale(d3.event.scale));
+			svg.attr("transform", d3Translate(vector) + d3Scale(d3.event.scale));
 			RADIUS = RADIUS_DEFAULT / d3.event.scale;
 		})
 		.on("zoomend", function() {
-			chart.selectAll(".node circle")
+			svg.selectAll(".node circle")
 				.transition().duration(duration)
 				.attr("r", RADIUS);	// escalado de los nodos
 		});
@@ -302,11 +316,12 @@ function TalkVisualizer(data) {
 			zm.event(svg);
 		})
 		.call(zm)
-		.on("dblclick.zoom", null);
+		.on("dblclick.zoom", null)
+		.append("g");
 
-	var chart = svg.append("g")
+	var chart = svg
+				.append("g").attr("id", "chart")
 				.attr("transform", d3Translate([center.x,center.y]))
-				.append("g").attr("id", "chart");
 
 	/* Actualización de filtros */
 	document.getElementById("svg").addEventListener("updateFilter", function(e) {
@@ -337,10 +352,10 @@ function TalkVisualizer(data) {
 			$("#n-users").text("("+theUsers.length+")");
 			var $list = $("#users-list");
 			theUsers.forEach(function(user) {
-				var $row = $("<li>").addClass("item")
-					.append($("<span>").addClass("check").text("@"+user.__key).attr("data-user", user.__key)
+				var $row = $("<li>").addClass("item").attr("data-user", user.__key)
+					.append($("<span>").addClass("check").text("@"+user.__key)
 						.on("mouseover", function() {
-							var username = this.getAttribute("data-user");
+							var username = $(this).closest("li").attr("data-user");
 							d3.selectAll("g.node circle")
 							.transition().duration(duration)
 							.attr("r", function(n) {
@@ -348,20 +363,26 @@ function TalkVisualizer(data) {
 							});
 						})
 						.on("mouseout", function() {
-							d3.selectAll("g.node circle").attr("r", RADIUS);			
+							d3.selectAll("g.node circle").attr("r", RADIUS);
 						})
 						.on("click", function() {
-							var username = this.getAttribute("data-user");
-							var user = PROCESSOR.users[username];
-							user.color = user.color || (user.color = USER_COLOR.get());	// color asignado a este usuario
-							dispatchFilterUser(username, $(this).toggleClass('on').hasClass('on'));
+							var user = $(this).closest("li").get(0).user;
+							dispatchFilterUser(user.__key, $(this).toggleClass('on').hasClass('on'));
 							$(this).closest("li").find(".color-picker").css("background-color", user.color).find("input").val(user.color);
 						}))
 					.append($("<span>").addClass("color-picker")
 						.append($("<input>").attr("type", "color")
 							.on("change", function(e) {
-								var newColor = this.value;
-								$(this).closest('.color-picker').css("background-color", newColor);
+								var $this = $(this);
+								var newColor = $this.val();
+								// var username = $(this).closest('li').attr("data-user");
+								$this.closest('.color-picker').css("background-color", newColor);
+								// Actualización del color en visualizaciones
+								// PROCESSOR.users[username].color = newColor;
+								var user = $this.closest('li').get(0).user;
+								user.color = newColor;
+								d3.selectAll("g.node.user-"+user.__key+" circle").attr("fill", newColor);
+								$("#chart-messages .msg-container[data-user="+user.__key+"] .handle").css("background-color", newColor);
 							})))
 					.append($("<span>").text(user.nMessages))
 					.append($("<span>").text(user.nWords))
@@ -436,7 +457,9 @@ function TalkVisualizer(data) {
 			var node = chart.selectAll(".node")
 			  	.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
 			var nodeEnter = node.enter().append("g")
-				.attr("class", "node")
+				.attr("class", function(d) {
+					return "node user-" + d.usuarioOrigen;
+				})
 				.attr("transform", function() {return nodePosition0(source);})	// new nodes enter at source's position
 				// CLICK event ofr nodes:
 				.on("click", clickOnNode)
@@ -464,7 +487,7 @@ function TalkVisualizer(data) {
 				});
 			nodeEnter.append("circle")
 				.attr("r", function(d) {return RADIUS})
-				.attr("fill", function(d) {return d.filtered ? (d.author.color || "#f30") : "#eee"});
+				.attr("fill", getMsgColor);
 			// Node name:
 			// nodeEnter.append("text")
 			// 	.attr("transform", LAYOUT.textTransform)
@@ -478,7 +501,7 @@ function TalkVisualizer(data) {
 				.duration(duration)
 				.attr("transform", nodePosition)
 				.select("circle")
-				.attr("fill", function(d) {return d.filtered ? (d.author.color || "#f30") : "#eee"});
+				.attr("fill", getMsgColor);
 			// nodeUpdate.select("text")
 			// 	.attr("transform", LAYOUT.textTransform)
 			// 	.attr("text-anchor", LAYOUT.textAnchor)
@@ -532,7 +555,7 @@ function TalkVisualizer(data) {
 };
 
 /* se obtiene la información de la extensión */
-var TEST = 1;
+var TEST = 3;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
