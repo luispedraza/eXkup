@@ -119,14 +119,11 @@ function DataProcessor(data, hideAll) {
 	this.users = data.perfilesUsuarios;
 	/* Convierte la estructura de partida en un árbol para d3js */
 	function makeInfoTree(info, hideAll) {
+		var index = THAT.messages;
 		var messages = info.mensajes;
 		var rootMsg = messages[0];
 		rootMsg.filtered = true;		// el raíz nunca eas filtrado
-		rootMsg.referencesCounter = 0;
-		rootMsg.author = THAT.users[rootMsg.usuarioOrigen];
-		rootMsg.nMessages = 1;
-		var index = {}					// variable auxiliar para encontrar rápido los mensajes
-		index[rootMsg.idMsg] = rootMsg;
+		messageProcessor(rootMsg);
 		var replies = messages.slice(1);
 		replies.forEach(function(m) {
 			var parentObj = index[m.idMsgRespuesta];
@@ -141,16 +138,15 @@ function DataProcessor(data, hideAll) {
 				m.filtered = true;
 				parentObj.referencesCounter++;
 			};
-			m.referencesCounter = 0;	// contador de referencias a este objeto
-			index[m.idMsg] = m;
 			messageProcessor(m);		// procesamiento del mensaje para extraer información
 		});
 		return rootMsg;
 	};
 	function messageProcessor(m) {
 		var id = m.idMsg;
-		var images = THAT.images;
 		THAT.messages[id] = m;
+		// referencias 
+		m.referencesCounter = 0;	// contador de referencias a este objeto
 		// usuario
 		var author = THAT.users[m.usuarioOrigen];	// autor del mensaje
 		if (author.nMessages) author.nMessages++; else author.nMessages=1;
@@ -160,11 +156,14 @@ function DataProcessor(data, hideAll) {
 		var userMsgs = author.messages || (author.messages = []);
 		userMsgs.push(id);	// todos los mensajes de este usuario
 		// imagen
+		var images = THAT.images;
 		if (m.cont_adicional) {
 			var content = m.cont_adicional;
 			var imgElement = images[content] || (images[content] = {'messages': []});
 			imgElement.messages.push(id);
 		};
+		// Número de palabras:
+		if (author.nWords) author.nWords+=12; else author.nWords=12;
 	};
 
 	/* Filtrado de mensajes */
@@ -312,7 +311,6 @@ function TalkVisualizer(data) {
 	/* Actualización de filtros */
 	document.getElementById("svg").addEventListener("updateFilter", function(e) {
 		PROCESSOR.filter(e.detail);
-		console.log("quedando: ", root);
 		update();
 	});
 	
@@ -335,12 +333,12 @@ function TalkVisualizer(data) {
 			};
 		};
 		function populateUsers() {
-			var theUsers = PROCESSOR.users;
+			var theUsers = sortArray(makeArray(PROCESSOR.users), "__key");
+			$("#n-users").text("("+theUsers.length+")");
 			var $list = $("#users-list");
-			for (var u in theUsers) {
-				var user = theUsers[u];
+			theUsers.forEach(function(user) {
 				var $row = $("<li>").addClass("item")
-					.append($("<span>").addClass("check").text("@"+u).attr("data-user", u)
+					.append($("<span>").addClass("check").text("@"+user.__key).attr("data-user", user.__key)
 						.on("mouseover", function() {
 							var username = this.getAttribute("data-user");
 							d3.selectAll("g.node circle")
@@ -366,10 +364,11 @@ function TalkVisualizer(data) {
 								$(this).closest('.color-picker').css("background-color", newColor);
 							})))
 					.append($("<span>").text(user.nMessages))
-					.append($("<span>").text("non"))
+					.append($("<span>").text(user.nWords))
 					.append($("<span>").text(user.nReplies));
-				$list.append($row);
-			};
+				$row.get(0).user = user;
+				$list.append($row);	// guardamos también el usuario correspondientes
+			});
 		};
 		function populateImages() {
 			var theImages = makeArray(PROCESSOR.images);
@@ -465,7 +464,7 @@ function TalkVisualizer(data) {
 				});
 			nodeEnter.append("circle")
 				.attr("r", function(d) {return RADIUS})
-				.attr("fill", function(d) {console.log(d); return d.filtered ? (d.author.color || "#f30") : "#eee"});
+				.attr("fill", function(d) {return d.filtered ? (d.author.color || "#f30") : "#eee"});
 			// Node name:
 			// nodeEnter.append("text")
 			// 	.attr("transform", LAYOUT.textTransform)
@@ -533,7 +532,7 @@ function TalkVisualizer(data) {
 };
 
 /* se obtiene la información de la extensión */
-var TEST = 3;
+var TEST = 1;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
@@ -552,13 +551,42 @@ if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 		});	
 };
 
+function sortUsers(sorting) {
+	var $list = $("#users-list");
+	var $items = $list.find("li");
+	$items = $items.sort(function(a,b) {
+		if (sorting=="nickname") {
+			if (a.user.__key < b.user.__key) return -1;
+			else if (a.user.__key > b.user.__key) return 1;
+			return 0;
+		} else {	// valores numéricos
+			if ((a.user[sorting]||0) > (b.user[sorting]||0)) return -1;
+			else if ((a.user[sorting]||0) < (b.user[sorting]||0)) return 1;
+			return 0;
+		};
+	});
+	$items.detach().appendTo($list);
+};
+
 /* EVENTOS */
 // selección de todos los usuarios
 $("#check-all-users").on("click", function() {
 	var $this = $(this);
 	$this.toggleClass('on');
-	$("#users-list li").toggleClass('on', $this.hasClass('on'));
+	$("#users-list .check").toggleClass('on', $this.hasClass('on'));
 	dispatchFilterUser("*", $this.hasClass('on'))
+});
+$("#sort-nickname").on("click", function() {
+	sortUsers("nickname");
+});
+$("#sort-nmessages").on("click", function() {
+	sortUsers("nMessages");
+});
+$("#sort-nwords").on("click", function() {
+	sortUsers("nWords");
+});
+$("#sort-nreplies").on("click", function() {
+	sortUsers("nReplies");
 });
 $(".expand").on("click", function() {
 	$this = $(this);
