@@ -34,17 +34,38 @@ function onShowEditor() {
 };
 
 function populateMessages(tree) {
-	function expandElement($e) {
-		$e.addClass("current")
-			.add($e.parents(".msg-container")).addClass("on").css("width", "100%").siblings().css( "width", "0" );
+	function toggleElement(event) {
+		event.stopPropagation();
+		var $this = $(this);
+		if ($this.hasClass('on')) {	// colapsar
+			$this.add($this.find(".msg-container.on")).each(function() {
+				$(this).removeClass('on current').css("width", "")
+					.find(".message").remove();
+				this.msg = this._msg; this._msg = null;
+			});
+		} else {	// expandir
+			$this.addClass("current")
+				.add($this.parents(".msg-container")).addClass("on").css("width", "100%")
+				.each(function() {
+					if (this.msg) {
+						$(this).find("> .handle").append(createMessage(this.msg));
+						this._msg = this.msg; this.msg = null;
+					};
+				})
+				.siblings().css( "width", "0" );
+		};
 	};
-	function collapseElement($e) {
-		$e.add($e.find(".msg-container.on")).each(function() {
-			var $this = $(this);
-			var width = (100 / ($this.siblings().length + 1)) + "px";
-			$this.removeClass('on current').css("width", width).siblings().css( "width", width);
-		});
-	};
+	// function expandElement($e) {
+	// 	$e.addClass("current")
+	// 		.add($e.parents(".msg-container")).addClass("on").css("width", "100%").siblings().css( "width", "0" );
+	// };
+	// function collapseElement($e) {
+	// 	$e.add($e.find(".msg-container.on")).each(function() {
+	// 		var $this = $(this);
+	// 		var width = (100 / ($this.siblings().length + 1)) + "px";
+	// 		$this.removeClass('on current').css("width", width).siblings().css( "width", width);
+	// 	});
+	// };
 	function accordion(event) {
 		var $element = $(this);
 		event.stopPropagation();
@@ -82,32 +103,22 @@ function populateMessages(tree) {
 	};
 	function accordionReset() {$(this).find(".msg-container:not(.on)").css("width","");};
 	function appendMessage(msg, $container) {
-		var $msg = createMessage(msg);
-		$msg.data = msg;
-		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container);//.attr("data-color", msg.author.color);
-		$msgContainer.on("click", function(e) {
-			e.stopPropagation();
-			var $this = $(this);
-			if ($this.hasClass('on')) {
-				var width = (100 / ($this.siblings().length + 1)) + "px";
-				collapseElement($(this));
-			} else {
-				expandElement($(this));
-			};
-		});
-		$msgContainer.append($("<div>").addClass('handle').css("background-color", getMsgColor(msg)));	// antes  hecho con pseudoelemento
-		$msgContainer.append($msg);
+		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container)
+			.attr("data-user", msg.usuarioOrigen)
+			// antes  hecho con pseudoelemento:
+			.append($("<div>").addClass('handle').css("background-color", getMsgColor(msg)))
+			.on("click", toggleElement)	// muestra u oculta la conversación
+		$msgContainer.get(0).msg = msg; // guardamos el mensaje con el elemento
+		// $msgContainer.append(createMessage(msg));
 		if (msg.children) {
 			var children = msg.children;
 			var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer)
 				.on("mousemove", accordion)
 				.on("mouseleave", accordionReset);
-			var width = (100/msg.children.length) +  "%";
 			children.forEach(function(m) {
 				appendMessage(m, $childrenContainer).addClass(m.selected ? "sel" : "nosel");
 			});
 		};
-		$msgContainer.attr("data-user", msg.usuarioOrigen);
 		return $msgContainer;
 	};
 	$mainContainer = $("#chart-ouput").empty();
@@ -282,8 +293,8 @@ function expandToElement(root, callbackCondition) {
 function TalkVisualizer(data) {
 	var RADIUS_DEFAULT = 5,
 		RADIUS = RADIUS_DEFAULT
-		NODE_BORDER_DEFAULT = 2,
-		NODE_BORDER = NODE_BORDER_DEFAULT;
+		NODE_BORDER_DEFAULT = 1,
+		NODE_BORDER = NODE_BORDER_DEFAULT+"px";
 	// Manipulación de los datos
 	// console.log(data);
 	// console.log(JSON.stringify(data));
@@ -315,7 +326,7 @@ function TalkVisualizer(data) {
 			// vector = [center.x+vector[0], center.y+vector[1]];
 			svg.attr("transform", d3Translate(vector) + d3Scale(scale));
 			RADIUS = RADIUS_DEFAULT / scale;
-			NODE_BORDER = NODE_BORDER_DEFAULT / scale;
+			NODE_BORDER = (NODE_BORDER_DEFAULT / scale)+"px";
 		})
 		.on("zoomend", function() {
 			svg.selectAll(".node circle")
@@ -628,7 +639,7 @@ $("#chart-control .sort-users").on("click", function() {
 $(".expand").on("click", function() {
 	$this = $(this);
 	$this.toggleClass('on');
-	var $expandable = $(this).closest(".expandable");
+	var $expandable = $(this).closest(".expandable").toggleClass('on');
 	var newSize = "";
 	if ($this.hasClass('on')) {
 		var newSize = $expandable.attr("data-width");

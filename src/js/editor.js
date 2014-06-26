@@ -95,7 +95,7 @@ function Editor(container, api, callback) {
 	var MAXCHAR = MAXCHAR_DEFAULT;		// máximo de caracteres para el mensaje
 	var CONFIG;			// configuración que almacena el editor
 	var USER_FINDER = null;
-	var THEME_FINDER = null;
+	var THEME_FINDER = null; 
 
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
