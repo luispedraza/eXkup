@@ -635,13 +635,13 @@ function showThread(threadID, originalMsgID) {
 	// 	[]);
 	var modal = new ModalDialog("Cargando datos", {type:"spinner", text: "Obteniendo datos del servidor..."}, []);
 	API.loadThread(threadID, function(info) {
-		TIC();
+		// TIC();
 		modal.close()
-		modal = new ModalDialog("Procesando datos", {type:"progress"}, []);
 		var $tree = $("#tree").empty();
 		var aux = {};
 		/* agregar un nuevo nodo: item + children */
 		var $highlightedMsg = null;
+		/* Función que añade un nuevo elemento a la conversación */
 		function addNode(msg, parentID) {
 			var msgID = msg.idMsg;
 			var $msg = createMessage(msg);
@@ -669,29 +669,48 @@ function showThread(threadID, originalMsgID) {
 			};
 			parent.children.append($newNode);
 		};
+		/* Función que se ejecuta cuando termina de procesarse el thread */
+		function onEnd() {
+			// TOC(true);
+			showTreeBoard(true);	// mostramos el resultado
+			$treeBoard = $("#tree-board").attr("data-thread", threadID)	// lo guardamos en el board, para visualización
+				.off("mousemove").on("mousemove", function(e) {
+					if ($("#mouse-follow").hasClass('on')) {
+						var treeBoardRect = this.getBoundingClientRect(),
+							treeRect = document.getElementById("tree").getBoundingClientRect();
+						var alfa = (e.clientX - treeBoardRect.left) / treeBoardRect.width;
+						var scroll = Math.floor(alfa*(treeRect.width - treeBoardRect.width));
+						$treeBoard.scrollLeft(scroll);
+					};
+				});
+			setTimeout(function() {
+				// scroll hasta el mensaje de punto de entrada
+				$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);
+				modal.close();	// ocultamos el diálogo informativo de carga
+			}, 1500);
+		};
 		var messages = info.mensajes;
 		addNode(API.buildThreadMessage(messages[0], info.perfilesUsuarios), null);
 		var replies = messages.slice(1);	// cojo todas las respuestas al nodo raíz
-		replies.forEach(function(m) {
-			addNode(API.buildThreadMessage(m, info.perfilesUsuarios), m.idMsgRespuesta);
+		var dlgConfig = {	type: "progress",
+							data: replies,
+							span: 100,
+							callbackItem: function(item) {
+								addNode(API.buildThreadMessage(item, info.perfilesUsuarios), item.idMsgRespuesta);
+							},
+							callbackEnd: onEnd};
+		modal = new ModalDialog("Procesando " + messages.length + " mensajes",
+			dlgConfig, ["Cancelar"], function(r) {
+			if (r=="Cancelar") {
+				modal.stopProgress();
+				$tree.empty();
+			};
 		});
-		TOC(true);
-		showTreeBoard(true);	// mostramos el resultado
-		$treeBoard = $("#tree-board").attr("data-thread", threadID)	// lo guardamos en el board, para visualización
-			.off("mousemove").on("mousemove", function(e) {
-				if ($("#mouse-follow").hasClass('on')) {
-					var treeBoardRect = this.getBoundingClientRect(),
-						treeRect = document.getElementById("tree").getBoundingClientRect();
-					var alfa = (e.clientX - treeBoardRect.left) / treeBoardRect.width;
-					var scroll = Math.floor(alfa*(treeRect.width - treeBoardRect.width));
-					$treeBoard.scrollLeft(scroll);
-				};
-			});
-		setTimeout(function() {
-			// scroll hasta el mensaje de punto de entrada
-			$treeBoard.scrollTop($highlightedMsg.offset().top-$treeBoard.offset().top);
-			modal.close();	// ocultamos el diálogo informativo de carga
-		}, 1500);
+		modal.runProgress();
+		// replies.forEach(function(m) {
+		// 	addNode(API.buildThreadMessage(m, info.perfilesUsuarios), m.idMsgRespuesta);
+		// });
+		
 	});
 };
 

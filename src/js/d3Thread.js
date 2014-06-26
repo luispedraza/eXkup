@@ -12,6 +12,7 @@ function getUserColor(user) {
 	return user.selected ? user.color : "#ccc";
 };
 
+
 function dispatchSelectUser(username, add) {
 	var e = document.createEvent("CustomEvent");
 	var detail = {'user': username, 'add': add};
@@ -79,9 +80,7 @@ function populateMessages(tree) {
 		});
 		return false;
 	};
-	function accordionReset() {
-		$(this).find(".msg-container:not(.on)").css("width","");
-	};
+	function accordionReset() {$(this).find(".msg-container:not(.on)").css("width","");};
 	function appendMessage(msg, $container) {
 		var $msg = createMessage(msg);
 		$msg.data = msg;
@@ -282,7 +281,9 @@ function expandToElement(root, callbackCondition) {
 // visualización en árbol:
 function TalkVisualizer(data) {
 	var RADIUS_DEFAULT = 5,
-		RADIUS = RADIUS_DEFAULT;
+		RADIUS = RADIUS_DEFAULT
+		NODE_BORDER_DEFAULT = 2,
+		NODE_BORDER = NODE_BORDER_DEFAULT;
 	// Manipulación de los datos
 	// console.log(data);
 	// console.log(JSON.stringify(data));
@@ -310,9 +311,11 @@ function TalkVisualizer(data) {
 		.scaleExtent([.25,8])
 		.on("zoom", function() {
 			var vector = d3.event.translate;
+			var scale = d3.event.scale;
 			// vector = [center.x+vector[0], center.y+vector[1]];
-			svg.attr("transform", d3Translate(vector) + d3Scale(d3.event.scale));
-			RADIUS = RADIUS_DEFAULT / d3.event.scale;
+			svg.attr("transform", d3Translate(vector) + d3Scale(scale));
+			RADIUS = RADIUS_DEFAULT / scale;
+			NODE_BORDER = NODE_BORDER_DEFAULT / scale;
 		})
 		.on("zoomend", function() {
 			svg.selectAll(".node circle")
@@ -500,7 +503,9 @@ function TalkVisualizer(data) {
 				});
 			nodeEnter.append("circle")
 				.attr("r", function(d) {return RADIUS})
-				.attr("fill", getMsgColor);
+				.attr("fill", getMsgColor)
+				.attr("stroke", "#fff")
+				.attr("stroke-width", NODE_BORDER);
 			// Node name:
 			// nodeEnter.append("text")
 			// 	.attr("transform", LAYOUT.textTransform)
@@ -514,7 +519,11 @@ function TalkVisualizer(data) {
 				.duration(duration)
 				.attr("transform", nodePosition)
 				.select("circle")
-				.attr("fill", getMsgColor);
+					.attr("fill", getMsgColor)
+					.attr("stroke", function(d) {
+						return (d._children) ? d3.rgb(getMsgColor(d)).darker().toString() : "#fff";
+					})
+					.attr("stroke-width", NODE_BORDER);
 			// nodeUpdate.select("text")
 			// 	.attr("transform", LAYOUT.textTransform)
 			// 	.attr("text-anchor", LAYOUT.textAnchor)
@@ -568,7 +577,7 @@ function TalkVisualizer(data) {
 };
 
 /* se obtiene la información de la extensión */
-// var TEST = 2;
+var TEST = 3;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {

@@ -15,8 +15,6 @@ svg {
 }
 
 .node circle {
-  stroke: #fff;
-  stroke-width: .1px;
   cursor: pointer;
 }
 

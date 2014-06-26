@@ -16,12 +16,37 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 	if (extra) {
 		var $extra = $("<div class='dlg_extra'></div>");
 		if (extra.type == "progress") {
+			var callbackItem = extra.callbackItem;	// a ejecutar sobre cada item
+			var callbackEnd = extra.callbackEnd;	// a ejecutar al final
+			var dataArray = extra.data;				// array de items
+			var span = extra.span;					// elementos a procesar por iteración
+			$bar = $("<div>").addClass('loading-progress'); 	// la barra de progreso
 			$extra
 				.append($("<div>").addClass('loading-container')
 					.append($("<div>").addClass('loading-bar')
-						.append($("<div>").addClass('loading-progress'))));
-			THAT.setProgress = function(value) {
-				console.log(value);
+						.append($bar)));
+			var iterations = Math.floor(dataArray.length/span);	// número de procesamientos
+			var currentIteration = 0;	// procesamiento actual
+			THAT.runProgress = function(value) {
+				function processSpanArray() {
+					setTimeout(function() {
+						if (currentIteration>iterations) {
+							callbackEnd();
+							removeDialog();
+						} else {
+							var initial = currentIteration*span;
+							dataArray.slice(initial, initial+span).forEach(callbackItem);
+							var completed = Math.floor(100*currentIteration/iterations) + "%";
+							$bar.css("width", completed).text(completed);
+							currentIteration++;
+							processSpanArray();	// se vuelve a llamar a la función
+						};
+					}, 50);
+				};
+				processSpanArray();
+			};
+			THAT.stopProgress = function() {
+				currentIteration = iterations;
 			};
 		} else if (extra.type=="spinner") {
 			$extra

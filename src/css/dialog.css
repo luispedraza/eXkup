@@ -157,6 +157,10 @@
 
 .loading-progress {
 	background-color: #f30;
-	height: 10px;
-	width: 50%;
+	height: 20px;
+	padding: 5px;
+	width: 0%;
+	color: #fff;
+	font-size: 12px;
+	content: " ";
 }
