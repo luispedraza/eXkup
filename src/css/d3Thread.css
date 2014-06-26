@@ -260,6 +260,14 @@ span:nth-child(5) {
   margin-left: 2px;
 }
 
+/* palabras */
+#chart-control .word {
+  display: inline-block;
+  font-size: 10px;
+  margin-right: 2px;
+}
+
+
 #chart-control img {
   height: 100px;
   margin-right: 5px;

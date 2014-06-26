@@ -1,4 +1,5 @@
 var PREPOSICIONES = {a:true,ante:true,bajo:true,cabe:true,con:true,contra:true,de:true,desde:true,durante:true,en:true,entre:true,hacia:true,hasta:true,mediante:true,para:true,por:true,según:true,sin:true,so:true,sobre:true,tras:true,versus:true,vía:true};
+var ARTICULOS = {el:true, la:true, los:true, las:true, un:true, una:true, unos:true, unas:true};
 var VISUALIZER = null;
 
 
@@ -55,17 +56,6 @@ function populateMessages(tree) {
 				.siblings().css( "width", "0" );
 		};
 	};
-	// function expandElement($e) {
-	// 	$e.addClass("current")
-	// 		.add($e.parents(".msg-container")).addClass("on").css("width", "100%").siblings().css( "width", "0" );
-	// };
-	// function collapseElement($e) {
-	// 	$e.add($e.find(".msg-container.on")).each(function() {
-	// 		var $this = $(this);
-	// 		var width = (100 / ($this.siblings().length + 1)) + "px";
-	// 		$this.removeClass('on current').css("width", width).siblings().css( "width", width);
-	// 	});
-	// };
 	function accordion(event) {
 		var $element = $(this);
 		event.stopPropagation();
@@ -105,11 +95,9 @@ function populateMessages(tree) {
 	function appendMessage(msg, $container) {
 		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container)
 			.attr("data-user", msg.usuarioOrigen)
-			// antes  hecho con pseudoelemento:
 			.append($("<div>").addClass('handle').css("background-color", getMsgColor(msg)))
 			.on("click", toggleElement)	// muestra u oculta la conversación
 		$msgContainer.get(0).msg = msg; // guardamos el mensaje con el elemento
-		// $msgContainer.append(createMessage(msg));
 		if (msg.children) {
 			var children = msg.children;
 			var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer)
@@ -141,7 +129,6 @@ function DataProcessor(data, hideAll) {
 		});
 	};
 	function messageProcessor(m) {
-		console.log(m);
 		var id = m.idMsg;
 		THAT.messages[id] = m;
 		// referencias 
@@ -165,7 +152,17 @@ function DataProcessor(data, hideAll) {
 			imgElement.messages.push(id);
 		};
 		// Número de palabras:
-		if (author.nWords) author.nWords+=12; else author.nWords=12;
+		var words = THAT.words;
+		var count = 0;
+		m.contenido.replace(/(<([^>]+)>)/ig,"").replace(/[¡!¿?\.,:;\+\{\}\(\)\"\']/g, "").replace(/ +/g, " ")
+			.toLowerCase().split(" ")
+			.forEach(function(w) {
+				if (!PREPOSICIONES[w] && !ARTICULOS[w]) {
+					words[w] ? (words[w].n++) : (words[w]={n:1});
+					count++;
+				};
+			});
+		if (author.nWords) author.nWords+=count; else author.nWords=count;
 	};
 
 	/* Selección de mensajes */
@@ -440,7 +437,11 @@ function TalkVisualizer(data) {
 
 		};
 		function populateWords(words) {
-
+			var theWords = sortArray(makeArray(PROCESSOR.words), "__key");
+			var $list = $("#words-list");
+			theWords.forEach(function(word) {
+				$list.append($("<li>").addClass("word").text(word.__key + " (" + word.n + ")"));
+			});			
 		};
 		populateUsers();
 		populateImages();
@@ -588,7 +589,7 @@ function TalkVisualizer(data) {
 };
 
 /* se obtiene la información de la extensión */
-// var TEST = 3;
+var TEST = 0;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
