@@ -1,3 +1,44 @@
+/* Inicializa los eventos de un mensaje */
+function onMessageEnter() {
+	$this = $(this);
+	$this.find(".author")
+		.on("click", onAuthorClick);
+	$this.find(".time")
+		.on("mouseover", onTimeMouseover)
+		.on("mouseout", onTimeMouseout);
+	$this.find(".themes li")
+		.on("click", onThemeClick);
+	$control = $this.find(".msg_control");
+	$control.find(".fav")
+		.on("click", onAddFavoriteClick);
+	$control.find(".reply")
+		.on("click", onReplyMessageClick);
+	$control.find(".fwd")
+		.on("click", onForwardMessageClick);
+	$control.find(".delete")
+		.on("click", onDeleteMessageClick);
+};
+/* Remueve los eventos de un mensaje */
+function onMessageExit() {
+	$this = $(this);
+	$this.find(".author")
+		.off("click");
+	$this.find(".time")
+		.off("mouseover")
+		.off("mouseout");
+	$this.find(".themes li")
+		.off("click");
+	$control = $this.find(".msg_control");
+	$control.find(".fav")
+		.off("click");
+	$control.find(".reply")
+		.off("click");
+	$control.find(".fwd")
+		.off("click");
+	$control.find(".delete")
+		.off("click");
+};
+
 /* Función que se ejecuta al hacer click en un elemento de la lista de temas */
 function onThemeClick() {
 	loadBoard($(this).attr("data-theme"));

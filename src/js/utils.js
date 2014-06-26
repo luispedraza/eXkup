@@ -20,8 +20,10 @@ var TIC_TOC_TIME = 0;
 function TIC() {
 	TIC_TOC_TIME = new Date();
 };
-function TOC() {
-	return (new Date() - TIC_TOC_TIME);
+function TOC(print) {
+	var ellapsed = new Date() - TIC_TOC_TIME;
+	if (print) console.log(ellapsed);
+	return ellapsed;
 };
 
 Array.prototype.shuffle = function() {

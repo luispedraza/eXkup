@@ -140,3 +140,23 @@
 .images-selector img:not(.on):hover {
 	outline: 2px solid #f30;
 }
+
+/* Spinner de carga */
+.spinner {
+    text-align: center;
+	color: #f30;
+    width: 100%;
+    font-size: 30px;
+}
+
+/* Barra de progreso */
+.loading-bar {
+	background-color: #f5f5f5;
+	border: 1px solid #eee;
+}
+
+.loading-progress {
+	background-color: #f30;
+	height: 10px;
+	width: 50%;
+}

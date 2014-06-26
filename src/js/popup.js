@@ -630,22 +630,26 @@ function onWriteTheme() {
 
 /* Carga de una conversación completa */
 function showThread(threadID, originalMsgID) {
-	var modal = new ModalDialog("Cargando datos",
-		"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
-		[]);
+	// var modal = new ModalDialog("Cargando datos",
+	// 	"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
+	// 	[]);
+	var modal = new ModalDialog("Cargando datos", {type:"spinner", text: "Obteniendo datos del servidor..."}, []);
 	API.loadThread(threadID, function(info) {
+		TIC();
+		modal.close()
+		modal = new ModalDialog("Procesando datos", {type:"progress"}, []);
 		var $tree = $("#tree").empty();
 		var aux = {};
 		/* agregar un nuevo nodo: item + children */
-		var $newNode, $newItem, $newMsg, newMore;
 		var $highlightedMsg = null;
 		function addNode(msg, parentID) {
 			var msgID = msg.idMsg;
-			$newNode = $("<div>").addClass('node');
-			$newItem = $("<div>").addClass('item').appendTo($newNode);
-			$newMsg = createMessage(msg).appendTo($newItem);
+			var $msg = createMessage(msg);
 			if (msgID == originalMsgID)
-				$highlightedMsg = $newMsg.addClass('highlighted');	// resaltamos el mensaje de entrada al hilo
+				$highlightedMsg = $msg.addClass('highlighted');	// resaltamos el mensaje de entrada al hilo
+			var $newNode = $("<div>").addClass('node')
+				.append($("<div>").addClass('item')
+					.append($msg));
 			aux[msgID] = {node: $newNode};
 			if (parentID == null) {
 				$tree.append($newNode);
@@ -671,6 +675,7 @@ function showThread(threadID, originalMsgID) {
 		replies.forEach(function(m) {
 			addNode(API.buildThreadMessage(m, info.perfilesUsuarios), m.idMsgRespuesta);
 		});
+		TOC(true);
 		showTreeBoard(true);	// mostramos el resultado
 		$treeBoard = $("#tree-board").attr("data-thread", threadID)	// lo guardamos en el board, para visualización
 			.off("mousemove").on("mousemove", function(e) {
@@ -707,19 +712,18 @@ function createMessage(msg, themes) {
 	// Creación del nuevo mensaje:
 	$msg = $("<div>").addClass('message')
 		.attr("data-author", user)
-		.attr("data-id", m_id);
+		.attr("data-id", m_id)
+		.on("mouseenter", onMessageEnter)
+		.on("mouseleave", onMessageExit);
 	// La cabecera:
 	var $head = $("<div>").addClass('msg_header')
 		.append($("<img>").attr("src", msg.pathfoto))
-		.append($("<a>").attr("href", "#")
+		.append($("<a>").attr("href", "#").addClass("author")
 			.text("@" + user + (msg.usuarioOrigenNombre ? (" (" + msg.usuarioOrigenNombre + ")") : ""))
-			.attr("data-user", user)
-			.on("click", onAuthorClick))
+			.attr("data-user", user))
 		.append(
 			makeLink(getTimeAgo(new Date(tsMessage), new Date()),"http://eskup.elpais.com/" + m_id)
-				.addClass("time fa fa-clock-o").attr("data-ts", tsMessage)
-				.on("mouseover", onTimeMouseover)
-				.on("mouseout", onTimeMouseout));
+				.addClass("time fa fa-clock-o").attr("data-ts", tsMessage));
 	// Mensaje reenviado
 	if (msg.reenvio) {
 		$head.append($("<span>").addClass('btn reply2link fa fa-retweet')
@@ -743,8 +747,7 @@ function createMessage(msg, themes) {
 				var themeID = themeKey.split("-")[1];
 				$themes.append($("<li>")
 					.attr("data-theme", themeKey)
-					.text(themes[themeID].nombre)
-					.on("click", onThemeClick));
+					.text(themes[themeID].nombre));
 			});
 			$msg.attr("data-themes", JSON.stringify(msgThemes.map(function(d){return d.split("-")[1];})));
 		};
@@ -752,14 +755,11 @@ function createMessage(msg, themes) {
 	// Elementos de control:
 	var $control = $("<div>").addClass('msg_control')
 		.append($("<div>").addClass('btn fav fa fa-star' + (API.checkFavorite(m_id) ? " on" : ""))
-			.text(" favorito")
-			.on("click", onAddFavoriteClick))
+			.text(" favorito"))
 		.append($("<div>").addClass('btn reply fa fa-mail-reply')
-			.text(" responder")
-			.on("click", onReplyMessageClick))
+			.text(" responder"))
 		.append($("<div>").addClass('btn fwd fa fa-retweet')
-			.text(" reenviar")
-			.on("click", onForwardMessageClick));
+			.text(" reenviar"));
 	// Hilos de mensajes
 	if (msg.idMsgRespuesta && (msg.idMsgRespuesta != m_id)) {
 		$head.append($("<span>").addClass('btn reply2link fa fa-mail-reply')
@@ -773,11 +773,9 @@ function createMessage(msg, themes) {
 	};
 	// Mensaje propio
 	if (user == API.getUserNickname()) {
-		$control.append($("<div>").addClass('btn fa fa-trash-o')
-			.text(" borrar")
-			.on("click", onDeleteMessageClick));
+		$control.append($("<div>").addClass('btn delete fa fa-trash-o')
+			.text(" borrar"));
 	};
-	
 	return $msg.append([$head, $content, $themes, $control]);
 };
 
