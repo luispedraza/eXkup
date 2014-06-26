@@ -588,7 +588,7 @@ function TalkVisualizer(data) {
 };
 
 /* se obtiene la información de la extensión */
-var TEST = 3;
+// var TEST = 3;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
