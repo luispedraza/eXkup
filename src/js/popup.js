@@ -357,7 +357,7 @@ function loadBoardMessages(theme, callback) {
 	};
 	function infoShowLoadingMessages() {
 		LOADING = true;
-		$board.append("<div class='loading'><i class='fa fa-refresh fa-spin'></i> CARGANDO...</div>");
+		$board.append("<div class='loading'><i class='fa fa-spinner fa-spin'></i> CARGANDO...</div>");
 	};
 	function infoHideLoadingMessages() {
 		LOADING = false;
