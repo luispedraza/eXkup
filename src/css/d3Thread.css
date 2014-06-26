@@ -66,11 +66,11 @@ svg {
   height: 10px;
   border: 1px solid #fff;
 }
-#chart-ouput .msg-container.filter .handle {
+#chart-ouput .msg-container.sel .handle {
   /*background-color: #f30;*/
   /*background-color: attr(data-color color);*/
 }
-#chart-ouput .msg-container.nofilter .handle {
+#chart-ouput .msg-container.nosel .handle {
 /*  background-color: #eee;*/
 }
 #chart-ouput .children-container {
@@ -162,13 +162,13 @@ svg {
   color: #aaa;
   list-style: none;
   white-space: nowrap;
-  padding: 3px;
+  padding: 5px 0;
   border-top: 1px solid #ccc;
-  display: list-item;
+  /* display: list-item; */
 }
 #chart-control .item span {
   display: inline-block;
-  padding: 5px 0;
+  /* padding: 5px 0; */
   margin-right: 3px;
   vertical-align: middle;
 }
@@ -178,7 +178,7 @@ svg {
 
 #chart-control .check {
   position: relative;
-  padding: 5px 0;
+  /* padding: 5px 0; */
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
@@ -197,7 +197,7 @@ svg {
   display: block;
   position: absolute;
   left: 2px;
-  top: 8px;
+  top: 3px;
   width: 8px;
   height: 8px;
   content: " ";
@@ -226,13 +226,13 @@ svg {
 #check-all-users:after {
   /* margin-left: 15px; */
   /* padding: 0; */
-  top: 8px !important;
+  /* top: 8px !important; */
 }
 #users-list input[type="color"] {
   opacity: 0;
 }
 span:nth-child(1) {
-  width: 110px;
+  width: 115px;
 }
 span:nth-child(2) {
   width: 10px;
@@ -258,19 +258,19 @@ span:nth-child(5) {
 }
 #chart-control .list-head {
   background-color: #f5f5f5;
-  border-bottom: 1px solid #ccc;
-  box-shadow: 0 5px 5px -4px rgba(100,100,100,.5);
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 5px 5px 0 rgba(100,100,100,.2);
   /* font-weight: bold !important; */
 }
-#chart-control .list-head .fa {
+#chart-control .list-head span {
   font-weight: bold;
   color: #666;
   cursor: pointer;
 }
-#chart-control .list-head .fa:hover {
-  background-color: #ddd;
+#chart-control .list-head span:hover {
+  color: #000;
 }
-#chart-control .list-head .fa:before {
+#chart-control .list-head span:before {
   font-weight: normal;
   margin-left: 2px;
 }

@@ -6,13 +6,16 @@ var USER_COLOR = new ColorGenerator();
 
 /* Obtiene el color de pintado para un mensaje dado */
 function getMsgColor(msg) {
-	return msg.filtered ? msg.author.color : "#ccc";
+	return msg.selected ? msg.author.color : "#ccc";
+};
+function getUserColor(user) {
+	return user.selected ? user.color : "#ccc";
 };
 
-function dispatchFilterUser(username, filter) {
+function dispatchSelectUser(username, add) {
 	var e = document.createEvent("CustomEvent");
-	var detail = {'user': username, 'type': filter ? "add" : "remove"};
-	e.initCustomEvent("updateFilter", false, false, detail);
+	var detail = {'user': username, 'add': add};
+	e.initCustomEvent("updateSelection", false, false, detail);
 	document.getElementById("svg").dispatchEvent(e);
 };
 
@@ -64,7 +67,6 @@ function populateMessages(tree) {
 				sum += (Math.cos(xTheta)+1)/2;
 			};
 		});
-		// var k = width/sum;
 		var k = 100/sum;
 		$children.each(function(i) {
 			var xPos = ((i*span+span/2)-x) * xScale;
@@ -103,7 +105,7 @@ function populateMessages(tree) {
 				.on("mouseleave", accordionReset);
 			var width = (100/msg.children.length) +  "%";
 			children.forEach(function(m) {
-				appendMessage(m, $childrenContainer).addClass(m.filtered ? "filter" : "nofilter");
+				appendMessage(m, $childrenContainer).addClass(m.selected ? "sel" : "nosel");
 			});
 		};
 		$msgContainer.attr("data-user", msg.usuarioOrigen);
@@ -119,15 +121,17 @@ function populateMessages(tree) {
 	@ param hidden: inicialmente todas las respuestas están ocultas
 */
 function DataProcessor(data, hideAll) {
-	function generateColors(users) {
+	function initUsers(users) {
 		var userNicknames = Object.keys(users);
-		console.log(userNicknames);
 		var nUsers = Object.keys(users).length;
 		userNicknames.forEach(function(u,i) {
-			users[u].color = d3.hsl(i*360/nUsers, .5, .5).toString();
+			var user = users[u];
+			user.color = d3.hsl(i*360/nUsers, .5, .5).toString();
+			user.selected = !hideAll;
 		});
 	};
 	function messageProcessor(m) {
+		console.log(m);
 		var id = m.idMsg;
 		THAT.messages[id] = m;
 		// referencias 
@@ -135,6 +139,9 @@ function DataProcessor(data, hideAll) {
 		// usuario
 		var author = THAT.users[m.usuarioOrigen];	// autor del mensaje
 		if (author.nMessages) author.nMessages++; else author.nMessages=1;
+		if (m.borrado) {
+			if (author.nDeleted) author.nDeleted++; else author.nDeleted=1;
+		};
 		var authorReplied = THAT.users[m.autorMsgRespuesta];
 		if (authorReplied.nReplies) authorReplied.nReplies++; else authorReplied.nReplies=1;
 		m.author = author;
@@ -151,8 +158,8 @@ function DataProcessor(data, hideAll) {
 		if (author.nWords) author.nWords+=12; else author.nWords=12;
 	};
 
-	/* Filtrado de mensajes */
-	this.filter = function(filter) {
+	/* Selección de mensajes */
+	this.select = function(selector) {
 		function addFound(msg) {
 			var parent = msg.parent;
 			if (!parent) return;
@@ -184,7 +191,7 @@ function DataProcessor(data, hideAll) {
 			var parent = msg.parent;
 			if (!parent) return;
 			parent.referencesCounter--;
-			var needed = (msg.filtered || (msg.referencesCounter!=0));		// necesidad del elemento
+			var needed = (msg.selected || (msg.referencesCounter!=0));		// necesidad del elemento
 			if (!needed) {
 				var pHidden = (parent._hidden || (parent._hidden = []));
 				if (pHidden.indexOf(msg)<0) {		
@@ -209,19 +216,23 @@ function DataProcessor(data, hideAll) {
 			};
 			removeFound(parent);
 		};
-		function evaluateMessage(m, add) {
-			m.filtered = add;								// true si se agrega el filtro, false si se elimina
-			(add) ? addFound(m) : removeFound(m);
+		/* Evaluación de un mensaje 
+			@param select: true para agregar, false para eliminar
+		*/
+		function evaluateMessage(m, select) {
+			if (m.selected == select) return; // el mensaje no cambia su estado de selección
+			m.selected = select; // true si se agrega el filtro, false si se elimina
+			(select) ? addFound(m) : removeFound(m);
 		};
-		var filterAdd = (filter.type === "add");
+		console.log("seleccionando", selector);
 		var allMessages = THAT.messages;
-		if (filter.user) {
-			if (filter.user == "*") {
-				for (m in allMessages) evaluateMessage(allMessages[m], filterAdd);
+		if (selector.user) {
+			if (selector.user == "*") {
+				for (m in allMessages) evaluateMessage(allMessages[m], selector.add);
 			} else  {
-				var mIDs = THAT.users[filter.user].messages;	// array de ids de mensajes del usuario
+				var mIDs = THAT.users[selector.user].messages;	// array de ids de mensajes del usuario
 				mIDs.forEach(function(id) {
-					evaluateMessage(allMessages[id], filterAdd);
+					evaluateMessage(allMessages[id], selector.add);
 				});
 			};
 		};
@@ -238,7 +249,7 @@ function DataProcessor(data, hideAll) {
 	var index = THAT.messages;
 	var messages = data.mensajes;
 	var rootMsg = messages[0];
-	rootMsg.filtered = true;		// el raíz nunca eas filtrado
+	rootMsg.selected = true;			// el raíz nunca eas filtrado
 	messageProcessor(rootMsg);
 	var replies = messages.slice(1);
 	replies.forEach(function(m) {
@@ -247,17 +258,17 @@ function DataProcessor(data, hideAll) {
 		if (hideAll) {
 			var pHidden = (parentObj._hidden || (parentObj._hidden = []));
 			pHidden.push(m);			// se agrega como hijo  OCULTO del padre
-			m.filtered = false;
+			m.selected = false;
 		} else {
 			var pChildren = (parentObj.children || (parentObj.children = []));
 			pChildren.push(m);			// se agrega como hijo del padre
-			m.filtered = true;
+			m.selected = true;
 			parentObj.referencesCounter++;
 		};
 		messageProcessor(m);		// procesamiento del mensaje para extraer información
 	});
 	this.tree = rootMsg;
-	generateColors(this.users);
+	initUsers(this.users);
 };
 
 function expandToElement(root, callbackCondition) {
@@ -270,7 +281,7 @@ function expandToElement(root, callbackCondition) {
 
 // visualización en árbol:
 function TalkVisualizer(data) {
-	var RADIUS_DEFAULT = 4,
+	var RADIUS_DEFAULT = 5,
 		RADIUS = RADIUS_DEFAULT;
 	// Manipulación de los datos
 	// console.log(data);
@@ -324,8 +335,9 @@ function TalkVisualizer(data) {
 				.attr("transform", d3Translate([center.x,center.y]))
 
 	/* Actualización de filtros */
-	document.getElementById("svg").addEventListener("updateFilter", function(e) {
-		PROCESSOR.filter(e.detail);
+	document.getElementById("svg").addEventListener("updateSelection", function(e) {
+		PROCESSOR.select(e.detail);
+		console.log("quedando", root);
 		update();
 	});
 	
@@ -367,11 +379,11 @@ function TalkVisualizer(data) {
 						})
 						.on("click", function() {
 							var user = $(this).closest("li").get(0).user;
-							dispatchFilterUser(user.__key, $(this).toggleClass('on').hasClass('on'));
+							dispatchSelectUser(user.__key, $(this).toggleClass('on').hasClass('on'));
 							$(this).closest("li").find(".color-picker").css("background-color", user.color).find("input").val(user.color);
 						}))
-					.append($("<span>").addClass("color-picker")
-						.append($("<input>").attr("type", "color")
+					.append($("<span>").addClass("color-picker").css("background-color", getUserColor(user))
+						.append($("<input>").attr("type", "color").val(getUserColor(user))
 							.on("change", function(e) {
 								var $this = $(this);
 								var newColor = $this.val();
@@ -385,6 +397,7 @@ function TalkVisualizer(data) {
 								$("#chart-messages .msg-container[data-user="+user.__key+"] .handle").css("background-color", newColor);
 							})))
 					.append($("<span>").text(user.nMessages))
+					.append($("<span>").text(user.nDeleted))
 					.append($("<span>").text(user.nWords))
 					.append($("<span>").text(user.nReplies));
 				$row.get(0).user = user;
@@ -555,7 +568,7 @@ function TalkVisualizer(data) {
 };
 
 /* se obtiene la información de la extensión */
-// var TEST = 3;
+// var TEST = 2;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
@@ -597,19 +610,11 @@ $("#check-all-users").on("click", function() {
 	var $this = $(this);
 	$this.toggleClass('on');
 	$("#users-list .check").toggleClass('on', $this.hasClass('on'));
-	dispatchFilterUser("*", $this.hasClass('on'))
+	dispatchSelectUser("*", $this.hasClass('on'))
 });
-$("#sort-nickname").on("click", function() {
-	sortUsers("nickname");
-});
-$("#sort-nmessages").on("click", function() {
-	sortUsers("nMessages");
-});
-$("#sort-nwords").on("click", function() {
-	sortUsers("nWords");
-});
-$("#sort-nreplies").on("click", function() {
-	sortUsers("nReplies");
+// Ordenación de usuarios:
+$("#chart-control .sort-users").on("click", function() {
+	sortUsers($(this).attr("data-field"));
 });
 $(".expand").on("click", function() {
 	$this = $(this);

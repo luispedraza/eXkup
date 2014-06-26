@@ -9,6 +9,13 @@ var TABLONES = {
 	favs: "favs"
 };
 
+var VIDEO_TEMPLATES = {
+	"YOUTUBE": "<iframe class='video' type='text/html' src='http://www.youtube.com/embed/_____ID_____?autoplay=0' frameborder='0'/>",
+	"VIMEO": "<iframe class='video' src='http://player.vimeo.com/video/_____ID_____' frameborder='0'></iframe>",
+	"ZAPPINTERNET": "<iframe class='video' src='http://zappinternet.com/embed/_____ID_____' frameborder='0' scrolling='no'></iframe>",
+	"DAILYMOTION": "<iframe class='video' frameborder='0' src='http://www.dailymotion.com/embed/video/_____ID_____'></iframe>"
+};
+
 var TIC_TOC_TIME = 0;
 function TIC() {
 	TIC_TOC_TIME = new Date();
@@ -149,45 +156,50 @@ function checkUserPhoto(path) {
 	https://developers.google.com/youtube/player_parameters
 	http://developer.vimeo.com/player/embedding
 */
-function processContent($content) {
-	function insertVideo($element, id, fragment) {
-		$element.before(fragment.replace("_____ID_____", id)).remove();
-	};
-	var YOUTUBE_EMBED = "<iframe class='video' type='text/html' src='http://www.youtube.com/embed/_____ID_____?autoplay=0' frameborder='0'/>";
-	var VIMEO_EMBED = "<iframe class='video' src='http://player.vimeo.com/video/_____ID_____' frameborder='0'></iframe>";
-	var ZAPPINTERNET_EMBED = "<iframe class='video' src='http://zappinternet.com/embed/_____ID_____' frameborder='0' scrolling='no'></iframe>";
-	var DAILYMOTION_EMBED = "<iframe class='video' frameborder='0' src='http://www.dailymotion.com/embed/video/_____ID_____'></iframe>";
-	$links = $content.find("a");
+function findVideos($content) {
+	var $links = $content.find("a");
+	var found = [];
 	$links.each(function() {
 		var $this = $(this),
-			href = ($this.attr("title") || $this.attr("href"));	// esto es porque los cort.as traene la url original en el title :)
+			href = ($this.attr("title") || $this.attr("href"));	// esto es porque los cort.as trae la url original en el title :)
 		if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
 			var videoMatch = href.match(/[?&]v=([^&]+)/);
 			if (videoMatch && videoMatch[1]) {
-				insertVideo($this, videoMatch[1], YOUTUBE_EMBED);
+				found.push({$element: $this, service: "YOUTUBE", id: videoMatch[1]});
 				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*vimeo.com/)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*vimeo.com\/(\d+)/);
 			if (videoMatch && videoMatch[1]) {
-				insertVideo($this, videoMatch[1], VIMEO_EMBED);
+				found.push({$element: $this, service: "VIMEO", id: videoMatch[1]});
 				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*zappinternet.com\/video\//)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*zappinternet.com\/video\/(.+?)\//);
 			if (videoMatch && videoMatch[1]) {
-				insertVideo($this, videoMatch[1], ZAPPINTERNET_EMBED);
+				found.push({$element: $this, service: "ZAPPINTERNET", id: videoMatch[1]});
 				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*dailymotion.com\/video\//)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*dailymotion.com\/video\/([\w-]+)/);
 			if (videoMatch && videoMatch[1]) {
-				insertVideo($this, videoMatch[1], DAILYMOTION_EMBED);
+				found.push({$element: $this, service: "DAILYMOTION", id: videoMatch[1]});
 				return;
 			};
 		};
-		$this.replaceWith(makeLink(href ,href, 20).addClass('a-link'));
+		found.push({$element: $this, service: null, href: href});	// tratado como simple enlace
 	});
+	return found;
+};
+/* Reemplaza los enlaxes y vídeos encontrados por findVideo */
+function replaceLinks(info) {
+	info.forEach(function(a) {
+		if (a.service) a.$element.replaceWith($(VIDEO_TEMPLATES[a.service].replace("_____ID_____", a.id)));
+		else a.$element.replaceWith(makeLink(a.href ,a.href, 20).addClass('a-link'));
+	});
+};
+function processContent($content) {
+	replaceLinks(findVideos($content));
 };
 
 /* Convertir un objeto en una array, por ejemplo para ordenar luego sus elementos */

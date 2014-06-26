@@ -22,16 +22,17 @@
 	<script build="remove" type="text/javascript" src="js/d3SampleData.js" exclude="1"></script>
 </head>
 <body id="conversation">
-	<div id="chart-control" class="expandable" data-width="400px">
+	<div id="chart-control" class="expandable" data-width="500px">
 		<h1 class="fa fa-sliders"> CONTROLES<div class="fa fa-chevron-right expand"></div></h1>
 		<div>
 			<h2>Usuarios <span id="n-users"></span><span id="check-all-users" class="check"></span></h2>
 			<div class="list-head item">
-				<span id="sort-nickname" class="fa fa-sort"> nickname</span>
+				<span id="sort-nickname" class="sort-users fa fa-sort" data-field="nickname"> nickname</span>
 				<span class="color-picker"></span>
-				<span id="sort-nmessages" class="fa fa-sort"> mensajes</span>
-				<span id="sort-nwords" class="fa fa-sort"> palabras</span>
-				<span id="sort-nreplies" class="fa fa-sort"> respuestas</span>
+				<span id="sort-nmessages" class="sort-users fa fa-sort" data-field="nMessages"> mensajes</span>
+				<span id="sort-ndeleted" class="sort-users fa fa-sort" data-field="nDeleted"> borrados</span>
+				<span id="sort-nwords" class="sort-users fa fa-sort" data-field="nWords"> palabras</span>
+				<span id="sort-nreplies" class="sort-users fa fa-sort" data-field="nReplies"> respuestas</span>
 			</div>
 			<ul id="users-list" class="list"></ul>
 			<h2>Palabras</h2>
