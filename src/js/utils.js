@@ -205,11 +205,24 @@ function processContent($content) {
 };
 
 /* Convertir un objeto en una array, por ejemplo para ordenar luego sus elementos */
-function makeArray(obj) {
+function makeArray(obj, keyname) {
+	if (typeof keyname=="undefined") keyname = "__key";
 	var result = [];
 	for (k in obj) {
 		var val = obj[k];
-		val.__key = k;
+		val[keyname] = k;
+		result.push(val);
+	};
+	return result;
+};
+
+/* Convertir un objeto en una array, cuando las claves son enteros */
+function makeIntArray(obj, keyname) {
+	if (typeof keyname=="undefined") keyname = "__key";
+	var result = [];
+	for (k in obj) {
+		var val = obj[k];
+		val[keyname] = k >> 0;
 		result.push(val);
 	};
 	return result;
@@ -222,9 +235,55 @@ function sortArray(array, field) {
 	});
 };
 
+/* Función para ordenar un array de objetos numéricamente según el campo indicado */
+function sortNumArray(array, field) {
+	return array.sort(function(a,b) {
+		return (a[field] < b[field]) ? -1 : 1;
+	});
+};
+
 /* Función que determina si un objecto es de tipo Array */
 function isArray(object) {
 	return object instanceof Array;
 };
+
+/* Redondeo de un instante a una resolución de días */
+function roundTimeDays(ts) {
+	var date = new Date(ts);
+	date = new Date(date.getFullYear(), date.getMonth(),date.getDay());
+	return date.getTime();
+};
+
+/* Redondeo de un instante a una resolución de horas */
+function roundTimeHour(ts) {
+	var date = new Date(ts);
+	// var floor = new Date(date.getFullYear(), date.getMonth(),date.getDay(), date.getHours());
+	date.setMinutes(0);
+	date.setSeconds(0);
+	date.setMilliseconds(0);
+	return date.getTime();
+};
+/* Redondeo de un instante a una resolución de minutos */
+function roundTimeMinutes(ts) {
+	var date = new Date(ts);
+	// var floor = new Date(date.getFullYear(), date.getMonth(),date.getDay(), date.getHours());
+	date.setSeconds(0);
+	date.setMilliseconds(0);
+	return date.getTime();
+};
+
+/* Redondeo de un instante a una resolución de segundos */
+function roundTimeSeconds(ts) {
+	var date = new Date(ts);
+	// var floor = new Date(date.getFullYear(), date.getMonth(),date.getDay(), date.getHours());
+	date.setMilliseconds(0);
+	return date.getTime();
+};
+
+
+
+
+
+
 
 

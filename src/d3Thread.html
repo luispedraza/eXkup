@@ -8,9 +8,11 @@
 	<link rel="stylesheet" href="css/d3Thread.css" type="text/css" />
 	<link rel="stylesheet" href="css/dialog.css" type="text/css" />
 	<link rel="stylesheet" href="css/editor.css" type="text/css" />
+	<link rel="stylesheet" href="css/rickshaw.css" type="text/css" />
 
 	<script build="no" type="text/javascript" src="lib/d3.3.4.8.min.js"></script>
 	<script build="no" type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
+	<script build="no" type="text/javascript" src="lib/rickshaw.min.js"></script>
 	
 	<script type="text/javascript" src="js/utils.js"></script>
 	<script type="text/javascript" src="js/dialog.js"></script>
@@ -22,6 +24,12 @@
 	<script build="remove" type="text/javascript" src="js/d3SampleData.js" exclude="1"></script>
 </head>
 <body id="conversation">
+	<div id="d3-frequency"></div>
+	<div id="d3-chart"></div>
+	<div id="chart-options">
+		<div id="set-timeline" class="option">timeline</div>
+		<div id="set-tree" class="option">árbol</div>
+	</div>
 	<div id="chart-control" class="expandable" data-width="500px">
 		<h1 class="fa fa-sliders"> CONTROLES<div class="fa fa-chevron-right expand"></div></h1>
 		<div>
@@ -47,6 +55,7 @@
 		<h1 class="fa fa-comments"> CONVERSACIÓN<div class="fa fa-chevron-right expand"></div></h1>
 		<div id="chart-ouput"></div>
 	</div>
+
 
 	<script type="text/javascript" src="js/d3Thread.js"></script>
 </body>

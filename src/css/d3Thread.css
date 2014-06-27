@@ -1,17 +1,17 @@
 body {
   width: auto;
+  -webkit-box-sizing: border-box;
 }
 /*********************/
 /* Elementos del SVG */
 /*********************/
 
-svg {
+#d3-chart {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 450px;
   right: 0;
   bottom: 0;
-  z-index: -1;
 }
 
 .node circle {
@@ -35,7 +35,7 @@ svg {
 #chart-messages {
   width: 300px;
   margin: 0;
-  background-color: rgba(250,255,255,.5);
+  background-color: rgba(255,255,255,.5);
   overflow-y: scroll;
   max-height: 100%;
   position: fixed;
@@ -102,7 +102,7 @@ svg {
 }
 
 #chart-control {
-  background-color: #fff;
+  background-color: rgba(255,255,255,.9);
   width: 150px;
   font-size: 12px;
   position: fixed;
@@ -274,3 +274,41 @@ span:nth-child(5) {
   float: left;
   margin-top: 5px;
 }
+
+
+/* Diagramas de frecuencia */
+#d3-frequency {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 449px;
+  height: 300px;
+}
+#d3-frequency.on {
+  top: 0;
+  height: auto;
+}
+
+/* OPciones de visualización */
+#chart-options {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 200px;
+  height: 200px;
+  background-color: #eee;
+  border: 1px solid black;
+  padding: 5px;
+}
+#chart-options .option {
+  padding: 2px;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+}
+#chart-options .option:hover {
+  background-color: #666;
+}
+
+
+
