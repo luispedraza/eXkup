@@ -32,25 +32,32 @@
 	</div>
 	<div id="chart-control" class="expandable" data-width="500px">
 		<h1 class="fa fa-sliders"> CONTROLES<div class="fa fa-chevron-right expand"></div></h1>
-		<div>
+		<div id="users-list">
 			<h2>Usuarios <span id="n-users"></span><span id="check-all-users" class="check"></span></h2>
 			<div class="list-head item">
-				<span id="sort-nickname" class="sort-users fa fa-sort" data-field="nickname"> nickname</span>
+				<span id="sort-nickname" class="nickname sort-users fa fa-sort" data-field="nickname"> nickname</span>
 				<span class="color-picker"></span>
-				<span id="sort-nmessages" class="sort-users fa fa-sort" data-field="nMessages"> mensajes</span>
-				<span id="sort-ndeleted" class="sort-users fa fa-sort" data-field="nDeleted"> borrados</span>
-				<span id="sort-nwords" class="sort-users fa fa-sort" data-field="nWords"> palabras</span>
-				<span id="sort-nreplies" class="sort-users fa fa-sort" data-field="nReplies"> respuestas</span>
+				<span id="sort-nmessages" class="nmessages sort-users fa fa-sort" data-field="nMessages"> mensajes</span>
+				<span id="sort-ndeleted" class="ndeleted sort-users fa fa-sort" data-field="nDeleted"> borrados</span>
+				<span id="sort-nwords" class="nwords sort-users fa fa-sort" data-field="nWords"> palabras</span>
+				<span id="sort-nreplies" class="nreplies sort-users fa fa-sort" data-field="nReplies"> respuestas</span>
 			</div>
 			<ul id="users-list" class="list"></ul>
-			<h2>Palabras</h2>
-			<ul id="words-list" class="list"></ul>
+		</div>
+		<div id="words-list">
+			<h2>Top Palabras</h2>
+			<ol id="words-list" class="list columns"></ol>
+		</div>
+		<div id="images-list">
 			<h2>Imágenes</h2>
 			<ul id="images-list" class="list"></ul>
+		</div>
+		<div id="videos-list">
 			<h2>Vídeos</h2>
 			<ul id="videos-list" class="list"></ul>
 		</div>
 	</div>
+
 	<div id="chart-messages" class="expandable" data-width="max">
 		<h1 class="fa fa-comments"> CONVERSACIÓN<div class="fa fa-chevron-right expand"></div></h1>
 		<div id="chart-ouput"></div>

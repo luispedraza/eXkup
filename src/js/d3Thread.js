@@ -1,7 +1,32 @@
-var PREPOSICIONES = {a:true,ante:true,bajo:true,cabe:true,con:true,contra:true,de:true,desde:true,durante:true,en:true,entre:true,hacia:true,hasta:true,mediante:true,para:true,por:true,según:true,sin:true,so:true,sobre:true,tras:true,versus:true,vía:true};
-var ARTICULOS = {el:true, la:true, los:true, las:true, un:true, una:true, unos:true, unas:true};
-var VISUALIZER = null;
+var MONOSILABOS = ".";
+var PREPOSICIONES = "ante|bajo|cabe|con|contra|de(sde)?|durante|en(tre)?|hacia|hasta|mediante|para|por|segun|sin|so(bre)?|tras|versus|via";
+var ARTICULOS = "el|l[ao]s?|un|un[ao]s?|al|del|este|est[ao]s?|mis?|sus?";
+var INTERJECCIONES = "ah|arre|a+y+|bah+|buah+|chiton|ea|eh|ey+|guau|guay|hala|hey|o+h+|ole|ojala|puaj|puf+|(j+a+)+";
+var CONJUNCIONES = "ni|pero|sino|conque|luego|tan|tanto|asi|que";
+// http://www.solosequenosenada.com/gramatica/spanish/listado/lista_07_pronombres.php
+var PRONOMBRES_PER = "yo|me|mi|nos(otr[ao]s)?|t[eiu]|os|usted(es)?|vos(otr[ao]s)?|contigo|el(l[ao]s?)?|l[aeo]s?|s[ei]|consigo";
+var PRONOMBRES_DEM = "aquel(l[ao]s?)?|es[aeo]s?|est[aeo]s?";
+var PRONOMBRES_POS = "mi[ao]s?|[nv]uestr[ao]s?|[st]uy[ao]s|tus?";
+var PRONOMBRES_IND = "algo|alguien|algun([ao]s?)?|cual(es)?quiera|demas|mism[ao]s?|much[ao]s?|nada|nadie|ningun([ao]s?)?|otr[ao]s?|poc[ao]s?|quien(es)?quiera|tant[ao]s?|tod[ao]s?|ultim[ao]s?|un([ao]s?)?|vari[ao]s";
+var PRONOMBRES_INT = "a?donde|como|cual(es)?|cuando|cuant[ao]s?|que|quien(es)?";
+var PRONOMBRES_REL = "cuy[ao]s"; // se han omitido algunos por redundancia con los anteriores
+var PRONOMBRES = [PRONOMBRES_PER, PRONOMBRES_DEM, PRONOMBRES_POS, PRONOMBRES_IND, PRONOMBRES_INT, PRONOMBRES_REL].join("|");
 
+var ADV_LUGAR = "aqui|all[ai]|ahi|aca|arriba|abajo|cerca|lejos|delante|detras|encima|debajo|enfrente|atras|alrededor";
+var ADV_TIEMPO = "pront[ao]|tarde|temprano|todavia|aun(que)?|ya|ayer|hoy|mañana|siempre|nunca|jamas|proxim[ao]|anoche|enseguida|ahora|mientras|anterior";
+var ADV_MODO = "bien|mal|regular|despacio|deprisa|tal|como|aprisa|adrede|peor|mejor";
+var ADV_CANT = "muy|poco|mucho|bastante|mas|menos|algo|demasiado|casi|sol[ao]|tan(to)?|tod[ao]|nada|aproximad[ao]";
+var ADV_AFIRM = "si|tambien|ciert[ao]|efectiv[ao]|clar[ao]|exact[ao]|obvi[ao]|verdader[ao]|segur[ao]";
+var ADV_NEGAC = "no|jamas|nunca|tampoco";
+var ADV_DUDA = "quizas?|acaso|probable|posible|tal vez|puede( ser)?";
+var ADV_OTROS = "inclusive|ademas|unic[ao]s?|incluso|\w+mente|viceversa|siquiera|por\s?que";
+var ADVERBIOS = [ADV_LUGAR, ADV_TIEMPO, ADV_MODO, ADV_CANT, ADV_AFIRM, ADV_NEGAC, ADV_DUDA, ADV_OTROS].join("|");
+
+var OTROS = "dos|tres|vale(nrs])?|ve[ron]|creo|sabes?|quier[aeo]([ns])?|parece|decir|tengo|dar|hecho|vez|dice|digo|cada|es|ha([nsy])?|haya(n)?(is)?|soy?n?(mos)?|s?era?n?|tiene([ns])?|pues|van?(mos)?|estoy|estan?(mos)?(is)?|hace[nr]?(mos)?|haciendo|sean?(mos)?(is)?|he(mos)?|fue|era(mos)?(is)?|sido|da|van|etc|haber";
+
+var NO_WORDS = new RegExp(" "+[MONOSILABOS, PREPOSICIONES, ARTICULOS, INTERJECCIONES, CONJUNCIONES, PRONOMBRES, ADVERBIOS, OTROS].join("|").replace(/\|/g," \| ")+" ", "g");
+
+var VISUALIZER = null;
 
 var USER_COLOR = new ColorGenerator();
 
@@ -13,10 +38,10 @@ function getUserColor(user) {
 	return user.selected ? user.color : "#ccc";
 };
 
-
-function dispatchSelectUser(username, add) {
+function dispatchSelect(type, value, add) {
 	var e = document.createEvent("CustomEvent");
-	var detail = {'user': username, 'add': add};
+	var detail = {'add': add};
+	detail[type] = value;
 	e.initCustomEvent("updateSelection", false, false, detail);
 	document.getElementById("svg").dispatchEvent(e);
 };
@@ -129,44 +154,59 @@ function DataProcessor(data, hideAll) {
 		});
 	};
 	function messageProcessor(m) {
-		var id = m.idMsg;
-		THAT.messages[id] = m;
+		THAT.index[m.idMsg] = m;
 		// referencias 
 		m.referencesCounter = 0;	// contador de referencias a este objeto
 		// usuario
 		var author = THAT.users[m.usuarioOrigen];	// autor del mensaje
 		if (author.nMessages) author.nMessages++; else author.nMessages=1;
-		if (m.borrado) {
-			if (author.nDeleted) author.nDeleted++; else author.nDeleted=1;
-		};
 		var authorReplied = THAT.users[m.autorMsgRespuesta];
 		if (authorReplied.nReplies) authorReplied.nReplies++; else authorReplied.nReplies=1;
 		m.author = author;
 		var userMsgs = author.messages || (author.messages = []);
-		userMsgs.push(id);	// todos los mensajes de este usuario
+		userMsgs.push(m);	// todos los mensajes de este usuario
+		// Mensajes borrados:
+		if (m.borrado) {
+			if (author.nDeleted) author.nDeleted++; else author.nDeleted=1;
+			return; // no hay imágenes, vídeos o palabras que procesar
+		};
 		// imagen
 		var images = THAT.images;
 		if (m.cont_adicional) {
-			var content = m.cont_adicional;
-			var imgElement = images[content] || (images[content] = {'messages': []});
-			imgElement.messages.push(id);
+			var cont = m.cont_adicional;
+			var imgElement = images[cont] || (images[cont] = {'messages': []});
+			imgElement.messages.push(m);
 		};
 		// vídeos:
 		var $msg = $("<div>").html(m.contenido);
-		var links = findVideos($msg);
-		var content = $msg.text();
-		
+		var $links = processContent($msg, false);
+		$links.remove();
 		// Número de palabras:
+		var content = " " + $msg.text() + " ";
 		var words = THAT.words;
-		var count = 0;
-		content.replace(/\W+/g, " ").replace(/ +/g, " ")
-			.toLowerCase().split(" ")
-			.forEach(function(w) {
-				if (!PREPOSICIONES[w] && !ARTICULOS[w]) {
-					words[w] ? (words[w].n++) : (words[w]={n:1});
-					count++;
+		content = content.replace(/[ \d-'`~¡!@#$%^&*_€+=¿?;:'"“”,\|\.<>\(\)\{\}\[\]\\\/]+/g, "  ");
+		var count = content.split("  ").length;
+		content = content.toLowerCase()
+			.replace(/[aáàä]/g, "a")
+			.replace(/[eéèë]/g, "e")
+			.replace(/[iíìï]/g, "i")
+			.replace(/[oóòö]/g, "o")
+			.replace(/[uúùü]/g, "u")
+			.replace(NO_WORDS, " ")
+			.replace(/ +/g, " ").trim();
+		if (content.length) {
+			var localIndex = {};	// para evitar asociar dos ceces un mensaje a la misma palabra (duplicadas)
+			content.split(" ").forEach(function(w) {
+				if (words[w]) {
+					words[w].n++;
+					if (localIndex[w]) return;	// ya está asociado el mensaje a la palabra
+					words[w].messages.push(m);
+				} else {
+					words[w] = {messages: [m], n: 1};
 				};
+				localIndex[w] = 1;
 			});
+		};
 		if (author.nWords) author.nWords+=count; else author.nWords=count;
 	};
 	function computeFrequencies() {
@@ -187,6 +227,7 @@ function DataProcessor(data, hideAll) {
 
 	/* Selección de mensajes */
 	this.select = function(selector) {
+		console.log("seleccionando");
 		function addFound(msg) {
 			var parent = msg.parent;
 			if (!parent) return;
@@ -247,21 +288,23 @@ function DataProcessor(data, hideAll) {
 			@param select: true para agregar, false para eliminar
 		*/
 		function evaluateMessage(m, select) {
-			if (m.selected == select) return; // el mensaje no cambia su estado de selección
-			m.selected = select; // true si se agrega el filtro, false si se elimina
-			(select) ? addFound(m) : removeFound(m);
+			m.selected += (select) ? 1 : (-1);
+			if (m.selected*select==1) addFound(m);	// se ha pasado de 0 a 1
+			else if (m.selected==0) removeFound(m);
 		};
-		var allMessages = THAT.messages;
+		var messages;
 		if (selector.user) {
 			if (selector.user == "*") {
-				for (m in allMessages) evaluateMessage(allMessages[m], selector.add);
+				messages = THAT.messages;
 			} else  {
-				var mIDs = THAT.users[selector.user].messages;	// array de ids de mensajes del usuario
-				mIDs.forEach(function(id) {
-					evaluateMessage(allMessages[id], selector.add);
-				});
+				messages = THAT.users[selector.user].messages;	// array de mensajes
 			};
+		} else if (selector.word) {
+			messages = THAT.words[selector.word].messages;
 		};
+		messages.forEach(function(m) {
+			evaluateMessage(m, selector.add);
+		});
 		computeFrequencies();	// recalcular frecuencias para el nuevo conjunto de mensajes
 	};
 	// Procesamiento de los datos:
@@ -269,26 +312,23 @@ function DataProcessor(data, hideAll) {
 	var THAT = this;
 	this.words = {};
 	this.images = {};
-	this.videos = {};
-	this.messages = {};	// Diccionario de mensajes, ESCLUIDO EL RAIZ
+	this.videos = {};	
 	this.users = data.perfilesUsuarios;	
 	this.freq = {}; 	// frecuencias de mensajes para la selección actual
 
-	var index = THAT.messages;
-	var messages = data.mensajes;
-	var rootMsg = messages[0];
-	rootMsg.selected = true;			// el raíz nunca es filtrado
-
-	// var endTS = roundTimeHour(messages.slice(-1)[0].tsMensaje*1000);	// final de tiempos
+	var index = this.index = {};				// Diccionario de todos los mensajes
+	
+	var rootMsg = data.mensajes[0];
+	rootMsg.selected = 1;			// el raíz nunca es filtrado
 	messageProcessor(rootMsg);
-	var replies = messages.slice(1);
+	var replies = this.messages = data.mensajes.slice(1); // Array de mensajes, excluido el raiz
 	if (hideAll) {
 		replies.forEach(function(m) {
 			var parentObj = index[m.idMsgRespuesta];
 			m.parent = parentObj;		// el padre de este mensaje
 			var pHidden = (parentObj._hidden || (parentObj._hidden = []));
 			pHidden.push(m);			// se agrega como hijo  OCULTO del padre
-			m.selected = false;
+			m.selected = 0;
 			messageProcessor(m);		// procesamiento del mensaje para extraer información
 		});
 	} else {
@@ -297,7 +337,7 @@ function DataProcessor(data, hideAll) {
 			m.parent = parentObj;		// el padre de este mensaje
 			var pChildren = (parentObj.children || (parentObj.children = []));
 			pChildren.push(m);			// se agrega como hijo del padre
-			m.selected = true;
+			m.selected = 1;
 			parentObj.referencesCounter++;
 			messageProcessor(m);		// procesamiento del mensaje para extraer información
 		});
@@ -315,13 +355,13 @@ function TalkVisualizer(data) {
 		NODE_BORDER = NODE_BORDER_DEFAULT+"px";
 	// Manipulación de los datos
 	// console.log(data);
-	console.log(JSON.stringify(data));
+	// console.log(JSON.stringify(data));
 	var PROCESSOR = new DataProcessor(data, true);
 	var FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR);
 
 	var root = PROCESSOR.tree;
 	root.x0 = root.y0 = 0;
-	console.log(root);
+	// console.log(root);
 
 
 	var container = document.querySelector("#d3-chart"),
@@ -419,24 +459,24 @@ function TalkVisualizer(data) {
 		function populateUsers() {
 			var theUsers = sortArray(makeArray(PROCESSOR.users), "__key");
 			$("#n-users").text("("+theUsers.length+")");
-			var $list = $("#users-list");
+			var $list = $("#users-list ul");
 			theUsers.forEach(function(user) {
 				var $row = $("<li>").addClass("item").attr("data-user", user.__key)
-					.append($("<span>").addClass("check").text("@"+user.__key)
-						.on("mouseover", function() {
-							var username = $(this).closest("li").attr("data-user");
-							d3.selectAll("g.node circle")
-							.transition().duration(duration)
-							.attr("r", function(n) {
-								return (n.usuarioOrigen == username) ? (RADIUS*3) : RADIUS;
-							});
-						})
-						.on("mouseout", function() {
-							d3.selectAll("g.node circle").attr("r", RADIUS);
-						})
+					.on("mouseover", function() {
+						var username = $(this).closest("li").attr("data-user");
+						d3.selectAll("g.node circle")
+						.transition().duration(duration)
+						.attr("r", function(n) {
+							return (n.usuarioOrigen == username) ? (RADIUS*3) : RADIUS;
+						});
+					})
+					.on("mouseout", function() {
+						d3.selectAll("g.node circle").attr("r", RADIUS);
+					})
+					.append($("<span>").addClass("nickname check").text("@"+user.__key)
 						.on("click", function() {
 							var user = $(this).closest("li").get(0).user;
-							dispatchSelectUser(user.__key, $(this).toggleClass('on').hasClass('on'));
+							dispatchSelect("user", user.__key, $(this).toggleClass('on').hasClass('on'));
 							$(this).closest("li").find(".color-picker").css("background-color", user.color).find("input").val(user.color);
 						}))
 					.append($("<span>").addClass("color-picker").css("background-color", getUserColor(user))
@@ -452,17 +492,17 @@ function TalkVisualizer(data) {
 								d3.selectAll("g.node.user-"+user.__key+" circle").attr("fill", newColor);
 								$("#chart-messages .msg-container[data-user="+user.__key+"] .handle").css("background-color", newColor);
 							})))
-					.append($("<span>").text(user.nMessages))
-					.append($("<span>").text(user.nDeleted))
-					.append($("<span>").text(user.nWords))
-					.append($("<span>").text(user.nReplies));
+					.append($("<span>").addClass("nmessages").text(user.nMessages))
+					.append($("<span>").addClass("ndeleted").text(user.nDeleted))
+					.append($("<span>").addClass("nwords").text(user.nWords))
+					.append($("<span>").addClass("nreplies").text(user.nReplies));
 				$row.get(0).user = user;
 				$list.append($row);	// guardamos también el usuario correspondientes
 			});
 		};
 		function populateImages() {
 			var theImages = makeArray(PROCESSOR.images);
-			var li = d3.select("#images-list").selectAll("li").data(theImages);
+			var li = d3.select("#images-list ul").selectAll("li").data(theImages);
 			li.enter().append("img")
 				.attr("src", function(d){return d.__key})
 				.on("mouseover", function(d) {
@@ -482,10 +522,15 @@ function TalkVisualizer(data) {
 
 		};
 		function populateWords(words) {
-			var theWords = sortArray(makeArray(PROCESSOR.words), "__key");
-			var $list = $("#words-list");
-			theWords.forEach(function(word) {
-				$list.append($("<li>").addClass("word").text(word.__key + " (" + word.n + ")"));
+			var theWords = sortNumArray(makeArray(PROCESSOR.words, "word"), "n", true).slice(0,65);
+			var $list = $("#words-list .list");
+			theWords.forEach(function(w) {
+				$list.append($("<li>").addClass("word").text(w.word + " (" + w.n + ")")
+					.data(w)
+					.on("click", function() {
+						var $this = $(this);
+						dispatchSelect("word", $this.data().word, $(this).toggleClass('on').hasClass('on'));
+					}));
 			});			
 		};
 		populateUsers();
@@ -652,7 +697,7 @@ function FrequencyVisualizer(element, processor) {
 };
 
 /* se obtiene la información de la extensión */
-var TEST = 3;
+var TEST = 1;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
@@ -668,11 +713,11 @@ if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	chrome.runtime.onMessage.addListener (
 		function(request, sender) {
 			VISUALIZER = new TalkVisualizer(request.info);
-		});	
+		});
 };
 
 function sortUsers(sorting) {
-	var $list = $("#users-list");
+	var $list = $("#users-list .list");
 	var $items = $list.find("li");
 	$items = $items.sort(function(a,b) {
 		if (sorting=="nickname") {
@@ -693,19 +738,17 @@ function sortUsers(sorting) {
 $("#check-all-users").on("click", function() {
 	var $this = $(this);
 	$this.toggleClass('on');
-	$("#users-list .check").toggleClass('on', $this.hasClass('on'));
-	dispatchSelectUser("*", $this.hasClass('on'))
+	$("#users-list .list .check").toggleClass('on', $this.hasClass('on'));
+	dispatchSelect("user", "*", $this.hasClass('on'))
 });
 // Ordenación de usuarios:
 $("#chart-control .sort-users").on("click", function() {
 	sortUsers($(this).attr("data-field"));
 });
 $(".expand").on("click", function() {
-	$this = $(this);
-	$this.toggleClass('on');
 	var $expandable = $(this).closest(".expandable").toggleClass('on');
 	var newSize = "";
-	if ($this.hasClass('on')) {
+	if ($expandable.hasClass('on')) {
 		var newSize = $expandable.attr("data-width");
 		if (newSize=="max") {
 			newSize = (window.innerWidth - $expandable.offset().left - 20) + "px";

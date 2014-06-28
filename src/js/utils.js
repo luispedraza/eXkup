@@ -234,10 +234,17 @@ function sortArray(array, field) {
 };
 
 /* Función para ordenar un array de objetos numéricamente según el campo indicado */
-function sortNumArray(array, field) {
-	return array.sort(function(a,b) {
-		return (a[field] < b[field]) ? -1 : 1;
-	});
+function sortNumArray(array, field, reverse) {
+	if (typeof reverse === "undefined") reverse = false;
+	if (reverse) {
+		return array.sort(function(a,b) {
+			return (a[field] > b[field]) ? -1 : 1;
+		});
+	} else {
+		return array.sort(function(a,b) {
+			return (a[field] < b[field]) ? -1 : 1;
+		});
+	};
 };
 
 /* Función que determina si un objecto es de tipo Array */

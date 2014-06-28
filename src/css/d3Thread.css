@@ -1,6 +1,7 @@
 body {
   width: auto;
   -webkit-box-sizing: border-box;
+  height: 1000px;
 }
 /*********************/
 /* Elementos del SVG */
@@ -24,7 +25,6 @@ body {
 
 .link {
   fill: none;
-  /*stroke: #999;*/
   stroke-width: .2px;
 }
 
@@ -43,7 +43,6 @@ body {
   left: 150px;
   bottom: 0;
   font-size: 12px;
-  /*border-collapse: collapse;*/
   -webkit-box-sizing: border-box;
   border-right: 1px solid #ccc;
 }
@@ -132,22 +131,22 @@ body {
   padding: 10px;
   cursor: pointer;
 }
-#conversation .expand.on:before {
-  -webkit-transform: rotate(180deg);
-}
 .expandable {
-  transition: width .5s ease;
+   transition: width .5s ease; 
+}
+.expandable.on .expand:before {
+  -webkit-transform: rotate(180deg);
 }
 
 #chart-control > div {
-  padding: 10px;
+  padding: 0 10px;
 }
 #chart-control h2 {
   text-transform: uppercase;
   font-weight: bold;
   font-size: 12px;
   color: #aaa;
-  margin: 10px 0 5px 0;
+  margin: 5px 0 2px 0;
   border-bottom: 2px solid #ccc;
 }
 #chart-control .item {
@@ -160,7 +159,6 @@ body {
 #chart-control .item span {
   display: inline-block;
   margin-right: 3px;
-  vertical-align: middle;
 }
 #chart-control .check.on {
   color: #000;
@@ -168,11 +166,11 @@ body {
 
 #chart-control .check {
   position: relative;
-  /* padding: 5px 0; */
   cursor: pointer;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  vertical-align: middle;
 }
 #chart-control .check:before {
   display: inline-block;
@@ -200,15 +198,6 @@ body {
   background-color: #f30;
 }
 
-#chart-control .item .color-picker {
-  /* border: 1px solid #ccc; */
-  width: 10px;
-  height: 10px;
-  padding: 0;
-  overflow: hidden;
-  border-radius: 200px;
-  padding: 0;
-}
 #check-all-users {
   margin-left: 5px;
   vertical-align: middle;
@@ -217,21 +206,31 @@ body {
 #users-list input[type="color"] {
   opacity: 0;
 }
-span:nth-child(1) {
+
+#users-list .nickname {
   width: 115px;
 }
-span:nth-child(2) {
+#users-list .color-picker {
   width: 10px;
+  height: 10px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 200px;
+  padding: 0;
 }
-span:nth-child(3) {
+#users-list .nmessages {
   width: 75px;
   text-align: center;
 }
-span:nth-child(4) {
+#users-list .ndeleted {
   width: 75px;
   text-align: center;
 }
-span:nth-child(5) {
+#users-list .nwords {
+  width: 80px;
+  text-align: center;
+}
+#users-list .nreplies {
   width: 80px;
   text-align: center;
 }
@@ -242,16 +241,19 @@ span:nth-child(5) {
   padding: 0;
   overflow-x: hidden;
 }
+
 #chart-control .list-head {
   background-color: #f5f5f5;
   border-bottom: 1px solid #ddd;
   box-shadow: 0 5px 5px 0 rgba(100,100,100,.2);
 }
+
 #chart-control .list-head span {
   font-weight: bold;
   color: #666;
   cursor: pointer;
 }
+
 #chart-control .list-head span:hover {
   color: #000;
 }
@@ -261,12 +263,40 @@ span:nth-child(5) {
 }
 
 /* palabras */
-#chart-control .word {
-  display: inline-block;
+#words-list .word {
   font-size: 10px;
+  text-transform: uppercase;
+  overflow: hidden;   
+  white-space: nowrap;   
+  text-overflow: ellipsis;
+}
+#words-list .word:hover, #words-list .word:hover:before {
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+}
+#words-list .list {
+  counter-reset: nwords;
+}
+#words-list li:before {
+  content: counter(nwords, decimal-leading-zero);
+  font-size: 8px;
+  counter-increment: nwords;
+  background-color: #aaa;
+  padding: 2px;
+  color: #fff;
+  width: 10px;
+  height: 10px;
   margin-right: 2px;
 }
-
+#words-list li.on:before, #words-list li.on:hover:before {
+  background-color: #f30;
+}
+.on #words-list .list {
+  -webkit-column-count: 5;
+  -webkit-column-rule: 1px solid #ccc;
+  overflow: hidden;
+}
 
 #chart-control img {
   height: 100px;
@@ -274,7 +304,6 @@ span:nth-child(5) {
   float: left;
   margin-top: 5px;
 }
-
 
 /* Diagramas de frecuencia */
 #d3-frequency {
@@ -309,6 +338,3 @@ span:nth-child(5) {
 #chart-options .option:hover {
   background-color: #666;
 }
-
-
-
