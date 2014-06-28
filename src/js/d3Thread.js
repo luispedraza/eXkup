@@ -224,6 +224,9 @@ function DataProcessor(data, hideAll) {
 		data.fRange = [0, maxFreq];
 		data.tsRange = [data[0].x, data.slice(-1)[0].y];
 	};
+	this.selectMode = function(mode) {
+		THAT.mode = mode;
+	};
 
 	/* Selección de mensajes */
 	this.select = function(selector) {
@@ -314,6 +317,7 @@ function DataProcessor(data, hideAll) {
 	this.videos = {};	
 	this.users = data.perfilesUsuarios;	
 	this.freq = {}; 	// frecuencias de mensajes para la selección actual
+	this.mode = "or"; 	// modo de selección de mensajes: and (y lógico de criterios), or (o lógico de criterios)
 
 	var index = this.index = {};				// Diccionario de todos los mensajes
 	
@@ -663,6 +667,10 @@ function TalkVisualizer(data) {
 	};
 
 	update();
+	$("#switch").on("click", function() {
+		$(this).toggleClass("or and");
+		PROCESSOR.selectMode($(this).hasClass("and") ? "and" : "or");
+	});
 };
 
 /* Visualización de frecuencias */
@@ -764,6 +772,7 @@ $("#set-tree").on("click", function() {
 	$("#d3-frequency").removeClass('on');
 	VISUALIZER.config({layout:"tree"});
 });
+
 
 
 
