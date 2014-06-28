@@ -696,7 +696,7 @@ function FrequencyVisualizer(element, processor) {
 };
 
 /* se obtiene la información de la extensión */
-// var TEST = 1;
+var TEST = 1;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
