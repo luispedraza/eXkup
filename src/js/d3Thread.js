@@ -227,7 +227,6 @@ function DataProcessor(data, hideAll) {
 
 	/* Selección de mensajes */
 	this.select = function(selector) {
-		console.log("seleccionando");
 		function addFound(msg) {
 			var parent = msg.parent;
 			if (!parent) return;
@@ -459,7 +458,7 @@ function TalkVisualizer(data) {
 		function populateUsers() {
 			var theUsers = sortArray(makeArray(PROCESSOR.users), "__key");
 			$("#n-users").text("("+theUsers.length+")");
-			var $list = $("#users-list ul");
+			var $list = $("#chart-control .users-list ul");
 			theUsers.forEach(function(user) {
 				var $row = $("<li>").addClass("item").attr("data-user", user.__key)
 					.on("mouseover", function() {
@@ -502,7 +501,7 @@ function TalkVisualizer(data) {
 		};
 		function populateImages() {
 			var theImages = makeArray(PROCESSOR.images);
-			var li = d3.select("#images-list ul").selectAll("li").data(theImages);
+			var li = d3.select("#chart-control .images-list ul").selectAll("li").data(theImages);
 			li.enter().append("img")
 				.attr("src", function(d){return d.__key})
 				.on("mouseover", function(d) {
@@ -523,7 +522,7 @@ function TalkVisualizer(data) {
 		};
 		function populateWords(words) {
 			var theWords = sortNumArray(makeArray(PROCESSOR.words, "word"), "n", true).slice(0,65);
-			var $list = $("#words-list .list");
+			var $list = $("#chart-control .words-list .list");
 			theWords.forEach(function(w) {
 				$list.append($("<li>").addClass("word").text(w.word + " (" + w.n + ")")
 					.data(w)
@@ -697,7 +696,7 @@ function FrequencyVisualizer(element, processor) {
 };
 
 /* se obtiene la información de la extensión */
-var TEST = 1;
+// var TEST = 1;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
@@ -717,7 +716,7 @@ if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 };
 
 function sortUsers(sorting) {
-	var $list = $("#users-list .list");
+	var $list = $("#chart-control .users-list .list");
 	var $items = $list.find("li");
 	$items = $items.sort(function(a,b) {
 		if (sorting=="nickname") {
@@ -738,7 +737,7 @@ function sortUsers(sorting) {
 $("#check-all-users").on("click", function() {
 	var $this = $(this);
 	$this.toggleClass('on');
-	$("#users-list .list .check").toggleClass('on', $this.hasClass('on'));
+	$("#chart-control .users-list .list .check").toggleClass('on', $this.hasClass('on'));
 	dispatchSelect("user", "*", $this.hasClass('on'))
 });
 // Ordenación de usuarios:
