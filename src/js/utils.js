@@ -158,50 +158,48 @@ function checkUserPhoto(path) {
 	https://developers.google.com/youtube/player_parameters
 	http://developer.vimeo.com/player/embedding
 */
-function findVideos($content) {
+function processContent($content, replace) {
 	var $links = $content.find("a");
-	var found = [];
 	$links.each(function() {
 		var $this = $(this),
+			ID = null,
 			href = ($this.attr("title") || $this.attr("href"));	// esto es porque los cort.as trae la url original en el title :)
 		if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
 			var videoMatch = href.match(/[?&]v=([^&]+)/);
-			if (videoMatch && videoMatch[1]) {
-				found.push({$element: $this, service: "YOUTUBE", id: videoMatch[1]});
+			if (videoMatch && (ID=videoMatch[1])) {
+				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["YOUTUBE"].replace("_____ID_____", ID)));
+				else this.__video__ = {service: "YOUTUBE", id: ID};
 				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*vimeo.com/)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*vimeo.com\/(\d+)/);
-			if (videoMatch && videoMatch[1]) {
-				found.push({$element: $this, service: "VIMEO", id: videoMatch[1]});
+			if (videoMatch && (ID=videoMatch[1])) {
+				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["VIMEO"].replace("_____ID_____", ID)));
+				else this.__video__ = {service: "VIMEO", id: ID};
 				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*zappinternet.com\/video\//)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*zappinternet.com\/video\/(.+?)\//);
-			if (videoMatch && videoMatch[1]) {
-				found.push({$element: $this, service: "ZAPPINTERNET", id: videoMatch[1]});
+			if (videoMatch && (ID=videoMatch[1])) {
+				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["ZAPPINTERNET"].replace("_____ID_____", ID)));
+				else this.__video__ = {service: "ZAPPINTERNET", id: ID};
 				return;
 			};
 		} else if (href.match(/https?:\/\/[w\.]*dailymotion.com\/video\//)) {
 			var videoMatch = href.match(/https?:\/\/[w\.]*dailymotion.com\/video\/([\w-]+)/);
-			if (videoMatch && videoMatch[1]) {
-				found.push({$element: $this, service: "DAILYMOTION", id: videoMatch[1]});
+			if (videoMatch && (ID=videoMatch[1])) {
+				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["DAILYMOTION"].replace("_____ID_____", ID)));
+				else this.__video__ = {service: "DAILYMOTION", id: ID};
 				return;
 			};
 		};
-		found.push({$element: $this, service: null, href: href});	// tratado como simple enlace
+		if (replace) $this.replaceWith(makeLink(href ,href, 20).addClass('a-link'));
 	});
-	return found;
+	return $links;
 };
-/* Reemplaza los enlaxes y vídeos encontrados por findVideo */
-function replaceLinks(info) {
-	info.forEach(function(a) {
-		if (a.service) a.$element.replaceWith($(VIDEO_TEMPLATES[a.service].replace("_____ID_____", a.id)));
-		else a.$element.replaceWith(makeLink(a.href ,a.href, 20).addClass('a-link'));
-	});
-};
-function processContent($content) {
-	replaceLinks(findVideos($content));
+
+function insertVideo($element, v) {
+	$element.append($(VIDEO_TEMPLATES[v.service].replace("_____ID_____", v.id)));
 };
 
 /* Convertir un objeto en una array, por ejemplo para ordenar luego sus elementos */

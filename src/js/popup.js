@@ -752,7 +752,7 @@ function createMessage(msg, themes) {
 	};
 	// El contenido del mensaje:
 	var $content = $("<div>").addClass('msg_content').html(msg.contenido);
-	processContent($content);				// PROCESAMIENTO DE LOS CONTENIDOS: ENLACES, VÍDEOS...
+	processContent($content, true);				// PROCESAMIENTO DE LOS CONTENIDOS: ENLACES, VÍDEOS...
 	if (msg.cont_adicional) {
 		$content.append($("<img>").attr("src", msg.cont_adicional));
 	};

@@ -151,10 +151,15 @@ function DataProcessor(data, hideAll) {
 			var imgElement = images[content] || (images[content] = {'messages': []});
 			imgElement.messages.push(id);
 		};
+		// vídeos:
+		var $msg = $("<div>").html(m.contenido);
+		var links = findVideos($msg);
+		var content = $msg.text();
+		
 		// Número de palabras:
 		var words = THAT.words;
 		var count = 0;
-		m.contenido.replace(/(<([^>]+)>)/ig,"").replace(/[“”¡!¿?\.,:;\+\{\}\(\)\"\']/g, "").replace(/ +/g, " ")
+		content.replace(/\W+/g, " ").replace(/ +/g, " ")
 			.toLowerCase().split(" ")
 			.forEach(function(w) {
 				if (!PREPOSICIONES[w] && !ARTICULOS[w]) {
@@ -175,7 +180,9 @@ function DataProcessor(data, hideAll) {
 			if (m.children) m.children.forEach(addMessage);
 		};
 		addMessage(THAT.tree);
-		THAT.freq.data = sortNumArray(makeIntArray(frequency, "x"), "x");
+		var data = THAT.freq.data = sortNumArray(makeIntArray(frequency, "x"), "x");
+		data.fRange = [0, maxFreq];
+		data.tsRange = [data[0].x, data.slice(-1)[0].y];
 	};
 
 	/* Selección de mensajes */
@@ -227,7 +234,7 @@ function DataProcessor(data, hideAll) {
 						var pCollapsed = parent._children;			
 						var index = pCollapsed.indexOf(msg);
 						if (index>=0) {
-							parent.children = pChildren.concat(pCollapsed.splice(index, 1));
+							parent._hidden = pHidden.concat(pCollapsed.splice(index, 1));
 							removeFound(parent);
 							return;
 						};
@@ -308,12 +315,14 @@ function TalkVisualizer(data) {
 		NODE_BORDER = NODE_BORDER_DEFAULT+"px";
 	// Manipulación de los datos
 	// console.log(data);
-	// console.log(JSON.stringify(data));
+	console.log(JSON.stringify(data));
 	var PROCESSOR = new DataProcessor(data, true);
 	var FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR);
 
 	var root = PROCESSOR.tree;
+	root.x0 = root.y0 = 0;
 	console.log(root);
+
 
 	var container = document.querySelector("#d3-chart"),
 		rect = container.getBoundingClientRect(),
@@ -356,7 +365,7 @@ function TalkVisualizer(data) {
 
 	var chart = svg
 				.append("g").attr("id", "chart")
-				.attr("transform", d3Translate([center.x,center.y]))
+				.attr("transform", d3Translate([center.x,center.y]));
 
 	/* Actualización de filtros */
 	document.getElementById("svg").addEventListener("updateSelection", function(e) {
@@ -379,12 +388,15 @@ function TalkVisualizer(data) {
 				xSize = 360; ySize = Math.min(width, height)/2-50;
 					nodePosition = radialNodePosition;
 					nodePosition0 = radialNodePosition0;
+					chart.transition().duration(duration)
+						.attr("transform", d3Translate([center.x,center.y]));
 			} else if(layout=="timeline") {
 				xSize = 100, ySize = 100;
 					nodePosition = timelineNodePosition;
 					nodePosition0 = timelineNodePosition0;
+					chart.transition().duration(duration)
+						.attr("transform", d3Translate([0,0]));
 			};
-			console.log(xSize, ySize);
 			LAYOUT = d3.layout.tree()
 				.size([xSize, ySize])
 				.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
@@ -394,8 +406,6 @@ function TalkVisualizer(data) {
 	var LAYOUT = null;
 	configureLayout();	// para que haya un layout inicial de árbol
 
-	
-	
 	function populateController() {
 		function insertMessage(id, clean) {
 			var $ouput = $('#chart-ouput');
@@ -642,7 +652,7 @@ function FrequencyVisualizer(element, processor) {
 };
 
 /* se obtiene la información de la extensión */
-// var TEST = 2;
+var TEST = 3;
 
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) {
