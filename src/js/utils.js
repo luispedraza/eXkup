@@ -2,7 +2,7 @@ var MESES = new Array("enero", "febrero", "marzo", "abril", "mayo", "junio", "ju
 var TIME_TOOLTIP_TIMER = null;	// tooltip para la fecha del mensaje
 var DEG2RAD = Math.PI/180;
 var RAD2DEG = 180/Math.PI;
-
+var PI2 = 2*Math.PI;
 var TABLONES = {
 	mios: "t1-",
 	sigo: "2",

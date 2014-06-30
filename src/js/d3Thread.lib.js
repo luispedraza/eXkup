@@ -31,20 +31,17 @@ function getMsgColor(msg) {
 function getUserColor(user) {
 	return user.selected ? user.color : "#ccc";
 };
-
 function updateButtons() {
 	// Respuestas a mensajes:
 	$("#chart-ouput .btn.reply").off("click").on("click", function() {
 		onShowEditor();
 	});
 };
-
 function onShowEditor() {
 	$container = $("<div>").addClass('editor-container');
 	EDITOR = new Editor($container, API);
 	new ModalDialog("Nuevo mensaje", $container, ["Cancelar"]);
 };
-
 function populateMessages(tree) {
 	function toggleElement(event) {
 		event.stopPropagation();
@@ -124,7 +121,6 @@ function populateMessages(tree) {
 	$rootContainer = $("<div>").addClass('children-container').appendTo($mainContainer);
 	appendMessage(tree, $rootContainer).addClass('on').off();		// conversación de mensajes
 };
-
 /* Función principal de procesamiento de datos
 	@param data: datos obtenidos de la api para una conversación
 	@ param hidden: inicialmente todas las respuestas están ocultas
@@ -341,7 +337,7 @@ function DataProcessor(data) {
 	initUsers(this.users);
 };
 
-// visualización en árbol:
+// VISUALIZACIÓN DE MENSAJES:
 function TalkVisualizer(containerID, treeData) {
 	// console.log(data);
 	// console.log(JSON.stringify(data));
@@ -508,6 +504,14 @@ function TalkVisualizer(containerID, treeData) {
 		function updateSVG() {
 			updateNodes();
 			updateTreeLinks();
+		};
+		/* Cálculo de las posiciones de cada nodo */
+		function computePositions(node) {
+			if (node.children) node.forEach(function(n) {
+				var ang = node.x;
+				
+				computePositions(n);
+			});
 		};
 		nodes = LAYOUT.nodes(root);
 		links = LAYOUT.links(nodes);
