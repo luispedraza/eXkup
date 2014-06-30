@@ -353,8 +353,8 @@ function TalkVisualizer(containerID, treeData) {
 	var center = {x: width/2, y: height/2};
 	var node_index = 0,
 	    DURATION = 500;
-	var diagonal = d3.svg.diagonal.radial()
-		.projection(function(d) { return [d.y, d.x*DEG2RAD]; });
+	var diagonal = d3.svg.diagonal().radial();
+    	// .projection(function(d) { return [d.yr, d.xr]; });
 	/* zoom behavior: */
 	var zm = d3.behavior.zoom()
 		.scaleExtent([.25,8])
@@ -392,7 +392,7 @@ function TalkVisualizer(containerID, treeData) {
 		if ((layout=="tree")||(layout=="timeline")) {
 			var xSize, ySize; 
 			if (layout=="tree") {
-				xSize = 360; ySize = Math.min(width, height)/2-50;
+				xSize = PI2; ySize = Math.min(width, height)/2-50;
 					nodePosition = radialNodePosition;
 					nodePosition0 = radialNodePosition0;
 					chart.transition().duration(DURATION)
@@ -442,7 +442,7 @@ function TalkVisualizer(containerID, treeData) {
 				.attr("class", function(d) {
 					return "node user-" + d.usuarioOrigen;
 				})
-				.attr("transform", function() {return nodePosition0(source);})	// new nodes enter at source's position
+				.attr("transform", function() {return d3TranslateR(source);})	// new nodes enter at source's position
 				.on("click", clickOnNode)
 				.on("mouseenter", function(d, e) {
 					$thisMsg = $("<div>").attr("id", "current-message")
@@ -461,7 +461,7 @@ function TalkVisualizer(containerID, treeData) {
 			// Transition nodes to their new position.
 			var nodeUpdate = node.transition()
 				.duration(DURATION)
-				.attr("transform", nodePosition)
+				.attr("transform", d3TranslateR)
 				.select("circle")
 					.attr("fill", getMsgColor)
 					.attr("stroke", function(d) {
@@ -471,7 +471,7 @@ function TalkVisualizer(containerID, treeData) {
 			
 			// Transition exiting nodes to the parent's new position.
 			var nodeExit = node.exit().transition().duration(DURATION)
-				.attr("transform", function(d) { return nodePosition(source); })
+				.attr("transform", function(d) { return d3TranslateR(source); })
 				.remove();
 			nodeExit.select("circle")
 				.transition().duration(DURATION)
@@ -484,7 +484,7 @@ function TalkVisualizer(containerID, treeData) {
 			link.enter().insert("path", "g.node")
 				.attr("class", "link")
 				.attr("d", function(d) {
-					var o = {x: source.x0, y: source.y0};
+					var o = {x: source.x, y: source.y};
 					return diagonal({source: o, target: o});
 				})
 				.attr("stroke", "#999");
@@ -507,13 +507,20 @@ function TalkVisualizer(containerID, treeData) {
 		};
 		/* Cálculo de las posiciones de cada nodo */
 		function computePositions(node) {
-			if (node.children) node.forEach(function(n) {
-				var ang = node.x;
-				
+			var ang = node.x;
+			node.x = Math.cos(ang)*node.y;
+			node.y = Math.sin(ang)*node.y;
+			if (node.children) node.children.forEach(function(n) {
 				computePositions(n);
 			});
 		};
 		nodes = LAYOUT.nodes(root);
+		computePositions(root);	// cálculo de las posiciones de los nodos para el layout
+		// links = d3.merge(nodes.map(function(parent) {
+		// 	return (parent.children || []).map(function(child) {
+		// 		return {source: parent, target: child};
+		// 	});
+		// }));
 		links = LAYOUT.links(nodes);
 		updateSVG();
 		stashPositions();	// Stash the old positions for transition.
