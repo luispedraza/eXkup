@@ -1,17 +1,27 @@
-var TEST = 2;
+var PROCESSOR = null;
 var VISUALIZER = null;
+var FREQUENCIES = null;
 
+function initThread(apiData) {
+	PROCESSOR = new DataProcessor(apiData);
+	FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR);
+	VISUALIZER = new TalkVisualizer("#d3-chart", PROCESSOR.tree);
+	populateController(PROCESSOR);
+	populateMessages(PROCESSOR.tree);	// los mensajes de la barra izquierda
+};
+
+var TEST = 3;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
 	} else if (TEST === 2) { TEST = SAMPLE_DATA._testMedium;
 	} else if (TEST === 3) { TEST = SAMPLE_DATA._testBig;
 	};
-	VISUALIZER = new TalkVisualizer(TEST);
+	initThread(TEST);
 } else {
 	chrome.runtime.onMessage.addListener (
 		function(request, sender) {
-			VISUALIZER = new TalkVisualizer(request.info);
+			initThread(request.info);
 		});
 };
 
@@ -32,8 +42,20 @@ function sortUsers(sorting) {
 	});
 	$items.detach().appendTo($list);
 };
-
+function dispatchSelect(type, value, add) {
+	var e = document.createEvent("CustomEvent");
+	var detail = {'add': add,'type': type,'value':value};
+	e.initCustomEvent("updateSelection", false, false, detail);
+	document.body.dispatchEvent(e);
+};
 /* EVENTOS */
+
+// Cambio de lógica de selección
+$("#switch").on("click", function() {
+	$(this).toggleClass("OR AND");
+	PROCESSOR.selectMode($(this).hasClass("AND") ? "AND" : "OR");
+	VISUALIZER.updateGraph();
+});
 // selección de todos los usuarios
 $("#check-all-users").on("click", function() {
 	var $checkAll = $(this);
@@ -76,5 +98,12 @@ $("#set-timeline").on("click", function() {
 });
 $("#set-tree").on("click", function() {
 	VISUALIZER.config({layout:"tree"});
+});
+/* Actualización de filtros */
+document.body.addEventListener("updateSelection", function(e) {
+	PROCESSOR.select(e.detail);
+	VISUALIZER.updateGraph();
+	FREQUENCIES.updateGraph();
+	populateMessages(PROCESSOR.tree);
 });
 

@@ -32,13 +32,6 @@ function getUserColor(user) {
 	return user.selected ? user.color : "#ccc";
 };
 
-function dispatchSelect(type, value, add) {
-	var e = document.createEvent("CustomEvent");
-	var detail = {'add': add,'type': type,'value':value};
-	e.initCustomEvent("updateSelection", false, false, detail);
-	document.getElementById("svg").dispatchEvent(e);
-};
-
 function updateButtons() {
 	// Respuestas a mensajes:
 	$("#chart-ouput .btn.reply").off("click").on("click", function() {
@@ -302,7 +295,6 @@ function DataProcessor(data) {
 				selector.value.forEach(function(w) {messages = messages.concat(THAT.words[w].messages);});
 			};
 			messages.forEach(function(m) {
-				console.log(m);
 				m.selCounter+=count; // cambio de contabilidad de los mensajes
 			});	
 		};
@@ -350,34 +342,23 @@ function DataProcessor(data) {
 };
 
 // visualización en árbol:
-function TalkVisualizer(data) {
+function TalkVisualizer(containerID, treeData) {
+	// console.log(data);
+	// console.log(JSON.stringify(data));
 	var RADIUS_DEFAULT = 5,
 		RADIUS = RADIUS_DEFAULT
 		NODE_BORDER_DEFAULT = 1,
 		NODE_BORDER = NODE_BORDER_DEFAULT+"px";
-	// Manipulación de los datos
-	// console.log(data);
-	// console.log(JSON.stringify(data));
-	var PROCESSOR = new DataProcessor(data);
-	var FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR);
-
-	var root = PROCESSOR.tree;
-	root.x0 = root.y0 = 0;
-	// console.log(root);
-
-
-	var container = document.querySelector("#d3-chart"),
+	var root = treeData;
+	var container = document.querySelector(containerID),
 		rect = container.getBoundingClientRect(),
 		width = rect.width,
 		height = rect.height;
 	var center = {x: width/2, y: height/2};
-
 	var node_index = 0,
-	    duration = 500;
-
+	    DURATION = 500;
 	var diagonal = d3.svg.diagonal.radial()
 		.projection(function(d) { return [d.y, d.x*DEG2RAD]; });
-	
 	/* zoom behavior: */
 	var zm = d3.behavior.zoom()
 		.scaleExtent([.25,8])
@@ -391,10 +372,10 @@ function TalkVisualizer(data) {
 		})
 		.on("zoomend", function() {
 			svg.selectAll(".node circle")
-				.transition().duration(duration)
+				.transition().duration(DURATION)
 				.attr("r", RADIUS);	// escalado de los nodos
 		});
-	var svg = d3.select("#d3-chart").append("svg")
+	var svg = d3.select(containerID).append("svg")
 		.attr("id", "svg")
 		.on("dblclick", function() {
 			zm.translate([0,0]);
@@ -404,24 +385,10 @@ function TalkVisualizer(data) {
 		.call(zm)
 		.on("dblclick.zoom", null)
 		.append("g");
-
 	var chart = svg
 				.append("g").attr("id", "chart")
 				.attr("transform", d3Translate([center.x,center.y]));
-
-	/* Actualización de filtros */
-	document.getElementById("svg").addEventListener("updateSelection", function(e) {
-		PROCESSOR.select(e.detail);
-		update();
-	});
-	
-	//root.children.forEach(collapse);
-	// collapse(root);
-
 	var nodes, links;
-	var $currentMessage = null;
-
-	populateController(PROCESSOR.users, PROCESSOR.words, PROCESSOR.images, PROCESSOR.videos);
 
 	function configureLayout (layout) {
 		if (typeof layout == "undefined") layout = "tree";
@@ -432,13 +399,13 @@ function TalkVisualizer(data) {
 				xSize = 360; ySize = Math.min(width, height)/2-50;
 					nodePosition = radialNodePosition;
 					nodePosition0 = radialNodePosition0;
-					chart.transition().duration(duration)
+					chart.transition().duration(DURATION)
 						.attr("transform", d3Translate([center.x,center.y]));
 			} else if(layout=="timeline") {
 				xSize = 100, ySize = 100;
 					nodePosition = timelineNodePosition;
 					nodePosition0 = timelineNodePosition0;
-					chart.transition().duration(duration)
+					chart.transition().duration(DURATION)
 						.attr("transform", d3Translate([0,0]));
 			};
 			LAYOUT = d3.layout.tree()
@@ -470,6 +437,7 @@ function TalkVisualizer(data) {
 
 	/* Principal función de actualización */
 	function update(source) {
+		TIC();
 		if (typeof source == "undefined") source = root;
 		function updateNodes() {
 			var node = chart.selectAll(".node")
@@ -496,7 +464,7 @@ function TalkVisualizer(data) {
 
 			// Transition nodes to their new position.
 			var nodeUpdate = node.transition()
-				.duration(duration)
+				.duration(DURATION)
 				.attr("transform", nodePosition)
 				.select("circle")
 					.attr("fill", getMsgColor)
@@ -506,11 +474,11 @@ function TalkVisualizer(data) {
 					// .attr("stroke-width", NODE_BORDER);
 			
 			// Transition exiting nodes to the parent's new position.
-			var nodeExit = node.exit().transition().duration(duration)
+			var nodeExit = node.exit().transition().duration(DURATION)
 				.attr("transform", function(d) { return nodePosition(source); })
 				.remove();
 			nodeExit.select("circle")
-				.transition().duration(duration)
+				.transition().duration(DURATION)
 				.attr("r", 1e-6);
 		};
 		function updateTreeLinks() {
@@ -526,11 +494,11 @@ function TalkVisualizer(data) {
 				.attr("stroke", "#999");
 			// Transición a nueva posición
 			link.transition()
-				.duration(duration)
+				.duration(DURATION)
 				.attr("d", diagonal);
 			// Transition exiting nodes to the parent's new position.
 			link.exit().transition()
-				.duration(duration)
+				.duration(DURATION)
 				.attr("d", function(d) {
 					var o = {x: source.x, y: source.y};
 					return diagonal({source: o, target: o});
@@ -541,37 +509,31 @@ function TalkVisualizer(data) {
 			updateNodes();
 			updateTreeLinks();
 		};
-		populateMessages(root);	// los mensajes de la barra izquierda
 		nodes = LAYOUT.nodes(root);
 		links = LAYOUT.links(nodes);
 		updateSVG();
-		FREQUENCIES.update();
-		// Stash the old positions for transition.
-		stashPositions();
+		stashPositions();	// Stash the old positions for transition.
+		TOC(true);
 	};
 	this.config = function(configuration) {
 		if (configuration.layout) configureLayout(configuration.layout);
 		update();
 	};
 	update();
-	$("#switch").on("click", function() {
-		$(this).toggleClass("OR AND");
-		PROCESSOR.selectMode($(this).hasClass("AND") ? "AND" : "OR");
-		update();
-	});
-
+	
+	this.updateGraph = function() { update(); };
 	this.highlightUsers = function (users, highlight) {
 		var selector = users.map(function(u) {return ".user-"+u+" circle";}).join(",");
 		var radius = highlight ? RADIUS*3 : RADIUS;
 		// d3.selectAll("#d3-chart g.node circle");
 		d3.selectAll(selector)
-			.transition().duration(duration)
+			.transition().duration(DURATION)
 			.attr("r", radius);
 	};
 };
 
 /* Controladores de selección de usuarios, palabras, imágenes y vídeos */
-function populateController(users, words, images, videos) {
+function populateController(processor) {
 	function insertMessage(id, clean) {
 		var $ouput = $('#chart-ouput');
 		if (typeof clean == "undefined") clean=true;
@@ -652,10 +614,10 @@ function populateController(users, words, images, videos) {
 				}));
 		});			
 	};
-	if (users) populateUsers(users);
-	if (images) populateImages(images);
-	if (videos) populateVideos(videos);
-	if (words) populateWords(words);
+	populateUsers(processor.users);
+	populateImages(processor.images);
+	populateVideos(processor.videos);
+	populateWords(processor.words);
 };
 /* Visualización de frecuencias */
 function FrequencyVisualizer(element, processor) {
@@ -672,7 +634,7 @@ function FrequencyVisualizer(element, processor) {
 			name: "Mensajes/h"
 		}]
 	});
-	this.update = function() {
+	this.updateGraph = function() {
 		var data = frequencies.data
 		graph.series[0].data = data;
 		graph.update();
