@@ -10,7 +10,7 @@ body {
 #d3-chart {
   position: absolute;
   top: 0;
-  left: 600px;
+  left: 450px;
   right: 0;
   bottom: 0;
   border:  1px solid red;
@@ -32,10 +32,10 @@ body {
 /******************/
 /* Elementos HTML */
 /******************/
-#switch.and:before {
+#switch.AND:before {
   content: "TODOS";
 }
-#switch.or:before {
+#switch.OR:before {
   content: "ALGUNO";
 }
 .expandable {
@@ -55,7 +55,7 @@ body {
 }
 #chart-messages {
   width: 300px;
-  left: 300px;
+  left: 150px;
 }
 
 #chart-messages .msg-container {
@@ -333,10 +333,6 @@ body {
   bottom: 0;
   left: 449px;
   height: 300px;
-}
-#d3-frequency.on {
-  top: 0;
-  height: auto;
 }
 
 /* OPciones de visualización */

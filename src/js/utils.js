@@ -1,5 +1,7 @@
 var MESES = new Array("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre");
 var TIME_TOOLTIP_TIMER = null;	// tooltip para la fecha del mensaje
+var DEG2RAD = Math.PI/180;
+var RAD2DEG = 180/Math.PI;
 
 var TABLONES = {
 	mios: "t1-",
@@ -227,9 +229,13 @@ function makeIntArray(obj, keyname) {
 };
 
 /* Función para ordenar un array de objetos alfabéticamente según el campo indicado */
-function sortArray(array, field) {
+function sortArray(array, field, reverse) {
+	var rValue1 = reverse ? -1 : 1;
+	var rValue2 = -rValue1;
 	return array.sort(function(a,b) {
-		return (a[field].toLowerCase() < b[field].toLowerCase()) ? -1 : 1;
+		if (a[field].toLowerCase() < b[field].toLowerCase()) return rValue1;
+		if (a[field].toLowerCase() > b[field].toLowerCase()) return rValue2;
+		return 0;
 	});
 };
 
@@ -260,29 +266,30 @@ function roundTimeDays(ts) {
 };
 
 /* Redondeo de un instante a una resolución de horas */
-function roundTimeHour(ts) {
+function floorTimeHour(ts) {
 	var date = new Date(ts);
-	// var floor = new Date(date.getFullYear(), date.getMonth(),date.getDay(), date.getHours());
+	date.setMinutes(0);
+	date.setSeconds(0);
+	return date.setMilliseconds(0);
+};
+function ceilTimeHour(ts) {
+	var date = new Date(ts);
 	date.setMinutes(0);
 	date.setSeconds(0);
 	date.setMilliseconds(0);
-	return date.getTime();
+	return date.setHours(date.getHours()+1);
 };
 /* Redondeo de un instante a una resolución de minutos */
 function roundTimeMinutes(ts) {
 	var date = new Date(ts);
-	// var floor = new Date(date.getFullYear(), date.getMonth(),date.getDay(), date.getHours());
 	date.setSeconds(0);
-	date.setMilliseconds(0);
-	return date.getTime();
+	return date.setMilliseconds(0);
 };
 
 /* Redondeo de un instante a una resolución de segundos */
 function roundTimeSeconds(ts) {
 	var date = new Date(ts);
-	// var floor = new Date(date.getFullYear(), date.getMonth(),date.getDay(), date.getHours());
-	date.setMilliseconds(0);
-	return date.getTime();
+	return date.setMilliseconds(0);
 };
 
 
