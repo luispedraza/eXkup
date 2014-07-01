@@ -2,7 +2,7 @@ function d3Translate(vector) {
 	return " translate(" + vector + ")";
 };
 function d3TranslateR(node) {
-    return " translate(" + [node.x, node.y].join(",") + ")";
+    return " translate(" + [node.xx, node.yy].join(",") + ")";
 };
 function d3Scale(scale) {
 	return " scale(" + scale + ")";

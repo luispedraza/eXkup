@@ -127,11 +127,23 @@ function populateMessages(tree) {
 */
 function DataProcessor(data) {
 	function initUsers(users) {
-		var userNicknames = Object.keys(users);
-		var nUsers = Object.keys(users).length;
-		userNicknames.forEach(function(u,i) {
-			var user = users[u];
-			user.color = d3.hsl(i*360/nUsers, .5, .5).toString();
+		var users = makeArray(users, "nickname");
+		var nUsers = users.length;
+		// var color = chroma.scale(["#00ff00", "#ff00ff"]).domain([0,nUsers-1]);
+		// users.forEach(function(u,i) {
+		// 	// users[u].color = d3.hsl(i*360/nUsers, .5, .5).toString();
+		// 	u.color = color(i);
+		// });
+		// var color = d3.scale.linear()
+		// 	.domain([0, nUsers/2, nUsers-1])
+		// 	.range(["#0f0000", "#ff0000", "ffff00"]);
+		// var N = 765;
+		// var scale = d3.scale.linear()
+		// .domain([0, nUsers-1])
+		// .range([0,765]);
+		users.forEach(function(u,i) {
+			u.color = d3.hsl(i*360/nUsers, .9+Math.random()*.1, .5+Math.random()*.2).toString();
+			// u.color = color(i);
 		});
 	};
 	function messageProcessor(m) {
@@ -353,7 +365,8 @@ function TalkVisualizer(containerID, treeData) {
 	var center = {x: width/2, y: height/2};
 	var node_index = 0,
 	    DURATION = 500;
-	var diagonal = d3.svg.diagonal().radial();
+	var diagonal = null;	// función de pintado de los links
+	// var diagonal = d3.svg.diagonal().radial();
     	// .projection(function(d) { return [d.yr, d.xr]; });
 	/* zoom behavior: */
 	var zm = d3.behavior.zoom()
@@ -391,18 +404,20 @@ function TalkVisualizer(containerID, treeData) {
 		LAYOUT_TYPE = layout;
 		if ((layout=="tree")||(layout=="timeline")) {
 			var xSize, ySize; 
-			if (layout=="tree") {
-				xSize = PI2; ySize = Math.min(width, height)/2-50;
-					nodePosition = radialNodePosition;
-					nodePosition0 = radialNodePosition0;
-					chart.transition().duration(DURATION)
-						.attr("transform", d3Translate([center.x,center.y]));
-			} else if(layout=="timeline") {
-				xSize = 100, ySize = 100;
-					nodePosition = timelineNodePosition;
-					nodePosition0 = timelineNodePosition0;
-					chart.transition().duration(DURATION)
-						.attr("transform", d3Translate([0,0]));
+			if (LAYOUT_TYPE=="tree") {
+				diagonal = d3.svg.diagonal.radial()
+					.projection(function(d) { return [d.y, d.x+_PI_2]; });
+				xSize = _2_PI; 
+				ySize = Math.min(width, height)/2-50;
+				chart.transition().duration(DURATION)
+					.attr("transform", d3Translate([center.x,center.y]));
+			} else if(LAYOUT_TYPE=="timeline") {
+				diagonal = d3.svg.diagonal()
+					.projection(function(d) { return [d.yy, d.xx]; });
+				xSize = 100;
+				ySize = 100;
+				chart.transition().duration(DURATION)
+					.attr("transform", d3Translate([0,0]));
 			};
 			LAYOUT = d3.layout.tree()
 				.size([xSize, ySize])
@@ -422,15 +437,6 @@ function TalkVisualizer(containerID, treeData) {
 	};
 	/* Colapsa los nodos de la estructura de datos de árbol */
 	function collapse(d) { if (d.children.length) { d._children = d.children; d._children.forEach(collapse); d.children = null; }; };
-
-	function radialNodePosition(d) {  return d3Rotate(d.x-90) + d3Translate(d.y);};
-	function radialNodePosition0(d) { return d3Rotate(d.x0-90) + d3Translate(d.y0); };
-	function timelineNodePosition(d) { return d3Translate([width*d.tsX, height*d.x/100]); };
-	function timelineNodePosition0(d) { return d3Translate([width*d.tsX0, height*d.x0/100]); };
-
-	var nodePosition = radialNodePosition;
-	var nodePosition0 = radialNodePosition0;
-
 	/* Principal función de actualización */
 	function update(source) {
 		TIC();
@@ -507,9 +513,15 @@ function TalkVisualizer(containerID, treeData) {
 		};
 		/* Cálculo de las posiciones de cada nodo */
 		function computePositions(node) {
-			var ang = node.x;
-			node.x = Math.cos(ang)*node.y;
-			node.y = Math.sin(ang)*node.y;
+			if (LAYOUT_TYPE=="tree") {
+				var ang = node.x;
+				node.xx = Math.cos(ang)*node.y;
+				node.yy = Math.sin(ang)*node.y;
+			} else {
+				console.log(node.tsX);
+				node.xx = width*node.tsX;
+				node.yy = height*node.x/100;
+			};
 			if (node.children) node.children.forEach(function(n) {
 				computePositions(n);
 			});
