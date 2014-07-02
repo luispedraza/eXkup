@@ -134,14 +134,14 @@ function showSearchForm(show) {
 /* Función que se ejecuta al pulsar en nuevo mensaje */
 function onNewMessage() {
 	showEditor(true);
-	$("#edit-section-h1").off();	// se vuelve a cerrar presionando cancel
+	// $("#edit-section-h1").off();	// se vuelve a cerrar presionando cancel
 };
 
 /* Función que se ejecuta al cancelar en el editor */
 function onCancelEditor() {
 	$("#replying-message").remove();	// si se estuviera respondiendo a un mensaje
 	showEditor(null);					// se oculta y resetea el editor
-	$("#edit-section-h1").off().on("click", onNewMessage);
+	// $("#edit-section-h1").off().on("click", onNewMessage);
 };
 
 /* INICIALIZACIÓN DEL POPUP */

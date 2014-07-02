@@ -34,10 +34,10 @@ body {
 .link {
   fill: none;
 }
-#d3-chart path {
-  transition: opacity .2s ease;
+#d3-chart-interaction .chord {
+  transition: opacity .5s ease;
 }
-.fade {
+#d3-chart-interaction:hover .chord.fade {
   opacity: .1;
 }
 
