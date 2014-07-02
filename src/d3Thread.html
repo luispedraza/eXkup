@@ -26,18 +26,30 @@
 	<script type="text/javascript" src="js/d3Thread.lib.js"></script>
 </head>
 <body id="conversation">
-	<div id="d3-frequency"></div>
-	<div id="d3-chart"><h1>GRÁFICO</h1></div>
+	<div id="d3-frequency">
+		<h2>Frecuencia (mensajes/hora)</h2>
+	</div>
+	<div id="d3-chart">
+		<h2 class="redtitle fa fa-eye"> GRÁFICO</h2>
+		<div id="d3-chart-container"></div>
+	</div>
+	<div id="chart-options">
+		<div id="set-timeline" class="option">timeline</div>
+		<div id="set-tree" class="option">árbol</div>
+		<div id="group-singles" class="option">agrupar comentarios sin respuesta</div>
+		<div id="show-interaction" class="option">mostrar intereacciones</div>
+	</div>
+
 	<div id="chart-messages" class="expandable" data-width="max">
-		<h1 class="fa fa-comments"> CONVERSACIÓN<div class="fa fa-chevron-right expand"></div></h1>
+		<h2 class="redtitle fa fa-comments"> CONVERSACIÓN<div class="fa fa-chevron-right expand"></div></h2>
 		<div id="chart-ouput"></div>
 	</div>
 	
 	<div id="chart-control" class="expandable" data-width="500px">
-		<h1 class="fa fa-sliders"> SELECCIÓN<div class="fa fa-chevron-right expand"></div></h1>
+		<h2 class="redtitle fa fa-sliders"> SELECCIÓN<div class="fa fa-chevron-right expand"></div></h2>
 		<p><b>SELECCIONA</b> los mensajes que cumplen con <b id="switch" class="OR"></b> de los siguientes criterios:</p>
 		<div class="users-list">
-			<h2>Usuarios (<span id="n-users"></span>)<span id="check-all-users" class="check"></span></h2>
+			<h3>Usuarios (<span id="n-users"></span>)<span id="check-all-users" class="check"></span></h3>
 			<div class="list-head item">
 				<span id="sort-nickname" class="nickname sort-users fa fa-sort" data-field="nickname"> nickname</span>
 				<span class="color-picker"></span>
@@ -49,22 +61,17 @@
 			<ul class="list"></ul>
 		</div>
 		<div class="words-list">
-			<h2>Top Palabras</h2>
+			<h3>Top Palabras</h3>
 			<ol class="list columns"></ol>
 		</div>
 		<div class="images-list">
-			<h2>Imágenes</h2>
+			<h3>Imágenes</h3>
 			<ul class="list"></ul>
 		</div>
 		<div class="videos-list">
-			<h2>Vídeos</h2>
+			<h3>Vídeos</h3>
 			<ul class="list"></ul>
 		</div>
-	</div>
-
-	<div id="chart-options">
-		<div id="set-timeline" class="option">timeline</div>
-		<div id="set-tree" class="option">árbol</div>
 	</div>
 	<script type="text/javascript" src="js/d3Thread.js"></script>
 </body>

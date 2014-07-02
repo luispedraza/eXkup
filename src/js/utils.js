@@ -293,6 +293,15 @@ function roundTimeSeconds(ts) {
 	return date.setMilliseconds(0);
 };
 
+/* INicializa una matriz con el mismo valor */
+function initArray(dim1, dim2, value) {
+	return Array.apply(null, Array(dim1))
+		.map(function () { 
+			return Array.apply(null, Array(dim2))
+				.map(function () { return value;});
+			});
+};
+
 
 
 

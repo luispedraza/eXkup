@@ -5,12 +5,12 @@ var FREQUENCIES = null;
 function initThread(apiData) {
 	PROCESSOR = new DataProcessor(apiData);
 	FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR);
-	VISUALIZER = new TalkVisualizer("#d3-chart", PROCESSOR.tree);
+	VISUALIZER = new TalkVisualizer("#d3-chart-container", PROCESSOR);
 	populateController(PROCESSOR);
 	populateMessages(PROCESSOR.tree);	// los mensajes de la barra izquierda
 };
 
-var TEST = 3;
+// var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -98,6 +98,14 @@ $("#set-timeline").on("click", function() {
 });
 $("#set-tree").on("click", function() {
 	VISUALIZER.config({layout:"tree"});
+});
+$("#group-singles").on("click", function() {
+	PROCESSOR.groupSingles($(this).toggleClass('on').hasClass('on'));
+	VISUALIZER.updateGraph();
+});
+$("#show-interaction").on("click", function() {
+	PROCESSOR.computeInteraction();
+	VISUALIZER.updateInteraction();
 });
 /* Actualización de filtros */
 document.body.addEventListener("updateSelection", function(e) {

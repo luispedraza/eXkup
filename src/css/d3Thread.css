@@ -12,8 +12,15 @@ body {
   top: 0;
   left: 450px;
   right: 0;
+  bottom: 200px;
+}
+
+#d3-chart-container {
+  position: absolute;
+  left: 0;
+  right: 0;
   bottom: 0;
-  border:  1px solid red;
+  top: 40px;
 }
 
 .node circle {
@@ -26,7 +33,12 @@ body {
 
 .link {
   fill: none;
-  stroke-width: .2px;
+}
+#d3-chart path {
+  transition: opacity .2s ease;
+}
+.fade {
+  opacity: .1;
 }
 
 /******************/
@@ -118,7 +130,7 @@ body {
   width: 150px;
   left:  0;
 }
-.expandable h1 {
+h2.redtitle {
   color: #fff;
   background-color: #f30;
   margin: 0;
@@ -149,7 +161,7 @@ body {
 .expandable > div {
   padding: 0 10px;
 }
-.expandable h2 {
+.expandable h3 {
   text-transform: uppercase;
   font-weight: bold;
   font-size: 12px;
@@ -332,14 +344,20 @@ body {
   right: 0;
   bottom: 0;
   left: 449px;
-  height: 300px;
+  height: 200px;
+}
+#d3-frequency h2 {
+  margin: 5px;
+  color: #666;
+  font-size: 12px;
+  font-weight: normal;
 }
 
 /* OPciones de visualización */
 #chart-options {
   position: absolute;
   right: 0;
-  bottom: 0;
+  top: 0;
   width: 200px;
   height: 200px;
   background-color: #eee;

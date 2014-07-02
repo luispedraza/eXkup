@@ -131,8 +131,6 @@ function showSearchForm(show) {
 	};
 };
 
-
-
 /* Función que se ejecuta al pulsar en nuevo mensaje */
 function onNewMessage() {
 	showEditor(true);
