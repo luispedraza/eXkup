@@ -616,12 +616,19 @@ function TalkVisualizer(containerID, processor) {
 			// Agregamos un grupo por usuario
 			var groups = chartInteraction.selectAll("g.user")
 				.data(chordLayout.groups);
+
 			var groupsEnter = groups.enter().append("g")
 				.attr("class", "user")
 				.on("mouseover", filterUser);
+			
 			groupsEnter.append("title").text(function(d,i) {
 				return users[i].nickname;
 			});
+			var groupText = groupsEnter.append("text")
+				.attr("x", 5)
+				.attr("dy", 15);
+			// queda por agregar el nombre de cada usuario
+
 			// Agregamos/actualizamos los grupos:
 			groupsEnter.append("path")
 				.each(function(d) {this._startAngle = d.startAngle; this._endAngle = d.startAngle;})
@@ -635,7 +642,7 @@ function TalkVisualizer(containerID, processor) {
 				.transition().duration(DURATION)
 				.style("fill", function(d,i) { return users[i].color; })
 				.call(arcTween);
-				
+
 			// Agregamos/actualizamos las cuerdas:
 			var chords = chartInteraction.selectAll("path.chord")
 				.data(chordLayout.chords);
@@ -650,6 +657,7 @@ function TalkVisualizer(containerID, processor) {
 				.attr("d", function(d) {
 					return d3.svg.chord().radius(innerRadius).source(this._source).target(this._target)();
 				})
+				.style("opacity", .8)
 				.attr("stroke", "#fff");
 
 			chords.transition().duration(DURATION)
