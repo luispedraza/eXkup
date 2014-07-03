@@ -93,22 +93,22 @@ $(".expand").on("click", function() {
 	$expandable.css("width", newSize);
 });
 
-$("#set-timeline").on("click", function() {
-	VISUALIZER.config({layout:"timeline"});
+$("#chart-options .option").on("click", function() {
+	var $this = $(this);
+	if ($this.hasClass('on')) return;
+	$("#chart-options .option").removeClass('on');
+	$this.addClass('on');
+	if (this.id=="set-timeline") VISUALIZER.config({layout:"timeline"});
+	else if (this.id=="set-tree") VISUALIZER.config({layout:"tree"});
+	else if (this.id=="set-graph") VISUALIZER.config({layout:"graph"});
+	else if (this.id=="set-interaction") VISUALIZER.config({layout:"interaction"});
 });
-$("#set-tree").on("click", function() {
-	VISUALIZER.config({layout:"tree"});
-});
-$("#set-graph").on("click", function() {
-	VISUALIZER.config({layout:"graph"});
-});
+
 $("#group-singles").on("click", function() {
 	PROCESSOR.groupSingles($(this).toggleClass('on').hasClass('on'));
 	VISUALIZER.updateGraph();
 });
-$("#show-interaction").on("click", function() {
-	VISUALIZER.config({layout:"interaction"});
-});
+
 /* Actualización de filtros */
 document.body.addEventListener("updateSelection", function(e) {
 	PROCESSOR.select(e.detail);

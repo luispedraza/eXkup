@@ -419,6 +419,7 @@ function TalkVisualizer(containerID, processor) {
 		DEFAULT_DURATION = 500,
 	    DURATION = DEFAULT_DURATION;
 	var diagonal = null;	// función de pintado de los links
+	var LAYOUT_TYPE = "tree";
 	var LAYOUT = d3.layout.tree()
 		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 	var FORCE = d3.layout.force()
@@ -473,27 +474,25 @@ function TalkVisualizer(containerID, processor) {
 	function configureLayout (layout) {
 		if (typeof layout == "undefined") layout = "tree";
 		LAYOUT_TYPE = layout;
+		var chartPosition = [center.x,center.y];
 		if ((layout=="tree")||(layout=="timeline")) {
 			FORCE.stop();
 			DURATION = DEFAULT_DURATION;
 			var xSize, ySize; 
 			if (LAYOUT_TYPE=="tree") {
 				diagonal = d3.svg.diagonal.radial()
-					.source(function(d) {return d.parent || d;})
-					.target(function(d) {return d;})
+					// .source(function(d) {return d.parent || d;})
+					// .target(function(d) {return d;})
 					.projection(function(d) { return [d.y, d.x+_PI_2]; });
 				xSize = _2_PI; 
 				ySize = Math.min(width, height)/2-margin;
-				chart.transition().duration(DURATION)
-					.attr("transform", d3Translate([center.x,center.y]));
 			} else if(LAYOUT_TYPE=="timeline") {
-				diagonal = d3.svg.diagonal()
-					.source(function(d) {return d.parent || d;})
-					.target(function(d) {return d;})
+				diagonal = d3.svg.diagonal();
+					// .source(function(d) {return d.parent || d;})
+					// .target(function(d) {return d;});
 				xSize = 100;
 				ySize = 100;
-				chart.transition().duration(DURATION)
-					.attr("transform", d3Translate([0,height]) + d3Rotate(-90));
+				chartPosition = [0,0];
 			};
 			LAYOUT.size([xSize, ySize]);
 		} else if (LAYOUT_TYPE=="graph") {
@@ -501,22 +500,24 @@ function TalkVisualizer(containerID, processor) {
 			FORCE.nodes(nodes)
 				.links(LAYOUT.links(nodes))
 				.start();
-		} else if (LAYOUT_TYPE=="interaction") {
+		};
+		if (LAYOUT_TYPE=="interaction") {
 			DURATION = DEFAULT_DURATION;
 			chartInteraction
 				.attr("transform", d3Scale(0))
 				.transition().duration(DURATION)
 				.attr("transform", d3Scale(1));
-		};
-		if (LAYOUT_TYPE!="interaction") {
+			chart.transition().duration(DURATION)
+				.style("opacity", 0);
+		} else {
 			chartInteraction
 				.transition().duration(DURATION)
 				.attr("transform", d3Scale(0));
+			chart.transition().duration(DURATION)
+				.style("opacity", 1)
+				.attr("transform", d3Translate(chartPosition));
 		};
 	};
-	var LAYOUT_TYPE = null;
-	configureLayout();	// para que haya un layout inicial de árbol
-
 	// colapsa/expandir hijos
 	function clickOnNode(d) {
 		if (d.children) { d._children = d.children; d.children = null; } 
@@ -568,7 +569,7 @@ function TalkVisualizer(containerID, processor) {
 	};
 	function updateTreeLinks() {
 		var link = chart.selectAll("path.link")
-			.data(links, function(d) { return d.id; });
+			.data(links, function(d) { return d.target.id; });
 			// .data(links, function(d) { return d.target.id; });
 		// Los nuevos nodos entran en la posición previa del padre
 		link.enter().insert("path", "g.node")
@@ -704,31 +705,32 @@ function TalkVisualizer(containerID, processor) {
 				var ang = node.x;
 				node.xx = Math.cos(ang)*node.y;
 				node.yy = Math.sin(ang)*node.y;
-			} else {
-				node.x = node.xx = height-height*node.x/100;
-				node.y = node.yy = width*node.tsX;
+			} else if(LAYOUT_TYPE=="timeline") {
+				node.y = node.yy = height*node.x/100;
+				node.x = node.xx = width*node.tsX;
 			};
 			if (node.children) node.children.forEach(function(n) {
 				computeTreePositions(n);
 			});
 		};
 		if (LAYOUT_TYPE=="graph") {
+			updateNodes();
 			// force.nodes(nodes).links(LAYOUT.links(nodes));	
 		} 
 		else if (LAYOUT_TYPE=="interaction") {
 			updateInteraction();
 		} else {
 			nodes = LAYOUT.nodes(root);
-			links = nodes;
 			computeTreePositions(root);	// cálculo de las posiciones de los nodos para el layout
+			// links = nodes;
+			links = LAYOUT.links(nodes);
+			
 			updateNodes();
 			updateTreeLinks();
 		};
 		TOC(true);
 	};
 	function resetZoom() { zoom.translate([0,0]); zoom.scale(1); zoom.event(svg); };
-
-	update();
 	this.config = function(configuration) {
 		if (configuration.layout) configureLayout(configuration.layout);
 		update();
@@ -743,6 +745,8 @@ function TalkVisualizer(containerID, processor) {
 			.transition().duration(DURATION)
 			.attr("r", radius);
 	};
+	configureLayout();	// para que haya un layout inicial de árbol
+	update();
 };
 
 /* Controladores de selección de usuarios, palabras, imágenes y vídeos */
