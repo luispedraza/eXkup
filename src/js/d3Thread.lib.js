@@ -362,6 +362,10 @@ function DataProcessor(data) {
 		computeFrequencies();	// recalcular frecuencias para el nuevo conjunto de mensajes
 		computeInteraction();	// recalcular la matriz de interacciones para estos mensajes
 	};
+	this.getInteraction = function() {
+		computeInteraction();
+		return THAT.interaction;
+	};
 	// Procesamiento de los datos:
 	var THAT = this;
 	this.words = {};
@@ -412,9 +416,23 @@ function TalkVisualizer(containerID, processor) {
 	var center = {x: width/2, y: height/2};
 	var margin = 50;
 	var node_index = 0,
-	    DURATION = 500;
+		DEFAULT_DURATION = 500,
+	    DURATION = DEFAULT_DURATION;
 	var diagonal = null;	// función de pintado de los links
-	
+	var LAYOUT = d3.layout.tree()
+		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
+	var FORCE = d3.layout.force()
+		.charge(-120)
+		.linkDistance(30)
+		.size(width, height)
+		.on("tick", function() {
+			updateNodes();
+			updateTreeLinks();
+		});
+	var CHORD = d3.layout.chord()
+		.padding(0)
+		.sortSubgroups(d3.descending);
+
 	/* zoom behavior: */
 	var zoom = d3.behavior.zoom()
 		.scaleExtent([.25,8])
@@ -447,7 +465,8 @@ function TalkVisualizer(containerID, processor) {
 
 	var chartInteraction = svg
 				.append("g").attr("id", "d3-chart-interaction")
-				.attr("transform", d3Translate([center.x,center.y]));
+				.attr("transform", d3Translate([center.x,center.y]))
+				.append("g");
 
 	var nodes, links;
 
@@ -455,6 +474,8 @@ function TalkVisualizer(containerID, processor) {
 		if (typeof layout == "undefined") layout = "tree";
 		LAYOUT_TYPE = layout;
 		if ((layout=="tree")||(layout=="timeline")) {
+			FORCE.stop();
+			DURATION = DEFAULT_DURATION;
 			var xSize, ySize; 
 			if (LAYOUT_TYPE=="tree") {
 				diagonal = d3.svg.diagonal.radial()
@@ -474,16 +495,28 @@ function TalkVisualizer(containerID, processor) {
 				chart.transition().duration(DURATION)
 					.attr("transform", d3Translate([0,height]) + d3Rotate(-90));
 			};
-			LAYOUT = d3.layout.tree()
-				.size([xSize, ySize])
-				.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
+			LAYOUT.size([xSize, ySize]);
+		} else if (LAYOUT_TYPE=="graph") {
+			DURATION = 0;
+			FORCE.nodes(nodes)
+				.links(LAYOUT.links(nodes))
+				.start();
+		} else if (LAYOUT_TYPE=="interaction") {
+			DURATION = DEFAULT_DURATION;
+			chartInteraction
+				.attr("transform", d3Scale(0))
+				.transition().duration(DURATION)
+				.attr("transform", d3Scale(1));
+		};
+		if (LAYOUT_TYPE!="interaction") {
+			chartInteraction
+				.transition().duration(DURATION)
+				.attr("transform", d3Scale(0));
 		};
 	};
 	var LAYOUT_TYPE = null;
-	var LAYOUT = null;
 	configureLayout();	// para que haya un layout inicial de árbol
 
-	// function stashPositions() { nodes.forEach(function(d) { d.x0 = d.x; d.y0 = d.y; });	 };
 	// colapsa/expandir hijos
 	function clickOnNode(d) {
 		if (d.children) { d._children = d.children; d.children = null; } 
@@ -492,190 +525,181 @@ function TalkVisualizer(containerID, processor) {
 	};
 	/* Colapsa los nodos de la estructura de datos de árbol */
 	function collapse(d) { if (d.children.length) { d._children = d.children; d._children.forEach(collapse); d.children = null; }; };
+	function updateNodes() {
+		var node = chart.selectAll(".node")
+		  	.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
+		var nodeEnter = node.enter().append("g")
+			.attr("class", function(d) {
+				return "node user-" + d.usuarioOrigen;
+			})
+			.attr("transform", d3TranslateNode)
+			.style("opacity", 0)
+			.on("click", clickOnNode)
+			.on("mouseenter", function(d, e) {
+				console.log(d);
+				// $thisMsg = $("<div>").attr("id", "current-message")
+				// 	.append(createMessage(d).css("left", d3.event.offsetX+"px").css("top", d3.event.offsetY))
+				// 	.appendTo('body');
+			})
+			.on("mouseleave", function() {
+				$("#current-message").remove();
+			});
+		nodeEnter.append("circle")
+			.attr("r", RADIUS)
+			.attr("fill", getMsgColor)
+			.attr("stroke", "#fff")
+			.attr("stroke-width", NODE_BORDER);
+
+		// Transition nodes to their new position.
+		var nodeUpdate = node.transition()
+			.duration(DURATION)
+			.style("opacity", 1)
+			.attr("transform", d3TranslateNode)
+			.select("circle")
+				.attr("fill", getMsgColor);
+
+		// Transition exiting nodes to the parent's new position.
+		var nodeExit = node.exit().transition().duration(DURATION)
+			.style("opacity", 0)
+			.remove();
+		nodeExit.select("circle")
+			.transition().duration(DURATION)
+			.attr("r", 1e-6);
+	};
+	function updateTreeLinks() {
+		var link = chart.selectAll("path.link")
+			.data(links, function(d) { return d.id; });
+			// .data(links, function(d) { return d.target.id; });
+		// Los nuevos nodos entran en la posición previa del padre
+		link.enter().insert("path", "g.node")
+			.attr("class", "link")
+			.attr("d", diagonal)
+			.attr("stroke", "#999")
+			.attr("stroke-width", LINK_WIDTH)
+			.style("opacity", 0);
+		// Transición a nueva posición
+		link.transition()
+			.duration(DURATION)
+			.attr("d", diagonal)
+			.style("opacity", 1);
+		// Transition exiting nodes to the parent's new position.
+		link.exit().transition()
+			.duration(DURATION)
+			.style("opacity", 0)
+			.remove();
+	};
+	/* Actualización del gráfico de interacciones */
+	function updateInteraction () {
+		function arcTween(transition, angle) {
+			transition.attrTween("d", function(d) {
+				var endAngle = (angle===0) ? d.startAngle : d.endAngle;
+				var interpolateStart = d3.interpolate(this._startAngle, d.startAngle);
+				var interpolateEnd = d3.interpolate(this._endAngle, endAngle);
+				this._startAngle = d.startAngle;
+				this._endAngle = d.endAngle;
+				return function(t) {
+					d.startAngle = interpolateStart(t);
+					d.endAngle = interpolateEnd(t);
+					return arc(d);
+				};
+			});
+		};
+		function chordTween(transition, angle) {
+			transition.attrTween("d", function(d) {
+				var s_endAngle = (angle===0) ? d.source.startAngle : d.source.endAngle;
+				var t_endAngle = (angle===0) ? d.target.startAngle : d.target.endAngle;
+				var s_interpolateStart = d3.interpolate(this._source.startAngle, d.source.startAngle);
+				var s_interpolateEnd = d3.interpolate(this._source.endAngle, s_endAngle);
+				var t_interpolateStart = d3.interpolate(this._target.startAngle, d.target.startAngle);
+				var t_interpolateEnd = d3.interpolate(this._target.endAngle, t_endAngle);
+				this._source = {startAngle: d.source.startAngle, endAngle: s_endAngle};
+				this._target = {startAngle: d.target.startAngle, endAngle: t_endAngle};
+				return function(t) {
+					d.source.startAngle = s_interpolateStart(t);
+					d.source.endAngle = s_interpolateEnd(t);
+					d.target.startAngle = t_interpolateStart(t);
+					d.target.endAngle = t_interpolateEnd(t);
+					return fChord(d);
+				};
+			});
+		};
+		// filtrado de los mensajes relacionados con un usuario
+		function filterUser(d,i) {
+			chartInteraction.selectAll("path.chord").classed("fade", function(p) {
+				return 	p.source.index != i && p.target.index != i;
+			});
+		};
+		function unfilterUser(d,i) {
+			chartInteraction.selectAll("path.chord").classed("fade", false);
+		};
+		var interaction = processor.getInteraction();
+		var users = interaction.users;
+		var matrix = interaction.matrix;
+		CHORD.matrix(matrix);
+		var outerRadius = Math.min(width, height)/2 - margin;
+		var innerRadius = outerRadius*.8;
+		var arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius);
+		var fChord = d3.svg.chord().radius(innerRadius);
+		// Agregamos un grupo por usuario
+		var groups = chartInteraction.selectAll("g.user")
+			.data(CHORD.groups);
+		var groupsEnter = groups.enter().append("g")
+			.attr("class", "user")
+			.on("mouseover", filterUser);
+		groupsEnter.append("title").text(function(d,i) {
+			return users[i].nickname;
+		});
+		var groupText = groupsEnter.append("text")
+			.attr("x", 5)
+			.attr("dy", 15);
+		// queda por agregar el nombre de cada usuario
+
+		// Agregamos/actualizamos los grupos:
+		groupsEnter.append("path")
+			.each(function(d) {this._startAngle = d.startAngle; this._endAngle = d.startAngle;})
+			.attr("d", function(d) {
+				return d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius).startAngle(this._startAngle).endAngle(this._startAngle)(d);
+			})
+			.style("stroke", "#fff")
+			.style("fill", function(d,i) { return users[i].color; });
+
+		groups.select("path")
+			.transition().duration(DURATION)
+			.style("fill", function(d,i) { return users[i].color; })
+			.call(arcTween);
+
+		// Agregamos/actualizamos las cuerdas:
+		var chords = chartInteraction.selectAll("path.chord")
+			.data(CHORD.chords);
+
+		var chordsEnter = chords.enter().append("path")
+			.each(function(d) {
+				this._source = {startAngle: d.source.startAngle, endAngle: d.source.startAngle};
+				this._target = {startAngle: d.target.startAngle, endAngle: d.target.startAngle};
+			})
+			.attr("class", "chord")
+			.style("fill", function(d) { return users[d.source.index].color; })
+			.attr("d", function(d) {
+				return d3.svg.chord().radius(innerRadius).source(this._source).target(this._target)();
+			})
+			.style("opacity", .8)
+			.attr("stroke", "#fff");
+
+		chords.transition().duration(DURATION)
+			.attr("fill", function(d) { return users[d.source.index].color; })
+			.call(chordTween);
+
+		chords.exit()
+			.transition().duration(DURATION)
+			.call(chordTween, 0)
+			.remove();
+	};
 	/* Principal función de actualización */
 	function update(source) {
 		TIC();
 		if (typeof source == "undefined") source = root;
-		function updateNodes() {
-			var node = chart.selectAll(".node")
-			  	.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
-			var nodeEnter = node.enter().append("g")
-				.attr("class", function(d) {
-					return "node user-" + d.usuarioOrigen;
-				})
-				.attr("transform", d3TranslateNode)
-				.style("opacity", 0)
-				.on("click", clickOnNode)
-				.on("mouseenter", function(d, e) {
-					console.log(d);
-					// $thisMsg = $("<div>").attr("id", "current-message")
-					// 	.append(createMessage(d).css("left", d3.event.offsetX+"px").css("top", d3.event.offsetY))
-					// 	.appendTo('body');
-				})
-				.on("mouseleave", function() {
-					$("#current-message").remove();
-				});
-			nodeEnter.append("circle")
-				.attr("r", RADIUS)
-				.attr("fill", getMsgColor)
-				.attr("stroke", "#fff")
-				.attr("stroke-width", NODE_BORDER);
-
-			// Transition nodes to their new position.
-			var nodeUpdate = node.transition()
-				.duration(DURATION)
-				.style("opacity", 1)
-				.attr("transform", d3TranslateNode)
-				.select("circle")
-					.attr("fill", getMsgColor);
-
-			// Transition exiting nodes to the parent's new position.
-			var nodeExit = node.exit().transition().duration(DURATION)
-				.style("opacity", 0)
-				.remove();
-			nodeExit.select("circle")
-				.transition().duration(DURATION)
-				.attr("r", 1e-6);
-		};
-		function updateTreeLinks() {
-			var link = chart.selectAll("path.link")
-				.data(links, function(d) { return d.id; });
-				// .data(links, function(d) { return d.target.id; });
-			// Los nuevos nodos entran en la posición previa del padre
-			link.enter().insert("path", "g.node")
-				.attr("class", "link")
-				.attr("d", diagonal)
-				.attr("stroke", "#999")
-				.attr("stroke-width", LINK_WIDTH)
-				.style("opacity", 0);
-			// Transición a nueva posición
-			link.transition()
-				.duration(DURATION)
-				.attr("d", diagonal)
-				.style("opacity", 1);
-			// Transition exiting nodes to the parent's new position.
-			link.exit().transition()
-				.duration(DURATION)
-				.style("opacity", 0)
-				.remove();
-		};
-		/* Actualización del gráfico de interacciones */
-		function updateInteraction () {
-			function arcTween(transition, angle) {
-				transition.attrTween("d", function(d) {
-					var endAngle = (angle===0) ? d.startAngle : d.endAngle;
-					var interpolateStart = d3.interpolate(this._startAngle, d.startAngle);
-					var interpolateEnd = d3.interpolate(this._endAngle, endAngle);
-					this._startAngle = d.startAngle;
-					this._endAngle = d.endAngle;
-					return function(t) {
-						d.startAngle = interpolateStart(t);
-						d.endAngle = interpolateEnd(t);
-						return arc(d);
-					};
-				});
-			};
-			function chordTween(transition, angle) {
-				transition.attrTween("d", function(d) {
-					var s_endAngle = (angle===0) ? d.source.startAngle : d.source.endAngle;
-					var t_endAngle = (angle===0) ? d.target.startAngle : d.target.endAngle;
-					var s_interpolateStart = d3.interpolate(this._source.startAngle, d.source.startAngle);
-					var s_interpolateEnd = d3.interpolate(this._source.endAngle, s_endAngle);
-					var t_interpolateStart = d3.interpolate(this._target.startAngle, d.target.startAngle);
-					var t_interpolateEnd = d3.interpolate(this._target.endAngle, t_endAngle);
-					this._source = {startAngle: d.source.startAngle, endAngle: s_endAngle};
-					this._target = {startAngle: d.target.startAngle, endAngle: t_endAngle};
-					return function(t) {
-						d.source.startAngle = s_interpolateStart(t);
-						d.source.endAngle = s_interpolateEnd(t);
-						d.target.startAngle = t_interpolateStart(t);
-						d.target.endAngle = t_interpolateEnd(t);
-						return fChord(d);
-					};
-				});
-			};
-			// filtrado de los mensajes relacionados con un usuario
-			function filterUser(d,i) {
-				chartInteraction.selectAll("path.chord").classed("fade", function(p) {
-					return 	p.source.index != i && p.target.index != i;
-				});
-			};
-			function unfilterUser(d,i) {
-				chartInteraction.selectAll("path.chord").classed("fade", false);
-			};
-			var users = processor.interaction.users;
-			var matrix = processor.interaction.matrix;
-			var chordLayout = d3.layout.chord()
-				.padding(0)
-				.sortSubgroups(d3.descending)
-				.matrix(matrix);
-			var outerRadius = Math.min(width, height)/2 - margin;
-			var innerRadius = outerRadius*.8;
-			var arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius);
-			var fChord = d3.svg.chord().radius(innerRadius);
-			// Agregamos un grupo por usuario
-			var groups = chartInteraction.selectAll("g.user")
-				.data(chordLayout.groups);
-
-			var groupsEnter = groups.enter().append("g")
-				.attr("class", "user")
-				.on("mouseover", filterUser);
-			
-			groupsEnter.append("title").text(function(d,i) {
-				return users[i].nickname;
-			});
-			var groupText = groupsEnter.append("text")
-				.attr("x", 5)
-				.attr("dy", 15);
-			// queda por agregar el nombre de cada usuario
-
-			// Agregamos/actualizamos los grupos:
-			groupsEnter.append("path")
-				.each(function(d) {this._startAngle = d.startAngle; this._endAngle = d.startAngle;})
-				.attr("d", function(d) {
-					return d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius).startAngle(this._startAngle).endAngle(this._startAngle)(d);
-				})
-				.style("stroke", "#fff")
-				.style("fill", function(d,i) { return users[i].color; });
-
-			groups.select("path")
-				.transition().duration(DURATION)
-				.style("fill", function(d,i) { return users[i].color; })
-				.call(arcTween);
-
-			// Agregamos/actualizamos las cuerdas:
-			var chords = chartInteraction.selectAll("path.chord")
-				.data(chordLayout.chords);
-
-			var chordsEnter = chords.enter().append("path")
-				.each(function(d) {
-					this._source = {startAngle: d.source.startAngle, endAngle: d.source.startAngle};
-					this._target = {startAngle: d.target.startAngle, endAngle: d.target.startAngle};
-				})
-				.attr("class", "chord")
-				.style("fill", function(d) { return users[d.source.index].color; })
-				.attr("d", function(d) {
-					return d3.svg.chord().radius(innerRadius).source(this._source).target(this._target)();
-				})
-				.style("opacity", .8)
-				.attr("stroke", "#fff");
-
-			chords.transition().duration(DURATION)
-				.attr("fill", function(d) { return users[d.source.index].color; })
-				.call(chordTween);
-
-			chords.exit()
-				.transition().duration(DURATION)
-				.call(chordTween, 0)
-				.remove();
-		};
-		function updateSVG() {
-			// updateNodes();
-			// updateTreeLinks();
-			updateInteraction();
-		};
-		/* Cálculo de las posiciones de cada nodo */
-		function computePositions(node) {
+		/* Cálculo de las posiciones de cada nodo, layouts de árbol y timeline */
+		function computeTreePositions(node) {
 			if (LAYOUT_TYPE=="tree") {
 				var ang = node.x;
 				node.xx = Math.cos(ang)*node.y;
@@ -685,31 +709,31 @@ function TalkVisualizer(containerID, processor) {
 				node.y = node.yy = width*node.tsX;
 			};
 			if (node.children) node.children.forEach(function(n) {
-				computePositions(n);
+				computeTreePositions(n);
 			});
 		};
-		nodes = LAYOUT.nodes(root);
-		links = nodes;
-		computePositions(root);	// cálculo de las posiciones de los nodos para el layout
-		// links = nodes.filter(function(n){
-		// 	return n!=root;
-		// });
-		updateSVG();
-		// stashPositions();	// Stash the old positions for transition.
+		if (LAYOUT_TYPE=="graph") {
+			// force.nodes(nodes).links(LAYOUT.links(nodes));	
+		} 
+		else if (LAYOUT_TYPE=="interaction") {
+			updateInteraction();
+		} else {
+			nodes = LAYOUT.nodes(root);
+			links = nodes;
+			computeTreePositions(root);	// cálculo de las posiciones de los nodos para el layout
+			updateNodes();
+			updateTreeLinks();
+		};
 		TOC(true);
 	};
-	function resetZoom() {
-		zoom.translate([0,0]);
-		zoom.scale(1);
-		zoom.event(svg);
-	};
+	function resetZoom() { zoom.translate([0,0]); zoom.scale(1); zoom.event(svg); };
+
+	update();
 	this.config = function(configuration) {
 		if (configuration.layout) configureLayout(configuration.layout);
 		update();
 		resetZoom();
 	};
-	update();
-	
 	this.updateGraph = function() { update(); };
 	this.highlightUsers = function (users, highlight) {
 		var selector = users.map(function(u) {return ".user-"+u+" circle";}).join(",");

@@ -99,13 +99,15 @@ $("#set-timeline").on("click", function() {
 $("#set-tree").on("click", function() {
 	VISUALIZER.config({layout:"tree"});
 });
+$("#set-graph").on("click", function() {
+	VISUALIZER.config({layout:"graph"});
+});
 $("#group-singles").on("click", function() {
 	PROCESSOR.groupSingles($(this).toggleClass('on').hasClass('on'));
 	VISUALIZER.updateGraph();
 });
 $("#show-interaction").on("click", function() {
-	PROCESSOR.computeInteraction();
-	VISUALIZER.updateInteraction();
+	VISUALIZER.config({layout:"interaction"});
 });
 /* Actualización de filtros */
 document.body.addEventListener("updateSelection", function(e) {
