@@ -21,6 +21,7 @@ body {
   right: 0;
   bottom: 0;
   top: 40px;
+  cursor: default;
 }
 
 .node circle {
@@ -142,7 +143,6 @@ body {
   width: 300px;
   font-size: 10px;
   color: #666;
-  cursor: default;
 }
 .interaction-tooltip:before {
   display: block;

@@ -260,12 +260,12 @@ function DataProcessor(data) {
 	function computeInteraction() {
 		/* evalúa las interacciones de un mensaje */
 		function evaluateInteraction(m) {
-			if (m.selected) {
+			// if (m.selected) {
 				// sólo contamos mensajes de la selección actual
 				var i = usersArray.indexOf(m.author);
 				var j = usersArray.indexOf(users[m.autorMsgRespuesta]);
 				interaction[i][j]++;
-			};
+			// };
 			if (m.children) m.children.forEach(evaluateInteraction);
 		};
 		var users = THAT.users;
@@ -424,16 +424,21 @@ function TalkVisualizer(containerID, processor) {
 		DEFAULT_DURATION = 500,
 	    DURATION = DEFAULT_DURATION;
 	var diagonal = null;	// función de pintado de los links
+	var line = d3.svg.line()
+		.x(function(d) { return d.x; })
+		.y(function(d) { return d.y; });
 	var LAYOUT_TYPE = "tree";
 	var LAYOUT = d3.layout.tree()
 		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 	var FORCE = d3.layout.force()
-		.charge(-120)
+		.charge(0)
 		.linkDistance(30)
-		.size(width, height)
+		.gravity(0)
+		.size([width, height])
 		.on("tick", function() {
+			console.log(nodes[0].x);
 			updateNodes();
-			updateTreeLinks();
+			// updateTreeLinks();
 		});
 	var CHORD = d3.layout.chord()
 		.padding(0);
@@ -487,15 +492,11 @@ function TalkVisualizer(containerID, processor) {
 			var xSize, ySize; 
 			if (LAYOUT_TYPE=="tree") {
 				diagonal = d3.svg.diagonal.radial()
-					// .source(function(d) {return d.parent || d;})
-					// .target(function(d) {return d;})
-					.projection(function(d) { return [d.y, d.x+_PI_2]; });
+					.projection(function(d) {console.log(d); return [d.y, d.x+_PI_2]; });
 				xSize = _2_PI; 
 				ySize = Math.min(width, height)/2-margin;
 			} else if(LAYOUT_TYPE=="timeline") {
 				diagonal = d3.svg.diagonal();
-					// .source(function(d) {return d.parent || d;})
-					// .target(function(d) {return d;});
 				xSize = 100;
 				ySize = 100;
 				chartPosition = [0,0];
@@ -503,8 +504,9 @@ function TalkVisualizer(containerID, processor) {
 			LAYOUT.size([xSize, ySize]);
 		} else if (LAYOUT_TYPE=="graph") {
 			DURATION = 0;
+			diagonal = function(d) { return line([d.source, d.target]); };
 			FORCE.nodes(nodes)
-				.links(LAYOUT.links(nodes))
+				.links([])
 				.start();
 		};
 		if (LAYOUT_TYPE=="interaction") {
@@ -549,7 +551,8 @@ function TalkVisualizer(containerID, processor) {
 			.on("mouseenter", function(d, e) {
 				var tooltipConfig = {autoClose: "no"};
 				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d));
-			});
+			})
+			.call(FORCE.drag);
 		nodeEnter.append("circle")
 			.attr("r", RADIUS)
 			.attr("fill", getMsgColor)
@@ -564,7 +567,6 @@ function TalkVisualizer(containerID, processor) {
 			.select("circle")
 				.attr("fill", getMsgColor);
 
-		// Transition exiting nodes to the parent's new position.
 		var nodeExit = node.exit().transition().duration(DURATION)
 			.style("opacity", 0)
 			.remove();
