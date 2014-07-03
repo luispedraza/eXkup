@@ -132,7 +132,7 @@ function DataProcessor(data) {
 	function initUsers(users) {
 		var users = makeArray(users, "nickname");
 		var nUsers = users.length;
-		// var color = chroma.scale(["#00ff00", "#ff00ff"]).domain([0,nUsers-1]);
+		var color = chroma.scale(["#00ff00", "#ff00ff"]).domain([0,nUsers-1]);
 		// users.forEach(function(u,i) {
 		// 	// users[u].color = d3.hsl(i*360/nUsers, .5, .5).toString();
 		// 	u.color = color(i);
@@ -145,8 +145,7 @@ function DataProcessor(data) {
 		// .domain([0, nUsers-1])
 		// .range([0,765]);
 		users.forEach(function(u,i) {
-			u.color = d3.hsl(i*360/nUsers, .5+Math.random()*.1, .5+Math.random()*.1).toString();
-			// u.color = color(i);
+			u.color = d3.hsl(i*360/nUsers, .5+Math.random()*.2, .5+Math.random()*.1).toString();
 		});
 	};
 	this.groupSingles = function(group) {
@@ -427,18 +426,18 @@ function TalkVisualizer(containerID, processor) {
 	var line = d3.svg.line()
 		.x(function(d) { return d.x; })
 		.y(function(d) { return d.y; });
+	var d3TranslateNode = null;
 	var LAYOUT_TYPE = "tree";
 	var LAYOUT = d3.layout.tree()
 		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 	var FORCE = d3.layout.force()
-		.charge(0)
-		.linkDistance(30)
-		.gravity(0)
+		.charge(-50)
+		.linkDistance(20)
+		.gravity(0.1)
 		.size([width, height])
 		.on("tick", function() {
-			console.log(nodes[0].x);
 			updateNodes();
-			// updateTreeLinks();
+			updateTreeLinks();
 		});
 	var CHORD = d3.layout.chord()
 		.padding(0);
@@ -492,7 +491,7 @@ function TalkVisualizer(containerID, processor) {
 			var xSize, ySize; 
 			if (LAYOUT_TYPE=="tree") {
 				diagonal = d3.svg.diagonal.radial()
-					.projection(function(d) {console.log(d); return [d.y, d.x+_PI_2]; });
+					.projection(function(d) { return [d.y, d.x+_PI_2]; });
 				xSize = _2_PI; 
 				ySize = Math.min(width, height)/2-margin;
 			} else if(LAYOUT_TYPE=="timeline") {
@@ -502,8 +501,10 @@ function TalkVisualizer(containerID, processor) {
 				chartPosition = [0,0];
 			};
 			LAYOUT.size([xSize, ySize]);
+			d3TranslateNode = d3TranslateNodeXXYY;
 		} else if (LAYOUT_TYPE=="graph") {
 			DURATION = 0;
+			d3TranslateNode = d3TranslateNodeXY;
 			diagonal = function(d) { return line([d.source, d.target]); };
 			FORCE.nodes(nodes)
 				.links([])
@@ -550,7 +551,7 @@ function TalkVisualizer(containerID, processor) {
 			.on("click", clickOnNode)
 			.on("mouseenter", function(d, e) {
 				var tooltipConfig = {autoClose: "no"};
-				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d));
+				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
 			})
 			.call(FORCE.drag);
 		nodeEnter.append("circle")
@@ -672,7 +673,6 @@ function TalkVisualizer(containerID, processor) {
 		var interaction = processor.getInteraction();
 		var users = interaction.users;
 		var matrix = interaction.matrix;
-		console.log(matrix);
 		var nMessages = sumArray(matrix);
 		if (!chord_index_array) {
 			chord_index_array = initArray(users.length, users.length, null);
@@ -789,7 +789,6 @@ function TalkVisualizer(containerID, processor) {
 			computeTreePositions(root);	// cálculo de las posiciones de los nodos para el layout
 			// links = nodes;
 			links = LAYOUT.links(nodes);
-			
 			updateNodes();
 			updateTreeLinks();
 		};

@@ -10,7 +10,7 @@ function initThread(apiData) {
 	populateMessages(PROCESSOR.tree);	// los mensajes de la barra izquierda
 };
 
-var TEST = 0;
+// var TEST = 2;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
