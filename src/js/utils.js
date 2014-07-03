@@ -302,6 +302,16 @@ function initArray(dim1, dim2, value) {
 			});
 };
 
+function sumArray(array) {
+	var value = 0;
+	array.forEach(function(row,i) {
+		row.forEach(function(val,j) {
+			value+=val;
+		});
+	});
+	return value;
+};
+
 
 
 

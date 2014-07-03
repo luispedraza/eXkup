@@ -260,9 +260,12 @@ function DataProcessor(data) {
 	function computeInteraction() {
 		/* evalúa las interacciones de un mensaje */
 		function evaluateInteraction(m) {
-			var i = usersArray.indexOf(m.author);
-			var j = usersArray.indexOf(users[m.autorMsgRespuesta]);
-			interaction[i][j]++;
+			if (m.selected) {
+				// sólo contamos mensajes de la selección actual
+				var i = usersArray.indexOf(m.author);
+				var j = usersArray.indexOf(users[m.autorMsgRespuesta]);
+				interaction[i][j]++;
+			};
 			if (m.children) m.children.forEach(evaluateInteraction);
 		};
 		var users = THAT.users;
@@ -416,6 +419,8 @@ function TalkVisualizer(containerID, processor) {
 	var center = {x: width/2, y: height/2};
 	var margin = 50;
 	var node_index = 0,
+		chord_index = 0,
+		chord_index_array = null;	// almacena los índices de las cuerdas, ha de ser inicializado 
 		DEFAULT_DURATION = 500,
 	    DURATION = DEFAULT_DURATION;
 	var diagonal = null;	// función de pintado de los links
@@ -431,8 +436,9 @@ function TalkVisualizer(containerID, processor) {
 			updateTreeLinks();
 		});
 	var CHORD = d3.layout.chord()
-		.padding(0)
-		.sortSubgroups(d3.descending);
+		.padding(0);
+		// .sortGroups(d3.ascending)
+		// .sortSubgroups(d3.ascending);
 
 	/* zoom behavior: */
 	var zoom = d3.behavior.zoom()
@@ -504,16 +510,20 @@ function TalkVisualizer(containerID, processor) {
 		if (LAYOUT_TYPE=="interaction") {
 			DURATION = DEFAULT_DURATION;
 			chartInteraction
+				.style("pointer-events", "auto")
 				.attr("transform", d3Scale(0))
 				.transition().duration(DURATION)
 				.attr("transform", d3Scale(1));
 			chart.transition().duration(DURATION)
+				.style("pointer-events", "none")
 				.style("opacity", 0);
 		} else {
 			chartInteraction
+				.style("pointer-events", "none")
 				.transition().duration(DURATION)
 				.attr("transform", d3Scale(0));
 			chart.transition().duration(DURATION)
+				.style("pointer-events", "auto")
 				.style("opacity", 1)
 				.attr("transform", d3Translate(chartPosition));
 		};
@@ -537,13 +547,8 @@ function TalkVisualizer(containerID, processor) {
 			.style("opacity", 0)
 			.on("click", clickOnNode)
 			.on("mouseenter", function(d, e) {
-				console.log(d);
-				// $thisMsg = $("<div>").attr("id", "current-message")
-				// 	.append(createMessage(d).css("left", d3.event.offsetX+"px").css("top", d3.event.offsetY))
-				// 	.appendTo('body');
-			})
-			.on("mouseleave", function() {
-				$("#current-message").remove();
+				var tooltipConfig = {autoClose: "no"};
+				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d));
 			});
 		nodeEnter.append("circle")
 			.attr("r", RADIUS)
@@ -626,16 +631,50 @@ function TalkVisualizer(containerID, processor) {
 		};
 		// filtrado de los mensajes relacionados con un usuario
 		function filterUser(d,i) {
-			chartInteraction.selectAll("path.chord").classed("fade", function(p) {
+			chartInteraction.selectAll(".chord").classed("fade", function(p) {
 				return 	p.source.index != i && p.target.index != i;
+			});
+			chartInteraction.selectAll(".user").classed("fade", function(p) {
+				var j = p.index;
+				return (i==j) ? false : ((matrix[i][j]==0) && (matrix[j][i]==0));
 			});
 		};
 		function unfilterUser(d,i) {
 			chartInteraction.selectAll("path.chord").classed("fade", false);
 		};
+		function createUserTooltip(d,i) {
+			var groups = CHORD.groups();
+			function nm(i) {return Math.round(groups[i].value);};					// mensajes enviados por un usuario
+			function pm(i) {return (100*nm(i)/nMessages).toFixed(1);};				// porcentaje de mensajes enviados
+			function nmr(i) {return Math.round(d3.sum(matrix[i]));};						// número de mensajes recibidos
+			function pmr(i) {return (100*nmr(i)/nMessages).toFixed(1);};			// porcentaje de mensajes recibidos
+			var nickname = users[i].nickname;
+			var $ulSent = $("<ul>");
+			var $ulReceived = $("<ul>");
+			matrix[i].forEach(function(c,t) {
+				if (c!=0) $ulSent.append($("<li>").text("@" + users[t].nickname + ": " + c));
+			});
+			matrix.forEach(function(r,s) {
+				if (r[i]!=0) $ulReceived.append($("<li>").text("@" + users[s].nickname + ": " + r[i]));
+			});
+			var $tooltip = $("<div>").addClass("interaction-tooltip")
+					.append("<h2>@" + nickname + " ha enviado " + nm(i) + " mensajes ("+ pm(i) + "%) a:")
+					.append($ulSent);
+			if ($ulReceived.length) {
+				$tooltip
+					.append("<h2>@" + nickname + " ha recibido " + nmr(i) + " mensajes ("+ pmr(i) + "%) de:")
+					.append($ulReceived);
+			};
+			return $tooltip;
+		};
 		var interaction = processor.getInteraction();
 		var users = interaction.users;
 		var matrix = interaction.matrix;
+		console.log(matrix);
+		var nMessages = sumArray(matrix);
+		if (!chord_index_array) {
+			chord_index_array = initArray(users.length, users.length, null);
+		};
 		CHORD.matrix(matrix);
 		var outerRadius = Math.min(width, height)/2 - margin;
 		var innerRadius = outerRadius*.8;
@@ -646,13 +685,25 @@ function TalkVisualizer(containerID, processor) {
 			.data(CHORD.groups);
 		var groupsEnter = groups.enter().append("g")
 			.attr("class", "user")
-			.on("mouseover", filterUser);
-		groupsEnter.append("title").text(function(d,i) {
-			return users[i].nickname;
-		});
+			.on("mouseenter", function(d,i) {
+				filterUser(d,i);
+				// var configTooltip = {autoClose: "no"};
+				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createUserTooltip(d,i));
+			});
+		// groupsEnter.append("title").text(function(d,i) {
+		// 	return users[i].nickname;
+		// });
 		var groupText = groupsEnter.append("text")
-			.attr("x", 5)
-			.attr("dy", 15);
+			.each(function(d) { d.degAngle = RAD2DEG * (d.startAngle + d.endAngle) / 2 - 90; })
+			.attr("dy", ".35em")
+			.attr("font-size", "10px")
+			.attr("text-anchor", function(d) { return d.degAngle > 90 ? "end" : null; })
+			.attr("transform", function(d) {
+				return d3Rotate(d.degAngle) + d3Translate(outerRadius+10)
+				+ ((d.degAngle>90) ? " rotate(180)" : "")
+				+ ((d.value==0) ? " scale(0)" : "");
+			})
+        	.text(function(d,i) { return "@" + users[i].nickname; });
 		// queda por agregar el nombre de cada usuario
 
 		// Agregamos/actualizamos los grupos:
@@ -668,11 +719,24 @@ function TalkVisualizer(containerID, processor) {
 			.transition().duration(DURATION)
 			.style("fill", function(d,i) { return users[i].color; })
 			.call(arcTween);
+		groups.select("text")
+			.each(function(d) { d.degAngle = RAD2DEG * (d.startAngle + d.endAngle) / 2 - 90; })
+			.attr("text-anchor", function(d) { return d.degAngle > 90 ? "end" : null; })
+			.transition().duration(DURATION)
+			.style("opacity", function(d) { return (d.value==0) ? 0 : 1;})
+			.attr("transform", function(d) {
+				return d3Rotate(d.degAngle) + d3Translate(outerRadius+10)
+				+ ((d.degAngle>90) ? " rotate(180)" : "")
+				+ ((d.value==0) ? " scale(0)" : "");
+			});
 
 		// Agregamos/actualizamos las cuerdas:
 		var chords = chartInteraction.selectAll("path.chord")
-			.data(CHORD.chords);
-
+			.data(CHORD.chords, function(d) { 
+				var i = d.source.index;
+				var j = d.source.subindex;
+				return chord_index_array[i][j] || (chord_index_array[i][j] = ++chord_index); 
+			});
 		var chordsEnter = chords.enter().append("path")
 			.each(function(d) {
 				this._source = {startAngle: d.source.startAngle, endAngle: d.source.startAngle};
@@ -684,10 +748,9 @@ function TalkVisualizer(containerID, processor) {
 				return d3.svg.chord().radius(innerRadius).source(this._source).target(this._target)();
 			})
 			.style("opacity", .8)
-			.attr("stroke", "#fff");
-
+			.attr("stroke", "#ccc");
+		
 		chords.transition().duration(DURATION)
-			.attr("fill", function(d) { return users[d.source.index].color; })
 			.call(chordTween);
 
 		chords.exit()
@@ -866,5 +929,31 @@ function FrequencyVisualizer(element, processor) {
 	graph.render();
 };
 
+/* Para mostrar información contextual sobre lso elementos */
+function ChartTooltip(whereMouseMoved,x,y,content,config) {
+	if (typeof config == "undefined") config = {};
+	var delay = config.delay || 800;
+	var autoClose = config.autoClose || "yes";
+	if (!typeof delay ==="undefined") delay=800;
+	$(whereMouseMoved).on("mouseleave",function() {
+		clearTimeout(timeout);
+		if (autoClose=="yes") close();
+		$(this).off("mouseleave");
+	});
+	var $element = $("<div>");
+	var timeout = setTimeout(initTooltip, delay);
+	function initTooltip() {
+		$element.addClass("message-detail")
+			.css({"left": x, "top": y})
+			.append("<div class='tooltip-header'><div class='close fa fa-times'></div></div>")
+			.append(content)
+			.draggable()
+			.appendTo('#d3-chart-container');
+		$element.find(".close").on("click", close);
+	};
+	function close() {
+		$element.remove();
+	};
+};
 
 

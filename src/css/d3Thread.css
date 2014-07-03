@@ -34,13 +34,12 @@ body {
 .link {
   fill: none;
 }
-#d3-chart-interaction .chord {
+#d3-chart-interaction .chord, #d3-chart-interaction .user {
   transition: opacity .5s ease;
 }
-#d3-chart-interaction:hover .chord.fade {
+#d3-chart-interaction:hover .fade {
   opacity: .1 !important;
 }
-
 /******************/
 /* Elementos HTML */
 /******************/
@@ -119,11 +118,46 @@ body {
   top: 0;
   text-align: center;
 }
-
-#current-message .message {
-  position: absolute;
+.message-detail {
+  position: absolute !important;
+  border: 1px solid #ccc;
+  padding: 5px;
+  background-color: rgba(255,255,255,.9);
+}
+.message-detail .message {
   background-color: #fff;
   width: 400px;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+  background: none;
+}
+.message-detail .close{
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  color: #ccc;
+}
+.interaction-tooltip {
+  width: 300px;
+  font-size: 10px;
+  color: #666;
+  cursor: default;
+}
+.interaction-tooltip:before {
+  display: block;
+  content: "EN ESTA SELECCIÓN:";
+  font-weight: bold;
+}
+.interaction-tooltip h2 {
+  font-size: 10px;
+  font-weight: normal;
+  margin: 3px 0;
+}
+.interaction-tooltip ul {
+  padding: 0 10px;
+  margin: 0;
+  list-style: none;
 }
 
 #chart-control {
@@ -361,6 +395,7 @@ h2.redtitle {
   top: 30px;
   border: 1px solid #ccc;
   padding: 10px;
+  background-color: rgba(255,255,255,.8);
 }
 #chart-options .option {
   position: relative;
