@@ -484,47 +484,40 @@ function TalkVisualizer(containerID, processor) {
 				.append("g");
 
 	var nodes, links;
-	var authorFocus=[], repliedFocus=[];	// agrupación de nodos en layout de grafo
+	var authorFocus=[], repliedFocus=[], selectedAuthors = [];	// agrupación de nodos en layout de grafo
 
 	/* Configuración de los focos del grafo */
 	function configureFocus(options) {
-		var focusPadding = 120;		// espacio entre elementos
+		var focusPadding = (options.length == 2) ? 50 : 100;		// espacio entre elementos
 		var N = Math.floor((width-2*margin) / focusPadding);	// elementos por cada fila
 		authorFocus = [];
 		repliedFocus = [];
-		options.forEach(function(o) {
-			if (o=="group-author") {
-				// Los focos son los autores que forman parte de las selección
-				authorFocus = processor.usersArray.filter(function(u) {
-					return u.selected;
-				});
-				// autor para "resto de autores"
-				authorFocus.push({
-					nickname: "OTROS"
-				});
-				authorFocus.forEach(function(a,i) {
-					var i_row = Math.floor(i/N);
-					var i_col = Math.floor(i%N);
-					a.x = margin + i_col * focusPadding;
-					a.y = margin + i_row * focusPadding;
-				});
-			} else if (o=="group-replied") {
-				// Los focos son los autores que forman parte de las selección
-				repliedFocus = processor.usersArray.filter(function(u) {
-					return u.selected;
-				});
-				// autor para "resto de autores"
-				repliedFocus.push({
-					nickname: "OTROS"
-				});
-				repliedFocus.forEach(function(a,i) {
-					var i_row = Math.floor(i/N);
-					var i_col = Math.floor(i%N);
-					a.x = margin + i_col * focusPadding;
-					a.y = margin + i_row * focusPadding;
-				});
-			};
+		selectedAuthors = processor.usersArray.filter(function(u) {
+			return u.selected;
 		});
+		// autor para "resto de autores"
+		if (selectedAuthors.length != processor.usersArray.length) {
+			selectedAuthors.push({ nickname: "OTROS" });
+		};
+		if (options.length == 2) {
+			authorFocus = repliedFocus = selectedAuthors;
+			selectedAuthors.forEach(function(a,i) {
+				a.x = a.y = a.xa = a.yr = i * focusPadding;
+				a.ya = a.xr = 0;
+			});
+		} else {
+			if (options[0]=="group-author") {
+				authorFocus = selectedAuthors;
+			} else if (options[0]=="group-replied") {
+				repliedFocus = selectedAuthors;
+			};
+			selectedAuthors.forEach(function(a,i) {
+				var i_row = Math.floor(i/N);
+				var i_col = Math.floor(i%N);
+				a.x = a.xa = a.xr = margin + i_col * focusPadding;
+				a.y = a.ya = a.yr = margin + i_row * focusPadding;
+			});
+		};
 	};
 
 	/* Configuración del layout de la visualización 
@@ -600,24 +593,28 @@ function TalkVisualizer(containerID, processor) {
 
 	/* actualización del grafo en cada tic */
 	function ticUpdate(e) {
+		var k = 1 * e.alpha;
 		/* foco de autores */
-		if (authorFocus.length) {
-			var k = 1 * e.alpha;
-			// Empujar los nodos hacia su foco:
+		var fakeUser = selectedAuthors[selectedAuthors.length-1];	// el usuario "fake": OTROS
+		if (authorFocus.length && repliedFocus.length) {
+			nodes.forEach(function(m) {
+				var author = (m.selected) ? m.author : fakeUser;
+				var replied = (m.parent ? m.parent.author : root);
+				replied = replied.selected ? replied : fakeUser;
+				m.x += (author.x - m.x) * k;
+				m.y += (replied.y - m.y) * k;
+			});
+		} else if (authorFocus.length) {
 			nodes.forEach(function(m, i) {
-				var fakeUser = authorFocus[authorFocus.length-1];	// el usuario "fake": OTROS
-				var user = authorFocus[authorFocus.indexOf(m.author)] || fakeUser;
-				m.x += (user.x - m.x) * k;
-				m.y += (user.y - m.y) * k;
+				var author = authorFocus[authorFocus.indexOf(m.author)] || fakeUser;
+				m.x += (author.x - m.x) * k;
+				m.y += (author.y - m.y) * k;
 			});
 		} else if (repliedFocus.length) {
-			var k = 1 * e.alpha;
-			// Empujar los nodos hacia su foco:
 			nodes.forEach(function(m, i) {
-				var fakeUser = repliedFocus[repliedFocus.length-1];	// el usuario "fake": OTROS
-				var user = repliedFocus[repliedFocus.indexOf(m.parent ? m.parent.author : root)] || fakeUser;
-				m.x += (user.x - m.x) * k;
-				m.y += (user.y - m.y) * k;
+				var replied = repliedFocus[repliedFocus.indexOf(m.parent ? m.parent.author : root)] || fakeUser;
+				m.x += (replied.x - m.x) * k;
+				m.y += (replied.y - m.y) * k;
 			});
 		};
 		updateNodes();
@@ -630,7 +627,7 @@ function TalkVisualizer(containerID, processor) {
 		  	.data(authorFocus, function(d) { return d.graph_id || (d.graph_id = ++author_index); });
 		var f_authorEnter = f_author.enter().append("g")
 			.attr("class", "focus-author")
-			.attr("transform", d3TranslateNode)
+			.attr("transform", function(d) {return d3Translate([d.xa, d.ya]); })
 			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
 		f_authorEnter.append("image")
 			.attr("xlink:href", function(d) {return checkUserPhoto(d.pathfoto);})
@@ -645,7 +642,7 @@ function TalkVisualizer(containerID, processor) {
         	.text(function(d,i) { return "@" + d.nickname; });
 		var f_authorUpdate = f_author.transition()
 			.duration(DURATION)
-			.attr("transform", d3TranslateNode);
+			.attr("transform", function(d) {return d3Translate([d.xa, d.ya]); })
 		var f_authorExit = f_author.exit().transition().duration(DURATION)
 			.style("opacity", 0)
 			.remove();
@@ -654,7 +651,7 @@ function TalkVisualizer(containerID, processor) {
 		  	.data(repliedFocus, function(d) { return d.graph_id || (d.graph_id = ++replied_index); });
 		var f_repliedEnter = f_replied.enter().append("g")
 			.attr("class", "focus-replied")
-			.attr("transform", d3TranslateNode)
+			.attr("transform", function(d) {return d3Translate([d.xr, d.yr]); })
 			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
 		f_repliedEnter.append("image")
 			.attr("xlink:href", function(d) {return checkUserPhoto(d.pathfoto);})
@@ -669,7 +666,7 @@ function TalkVisualizer(containerID, processor) {
         	.text(function(d,i) { return "@" + d.nickname; });
 		var f_repliedUpdate = f_replied.transition()
 			.duration(DURATION)
-			.attr("transform", d3TranslateNode);
+			.attr("transform", function(d) {return d3Translate([d.xr, d.yr]); })
 		var f_repliedExit = f_replied.exit().transition().duration(DURATION)
 			.style("opacity", 0)
 			.remove();
