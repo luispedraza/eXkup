@@ -148,32 +148,7 @@ function DataProcessor(data) {
 			u.color = d3.hsl(i*360/nUsers, .5+Math.random()*.2, .5+Math.random()*.1).toString();
 		});
 	};
-	this.groupSingles = function(group) {
-		var tree = THAT.tree;
-		var singles = [], singlesHidden = [];
-		function findSingles(origin, destination) {
-			for (var i=origin.length-1; i>=0; i--) {
-				var node = origin[i];
-				if ((node.children||[]).concat(node._children||[]).length!=0) return;
-				destination.push(node);
-				origin.splice(i,1)
-			};
-		};
-		findSingles(tree.children || [], singles);
-		findSingles(tree._children || [], singles);
-		findSingles(tree._hidden || [], singlesHidden);
-		if (singles.length || singlesHidden.length) {
-			// Se crea un nodo virtua para contener a los mensajes sin conversación
-			var singlesContainer = {color: "red"};
-			if (singles.length){
-				singlesContainer.children = singles;	
-			};
-			if (singlesHidden.length) {
-				singlesContainer._hidden = singlesHidden;	
-			};
-			tree.children.push(singlesContainer);
-		};
-	};
+
 	function messageProcessor(m) {
 		index[m.idMsg] = m;
 		// referencias
@@ -345,9 +320,17 @@ function DataProcessor(data) {
 			var count = selector.add ? 1 : -1;
 			selectorCounter += (count*selector.value.length);	// incremento/decremento del número total de selectores	
 			if (selector.type=="user") {
-				selector.value.forEach(function(u) {messages = messages.concat(THAT.users[u].messages);});
+				selector.value.forEach(function(u) {
+					var user = THAT.users[u];
+					user.selected = selector.add;
+					messages = messages.concat(user.messages);
+				});
 			} else if (selector.type=="word") {
-				selector.value.forEach(function(w) {messages = messages.concat(THAT.words[w].messages);});
+				selector.value.forEach(function(w) {
+					var word = THAT.words[w];
+					word.selected = selector.add;
+					messages = messages.concat(word.messages);
+				});
 			};
 			messages.forEach(function(m) {
 				m.selCounter+=count; // cambio de contabilidad de los mensajes
@@ -421,8 +404,10 @@ function TalkVisualizer(containerID, processor) {
 		width = rect.width,
 		height = rect.height;
 	var center = {x: width/2, y: height/2};
-	var margin = 50;
+	var margin = 65;
 	var node_index = 0,
+		author_index = 0,	// focos de autores (grafo)
+		replied_index = 0,		// focos de palabrasa (grapfo)
 		chord_index = 0,
 		chord_index_array = null;	// almacena los índices de las cuerdas, ha de ser inicializado 
 		DEFAULT_DURATION = 500,
@@ -436,15 +421,12 @@ function TalkVisualizer(containerID, processor) {
 	var LAYOUT = d3.layout.tree()
 		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 	var FORCE = d3.layout.force()
-		.charge(-50)
+		.charge(-100)
 		.linkDistance(40)
 		.gravity(0.1)
 		.friction(.9)
 		.size([width, height])
-		.on("tick", function() {
-			updateNodes();
-			updateTreeLinks();
-		});
+		.on("tick", ticUpdate);
 	var CHORD = d3.layout.chord()
 		.padding(0);
 		// .sortGroups(d3.ascending)
@@ -492,6 +474,9 @@ function TalkVisualizer(containerID, processor) {
 	var chart = svg
 				.append("g").attr("id", "chart")
 				.attr("transform", d3Translate([center.x,center.y]));
+	var chartLinks = chart.append("g");	// grupo para los links
+	var chartFocus = chart.append("g");	// grupo para los focos 
+	var chartNodes = chart.append("g");	// grupo para los nodos 
 
 	var chartInteraction = svg
 				.append("g").attr("id", "d3-chart-interaction")
@@ -499,9 +484,58 @@ function TalkVisualizer(containerID, processor) {
 				.append("g");
 
 	var nodes, links;
+	var authorFocus=[], repliedFocus=[];	// agrupación de nodos en layout de grafo
 
-	function configureLayout (layout) {
-		if (typeof layout == "undefined") layout = "tree";
+	/* Configuración de los focos del grafo */
+	function configureFocus(options) {
+		var focusPadding = 120;		// espacio entre elementos
+		var N = Math.floor((width-2*margin) / focusPadding);	// elementos por cada fila
+		authorFocus = [];
+		repliedFocus = [];
+		options.forEach(function(o) {
+			if (o=="group-author") {
+				// Los focos son los autores que forman parte de las selección
+				authorFocus = processor.usersArray.filter(function(u) {
+					return u.selected;
+				});
+				// autor para "resto de autores"
+				authorFocus.push({
+					nickname: "OTROS"
+				});
+				authorFocus.forEach(function(a,i) {
+					var i_row = Math.floor(i/N);
+					var i_col = Math.floor(i%N);
+					a.x = margin + i_col * focusPadding;
+					a.y = margin + i_row * focusPadding;
+				});
+			} else if (o=="group-replied") {
+				// Los focos son los autores que forman parte de las selección
+				repliedFocus = processor.usersArray.filter(function(u) {
+					return u.selected;
+				});
+				// autor para "resto de autores"
+				repliedFocus.push({
+					nickname: "OTROS"
+				});
+				repliedFocus.forEach(function(a,i) {
+					var i_row = Math.floor(i/N);
+					var i_col = Math.floor(i%N);
+					a.x = margin + i_col * focusPadding;
+					a.y = margin + i_row * focusPadding;
+				});
+			};
+		});
+	};
+
+	/* Configuración del layout de la visualización 
+	{	layout: tree, timeline, graph, interaction,
+		options: group-user, group-word
+	}
+	*/
+	function configureLayout (configuration) {
+		if (typeof configuration=="undefined") configuration = {layout: "tree"};
+		var layout = configuration.layout || "tree";
+		var options = configuration.options || [];
 		LAYOUT_TYPE = layout;
 		FORCE.stop();
 		var chartPosition = [center.x,center.y];
@@ -531,9 +565,7 @@ function TalkVisualizer(containerID, processor) {
 			chartPosition = [0,0];
 			// d3TranslateNode = d3TranslateNodeXY;
 			diagonal = function(d) { return line([d.source, d.target]); };
-			// FORCE.nodes(nodes)
-			// 	.links(links)
-			// 	.start();
+			configureFocus(options);
 		};
 		if (LAYOUT_TYPE=="interaction") {
 			DURATION = DEFAULT_DURATION;
@@ -565,8 +597,86 @@ function TalkVisualizer(containerID, processor) {
 	};
 	/* Colapsa los nodos de la estructura de datos de árbol */
 	function collapse(d) { if (d.children.length) { d._children = d.children; d._children.forEach(collapse); d.children = null; }; };
+
+	/* actualización del grafo en cada tic */
+	function ticUpdate(e) {
+		/* foco de autores */
+		if (authorFocus.length) {
+			var k = 1 * e.alpha;
+			// Empujar los nodos hacia su foco:
+			nodes.forEach(function(m, i) {
+				var fakeUser = authorFocus[authorFocus.length-1];	// el usuario "fake": OTROS
+				var user = authorFocus[authorFocus.indexOf(m.author)] || fakeUser;
+				m.x += (user.x - m.x) * k;
+				m.y += (user.y - m.y) * k;
+			});
+		} else if (repliedFocus.length) {
+			var k = 1 * e.alpha;
+			// Empujar los nodos hacia su foco:
+			nodes.forEach(function(m, i) {
+				var fakeUser = repliedFocus[repliedFocus.length-1];	// el usuario "fake": OTROS
+				var user = repliedFocus[repliedFocus.indexOf(m.parent ? m.parent.author : root)] || fakeUser;
+				m.x += (user.x - m.x) * k;
+				m.y += (user.y - m.y) * k;
+			});
+		};
+		updateNodes();
+		updateTreeLinks();
+	};
+	/* Visualización de los focos del grafo, cuandod hay agrupación */
+	function updateFocus() {
+		/* Focos de autores */
+		var f_author = chartFocus.selectAll(".focus-author")
+		  	.data(authorFocus, function(d) { return d.graph_id || (d.graph_id = ++author_index); });
+		var f_authorEnter = f_author.enter().append("g")
+			.attr("class", "focus-author")
+			.attr("transform", d3TranslateNode)
+			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
+		f_authorEnter.append("image")
+			.attr("xlink:href", function(d) {return checkUserPhoto(d.pathfoto);})
+			.attr("x", -15)
+			.attr("y", -15)
+			.attr("width", 30)
+			.attr("height", 30);
+		f_authorEnter.append("text")
+			.attr("dy", ".35em")
+			.attr("font-size", "10px")
+			.attr("transform", d3Translate([-15, 30]))
+        	.text(function(d,i) { return "@" + d.nickname; });
+		var f_authorUpdate = f_author.transition()
+			.duration(DURATION)
+			.attr("transform", d3TranslateNode);
+		var f_authorExit = f_author.exit().transition().duration(DURATION)
+			.style("opacity", 0)
+			.remove();
+		/* Focos de autores respondidos */
+		var f_replied = chartFocus.selectAll(".focus-replied")
+		  	.data(repliedFocus, function(d) { return d.graph_id || (d.graph_id = ++replied_index); });
+		var f_repliedEnter = f_replied.enter().append("g")
+			.attr("class", "focus-replied")
+			.attr("transform", d3TranslateNode)
+			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
+		f_repliedEnter.append("image")
+			.attr("xlink:href", function(d) {return checkUserPhoto(d.pathfoto);})
+			.attr("x", -15)
+			.attr("y", -15)
+			.attr("width", 30)
+			.attr("height", 30);
+		f_repliedEnter.append("text")
+			.attr("dy", ".35em")
+			.attr("font-size", "10px")
+			.attr("transform", d3Translate([-15, 30]))
+        	.text(function(d,i) { return "@" + d.nickname; });
+		var f_repliedUpdate = f_replied.transition()
+			.duration(DURATION)
+			.attr("transform", d3TranslateNode);
+		var f_repliedExit = f_replied.exit().transition().duration(DURATION)
+			.style("opacity", 0)
+			.remove();
+	};
+
 	function updateNodes() {
-		var node = chart.selectAll(".node")
+		var node = chartNodes.selectAll(".node")
 		  	.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
 		var nodeEnter = node.enter().append("g")
 			.attr("class", function(d) {
@@ -605,11 +715,11 @@ function TalkVisualizer(containerID, processor) {
 	function updateTreeLinks() {
 		var linkWidth = getLinkWidth();
 		var linkOpacity = (LAYOUT_TYPE=="timeline") ? .3 : 1;
-		var link = chart.selectAll("path.link")
+		var link = chartLinks.selectAll("path.link")
 			.data(links, function(d) { return d.target.id; });
 			// .data(links, function(d) { return d.target.id; });
 		// Los nuevos nodos entran en la posición previa del padre
-		link.enter().insert("path", "g.node")
+		link.enter().append("path")
 			.attr("class", "link")
 			.attr("d", diagonal)
 			.attr("stroke", "#ccc")
@@ -809,6 +919,7 @@ function TalkVisualizer(containerID, processor) {
 				node.x = width*node.tsX;
 			});
 		};
+		// configuración inicial del grafo, para evitar saltos bruscos del layout anterior
 		function computeForceInitial(node) {
 			var result = [];
 			function computeNode(n) {
@@ -822,12 +933,12 @@ function TalkVisualizer(containerID, processor) {
 		};
 		if (LAYOUT_TYPE=="graph") {
 			nodes = computeForceInitial(root);
-			console.log("nodos: ", nodes);
 			links = LAYOUT.links(nodes);
+			forceLinks = (authorFocus.length || repliedFocus.length) ? [] : links;
 			FORCE.nodes(nodes)
-				.links(links)
+				.links(forceLinks)
 				.start();
-			updateNodes();
+			updateFocus();
 			// force.nodes(nodes).links(LAYOUT.links(nodes));
 		} else if (LAYOUT_TYPE=="interaction") {
 			updateInteraction();
@@ -844,7 +955,7 @@ function TalkVisualizer(containerID, processor) {
 	};
 	function resetZoom() { zoom.translate([0,0]); zoom.scale(1); zoom.event(svg); };
 	this.config = function(configuration) {
-		if (configuration.layout) configureLayout(configuration.layout);
+		configureLayout(configuration);
 		update();
 		resetZoom();
 	};

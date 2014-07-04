@@ -10,7 +10,7 @@ function initThread(apiData) {
 	populateMessages(PROCESSOR.tree);	// los mensajes de la barra izquierda
 };
 
-var TEST = 1;
+var TEST = 2;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -48,6 +48,16 @@ function dispatchSelect(type, value, add) {
 	e.initCustomEvent("updateSelection", false, false, detail);
 	document.body.dispatchEvent(e);
 };
+
+/* Configuración de las opciones del gráfico */
+function updateSelector() {
+	var selID = $("#chart-options .layout.on").attr("id");
+	$("#chart-options .option").removeClass("active");
+	$("#chart-options .option."+selID).addClass('active');
+};
+updateSelector();
+
+
 /* EVENTOS */
 
 // Cambio de lógica de selección
@@ -93,21 +103,29 @@ $(".expand").on("click", function() {
 	$expandable.css("width", newSize);
 });
 
-$("#chart-options .option").on("click", function() {
+function updateConfiguration() {
+	var layoutID = $("#chart-options .layout.on").attr("id");
+	var layout = layoutID.split("-")[1];
+	var options = $("#chart-options .on."+layoutID).map(function(o) {
+		return this.id;
+	}).get();
+	VISUALIZER.config({layout: layout, options: options});
+};
+
+$("#chart-options .layout").on("click", function() {
 	var $this = $(this);
 	if ($this.hasClass('on')) return;
-	$("#chart-options .option").removeClass('on');
+	$("#chart-options .layout").removeClass('on');
 	$this.addClass('on');
-	if (this.id=="set-timeline") VISUALIZER.config({layout:"timeline"});
-	else if (this.id=="set-tree") VISUALIZER.config({layout:"tree"});
-	else if (this.id=="set-graph") VISUALIZER.config({layout:"graph"});
-	else if (this.id=="set-interaction") VISUALIZER.config({layout:"interaction"});
+	updateSelector();
+	updateConfiguration();
+});
+$("#chart-options .option").on("click", function() {
+	var $this = $(this);
+	$this.toggleClass('on');
+	updateConfiguration();
 });
 
-$("#group-singles").on("click", function() {
-	PROCESSOR.groupSingles($(this).toggleClass('on').hasClass('on'));
-	VISUALIZER.updateGraph();
-});
 
 /* Actualización de filtros */
 document.body.addEventListener("updateSelection", function(e) {

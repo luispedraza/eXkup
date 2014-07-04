@@ -35,11 +35,17 @@
 		<div id="d3-chart-container"></div>
 	</div>
 	<div id="chart-options">
-		<div id="set-tree" class="option on">ÁRBOL</div>
-		<div id="set-timeline" class="option">TIMELINE</div>
-		<div id="set-graph" class="option">GRAFO</div>
-		<div id="set-interaction" class="option">INTERACCIONES</div>
-		<div id="group-singles" class="option">agrupar comentarios sin respuesta</div>
+		<div class="layouts">
+			<div id="set-tree" class="layout radio on">ÁRBOL</div>
+			<div id="set-timeline" class="layout radio">TIMELINE</div>
+			<div id="set-graph" class="layout radio">GRAFO</div>
+			<div id="set-interaction" class="layout radio">INTERACCIONES</div>
+		</div>
+		<div class="options">
+			<div class="option">Agrupar por: </div>
+			<div id="group-author" class="set-graph option check author">autor del mensaje</div>
+			<div id="group-replied" class="set-graph option check">autor respondido</div>
+		</div>
 	</div>
 
 	<div id="chart-messages" class="expandable" data-width="max">
