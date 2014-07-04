@@ -1,10 +1,10 @@
 function d3Translate(vector) {
 	return " translate(" + vector + ")";
 };
-function d3TranslateNodeXXYY(node) {
-    return " translate(" + [node.xx, node.yy] + ")";
-};
-function d3TranslateNodeXY(node) {
+// function d3TranslateNodeXXYY(node) {
+//     return " translate(" + [node.xx, node.yy] + ")";
+// };
+function d3TranslateNode(node) {
     return " translate(" + [node.x, node.y] + ")";
 };
 function d3Scale(scale) {
