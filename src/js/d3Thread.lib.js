@@ -486,46 +486,50 @@ function TalkVisualizer(containerID, processor) {
 	var nodes, links;
 	var authorFocus=[], repliedFocus=[], selectedAuthors = [];	// agrupación de nodos en layout de grafo
 
-	/* Configuración de los focos del grafo */
-	function configureFocus(options) {
-		var focusPadding = (options.length == 2) ? 50 : 100;		// espacio entre elementos
-		var N = Math.floor((width-2*margin) / focusPadding);	// elementos por cada fila
-		authorFocus = [];
-		repliedFocus = [];
-		selectedAuthors = processor.usersArray.filter(function(u) {
-			return u.selected;
-		});
-		// autor para "resto de autores"
-		if (selectedAuthors.length != processor.usersArray.length) {
-			selectedAuthors.push({ nickname: "OTROS" });
-		};
-		if (options.length == 2) {
-			authorFocus = repliedFocus = selectedAuthors;
-			selectedAuthors.forEach(function(a,i) {
-				a.x = a.y = a.xa = a.yr = i * focusPadding;
-				a.ya = a.xr = 0;
-			});
-		} else {
-			if (options[0]=="group-author") {
-				authorFocus = selectedAuthors;
-			} else if (options[0]=="group-replied") {
-				repliedFocus = selectedAuthors;
-			};
-			selectedAuthors.forEach(function(a,i) {
-				var i_row = Math.floor(i/N);
-				var i_col = Math.floor(i%N);
-				a.x = a.xa = a.xr = margin + i_col * focusPadding;
-				a.y = a.ya = a.yr = margin + i_row * focusPadding;
-			});
-		};
-	};
-
 	/* Configuración del layout de la visualización 
 	{	layout: tree, timeline, graph, interaction,
 		options: group-user, group-word
 	}
 	*/
 	function configureLayout (configuration) {
+		/* Configuración de los focos del grafo */
+		function configureFocus(options) {
+			authorFocus = [];
+			repliedFocus = [];
+			FORCE.size([width, height]);
+			if (options.length==0) return;	// no hay configuración de focos 
+			selectedAuthors = processor.usersArray.filter(function(u) {
+				return u.selected;
+			});
+			// autor para "resto de autores"
+			if (selectedAuthors.length != processor.usersArray.length) {
+				selectedAuthors.push({ nickname: "OTROS" });
+			};
+			if (options.length == 2) {
+				var focusPadding = 80;		// espacio entre elementos
+				var _size = 2*margin + selectedAuthors.length * focusPadding;
+				FORCE.size([_size, _size]);
+				authorFocus = repliedFocus = selectedAuthors;
+				selectedAuthors.forEach(function(a,i) {
+					a.x = a.y = a.xa = a.yr = i * focusPadding;
+					a.ya = a.xr = 0;
+				});
+			} else {
+				var focusPadding = 100;		// espacio entre elementos
+				var N = Math.floor((width-2*margin) / focusPadding);		// elementos por cada fila
+				if (options[0]=="group-author") {
+					authorFocus = selectedAuthors;
+				} else if (options[0]=="group-replied") {
+					repliedFocus = selectedAuthors;
+				};
+				selectedAuthors.forEach(function(a,i) {
+					var i_row = Math.floor(i/N);
+					var i_col = Math.floor(i%N);
+					a.x = a.xa = a.xr = margin + i_col * focusPadding;
+					a.y = a.ya = a.yr = margin + i_row * focusPadding;
+				});
+			};
+		};
 		if (typeof configuration=="undefined") configuration = {layout: "tree"};
 		var layout = configuration.layout || "tree";
 		var options = configuration.options || [];
