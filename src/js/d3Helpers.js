@@ -36,3 +36,17 @@ function ColorGenerator() {
         return generator(current++);
     };
 };
+
+function d3TimelinePath(d) {
+    var source = d.source, target = d.target;
+    var dx = target.x - source.x,
+        dcx = Math.min(50, .5*dx),
+        cx = source.x + dcx;
+    return  "M" + [source.x, source.y].join(",") + 
+            "C" + [ cx, source.y,
+                    cx, target.y, 
+                    target.x, target.y].join(",");
+};
+
+
+

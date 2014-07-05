@@ -547,10 +547,11 @@ function TalkVisualizer(containerID, processor) {
 				xSize = _2_PI; 
 				ySize = Math.min(width, height)/2-margin;
 			} else if(LAYOUT_TYPE=="timeline") {
-				diagonal = d3.svg.diagonal()
-					.source(function(d) { return {x:d.source.y, y:d.source.x}; })            
-				    .target(function(d) { return {x:d.target.y, y:d.target.x}; })
-				    .projection(function(d) { return [d.y, d.x]; });
+				// diagonal = d3.svg.diagonal()
+				// 	.source(function(d) { return {x:d.source.y, y:d.source.x}; })            
+				//     .target(function(d) { return {x:d.target.y, y:d.target.x}; })
+				//     .projection(function(d) { return [d.y, d.x]; });
+				diagonal = d3TimelinePath;
 				xSize = 100;
 				ySize = 100;
 				chartPosition = [0,0];
