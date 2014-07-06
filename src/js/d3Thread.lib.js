@@ -387,7 +387,7 @@ function DataProcessor(data) {
 function TalkVisualizer(containerID, processor) {
 	// console.log(data);
 	// console.log(JSON.stringify(data));
-	var RADIUS_DEFAULT = 5,
+	var RADIUS_DEFAULT = 10,
 		RADIUS = RADIUS_DEFAULT
 		NODE_BORDER_DEFAULT = 1,
 		NODE_BORDER = NODE_BORDER_DEFAULT,
@@ -431,6 +431,7 @@ function TalkVisualizer(containerID, processor) {
 		.padding(0);
 		// .sortGroups(d3.ascending)
 		// .sortSubgroups(d3.ascending);
+	var SQUARE = d3.svg.symbol().size(RADIUS_DEFAULT*RADIUS_DEFAULT).type("square");	// pra dibujar cuadrados;
 	var TIMELINE_SCROLL = 0;
 	/* zoom behavior: */
 	function zoomAction() {
@@ -468,10 +469,11 @@ function TalkVisualizer(containerID, processor) {
 			RADIUS = RADIUS_DEFAULT / scale;
 			NODE_BORDER = NODE_BORDER_DEFAULT / scale;
 			LINK_WIDTH = getLinkWidth();
-			svg.selectAll(".node circle")
+			svg.selectAll(".node")
 				.transition().duration(DURATION)
-				.attr("r", RADIUS)
-				.attr("stroke-width", NODE_BORDER);	// escalado de los nodos
+				.attr("transform", function(d) { return d3TranslateNode(d) + d3Scale(1/scale);})
+				.select(".shape")
+					.attr("stroke-width", NODE_BORDER);	// escalado de los nodos
 			svg.selectAll(".link")
 				.attr("stroke-width", LINK_WIDTH);
 		});
@@ -705,8 +707,15 @@ function TalkVisualizer(containerID, processor) {
 				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
 			})
 			.call(FORCE.drag);
-		nodeEnter.append("circle")
-			.attr("r", RADIUS)
+		// nodeEnter.append("circle")
+		// 	.attr("class", "shape")
+		// 	.attr("r", RADIUS)
+		// 	.attr("fill", getMsgColor)
+		// 	.attr("stroke", "#fff")
+		// 	.attr("stroke-width", NODE_BORDER);
+		nodeEnter.append("path")
+			.attr("class", "shape")
+			.attr("d", SQUARE)
 			.attr("fill", getMsgColor)
 			.attr("stroke", "#fff")
 			.attr("stroke-width", NODE_BORDER);
@@ -716,13 +725,13 @@ function TalkVisualizer(containerID, processor) {
 			.duration(DURATION)
 			.style("opacity", 1)
 			.attr("transform", d3TranslateNode)
-			.select("circle")
+			.select(".shape")
 				.attr("fill", getMsgColor);
 
 		var nodeExit = node.exit().transition().duration(DURATION)
 			.style("opacity", 0)
 			.remove();
-		nodeExit.select("circle")
+		nodeExit.select(".shape")
 			.transition().duration(DURATION)
 			.attr("r", 1e-6);
 	};
@@ -975,7 +984,7 @@ function TalkVisualizer(containerID, processor) {
 	};
 	this.updateGraph = function() { update(); };
 	this.highlightUsers = function (users, highlight) {
-		var selector = users.map(function(u) {return ".user-"+u+" circle";}).join(",");
+		var selector = users.map(function(u) {return ".user-"+u+" .shape";}).join(",");
 		var radius = highlight ? RADIUS*3 : RADIUS;
 		// d3.selectAll("#d3-chart g.node circle");
 		d3.selectAll(selector)
@@ -1026,7 +1035,7 @@ function populateController(processor) {
 							// Actualización del color en visualizaciones
 							var user = $this.closest('li').data();
 							user.color = newColor;
-							d3.selectAll("g.node.user-"+user.nickname+" circle").attr("fill", newColor);
+							d3.selectAll("g.node.user-"+user.nickname+" .shape").attr("fill", newColor);
 							$("#chart-messages .msg-container[data-user="+user.nickname+"] .handle").css("background-color", newColor);
 						})))
 				.append($("<span>").addClass("nmessages").text(user.nMessages))
