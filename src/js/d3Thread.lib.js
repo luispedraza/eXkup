@@ -222,9 +222,9 @@ function DataProcessor(data) {
 			if (m.children) m.children.forEach(addMessage);
 		};
 		addMessage(THAT.tree);
-		THAT.freq = {data: sortNumArray(makeIntArray(frequency, "x"), "x")};
-		// data.fRange = [0, maxFreq];
-		// data.tsRange = [data[0].x, data.slice(-1)[0].y];
+		THAT.freq = {data: sortNumArray(makeIntArray(frequency, "x"), "x"),
+					tsRange: [iniTS, endTS]
+					};
 	};
 	this.selectMode = function(mode) {
 		selectorMode = mode;
@@ -395,7 +395,7 @@ function TalkVisualizer(containerID, processor) {
 		LINK_WIDTH_TIMELINE_DEFAULT = 10,
 		LINK_WIDTH = LINK_WIDTH_DEFAULT;
 	function getLinkWidth() {
-		var scale = zoom.scale();
+		var scale = ZOOM.scale();
 		return ((LAYOUT_TYPE=="timeline") ? LINK_WIDTH_TIMELINE_DEFAULT : LINK_WIDTH_DEFAULT)/scale;
 	};
 	var root = processor.tree;
@@ -431,12 +431,20 @@ function TalkVisualizer(containerID, processor) {
 		.padding(0);
 		// .sortGroups(d3.ascending)
 		// .sortSubgroups(d3.ascending);
-
+	var TIMELINE_SCROLL = 0;
 	/* zoom behavior: */
 	function zoomAction() {
 		var vector = d3.event.translate;
 		var scale = d3.event.scale;
 		svg.attr("transform", d3Translate(vector) + d3Scale(scale));
+	};
+	function zoomActionTimeline() {
+		var vector = d3.event.translate;
+		var scale = d3.event.scale;
+		if (scale<1) TIMELINE_SCROLL-=5;
+		else if (scale>1) TIMELINE_SCROLL+=5;
+		svg.attr("transform", d3Translate([0,TIMELINE_SCROLL+vector[1]]));
+		ZOOM.scale(1);
 	};
 	/* para activar o desactivar temporalmente el zoom cuando se hace algo con una selección */
 	function overrideZoom(selection) {
@@ -446,15 +454,15 @@ function TalkVisualizer(containerID, processor) {
 		});
 		selection.on("mouseup", function() {
 			d3.select("#svg")
-				.call(zoom)
+				.call(ZOOM)
 				.on("dblclick.zoom", null)
 		});
 	};
-	var zoom = d3.behavior.zoom()
+	var ZOOM = d3.behavior.zoom()
 		.scaleExtent([.25,8])
 		.on("zoom", zoomAction)
 		.on("zoomend", function() {
-			var scale = zoom.scale();
+			var scale = ZOOM.scale();
 			RADIUS = RADIUS_DEFAULT / scale;
 			NODE_BORDER = NODE_BORDER_DEFAULT / scale;
 			LINK_WIDTH = getLinkWidth();
@@ -468,7 +476,7 @@ function TalkVisualizer(containerID, processor) {
 	var svg = d3.select(containerID).append("svg")
 		.attr("id", "svg")
 		.on("dblclick", resetZoom)
-		.call(zoom)
+		.call(ZOOM)
 		.on("dblclick.zoom", null)
 		.append("g");
 	var chart = svg
@@ -535,6 +543,7 @@ function TalkVisualizer(containerID, processor) {
 		var options = configuration.options || [];
 		LAYOUT_TYPE = layout;
 		FORCE.stop();
+		ZOOM.on("zoom", zoomAction);	// acción por defecto para el zoom
 		var chartPosition = [center.x,center.y];
 		if ((layout=="tree")||(layout=="timeline")) {
 			DURATION = DEFAULT_DURATION;
@@ -555,6 +564,7 @@ function TalkVisualizer(containerID, processor) {
 				xSize = 100;
 				ySize = 100;
 				chartPosition = [0,0];
+				ZOOM.on("zoom", zoomActionTimeline);
 			};
 			LAYOUT.size([xSize, ySize]);
 			// d3TranslateNode = d3TranslateNodeXXYY;
@@ -955,7 +965,7 @@ function TalkVisualizer(containerID, processor) {
 		};
 		TOC(true);
 	};
-	function resetZoom() { zoom.translate([0,0]); zoom.scale(1); zoom.event(svg); };
+	function resetZoom() { TIMELINE_SCROLL=0; ZOOM.translate([0,0]); ZOOM.scale(1); ZOOM.event(svg); };
 	this.config = function(configuration) {
 		configureLayout(configuration);
 		update();
