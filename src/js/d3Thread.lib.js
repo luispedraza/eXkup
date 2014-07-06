@@ -441,9 +441,11 @@ function TalkVisualizer(containerID, processor) {
 	function zoomActionTimeline() {
 		var vector = d3.event.translate;
 		var scale = d3.event.scale;
-		if (scale<1) TIMELINE_SCROLL-=5;
-		else if (scale>1) TIMELINE_SCROLL+=5;
-		svg.attr("transform", d3Translate([0,TIMELINE_SCROLL+vector[1]]));
+		var translation = 0;
+		if (scale<1) translation = (TIMELINE_SCROLL-=10);
+		else if (scale>1) translation = (TIMELINE_SCROLL+=10);
+		else translation = vector[1]+TIMELINE_SCROLL;
+		svg.attr("transform", d3Translate([0,translation]));
 		ZOOM.scale(1);
 	};
 	/* para activar o desactivar temporalmente el zoom cuando se hace algo con una selección */
