@@ -45,22 +45,22 @@ function onShowEditor() {
 function populateMessages(tree) {
 	/* Activa un contenedor de mensajes, insertando el mensaje correspondiente */
 	function toggleElement(event, $element) {
+		console.log("kokoko");
 		if (event) event.stopPropagation();
 		var $this = $element || $(this);
 		if ($this.hasClass('on')) {	// colapsar
 			$this.add($this.find(".msg-container.on")).each(function() {
 				$(this).removeClass('on current').css("width", "")
 					.find(".message").remove();
-				this.msg = this._msg; this._msg = null;
 			});
 		} else {	// expandir
 			$this.addClass("current")
-				.add($this.parents(".msg-container")).addClass("on").css("width", "100%")
+				.add($this.parents(".msg-container:not(.on)"))
+				.addClass("on")
+				.css("width", "100%")
 				.each(function() {
-					if (this.msg) {
-						$(this).find("> .handle").append(createMessage(this.msg));
-						this._msg = this.msg; this.msg = null;
-					};
+					var $this = $(this);
+					$this.find("> .handle").append(createMessage($this.data()));
 				})
 				.siblings().css( "width", "0" );
 		};
@@ -103,16 +103,19 @@ function populateMessages(tree) {
 	};
 	function accordionReset() {$(this).find(".msg-container:not(.on)").css("width","");};
 	function appendMessageContainer(msg, $container) {
-		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container)
-			.attr("data-user", msg.usuarioOrigen)
-			.append($("<div>").addClass('handle').css("background-color", getMsgColor(msg)))
-			.on("click", toggleElement)	// muestra u oculta la conversación
-		$msgContainer.get(0).msg = msg; // guardamos el mensaje con el elemento
+		var $msgContainer = $("<div>")
+				.addClass('msg-container')
+				.attr("data-user", msg.usuarioOrigen)
+				.append($("<div>").addClass('handle').css("background-color", getMsgColor(msg)))
+				.on("click", toggleElement)	// muestra u oculta la conversación
+				.data(msg)					// guardamos el mensaje con el elemento
+				.appendTo($container);
 		if (msg.children) {
 			var children = msg.children;
-			var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer)
+			var $childrenContainer = $("<div>").addClass('children-container')
 				.on("mousemove", accordion)
-				.on("mouseleave", accordionReset);
+				.on("mouseleave", accordionReset)
+				.appendTo($msgContainer);
 			children.forEach(function(m) {
 				appendMessageContainer(m, $childrenContainer).addClass(m.selected ? "sel" : "nosel");
 			});
@@ -129,6 +132,28 @@ function populateMessages(tree) {
 	@ param hidden: inicialmente todas las respuestas están ocultas
 */
 function DataProcessor(data) {
+
+	/* Obtiene los nodos correspondientes a una conversación */
+	this.getConversation = function(node) {
+		var result = [node];
+		function addBefore(node) {
+			var parent = node.parent;
+			if (parent) {
+				result.push(parent);
+				addBefore(parent);	
+			};
+		};
+		function addAfter(node) {
+			var children = node.children;
+			if (children) {
+				result = result.concat(children);
+				children.forEach(addAfter);
+			};
+		};
+		addBefore(node);
+		addAfter(node);
+		return result;
+	};
 	/* Generación del árbol agrupando por autor */
 	this.groupByAuthor = function() {
 		var result = {};
@@ -413,8 +438,8 @@ function TalkVisualizer(containerID, processor) {
 		RADIUS = RADIUS_DEFAULT
 		NODE_BORDER_DEFAULT = 1,
 		NODE_BORDER = NODE_BORDER_DEFAULT,
-		LINK_WIDTH_DEFAULT = .5,
-		LINK_WIDTH_TIMELINE_DEFAULT = 10,
+		LINK_WIDTH_DEFAULT = 1,
+		LINK_WIDTH_TIMELINE_DEFAULT = 5,
 		LINK_WIDTH = LINK_WIDTH_DEFAULT;
 	function getLinkWidth() {
 		var scale = ZOOM.scale();
@@ -631,6 +656,13 @@ function TalkVisualizer(containerID, processor) {
 		update(d);
 		return false;
 	};
+
+	function filterConversation(d) {
+		var conversation = processor.getConversation(d.target);
+		d3.selectAll(".link").classed("highlight", function(d) {
+			return ((conversation.indexOf(d.target)>=0) && (conversation.indexOf(d.source)>=0));
+		});
+	};
 	/* Colapsa los nodos de la estructura de datos de árbol */
 	function collapse(d) { if (d.children.length) { d._children = d.children; d._children.forEach(collapse); d.children = null; }; };
 
@@ -761,7 +793,7 @@ function TalkVisualizer(containerID, processor) {
 	};
 	function updateTreeLinks() {
 		var linkWidth = getLinkWidth();
-		var linkOpacity = (LAYOUT_TYPE=="timeline") ? .3 : 1;
+		var linkOpacity = (LAYOUT_TYPE=="timeline") ? 0.1 : 1;
 		var link = chartLinks.selectAll("path.link")
 			.data(links, function(d) { return d.target.id; });
 			// .data(links, function(d) { return d.target.id; });
@@ -769,9 +801,12 @@ function TalkVisualizer(containerID, processor) {
 		link.enter().append("path")
 			.attr("class", "link")
 			.attr("d", diagonal)
-			.attr("stroke", "#ccc")
 			.attr("stroke-width", linkWidth)
-			.style("opacity", 0);
+			.style("opacity", 0)
+			.on("mouseenter", filterConversation)
+			.on("click", function(d) {
+				dispatchConversation(d.target);			// se muestra la conversación completa
+			});
 		// Transición a nueva posición
 		link.transition()
 			.duration(DURATION)
@@ -969,8 +1004,8 @@ function TalkVisualizer(containerID, processor) {
 		function computeTimelinePositionsGrouped(groups) {
 			groups = makeArray(groups, "nickname");
 			var N = groups.length;
-			var vStep = height/N;
-			console.log(groups);
+			// var vStep = height/N;
+			var vStep = 20;
 			groups.forEach(function(g,i) {
 				var y = i*vStep;
 				g.messages.forEach(function(c) {

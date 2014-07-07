@@ -34,7 +34,14 @@ body {
 
 .link {
   fill: none;
+  stroke: #ccc;
 }
+
+.link.highlight {
+  stroke: #f30;
+  opacity: 1 !important;
+}
+
 #d3-chart-interaction .chord, #d3-chart-interaction .user {
   transition: opacity .5s ease;
 }

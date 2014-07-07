@@ -10,7 +10,7 @@ function initThread(apiData) {
 	populateMessages(PROCESSOR.tree);	// los mensajes de la barra izquierda
 };
 
-var TEST = 1;
+var TEST = 2;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -42,10 +42,18 @@ function sortUsers(sorting) {
 	});
 	$items.detach().appendTo($list);
 };
+/* Mensaje de cambio de selección */
 function dispatchSelect(type, value, add) {
 	var e = document.createEvent("CustomEvent");
 	var detail = {'add': add,'type': type,'value':value};
 	e.initCustomEvent("updateSelection", false, false, detail);
+	document.body.dispatchEvent(e);
+};
+
+function dispatchConversation(message) {
+	var e = document.createEvent("CustomEvent");
+	var detail = {'message': message};
+	e.initCustomEvent("conversation", false, false, detail);
 	document.body.dispatchEvent(e);
 };
 
@@ -134,5 +142,17 @@ document.body.addEventListener("updateSelection", function(e) {
 	VISUALIZER.updateGraph();
 	FREQUENCIES.updateGraph();
 	populateMessages(PROCESSOR.tree);
+});
+/* Selección de conversación */
+document.body.addEventListener("conversation", function(e) {
+	var message = e.detail.message;
+	console.log(message);
+	$(".msg-container").each(function() {
+		console.log("datos: ", $(this).data());
+		if ($(this).data().idMsg == message.idMsg) {
+			console.log("encontrado");
+			$(this).trigger("click");
+		};
+	});
 });
 
