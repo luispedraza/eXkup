@@ -10,7 +10,7 @@ function initThread(apiData) {
 	populateMessages(PROCESSOR.tree);	// los mensajes de la barra izquierda
 };
 
-var TEST = 3;
+var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -52,8 +52,7 @@ function dispatchSelect(type, value, add) {
 /* Configuración de las opciones del gráfico */
 function updateSelector() {
 	var selID = $("#chart-options .layout.on").attr("id");
-	$("#chart-options .option").removeClass("active");
-	$("#chart-options .option."+selID).addClass('active');
+	$("#chart-options .options").toggleClass('active', selID!="set-interaction");
 };
 updateSelector();
 
@@ -106,9 +105,10 @@ $(".expand").on("click", function() {
 function updateConfiguration() {
 	var layoutID = $("#chart-options .layout.on").attr("id");
 	var layout = layoutID.split("-")[1];
-	var options = $("#chart-options .on."+layoutID).map(function(o) {
-		return this.id;
-	}).get();
+	var options= {};
+	$("#chart-options .option").each(function() {
+		options[this.id] = $(this).hasClass('on');
+	});
 	VISUALIZER.config({layout: layout, options: options});
 };
 
@@ -122,10 +122,11 @@ $("#chart-options .layout").on("click", function() {
 });
 $("#chart-options .option").on("click", function() {
 	var $this = $(this);
-	$this.toggleClass('on');
+	var selected = $this.hasClass('on');
+	$("#chart-options .option").removeClass('on');
+	$this.toggleClass('on', !selected);
 	updateConfiguration();
 });
-
 
 /* Actualización de filtros */
 document.body.addEventListener("updateSelection", function(e) {

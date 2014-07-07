@@ -129,6 +129,28 @@ function populateMessages(tree) {
 	@ param hidden: inicialmente todas las respuestas están ocultas
 */
 function DataProcessor(data) {
+	/* Generación del árbol agrupando por autor */
+	this.groupByAuthor = function() {
+		var result = {};
+		function evaluateMesage(m) {
+			var nickname = m.usuarioOrigen;
+			var author = m.author;
+			if (nickname in result) {
+				result[nickname].messages.push(m);
+			} else {
+				if (author.selected) {
+					item = result[nickname] = {author: author, messages: [m]};
+				} else {
+					if (!("otros" in result)) {
+						result["otros"] = {author: {usuarioOrigen: "otros"}, messages: [m]};
+					} else result["otros"].messages.push(m);
+				};
+			};
+			if (m.children) m.children.forEach(evaluateMesage);
+		};
+		evaluateMesage(THAT.tree);
+		return result;
+	};
 	function initUsers(users) {
 		var users = makeArray(users, "nickname");
 		var nUsers = users.length;
@@ -365,8 +387,8 @@ function DataProcessor(data) {
 	messageProcessor(rootMsg);
 	rootMsg.selected = true;			// el raíz nunca es filtrado
 	// index[rootMsg.idMsg] = rootMsg;			// No se procesa el mensaje raíz
-	this.messages = data.mensajes;
-	var replies = this.messages.slice(1); // Array de mensajes, excluido el raiz
+	var messages = this.messages = data.mensajes;
+	var replies = messages.slice(1); // Array de mensajes, excluido el raiz
 	// var messages = this.messages = data.mensajes;
 	replies.forEach(function(m) {
 		var parentObj = index[m.idMsgRespuesta];
@@ -418,6 +440,7 @@ function TalkVisualizer(containerID, processor) {
 		.y(function(d) { return d.y; });
 	// var d3TranslateNode = null;
 	var LAYOUT_TYPE = "tree";
+	var LAYOUT_OPTIONS = {};	// opciones de configuración: agrupaciones, etc
 	var LAYOUT = d3.layout.tree()
 		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 	var FORCE = d3.layout.force()
@@ -542,10 +565,11 @@ function TalkVisualizer(containerID, processor) {
 				});
 			};
 		};
-		if (typeof configuration=="undefined") configuration = {layout: "tree"};
+		if (typeof configuration=="undefined") configuration = {};
 		var layout = configuration.layout || "tree";
-		var options = configuration.options || [];
+		var options = configuration.options || {"group-author": false, "group-replied": false};
 		LAYOUT_TYPE = layout;
+		LAYOUT_OPTIONS = options;	// opciones de configuración del layout
 		FORCE.stop();
 		ZOOM.on("zoom", zoomAction);	// acción por defecto para el zoom
 		var chartPosition = [center.x,center.y];
@@ -703,8 +727,8 @@ function TalkVisualizer(containerID, processor) {
 			.call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
 			.on("click", clickOnNode)
 			.on("mouseenter", function(d, e) {
-				var tooltipConfig = {autoClose: "no"};
-				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
+				// var tooltipConfig = {autoClose: "no"};
+				// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
 			})
 			.call(FORCE.drag);
 		// nodeEnter.append("circle")
@@ -942,6 +966,19 @@ function TalkVisualizer(containerID, processor) {
 				node.x = width*node.tsX;
 			});
 		};
+		function computeTimelinePositionsGrouped(groups) {
+			groups = makeArray(groups, "nickname");
+			var N = groups.length;
+			var vStep = height/N;
+			console.log(groups);
+			groups.forEach(function(g,i) {
+				var y = i*vStep;
+				g.messages.forEach(function(c) {
+					c.y = y;
+					c.x = width*c.tsX;
+				});
+			});
+		};
 		// configuración inicial del grafo, para evitar saltos bruscos del layout anterior
 		function computeForceInitial(node) {
 			var result = [];
@@ -952,6 +989,17 @@ function TalkVisualizer(containerID, processor) {
 				if (n.children) n.children.forEach(computeNode);
 			};
 			computeNode(node);
+			return result;
+		};
+		function rawNodes(rootNode) {
+			result = [];
+			function appendChildren(children) {
+				result = result.concat(children);
+				children.forEach(function(c) {
+					if (c.children) appendChildren(c.children);
+				});
+			};
+			appendChildren([rootNode]);
 			return result;
 		};
 		if (LAYOUT_TYPE=="graph") {
@@ -966,10 +1014,17 @@ function TalkVisualizer(containerID, processor) {
 		} else if (LAYOUT_TYPE=="interaction") {
 			updateInteraction();
 		} else {
-			nodes = LAYOUT.nodes(root);
-			(LAYOUT_TYPE=="tree") ? computeTreePositions(nodes) : computeTimelinePositions(nodes);
-			// computeTreePositions(root);	// cálculo de las posiciones de los nodos para el layout
-			// links = nodes;
+			if (LAYOUT_OPTIONS["group-author"]) {
+				nodes = rawNodes(root);
+				computeTimelinePositionsGrouped(processor.groupByAuthor());
+			} else if (LAYOUT_OPTIONS["group-replied"]) {
+
+			} else {
+				nodes = LAYOUT.nodes(root);
+				(LAYOUT_TYPE=="tree") ? computeTreePositions(nodes) : computeTimelinePositions(nodes);
+				// computeTreePositions(root);	// cálculo de las posiciones de los nodos para el layout
+				// links = nodes;
+			};
 			links = LAYOUT.links(nodes);
 			updateNodes();
 			updateTreeLinks();
