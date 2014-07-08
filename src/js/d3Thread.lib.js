@@ -42,19 +42,22 @@ function onShowEditor() {
 	EDITOR = new Editor($container, API);
 	new ModalDialog("Nuevo mensaje", $container, ["Cancelar"]);
 };
-function populateMessages(tree) {
+function Conversation(tree) {
+	var root = tree;
+	var $rootMsgContainer = null;	// contenedor del mensaje raíz
+	var $current = null;			// contenedor del mensaje actual
 	/* Activa un contenedor de mensajes, insertando el mensaje correspondiente */
-	function toggleElement(event, $element) {
-		console.log("kokoko");
-		if (event) event.stopPropagation();
-		var $this = $element || $(this);
+	function toggleElement(e) {
+		e.stopPropagation();
+		var $this = $(this);
 		if ($this.hasClass('on')) {	// colapsar
-			$this.add($this.find(".msg-container.on")).each(function() {
-				$(this).removeClass('on current').css("width", "")
-					.find(".message").remove();
-			});
+			$this.add($this.find(".msg-container.on"))
+				.removeClass('on')
+				.css("width", "")
+				.find(".message").remove();
+			$current = $this.closest(".msg-container");	// nuevo mensaje actual (extremo de la conversación)
 		} else {	// expandir
-			$this.addClass("current")
+			$this
 				.add($this.parents(".msg-container:not(.on)"))
 				.addClass("on")
 				.css("width", "100%")
@@ -63,6 +66,7 @@ function populateMessages(tree) {
 					$this.find("> .handle").append(createMessage($this.data()));
 				})
 				.siblings().css( "width", "0" );
+			$current = $this;
 		};
 		updateButtons();
 	};
@@ -110,6 +114,7 @@ function populateMessages(tree) {
 				.on("click", toggleElement)	// muestra u oculta la conversación
 				.data(msg)					// guardamos el mensaje con el elemento
 				.appendTo($container);
+		msg.container = $msgContainer;		// el mensaje guarda su contenedor correspondiente
 		if (msg.children) {
 			var children = msg.children;
 			var $childrenContainer = $("<div>").addClass('children-container')
@@ -122,10 +127,24 @@ function populateMessages(tree) {
 		};
 		return $msgContainer;
 	};
-	$mainContainer = $("#chart-ouput").empty();
-	// $rootContainer = $("<div>").addClass('children-container').appendTo($mainContainer);
-	$rootMsgContainer = appendMessageContainer(tree, $mainContainer).off();		// conversación de mensajes
-	toggleElement(null, $rootMsgContainer);
+	/* Expandir la conversación a un mensaje arbitrario */
+	this.expand = function(m) {
+		$current.trigger("click");	// colapsa el elemento actual
+		$(m.container).trigger("click");
+		// $rootMsgContainer.find(".msg-container").each(function() {
+		// 	if ($(this).data().idMsg == m.idMsg) {
+		// 		$(this).trigger("click");
+		// 	};
+		// });
+	};
+	var update = this.update = function() {
+		$mainContainer = $("#chart-output").empty();
+		$rootMsgContainer = appendMessageContainer(root, $mainContainer)
+			.trigger("click")
+			.off();		// conversación de mensajes
+		$current = $rootMsgContainer;
+	};
+	update();
 };
 /* Función principal de procesamiento de datos
 	@param data: datos obtenidos de la api para una conversación

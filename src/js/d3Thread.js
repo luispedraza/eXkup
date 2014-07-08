@@ -1,13 +1,14 @@
 var PROCESSOR = null;
 var VISUALIZER = null;
 var FREQUENCIES = null;
+var CONVERSATION = null;
 
 function initThread(apiData) {
 	PROCESSOR = new DataProcessor(apiData);
 	FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR);
 	VISUALIZER = new TalkVisualizer("#d3-chart-container", PROCESSOR);
 	populateController(PROCESSOR);
-	populateMessages(PROCESSOR.tree);	// los mensajes de la barra izquierda
+	CONVERSATION = new Conversation(PROCESSOR.tree); // conversación: mensajes de la barra izquierda
 };
 
 var TEST = 2;
@@ -141,18 +142,11 @@ document.body.addEventListener("updateSelection", function(e) {
 	PROCESSOR.select(e.detail);
 	VISUALIZER.updateGraph();
 	FREQUENCIES.updateGraph();
-	populateMessages(PROCESSOR.tree);
+	CONVERSATION.update();
 });
 /* Selección de conversación */
 document.body.addEventListener("conversation", function(e) {
 	var message = e.detail.message;
-	console.log(message);
-	$(".msg-container").each(function() {
-		console.log("datos: ", $(this).data());
-		if ($(this).data().idMsg == message.idMsg) {
-			console.log("encontrado");
-			$(this).trigger("click");
-		};
-	});
+	CONVERSATION.expand(message);
 });
 
