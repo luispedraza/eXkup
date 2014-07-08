@@ -42,6 +42,8 @@ function onShowEditor() {
 	EDITOR = new Editor($container, API);
 	new ModalDialog("Nuevo mensaje", $container, ["Cancelar"]);
 };
+
+/* Clase controlador para los mensajes de la conversación */
 function Conversation(tree) {
 	var root = tree;
 	var $rootMsgContainer = null;	// contenedor del mensaje raíz
@@ -51,10 +53,13 @@ function Conversation(tree) {
 		e.stopPropagation();
 		var $this = $(this);
 		if ($this.hasClass('on')) {	// colapsar
-			$this.add($this.find(".msg-container.on"))
+			var $containers = $this.add($this.find(".msg-container.on"))
 				.removeClass('on')
 				.css("width", "")
-				.find(".message").remove();
+				.each(function() {
+					$(this).find(".message").remove();
+				})
+				.siblings().css("width", "");
 			$current = $this.closest(".msg-container");	// nuevo mensaje actual (extremo de la conversación)
 		} else {	// expandir
 			$this
@@ -65,7 +70,7 @@ function Conversation(tree) {
 					var $this = $(this);
 					$this.find("> .handle").append(createMessage($this.data()));
 				})
-				.siblings().css( "width", "0" );
+				.siblings().css( "width", "0px" );
 			$current = $this;
 		};
 		updateButtons();
@@ -151,7 +156,6 @@ function Conversation(tree) {
 	@ param hidden: inicialmente todas las respuestas están ocultas
 */
 function DataProcessor(data) {
-
 	/* Obtiene los nodos correspondientes a una conversación */
 	this.getConversation = function(node) {
 		var result = [node];
