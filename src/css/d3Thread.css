@@ -34,7 +34,14 @@ body {
 
 .link {
   fill: none;
+  stroke: #ccc;
 }
+
+.link.highlight {
+  stroke: #f30;
+  opacity: 1 !important;
+}
+
 #d3-chart-interaction .chord, #d3-chart-interaction .user {
   transition: opacity .5s ease;
 }
@@ -407,19 +414,21 @@ h2.redtitle {
 }
 .options {
   margin-top: 5px;
+  height: 0;
+  overflow: hidden;
+  transition: height .25s linear;
+}
+.options.active {
+  height: 20px;
 }
 .layout, .option {
   display: inline-block;
   overflow: hidden;
-  
 }
 .option {
-  transition: width .2s linear;
-  width: 0;
+    vertical-align: middle;
 }
-.option.active {
-  width: 100px;
-}
+
 #conversation .radio {
   position: relative;
   padding-left: 20px;

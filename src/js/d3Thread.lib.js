@@ -42,27 +42,31 @@ function onShowEditor() {
 	EDITOR = new Editor($container, API);
 	new ModalDialog("Nuevo mensaje", $container, ["Cancelar"]);
 };
-function populateMessages(tree) {
+function Conversation(tree) {
+	var root = tree;
+	var $rootMsgContainer = null;	// contenedor del mensaje raíz
+	var $current = null;			// contenedor del mensaje actual
 	/* Activa un contenedor de mensajes, insertando el mensaje correspondiente */
-	function toggleElement(event, $element) {
-		if (event) event.stopPropagation();
-		var $this = $element || $(this);
+	function toggleElement(e) {
+		e.stopPropagation();
+		var $this = $(this);
 		if ($this.hasClass('on')) {	// colapsar
-			$this.add($this.find(".msg-container.on")).each(function() {
-				$(this).removeClass('on current').css("width", "")
-					.find(".message").remove();
-				this.msg = this._msg; this._msg = null;
-			});
+			$this.add($this.find(".msg-container.on"))
+				.removeClass('on')
+				.css("width", "")
+				.find(".message").remove();
+			$current = $this.closest(".msg-container");	// nuevo mensaje actual (extremo de la conversación)
 		} else {	// expandir
-			$this.addClass("current")
-				.add($this.parents(".msg-container")).addClass("on").css("width", "100%")
+			$this
+				.add($this.parents(".msg-container:not(.on)"))
+				.addClass("on")
+				.css("width", "100%")
 				.each(function() {
-					if (this.msg) {
-						$(this).find("> .handle").append(createMessage(this.msg));
-						this._msg = this.msg; this.msg = null;
-					};
+					var $this = $(this);
+					$this.find("> .handle").append(createMessage($this.data()));
 				})
 				.siblings().css( "width", "0" );
+			$current = $this;
 		};
 		updateButtons();
 	};
@@ -103,32 +107,94 @@ function populateMessages(tree) {
 	};
 	function accordionReset() {$(this).find(".msg-container:not(.on)").css("width","");};
 	function appendMessageContainer(msg, $container) {
-		var $msgContainer = $("<div>").addClass('msg-container').appendTo($container)
-			.attr("data-user", msg.usuarioOrigen)
-			.append($("<div>").addClass('handle').css("background-color", getMsgColor(msg)))
-			.on("click", toggleElement)	// muestra u oculta la conversación
-		$msgContainer.get(0).msg = msg; // guardamos el mensaje con el elemento
+		var $msgContainer = $("<div>")
+				.addClass('msg-container')
+				.attr("data-user", msg.usuarioOrigen)
+				.append($("<div>").addClass('handle').css("background-color", getMsgColor(msg)))
+				.on("click", toggleElement)	// muestra u oculta la conversación
+				.data(msg)					// guardamos el mensaje con el elemento
+				.appendTo($container);
+		msg.container = $msgContainer;		// el mensaje guarda su contenedor correspondiente
 		if (msg.children) {
 			var children = msg.children;
-			var $childrenContainer = $("<div>").addClass('children-container').appendTo($msgContainer)
+			var $childrenContainer = $("<div>").addClass('children-container')
 				.on("mousemove", accordion)
-				.on("mouseleave", accordionReset);
+				.on("mouseleave", accordionReset)
+				.appendTo($msgContainer);
 			children.forEach(function(m) {
 				appendMessageContainer(m, $childrenContainer).addClass(m.selected ? "sel" : "nosel");
 			});
 		};
 		return $msgContainer;
 	};
-	$mainContainer = $("#chart-ouput").empty();
-	// $rootContainer = $("<div>").addClass('children-container').appendTo($mainContainer);
-	$rootMsgContainer = appendMessageContainer(tree, $mainContainer).off();		// conversación de mensajes
-	toggleElement(null, $rootMsgContainer);
+	/* Expandir la conversación a un mensaje arbitrario */
+	this.expand = function(m) {
+		$current.trigger("click");	// colapsa el elemento actual
+		$(m.container).trigger("click");
+		// $rootMsgContainer.find(".msg-container").each(function() {
+		// 	if ($(this).data().idMsg == m.idMsg) {
+		// 		$(this).trigger("click");
+		// 	};
+		// });
+	};
+	var update = this.update = function() {
+		$mainContainer = $("#chart-output").empty();
+		$rootMsgContainer = appendMessageContainer(root, $mainContainer)
+			.trigger("click")
+			.off();		// conversación de mensajes
+		$current = $rootMsgContainer;
+	};
+	update();
 };
 /* Función principal de procesamiento de datos
 	@param data: datos obtenidos de la api para una conversación
 	@ param hidden: inicialmente todas las respuestas están ocultas
 */
 function DataProcessor(data) {
+
+	/* Obtiene los nodos correspondientes a una conversación */
+	this.getConversation = function(node) {
+		var result = [node];
+		function addBefore(node) {
+			var parent = node.parent;
+			if (parent) {
+				result.push(parent);
+				addBefore(parent);	
+			};
+		};
+		function addAfter(node) {
+			var children = node.children;
+			if (children) {
+				result = result.concat(children);
+				children.forEach(addAfter);
+			};
+		};
+		addBefore(node);
+		addAfter(node);
+		return result;
+	};
+	/* Generación del árbol agrupando por autor */
+	this.groupByAuthor = function() {
+		var result = {};
+		function evaluateMesage(m) {
+			var nickname = m.usuarioOrigen;
+			var author = m.author;
+			if (nickname in result) {
+				result[nickname].messages.push(m);
+			} else {
+				if (author.selected) {
+					item = result[nickname] = {author: author, messages: [m]};
+				} else {
+					if (!("otros" in result)) {
+						result["otros"] = {author: {usuarioOrigen: "otros"}, messages: [m]};
+					} else result["otros"].messages.push(m);
+				};
+			};
+			if (m.children) m.children.forEach(evaluateMesage);
+		};
+		evaluateMesage(THAT.tree);
+		return result;
+	};
 	function initUsers(users) {
 		var users = makeArray(users, "nickname");
 		var nUsers = users.length;
@@ -365,8 +431,8 @@ function DataProcessor(data) {
 	messageProcessor(rootMsg);
 	rootMsg.selected = true;			// el raíz nunca es filtrado
 	// index[rootMsg.idMsg] = rootMsg;			// No se procesa el mensaje raíz
-	this.messages = data.mensajes;
-	var replies = this.messages.slice(1); // Array de mensajes, excluido el raiz
+	var messages = this.messages = data.mensajes;
+	var replies = messages.slice(1); // Array de mensajes, excluido el raiz
 	// var messages = this.messages = data.mensajes;
 	replies.forEach(function(m) {
 		var parentObj = index[m.idMsgRespuesta];
@@ -387,12 +453,12 @@ function DataProcessor(data) {
 function TalkVisualizer(containerID, processor) {
 	// console.log(data);
 	// console.log(JSON.stringify(data));
-	var RADIUS_DEFAULT = 5,
+	var RADIUS_DEFAULT = 10,
 		RADIUS = RADIUS_DEFAULT
 		NODE_BORDER_DEFAULT = 1,
 		NODE_BORDER = NODE_BORDER_DEFAULT,
-		LINK_WIDTH_DEFAULT = .5,
-		LINK_WIDTH_TIMELINE_DEFAULT = 10,
+		LINK_WIDTH_DEFAULT = 1,
+		LINK_WIDTH_TIMELINE_DEFAULT = 5,
 		LINK_WIDTH = LINK_WIDTH_DEFAULT;
 	function getLinkWidth() {
 		var scale = ZOOM.scale();
@@ -418,6 +484,7 @@ function TalkVisualizer(containerID, processor) {
 		.y(function(d) { return d.y; });
 	// var d3TranslateNode = null;
 	var LAYOUT_TYPE = "tree";
+	var LAYOUT_OPTIONS = {};	// opciones de configuración: agrupaciones, etc
 	var LAYOUT = d3.layout.tree()
 		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 	var FORCE = d3.layout.force()
@@ -431,6 +498,7 @@ function TalkVisualizer(containerID, processor) {
 		.padding(0);
 		// .sortGroups(d3.ascending)
 		// .sortSubgroups(d3.ascending);
+	var SQUARE = d3.svg.symbol().size(RADIUS_DEFAULT*RADIUS_DEFAULT).type("square");	// pra dibujar cuadrados;
 	var TIMELINE_SCROLL = 0;
 	/* zoom behavior: */
 	function zoomAction() {
@@ -468,10 +536,11 @@ function TalkVisualizer(containerID, processor) {
 			RADIUS = RADIUS_DEFAULT / scale;
 			NODE_BORDER = NODE_BORDER_DEFAULT / scale;
 			LINK_WIDTH = getLinkWidth();
-			svg.selectAll(".node circle")
+			svg.selectAll(".node")
 				.transition().duration(DURATION)
-				.attr("r", RADIUS)
-				.attr("stroke-width", NODE_BORDER);	// escalado de los nodos
+				.attr("transform", function(d) { return d3TranslateNode(d) + d3Scale(1/scale);})
+				.select(".shape")
+					.attr("stroke-width", NODE_BORDER);	// escalado de los nodos
 			svg.selectAll(".link")
 				.attr("stroke-width", LINK_WIDTH);
 		});
@@ -540,10 +609,11 @@ function TalkVisualizer(containerID, processor) {
 				});
 			};
 		};
-		if (typeof configuration=="undefined") configuration = {layout: "tree"};
+		if (typeof configuration=="undefined") configuration = {};
 		var layout = configuration.layout || "tree";
-		var options = configuration.options || [];
+		var options = configuration.options || {"group-author": false, "group-replied": false};
 		LAYOUT_TYPE = layout;
+		LAYOUT_OPTIONS = options;	// opciones de configuración del layout
 		FORCE.stop();
 		ZOOM.on("zoom", zoomAction);	// acción por defecto para el zoom
 		var chartPosition = [center.x,center.y];
@@ -604,6 +674,13 @@ function TalkVisualizer(containerID, processor) {
 		else { d.children = d._children; d._children = null;};
 		update(d);
 		return false;
+	};
+
+	function filterConversation(d) {
+		var conversation = processor.getConversation(d.target);
+		d3.selectAll(".link").classed("highlight", function(d) {
+			return ((conversation.indexOf(d.target)>=0) && (conversation.indexOf(d.source)>=0));
+		});
 	};
 	/* Colapsa los nodos de la estructura de datos de árbol */
 	function collapse(d) { if (d.children.length) { d._children = d.children; d._children.forEach(collapse); d.children = null; }; };
@@ -701,12 +778,19 @@ function TalkVisualizer(containerID, processor) {
 			.call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
 			.on("click", clickOnNode)
 			.on("mouseenter", function(d, e) {
-				var tooltipConfig = {autoClose: "no"};
-				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
+				// var tooltipConfig = {autoClose: "no"};
+				// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
 			})
 			.call(FORCE.drag);
-		nodeEnter.append("circle")
-			.attr("r", RADIUS)
+		// nodeEnter.append("circle")
+		// 	.attr("class", "shape")
+		// 	.attr("r", RADIUS)
+		// 	.attr("fill", getMsgColor)
+		// 	.attr("stroke", "#fff")
+		// 	.attr("stroke-width", NODE_BORDER);
+		nodeEnter.append("path")
+			.attr("class", "shape")
+			.attr("d", SQUARE)
 			.attr("fill", getMsgColor)
 			.attr("stroke", "#fff")
 			.attr("stroke-width", NODE_BORDER);
@@ -716,19 +800,19 @@ function TalkVisualizer(containerID, processor) {
 			.duration(DURATION)
 			.style("opacity", 1)
 			.attr("transform", d3TranslateNode)
-			.select("circle")
+			.select(".shape")
 				.attr("fill", getMsgColor);
 
 		var nodeExit = node.exit().transition().duration(DURATION)
 			.style("opacity", 0)
 			.remove();
-		nodeExit.select("circle")
+		nodeExit.select(".shape")
 			.transition().duration(DURATION)
 			.attr("r", 1e-6);
 	};
 	function updateTreeLinks() {
 		var linkWidth = getLinkWidth();
-		var linkOpacity = (LAYOUT_TYPE=="timeline") ? .3 : 1;
+		var linkOpacity = (LAYOUT_TYPE=="timeline") ? 0.1 : 1;
 		var link = chartLinks.selectAll("path.link")
 			.data(links, function(d) { return d.target.id; });
 			// .data(links, function(d) { return d.target.id; });
@@ -736,9 +820,12 @@ function TalkVisualizer(containerID, processor) {
 		link.enter().append("path")
 			.attr("class", "link")
 			.attr("d", diagonal)
-			.attr("stroke", "#ccc")
 			.attr("stroke-width", linkWidth)
-			.style("opacity", 0);
+			.style("opacity", 0)
+			.on("mouseenter", filterConversation)
+			.on("click", function(d) {
+				dispatchConversation(d.target);			// se muestra la conversación completa
+			});
 		// Transición a nueva posición
 		link.transition()
 			.duration(DURATION)
@@ -933,6 +1020,19 @@ function TalkVisualizer(containerID, processor) {
 				node.x = width*node.tsX;
 			});
 		};
+		function computeTimelinePositionsGrouped(groups) {
+			groups = makeArray(groups, "nickname");
+			var N = groups.length;
+			// var vStep = height/N;
+			var vStep = 20;
+			groups.forEach(function(g,i) {
+				var y = i*vStep;
+				g.messages.forEach(function(c) {
+					c.y = y;
+					c.x = width*c.tsX;
+				});
+			});
+		};
 		// configuración inicial del grafo, para evitar saltos bruscos del layout anterior
 		function computeForceInitial(node) {
 			var result = [];
@@ -943,6 +1043,17 @@ function TalkVisualizer(containerID, processor) {
 				if (n.children) n.children.forEach(computeNode);
 			};
 			computeNode(node);
+			return result;
+		};
+		function rawNodes(rootNode) {
+			result = [];
+			function appendChildren(children) {
+				result = result.concat(children);
+				children.forEach(function(c) {
+					if (c.children) appendChildren(c.children);
+				});
+			};
+			appendChildren([rootNode]);
 			return result;
 		};
 		if (LAYOUT_TYPE=="graph") {
@@ -957,10 +1068,17 @@ function TalkVisualizer(containerID, processor) {
 		} else if (LAYOUT_TYPE=="interaction") {
 			updateInteraction();
 		} else {
-			nodes = LAYOUT.nodes(root);
-			(LAYOUT_TYPE=="tree") ? computeTreePositions(nodes) : computeTimelinePositions(nodes);
-			// computeTreePositions(root);	// cálculo de las posiciones de los nodos para el layout
-			// links = nodes;
+			if (LAYOUT_OPTIONS["group-author"]) {
+				nodes = rawNodes(root);
+				computeTimelinePositionsGrouped(processor.groupByAuthor());
+			} else if (LAYOUT_OPTIONS["group-replied"]) {
+
+			} else {
+				nodes = LAYOUT.nodes(root);
+				(LAYOUT_TYPE=="tree") ? computeTreePositions(nodes) : computeTimelinePositions(nodes);
+				// computeTreePositions(root);	// cálculo de las posiciones de los nodos para el layout
+				// links = nodes;
+			};
 			links = LAYOUT.links(nodes);
 			updateNodes();
 			updateTreeLinks();
@@ -975,7 +1093,7 @@ function TalkVisualizer(containerID, processor) {
 	};
 	this.updateGraph = function() { update(); };
 	this.highlightUsers = function (users, highlight) {
-		var selector = users.map(function(u) {return ".user-"+u+" circle";}).join(",");
+		var selector = users.map(function(u) {return ".user-"+u+" .shape";}).join(",");
 		var radius = highlight ? RADIUS*3 : RADIUS;
 		// d3.selectAll("#d3-chart g.node circle");
 		d3.selectAll(selector)
@@ -1026,7 +1144,7 @@ function populateController(processor) {
 							// Actualización del color en visualizaciones
 							var user = $this.closest('li').data();
 							user.color = newColor;
-							d3.selectAll("g.node.user-"+user.nickname+" circle").attr("fill", newColor);
+							d3.selectAll("g.node.user-"+user.nickname+" .shape").attr("fill", newColor);
 							$("#chart-messages .msg-container[data-user="+user.nickname+"] .handle").css("background-color", newColor);
 						})))
 				.append($("<span>").addClass("nmessages").text(user.nMessages))

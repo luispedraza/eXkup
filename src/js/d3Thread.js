@@ -1,16 +1,17 @@
 var PROCESSOR = null;
 var VISUALIZER = null;
 var FREQUENCIES = null;
+var CONVERSATION = null;
 
 function initThread(apiData) {
 	PROCESSOR = new DataProcessor(apiData);
 	FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR);
 	VISUALIZER = new TalkVisualizer("#d3-chart-container", PROCESSOR);
 	populateController(PROCESSOR);
-	populateMessages(PROCESSOR.tree);	// los mensajes de la barra izquierda
+	CONVERSATION = new Conversation(PROCESSOR.tree); // conversación: mensajes de la barra izquierda
 };
 
-var TEST = 3;
+var TEST = 2;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -42,6 +43,7 @@ function sortUsers(sorting) {
 	});
 	$items.detach().appendTo($list);
 };
+/* Mensaje de cambio de selección */
 function dispatchSelect(type, value, add) {
 	var e = document.createEvent("CustomEvent");
 	var detail = {'add': add,'type': type,'value':value};
@@ -49,11 +51,17 @@ function dispatchSelect(type, value, add) {
 	document.body.dispatchEvent(e);
 };
 
+function dispatchConversation(message) {
+	var e = document.createEvent("CustomEvent");
+	var detail = {'message': message};
+	e.initCustomEvent("conversation", false, false, detail);
+	document.body.dispatchEvent(e);
+};
+
 /* Configuración de las opciones del gráfico */
 function updateSelector() {
 	var selID = $("#chart-options .layout.on").attr("id");
-	$("#chart-options .option").removeClass("active");
-	$("#chart-options .option."+selID).addClass('active');
+	$("#chart-options .options").toggleClass('active', selID!="set-interaction");
 };
 updateSelector();
 
@@ -106,9 +114,10 @@ $(".expand").on("click", function() {
 function updateConfiguration() {
 	var layoutID = $("#chart-options .layout.on").attr("id");
 	var layout = layoutID.split("-")[1];
-	var options = $("#chart-options .on."+layoutID).map(function(o) {
-		return this.id;
-	}).get();
+	var options= {};
+	$("#chart-options .option").each(function() {
+		options[this.id] = $(this).hasClass('on');
+	});
 	VISUALIZER.config({layout: layout, options: options});
 };
 
@@ -122,16 +131,22 @@ $("#chart-options .layout").on("click", function() {
 });
 $("#chart-options .option").on("click", function() {
 	var $this = $(this);
-	$this.toggleClass('on');
+	var selected = $this.hasClass('on');
+	$("#chart-options .option").removeClass('on');
+	$this.toggleClass('on', !selected);
 	updateConfiguration();
 });
-
 
 /* Actualización de filtros */
 document.body.addEventListener("updateSelection", function(e) {
 	PROCESSOR.select(e.detail);
 	VISUALIZER.updateGraph();
 	FREQUENCIES.updateGraph();
-	populateMessages(PROCESSOR.tree);
+	CONVERSATION.update();
+});
+/* Selección de conversación */
+document.body.addEventListener("conversation", function(e) {
+	var message = e.detail.message;
+	CONVERSATION.expand(message);
 });
 
