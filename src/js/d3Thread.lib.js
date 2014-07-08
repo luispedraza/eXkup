@@ -47,7 +47,6 @@ function onShowEditor() {
 function Conversation(tree) {
 	var root = tree;
 	var $rootMsgContainer = null;	// contenedor del mensaje raíz
-	var $current = null;			// contenedor del mensaje actual
 	/* Activa un contenedor de mensajes, insertando el mensaje correspondiente */
 	function toggleElement(e) {
 		e.stopPropagation();
@@ -60,7 +59,6 @@ function Conversation(tree) {
 					$(this).find(".message").remove();
 				})
 				.siblings().css("width", "");
-			$current = $this.closest(".msg-container");	// nuevo mensaje actual (extremo de la conversación)
 		} else {	// expandir
 			$this
 				.add($this.parents(".msg-container:not(.on)"))
@@ -71,7 +69,6 @@ function Conversation(tree) {
 					$this.find("> .handle").append(createMessage($this.data()));
 				})
 				.siblings().css( "width", "0px" );
-			$current = $this;
 		};
 		updateButtons();
 	};
@@ -82,7 +79,6 @@ function Conversation(tree) {
 		var nChildren = $children.length;
 		if (nChildren == 1) return;	// sólo hay un hijo, no tiene sentido lupa
 		if($children.filter(".on").length) return;	// hay un mensaje hijo mostrado 
-
 		var offset = $element.offset();
 		var x = event.pageX - offset.left;	// origen de coordenadas de la función coseno: (cos(theta)+1)/2
 		var width = $element.width();
@@ -134,20 +130,18 @@ function Conversation(tree) {
 	};
 	/* Expandir la conversación a un mensaje arbitrario */
 	this.expand = function(m) {
-		$current.trigger("click");	// colapsa el elemento actual
+		$rootMsgContainer.find(".msg-container.on")
+			.removeClass('on')
+			.css("width", "")
+			.each(function() { $(this).find(".message").remove(); })
+			.siblings().css("width", "");
 		$(m.container).trigger("click");
-		// $rootMsgContainer.find(".msg-container").each(function() {
-		// 	if ($(this).data().idMsg == m.idMsg) {
-		// 		$(this).trigger("click");
-		// 	};
-		// });
 	};
 	var update = this.update = function() {
 		$mainContainer = $("#chart-output").empty();
 		$rootMsgContainer = appendMessageContainer(root, $mainContainer)
 			.trigger("click")
 			.off();		// conversación de mensajes
-		$current = $rootMsgContainer;
 	};
 	update();
 };
@@ -685,6 +679,14 @@ function TalkVisualizer(containerID, processor) {
 		d3.selectAll(".link").classed("highlight", function(d) {
 			return ((conversation.indexOf(d.target)>=0) && (conversation.indexOf(d.source)>=0));
 		});
+		// Al salir, se deselecciona la conversación
+		d3.select(this)
+			.on("click", function(d) {
+				dispatchConversation(d.target);			// se muestra la conversación completa
+			})
+			.on("mouseleave", function(p) {
+				d3.selectAll(".link").classed("highlight", false);
+			});
 	};
 	/* Colapsa los nodos de la estructura de datos de árbol */
 	function collapse(d) { if (d.children.length) { d._children = d.children; d._children.forEach(collapse); d.children = null; }; };
@@ -786,17 +788,11 @@ function TalkVisualizer(containerID, processor) {
 				// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
 			})
 			.call(FORCE.drag);
-		// nodeEnter.append("circle")
-		// 	.attr("class", "shape")
-		// 	.attr("r", RADIUS)
-		// 	.attr("fill", getMsgColor)
-		// 	.attr("stroke", "#fff")
-		// 	.attr("stroke-width", NODE_BORDER);
+
 		nodeEnter.append("path")
 			.attr("class", "shape")
 			.attr("d", SQUARE)
 			.attr("fill", getMsgColor)
-			.attr("stroke", "#fff")
 			.attr("stroke-width", NODE_BORDER);
 
 		// Transition nodes to their new position.
@@ -826,10 +822,7 @@ function TalkVisualizer(containerID, processor) {
 			.attr("d", diagonal)
 			.attr("stroke-width", linkWidth)
 			.style("opacity", 0)
-			.on("mouseenter", filterConversation)
-			.on("click", function(d) {
-				dispatchConversation(d.target);			// se muestra la conversación completa
-			});
+			.on("mouseenter", filterConversation);
 		// Transición a nueva posición
 		link.transition()
 			.duration(DURATION)
@@ -1071,17 +1064,29 @@ function TalkVisualizer(containerID, processor) {
 			// force.nodes(nodes).links(LAYOUT.links(nodes));
 		} else if (LAYOUT_TYPE=="interaction") {
 			updateInteraction();
-		} else {
+		} else if (LAYOUT_TYPE=="tree") {
+			nodes = LAYOUT.nodes(root);
+			computeTreePositions(nodes)
+			if (LAYOUT_OPTIONS["group-author"]) {
+				
+			} else if (LAYOUT_OPTIONS["group-replied"]) {
+
+			} else {
+
+			};
+			links = LAYOUT.links(nodes);
+			updateNodes();
+			updateTreeLinks();
+		} else if (LAYOUT_TYPE=="timeline") {
+			nodes = LAYOUT.nodes(root);
+			computeTimelinePositions(nodes)
 			if (LAYOUT_OPTIONS["group-author"]) {
 				nodes = rawNodes(root);
 				computeTimelinePositionsGrouped(processor.groupByAuthor());
 			} else if (LAYOUT_OPTIONS["group-replied"]) {
 
 			} else {
-				nodes = LAYOUT.nodes(root);
-				(LAYOUT_TYPE=="tree") ? computeTreePositions(nodes) : computeTimelinePositions(nodes);
-				// computeTreePositions(root);	// cálculo de las posiciones de los nodos para el layout
-				// links = nodes;
+
 			};
 			links = LAYOUT.links(nodes);
 			updateNodes();

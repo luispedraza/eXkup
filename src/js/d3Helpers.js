@@ -40,8 +40,8 @@ function ColorGenerator() {
 function d3TimelinePath(d) {
     var source = d.source, target = d.target;
     var dx = target.x - source.x,
-        dcx = Math.min(50, .5*dx),
-        // dcx = 0.5*dx,
+        // dcx = Math.min(50, .5*dx),
+        dcx = 0.5*dx,
         cx = source.x + dcx;
     return  "M" + [source.x, source.y].join(",") + 
             "C" + [ cx, source.y,

@@ -31,7 +31,9 @@ body {
 .node {
   font: 10px sans-serif;
 }
-
+.shape {
+  stroke: #fff;
+}
 .link {
   fill: none;
   stroke: #ccc;
