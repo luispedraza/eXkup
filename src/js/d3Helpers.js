@@ -18,12 +18,12 @@ function d3Matrix(matrix) {
 };
 function d3PolyPath(r, n) {
 	var points = [],
-        alfa = Math.PI/n,	// initial angle
+        alfa = _PI/n,	// initial angle
         delta = alfa*2;
     do {
-    	points.push([r*Math.cos(alfa), r*Math.sin(alfa)].join(","));
+    	points.push([r*_COS(alfa), r*_SIN(alfa)].join(","));
     	alfa += delta;
-    } while (alfa < 2*Math.PI);
+    } while (alfa < 2*_PI);
     return points.join(" ");
 };
 
@@ -49,5 +49,31 @@ function d3TimelinePath(d) {
                     target.x, target.y].join(",");
 };
 
-
+/* Links en el plot de dependencias hive (árbol agrupado) */
+function hiveLink(d) {
+var s = d.source,
+    t = d.target,
+    x;
+    if (t.ang < s.ang) x = t, t = s, s = x;
+    if (t.ang - s.ang > _PI) s.ang += 2 * _PI;
+    var a1 = s.ang - (t.ang - s.ang) / 4,
+        a2 = t.ang + (t.ang - s.ang) / 4;
+    return "M" + _COS(s.ang) * s.r + "," + _SIN(s.ang) * s.r
+        + "C" + _COS(a1) * s.r + "," + _SIN(a1) * s.r
+        + " " + _COS(a2) * t.r + "," + _SIN(a2) * t.r
+        + " " + _COS(t.ang) * t.r + "," + _SIN(t.ang) * t.r;
+};
+// function hiveLink(d) {
+// var s = d.source,
+//     t = d.target,
+//     x;
+//     if (t.ang < s.ang) x = t, t = s, s = x;
+//     if (t.ang - s.ang > _PI) s.ang += 2 * _PI;
+//     var a1 = s.ang + (t.ang - s.ang) / 3,
+//         a2 = t.ang - (t.ang - s.ang) / 3;
+//     return "M" + _COS(s.ang) * s.r + "," + _SIN(s.ang) * s.r
+//         + "C" + _COS(a1) * s.r + "," + _SIN(a1) * s.r
+//         + " " + _COS(a2) * t.r + "," + _SIN(a2) * t.r
+//         + " " + _COS(t.ang) * t.r + "," + _SIN(t.ang) * t.r;
+// };
 

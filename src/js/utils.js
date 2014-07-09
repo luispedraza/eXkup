@@ -1,10 +1,19 @@
 var MESES = new Array("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre");
 var TIME_TOOLTIP_TIMER = null;	// tooltip para la fecha del mensaje
-var DEG2RAD = Math.PI/180;
-var RAD2DEG = 180/Math.PI;
+
 var _PI = Math.PI;
 var _2_PI = 2*_PI;
 var _PI_2 = _PI/2;
+var DEG2RAD = _PI/180;
+var RAD2DEG = 180/_PI;
+
+var _SIN = Math.sin;
+var _COS = Math.cos;
+var _ABS = Math.abs;
+var _MIN = Math.min;
+var _RANDOM = Math.random;
+var _FLOOR = Math.floor;
+var _ROUND = Math.round;
 
 var TABLONES = {
 	mios: "t1-",
@@ -35,7 +44,7 @@ Array.prototype.shuffle = function() {
  	var len = this.length;
 	var i = len;
 	 while (i--) {
-	 	var p = parseInt(Math.random()*len);
+	 	var p = parseInt(_RANDOM()*len);
 		var t = this[i];
   	this[i] = this[p];
   	this[p] = t;
@@ -76,7 +85,7 @@ function makeLink(text, href, clamp) {
 function getBoard(id) { return TABLONES[id] || id; };
 
 function randomColor() {
-	return '#'+Math.floor(Math.random()*16777215).toString(16);
+	return '#'+_FLOOR(_RANDOM()*16777215).toString(16);
 };
 
 function encodeParams(dict) {
@@ -104,13 +113,13 @@ function dataURItoBlob(dataURI) {
 function getTimeAgo(date, now) {
 	var elapsed = (now - date) / 1000;
 	if (elapsed<60) {			// menos de 1 minuto
-		return Math.round(elapsed) + " s.";
+		return _ROUND(elapsed) + " s.";
 	}
 	else if (elapsed<3600) {	// menos de 1 horra
-		return Math.round(elapsed/60) + " min.";
+		return _ROUND(elapsed/60) + " min.";
 	}
 	else if (elapsed<86400) {	// menos de 1 día
-		return Math.round(elapsed/3600) + " h.";
+		return _ROUND(elapsed/3600) + " h.";
 	}
 	return formatDate(date, false);
 };
