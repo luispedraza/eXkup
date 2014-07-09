@@ -2,8 +2,10 @@ var MESES = new Array("enero", "febrero", "marzo", "abril", "mayo", "junio", "ju
 var TIME_TOOLTIP_TIMER = null;	// tooltip para la fecha del mensaje
 var DEG2RAD = Math.PI/180;
 var RAD2DEG = 180/Math.PI;
-var _2_PI = 2*Math.PI;
-var _PI_2 = Math.PI/2;
+var _PI = Math.PI;
+var _2_PI = 2*_PI;
+var _PI_2 = _PI/2;
+
 var TABLONES = {
 	mios: "t1-",
 	sigo: "2",
@@ -245,11 +247,15 @@ function sortNumArray(array, field, reverse) {
 	if (typeof reverse === "undefined") reverse = false;
 	if (reverse) {
 		return array.sort(function(a,b) {
-			return (a[field] > b[field]) ? -1 : 1;
+			if (a[field] > b[field]) return -1;
+			else if (a[field] < b[field]) return 1;
+			return 0;
 		});
 	} else {
 		return array.sort(function(a,b) {
-			return (a[field] < b[field]) ? -1 : 1;
+			if (a[field] < b[field]) return -1;
+			else if (a[field] > b[field]) return 1;
+			return 0;
 		});
 	};
 };
@@ -312,10 +318,52 @@ function sumArray(array) {
 	return value;
 };
 
+/* Intercambio de dos filas de una matriz */
+function swapFile(array, i, j) {
+	var temp = array[i];
+	array[i] = array[j];
+	array[j] = temp;
+};
+/* Cambia una fila insertándola en la posición dada */
+function insertFile(array,pos,file) {
+	var value = array.splice(file,1);
+	array.splice(pos,0,value[0]);
+};
+/* Intercambio de dos columnas de una matriz */
+function swapColumn(array, i, j) {
+	array.forEach(function(f) {
+		swapFile(f,i,j);
+	});
+};
+/* Cambia una columna inserándola en la posición dada */
+function insertColumn(array,pos,col) {
+	array.forEach(function(f) {
+		insertFile(f,pos,col);
+	});
+};
 
-
-
-
-
+function prettyArray(array) {
+	console.log(array.map(function(f) {
+		return f.map(function(e) {
+			return ((e<10) ? " " : "") + e;
+		}).join(" ");
+	}).join("\n"));
+};
+/* Encuentra el máximo de una matriz diagonal */
+function maxDiagonalArray(array, ini) {
+	var max = 0, imax = 0 , jmax = 0;
+	var size = array.length;
+	for (var i=ini; i<size; i++) {
+		for (var j=i; j<size; j++) {
+			var value = array[i][j];
+			if (value > max) {
+				imax = i;
+				jmax = j;
+				max = value;
+			};
+		};
+	};
+	return {"i": imax, "j": jmax, "max": max};
+};
 
 

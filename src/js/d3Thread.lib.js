@@ -171,27 +171,77 @@ function DataProcessor(data) {
 		addAfter(node);
 		return result;
 	};
-	/* Generación del árbol agrupando por autor */
-	this.groupByAuthor = function() {
+	/* Generación del árbol agrupando por autor del mensaje o del mensaje respondido
+		@param which: "author" o "replied"
+		además se intenta hacer de manera que los timelines queden "bonitos", con pocos cruces de líneas
+	 */
+	this.groupBy = function(which) {
+		////////////////////////////////////////////
+		// Estructura de datos inicial: dict {nickname: user.children}
 		var result = {};
+		var _key = (which=="author") ? "usuarioOrigen" : "autorMsgRespuesta";
+		var users = THAT.users;
 		function evaluateMesage(m) {
-			var nickname = m.usuarioOrigen;
-			var author = m.author;
+			var nickname = m[_key];
 			if (nickname in result) {
-				result[nickname].messages.push(m);
+				result[nickname].children.push(m);	// mensajes enviados a/por este usuario
 			} else {
-				if (author.selected) {
-					item = result[nickname] = {author: author, messages: [m]};
-				} else {
-					if (!("otros" in result)) {
-						result["otros"] = {author: {usuarioOrigen: "otros"}, messages: [m]};
-					} else result["otros"].messages.push(m);
-				};
+				users[nickname].children = [m];
+				result[nickname] = users[nickname];
 			};
 			if (m.children) m.children.forEach(evaluateMesage);
 		};
-		evaluateMesage(THAT.tree);
-		return result;
+		evaluateMesage(THAT.tree);	// aquí se construye el diccionario de usuarios, con sus children
+		////////////////////////////////////////////
+		// Construcción de la matriz de interacciones
+		function evaluateFullInteraction(m) {
+			var i = resultArray.indexOf(m.author);
+			var j = resultArray.indexOf(users[m.autorMsgRespuesta]);
+			fullInteraction[i][j]++;
+			fullInteraction[j][i]++;
+		};
+		// vector de usuarios, resultado:
+		var resultArray = makeArray(result, "nickname");
+		// El usuario raíz en la primera posición:
+		insertFile(resultArray, 0, resultArray.indexOf(THAT.tree.author));
+
+		var nUsers = resultArray.length;
+		var fullInteraction = initArray(nUsers, nUsers, 0);
+		resultArray.forEach(function (u,i) {
+			// inicialización del algoritmo iterativo que viene despues:
+			u.position = i;
+			u.newPosition = [];
+			u.children.forEach(evaluateFullInteraction);
+		});
+
+		// algoritmo iterativo para optimizar las posiciones:
+		function optimStep() {
+			for (var i=1; i<nUsers; i++) {
+				var u = resultArray[i];
+				var sumInteraction = d3.sum(fullInteraction[i]);
+				if (sumInteraction==1) {
+					var v = resultArray[fullInteraction[i].indexOf(1)];
+					u.newPosition.push(v.position);
+					v.newPosition.push(v.position);
+					continue;
+				};
+				for (var j=i+1; j<nUsers; j++) {
+					var v = resultArray[j];
+					var interaction = fullInteraction[i][j];
+					for (var p=0;p<interaction; p++) {
+						u.newPosition.push(u.position);
+						v.newPosition.push(u.position);
+					};
+				};
+			};
+			resultArray.forEach(function(u) {
+				u.position = d3.mean(u.newPosition);
+				u.newPosition = [];
+			});
+		};
+		for (var i=0; i<30; i++) optimStep();
+		resultArray = sortNumArray(resultArray, "position");
+		return resultArray;
 	};
 	function initUsers(users) {
 		var users = makeArray(users, "nickname");
@@ -286,24 +336,23 @@ function DataProcessor(data) {
 			if (m.children) m.children.forEach(addMessage);
 		};
 		addMessage(THAT.tree);
-		THAT.freq = {data: sortNumArray(makeIntArray(frequency, "x"), "x"),
-					tsRange: [iniTS, endTS]
-					};
+		return (THAT.frequencies = {"data": sortNumArray(makeIntArray(frequency, "x"), "x"),
+									"tsRange": [iniTS, endTS]});
 	};
+
+	this.getFrequencies = function() { return (this.frequencies || computeFrequencies()); };
+	/* Establece el modo de selección de los mensajes: o-y lógico de condiciones */
 	this.selectMode = function(mode) {
 		selectorMode = mode;
 		THAT.select(null);	// actualización de la selección completa
 	};
-	/* Cálculo de la mamtmriz de interacciones entre usuarios */
+	/* Cálculo de la matriz de interacciones entre usuarios */
 	function computeInteraction() {
 		/* evalúa las interacciones de un mensaje */
 		function evaluateInteraction(m) {
-			// if (m.selected) {
-				// sólo contamos mensajes de la selección actual
-				var i = usersArray.indexOf(m.author);
-				var j = usersArray.indexOf(users[m.autorMsgRespuesta]);
-				interaction[i][j]++;
-			// };
+			var i = usersArray.indexOf(m.author);
+			var j = usersArray.indexOf(users[m.autorMsgRespuesta]);
+			interaction[i][j]++;
 			if (m.children) m.children.forEach(evaluateInteraction);
 		};
 		var users = THAT.users;
@@ -311,8 +360,10 @@ function DataProcessor(data) {
 		var nUsers = usersArray.length;
 		var interaction = initArray(nUsers, nUsers, 0);
 		evaluateInteraction(THAT.tree);
-		THAT.interaction = {users: usersArray, matrix: interaction};
+		return (THAT.interaction = {"users": usersArray, "matrix": interaction});
 	};
+	/* Obtiene la información de interacciones para la selección actual */
+	this.getInteraction = function() { return (THAT.interaction || computeInteraction()); };
 
 	/* Selección de mensajes */
 	this.select = function(selector) {
@@ -398,7 +449,7 @@ function DataProcessor(data) {
 			};
 			messages.forEach(function(m) {
 				m.selCounter+=count; // cambio de contabilidad de los mensajes
-			});	
+			});
 		};
 		var evaluate = (selectorMode=="AND") ? evaluateMessageAND : evaluateMessageOR;
 		var selected;
@@ -408,13 +459,11 @@ function DataProcessor(data) {
 			m.selected = selected;
 			selected ? addFound(m) : removeFound(m);
 		});
+		THAT.interaction = null;	// se limpia la matriz de interacciones por haber cambiado el filtro
+		THAT.frequencies = null;	// se limpia la info de frecuencias
 		computeFrequencies();	// recalcular frecuencias para el nuevo conjunto de mensajes
-		computeInteraction();	// recalcular la matriz de interacciones para estos mensajes
 	};
-	this.getInteraction = function() {
-		computeInteraction();
-		return THAT.interaction;
-	};
+
 	// Procesamiento de los datos:
 	var THAT = this;
 	this.words = {};
@@ -422,6 +471,8 @@ function DataProcessor(data) {
 	this.videos = {};	
 	this.users = data.perfilesUsuarios;	
 	this.usersArray = sortArray(makeArray(this.users, "nickname"), "nickname");
+	this.interaction = null;	// almacenará la información de interacciones
+	this.frequencies = null; 	// almacenará info de frecuencias para la selección actual
 	var selectorMode = "OR"; 	// modo de selección de mensajes: and (y lógico de criterios), or (o lógico de criterios)
 	var selectorCounter = 0;	// número de selectores/filtros aplicados
 	var index = this.index = {};				// Diccionario de todos los mensajes
@@ -442,8 +493,6 @@ function DataProcessor(data) {
 	this.tree = rootMsg;
 	var firstTS = floorTimeHour(data.mensajes[0].tsMensaje*1000)/1000;
 	var lastTS = ceilTimeHour(data.mensajes[data.numMensajes-1].tsMensaje*1000)/1000;
-	computeFrequencies();			// cálculo de las frecuencias de los mensajes
-	computeInteraction();
 	initUsers(this.users);
 };
 
@@ -1018,13 +1067,13 @@ function TalkVisualizer(containerID, processor) {
 			});
 		};
 		function computeTimelinePositionsGrouped(groups) {
-			groups = makeArray(groups, "nickname");
+			/* Intento de ordenación para minimizar crucez de líneas */
 			var N = groups.length;
 			// var vStep = height/N;
 			var vStep = 20;
 			groups.forEach(function(g,i) {
 				var y = i*vStep;
-				g.messages.forEach(function(c) {
+				g.children.forEach(function(c) {
 					c.y = y;
 					c.x = width*c.tsX;
 				});
@@ -1082,7 +1131,7 @@ function TalkVisualizer(containerID, processor) {
 			computeTimelinePositions(nodes)
 			if (LAYOUT_OPTIONS["group-author"]) {
 				nodes = rawNodes(root);
-				computeTimelinePositionsGrouped(processor.groupByAuthor());
+				computeTimelinePositionsGrouped(processor.groupBy("author"));
 			} else if (LAYOUT_OPTIONS["group-replied"]) {
 
 			} else {
@@ -1202,7 +1251,7 @@ function populateController(processor) {
 };
 /* Visualización de frecuencias */
 function FrequencyVisualizer(element, processor) {
-	var frequencies = processor.freq;
+	var frequencies = processor.getFrequencies();
 	var container = document.querySelector(element),
 		rect = container.getBoundingClientRect(),
 		width = rect.width,
