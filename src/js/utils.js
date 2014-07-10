@@ -11,6 +11,7 @@ var _SIN = Math.sin;
 var _COS = Math.cos;
 var _ABS = Math.abs;
 var _MIN = Math.min;
+var _MAX = Math.max;
 var _RANDOM = Math.random;
 var _FLOOR = Math.floor;
 var _ROUND = Math.round;
@@ -258,15 +259,14 @@ function sortNumArray(array, field, reverse) {
 		return array.sort(function(a,b) {
 			if (a[field] > b[field]) return -1;
 			else if (a[field] < b[field]) return 1;
-			return 0;
 		});
 	} else {
 		return array.sort(function(a,b) {
 			if (a[field] < b[field]) return -1;
 			else if (a[field] > b[field]) return 1;
-			return 0;
 		});
 	};
+	return 0;
 };
 
 /* Función que determina si un objecto es de tipo Array */
@@ -374,5 +374,6 @@ function maxDiagonalArray(array, ini) {
 	};
 	return {"i": imax, "j": jmax, "max": max};
 };
+
 
 

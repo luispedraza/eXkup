@@ -172,12 +172,23 @@ function DataProcessor(data) {
 		return result;
 	};
 	/* Generación del árbol agrupando por autor del mensaje o del mensaje respondido
-		@param which: "author" o "replied"
+		@param M: número de interaciones del algoritmo de optimización
 		además se intenta hacer de manera que los timelines queden "bonitos", con pocos cruces de líneas
 	 */
-	this.groupByAuthor = function() {
+	this.groupByAuthor = function(M) {
 		////////////////////////////////////////////
 		// Estructura de datos inicial: dict {nickname: user.children}
+		/* función para calcular una media ponderada de elementos {v: valir, w: peso} */
+		function weightedMean (vector) {
+			var sum = 0, N = 0;
+			vector.forEach(function(e) {
+				sum += e.v * e.w;
+				N += e.w;
+			});
+			return sum/N;
+		};
+
+		if (typeof M === "undefined") M=30;
 		var result = {};
 		var users = THAT.users;
 		function evaluateMesage(m) {
@@ -191,19 +202,19 @@ function DataProcessor(data) {
 			if (m.children) m.children.forEach(evaluateMesage);
 		};
 		evaluateMesage(THAT.tree);	// aquí se construye el diccionario de usuarios, con sus children
+		// vector de usuarios, resultado:
+		var resultArray = makeArray(result, "nickname");
+		// El usuario raíz en la primera posición:
+		insertFile(resultArray, 0, resultArray.indexOf(THAT.tree.author));
+		var nUsers = resultArray.length;
 		////////////////////////////////////////////
 		// Construcción de la matriz de interacciones
 		function evaluateFullInteraction(m) {
 			var i = resultArray.indexOf(m.author);
 			var j = resultArray.indexOf(users[m.autorMsgRespuesta]);
 			fullInteraction[i][j]++;
-			fullInteraction[j][i]++;
+			// fullInteraction[j][i]++;
 		};
-		// vector de usuarios, resultado:
-		var resultArray = makeArray(result, "nickname");
-		// El usuario raíz en la primera posición:
-		insertFile(resultArray, 0, resultArray.indexOf(THAT.tree.author));
-		var nUsers = resultArray.length;
 		var fullInteraction = initArray(nUsers, nUsers, 0);
 		resultArray.forEach(function (u,i) {
 			// inicialización del algoritmo iterativo que viene despues:
@@ -211,32 +222,33 @@ function DataProcessor(data) {
 			u.newPosition = [];
 			u.children.forEach(evaluateFullInteraction);
 		});
+
 		// algoritmo iterativo para optimizar las posiciones:
 		function optimStep() {
-			for (var i=1; i<nUsers; i++) {
+			for (var i=0; i<nUsers; i++) {
 				var u = resultArray[i];
-				var sumInteraction = d3.sum(fullInteraction[i]);
-				if (sumInteraction==1) {
-					var v = resultArray[fullInteraction[i].indexOf(1)];
-					u.newPosition.push(v.position);
-					v.newPosition.push(v.position);
-					continue;
-				};
-				for (var j=i+1; j<nUsers; j++) {
+				u.newPosition.push({"v": u.position, "w": 1});	// posición actual
+				for (var j=0; j<nUsers; j++) {
 					var v = resultArray[j];
-					var interaction = fullInteraction[i][j];
-					for (var p=0;p<interaction; p++) {
-						u.newPosition.push(v.position);
-						v.newPosition.push(u.position);
+					var w = fullInteraction[i][j];
+					w = w*w;
+					if (w!=0) {
+						u.newPosition.push({"v": v.position, "w": w, "j": j});
+						v.newPosition.push({"v": u.position, "w": w, "j": j});
 					};
 				};
 			};
-			resultArray.forEach(function(u) {
-				u.position = d3.mean(u.newPosition);
+			resultArray.forEach(function(u, i) {
+				var newPos = u.newPosition;
+				if (i!=0) {
+					// las respuestas a registrador sin respuesta, quedan antes
+					u.position = ((newPos.length==2)&&(newPos[1].j==0)) ? -1 : weightedMean(newPos);
+				};
 				u.newPosition = [];
 			});
 		};
-		for (var i=0; i<20; i++) optimStep();
+		for (var i=0; i<M; i++) { optimStep(); };
+		// for (var i=0; i<0; i++) { optimStep(); };
 		return sortNumArray(resultArray, "position");
 	};
 	function initUsers(users) {
@@ -529,7 +541,7 @@ function TalkVisualizer(containerID, processor) {
 	var line = d3.svg.line()
 		.x(function(d) { return d.x; })
 		.y(function(d) { return d.y; });
-	// var d3TranslateNode = null;
+
 	var LAYOUT_TYPE = "tree";
 	var LAYOUT_OPTIONS = {};	// opciones de configuración: agrupaciones, etc
 	var LAYOUT = d3.layout.tree()
@@ -575,23 +587,27 @@ function TalkVisualizer(containerID, processor) {
 				.on("dblclick.zoom", null)
 		});
 	};
+
+	function onZoomEnd() {
+		var scale = ZOOM.scale();
+		NODE_BORDER = NODE_BORDER_DEFAULT/scale;
+		LINK_WIDTH = getLinkWidth();
+		var newScale = d3Scale(1/scale);
+		svg.selectAll(".node")
+			.transition().duration(DEFAULT_DURATION)
+			.attr("transform", function(d) {return d3TranslateNode(d) + newScale;});
+		// svg.selectAll(".focus-author")
+		// 	.transition().duration(DURATION)
+		// 	.attr("transform", function(d) { return d3TranslateNode(d) + newScale;});
+		svg.selectAll(".link")
+			// .transition().duration(DEFAULT_DURATION)
+			.attr("stroke-width", LINK_WIDTH);
+	};
+	var ___COUNT___ = 0;
 	var ZOOM = d3.behavior.zoom()
 		.scaleExtent([.25,8])
 		.on("zoom", zoomAction)
-		.on("zoomend", function() {
-			var scale = ZOOM.scale();
-			NODE_BORDER = NODE_BORDER_DEFAULT/scale;
-			LINK_WIDTH = getLinkWidth();
-			var newScale = d3Scale(1/scale);
-			svg.selectAll(".node")
-				.transition().duration(DEFAULT_DURATION)
-				.attr("transform", function(d) { return d3TranslateNode(d) + newScale;});
-			// svg.selectAll(".focus-author")
-			// 	.transition().duration(DURATION)
-			// 	.attr("transform", function(d) { return d3TranslateNode(d) + newScale;});
-			svg.selectAll(".link")
-				.attr("stroke-width", LINK_WIDTH);
-		});
+		.on("zoomend", onZoomEnd);
 	var svg = d3.select(containerID).append("svg")
 		.attr("id", "svg")
 		.on("dblclick", resetZoom)
@@ -765,7 +781,6 @@ function TalkVisualizer(containerID, processor) {
 	};
 	/* Visualización de los focos del grafo, cuandod hay agrupación */
 	function updateFocus() {
-		console.log(authorFocus);
 		/* Focos de autores */
 		var f_author = chartFocus.selectAll(".focus-author")
 		  	.data(authorFocus, function(d) { return d.graph_id || (d.graph_id = ++author_index); });
@@ -778,7 +793,11 @@ function TalkVisualizer(containerID, processor) {
 			.attr("x", -10)
 			.attr("y", -10)
 			.attr("width", 20)
-			.attr("height", 20);
+			.attr("height", 20)
+			.on("mouseenter", function (d) {
+				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY,
+					$("<div>").text("@" + d.nickname));
+			})
 		// f_authorEnter.append("text")
 		// 	.attr("dy", ".35em")
 		// 	.attr("font-size", "10px")
@@ -806,8 +825,8 @@ function TalkVisualizer(containerID, processor) {
 			.on("mouseenter", function(d, e) {
 				// var tooltipConfig = {autoClose: "no"};
 				// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
-			})
-			.call(FORCE.drag);
+			});
+			// .call(FORCE.drag);
 
 		nodeEnter.append("path")
 			.attr("class", "shape")
@@ -1031,36 +1050,15 @@ function TalkVisualizer(containerID, processor) {
 				node.y = _SIN(ang)*r;
 			});
 		};
-		// function computeTreePositionsGrouped(groups) {
-		// 	var nodes = [];
-		// 	var N = groups.length;
-		// 	var angStep = _2_PI/N;
-		// 	var R = N*25/_2_PI;
-		// 	var R0 = R+25;
-		// 	var rStep = 25;
-		// 	groups.forEach(function(g,i) {
-		// 		var ang = i*angStep;
-		// 		g.x = R * _COS(ang);
-		// 		g.y = R * _SIN(ang);
-		// 		// posiciones de los mensajes 
-		// 		g.children.forEach(function(c,i) {
-		// 			c.ang = ang;
-		// 			var r = c.r = R0 + i*rStep
-		// 			c.y = r * _SIN(ang);
-		// 			c.x = r * _COS(ang);
-		// 		});
-		// 		nodes = nodes.concat(g.children);
-		// 	});
-		// 	return nodes;
-		// };
+
 		function computeTreePositionsGrouped(groups) {
 			var nodes = [];
 			var N = groups.length;
 			var angStep = _2_PI/N;
 			var R0 = _MIN(width, height)/2;
 			var R = R0 - 20;
-			var rStep = 10;
 			groups.forEach(function(g,i) {
+				var rStep = _MIN(10, (R-100)/g.children.length);
 				var ang = i*angStep;
 				g.x = R0 * _COS(ang);
 				g.y = R0 * _SIN(ang);
@@ -1141,6 +1139,14 @@ function TalkVisualizer(containerID, processor) {
 		} else if (LAYOUT_TYPE=="timeline") {
 			diagonal = d3TimelinePath;
 			if (LAYOUT_OPTIONS["group-author"]) {
+				// DURATION = 0;
+				// setInterval(function() {
+				// 	authorFocus = processor.groupByAuthor(___COUNT___);
+				// 	___COUNT___++;
+				// 	nodes = computeTimelinePositionsGrouped(authorFocus);
+				// 	updateNodes();
+				// 	updateTreeLinks();
+				// }, 2000);
 				authorFocus = processor.groupByAuthor();
 				nodes = computeTimelinePositionsGrouped(authorFocus);
 			} else {
@@ -1291,31 +1297,5 @@ function FrequencyVisualizer(element, processor) {
 	graph.render();
 };
 
-/* Para mostrar información contextual sobre lso elementos */
-function ChartTooltip(whereMouseMoved,x,y,content,config) {
-	if (typeof config == "undefined") config = {};
-	var delay = config.delay || 800;
-	var autoClose = config.autoClose || "yes";
-	if (!typeof delay ==="undefined") delay=800;
-	$(whereMouseMoved).on("mouseleave",function() {
-		clearTimeout(timeout);
-		if (autoClose=="yes") close();
-		$(this).off("mouseleave");
-	});
-	var $element = $("<div>");
-	var timeout = setTimeout(initTooltip, delay);
-	function initTooltip() {
-		$element.addClass("message-detail")
-			.css({"left": x, "top": y})
-			.append("<div class='tooltip-header'><div class='close fa fa-times'></div></div>")
-			.append(content)
-			.draggable()
-			.appendTo('#d3-chart-container');
-		$element.find(".close").on("click", close);
-	};
-	function close() {
-		$element.remove();
-	};
-};
 
 

@@ -51,29 +51,17 @@ function d3TimelinePath(d) {
 
 /* Links en el plot de dependencias hive (árbol agrupado) */
 function hiveLink(d) {
-var s = d.source,
-    t = d.target,
-    x;
+    var s = d.source,
+        t = d.target,
+        x;
     if (t.ang < s.ang) x = t, t = s, s = x;
     if (t.ang - s.ang > _PI) s.ang += 2 * _PI;
-    var a1 = s.ang - (t.ang - s.ang) / 4,
-        a2 = t.ang + (t.ang - s.ang) / 4;
+    var a1 = s.ang - (t.ang - s.ang) / 3,
+        a2 = t.ang + (t.ang - s.ang) / 3;
     return "M" + _COS(s.ang) * s.r + "," + _SIN(s.ang) * s.r
         + "C" + _COS(a1) * s.r + "," + _SIN(a1) * s.r
         + " " + _COS(a2) * t.r + "," + _SIN(a2) * t.r
         + " " + _COS(t.ang) * t.r + "," + _SIN(t.ang) * t.r;
 };
-// function hiveLink(d) {
-// var s = d.source,
-//     t = d.target,
-//     x;
-//     if (t.ang < s.ang) x = t, t = s, s = x;
-//     if (t.ang - s.ang > _PI) s.ang += 2 * _PI;
-//     var a1 = s.ang + (t.ang - s.ang) / 3,
-//         a2 = t.ang - (t.ang - s.ang) / 3;
-//     return "M" + _COS(s.ang) * s.r + "," + _SIN(s.ang) * s.r
-//         + "C" + _COS(a1) * s.r + "," + _SIN(a1) * s.r
-//         + " " + _COS(a2) * t.r + "," + _SIN(a2) * t.r
-//         + " " + _COS(t.ang) * t.r + "," + _SIN(t.ang) * t.r;
-// };
+
 
