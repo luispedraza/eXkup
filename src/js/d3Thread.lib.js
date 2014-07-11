@@ -43,6 +43,11 @@ function onShowEditor() {
 	new ModalDialog("Nuevo mensaje", $container, ["Cancelar"]);
 };
 
+function updatePath() {
+	chartLinks.selectAll("path")
+		.attr("d", diagonal);
+};
+
 /* Clase controlador para los mensajes de la conversación */
 function Conversation(tree) {
 	var root = tree;
@@ -510,7 +515,7 @@ function TalkVisualizer(containerID, processor) {
 		RADIUS = RADIUS_DEFAULT
 		NODE_BORDER_DEFAULT = 1,
 		NODE_BORDER = NODE_BORDER_DEFAULT,
-		LINK_WIDTH_DEFAULT = 1,
+		LINK_WIDTH_DEFAULT = 0.5,
 		LINK_WIDTH_TIMELINE_DEFAULT = 3,
 		LINK_WIDTH = LINK_WIDTH_DEFAULT;
 	function getLinkWidth() {
@@ -587,17 +592,18 @@ function TalkVisualizer(containerID, processor) {
 	};
 
 	function onZoomEnd() {
+		console.log("zoomend");
 		var scale = ZOOM.scale();
 		NODE_BORDER = NODE_BORDER_DEFAULT/scale;
 		LINK_WIDTH = getLinkWidth();
 		var newScale = d3Scale(1/scale);
 		svg.selectAll(".node")
 			.transition().duration(DEFAULT_DURATION)
-			.attr("transform", function(d) {return d3TranslateNode(d) + newScale;});
+			.style("-webkit-transform", function(d) {return d3TranslateNode3D(d) + newScale;});
 		// svg.selectAll(".focus-author")
 		// 	.transition().duration(DURATION)
 		// 	.attr("transform", function(d) { return d3TranslateNode(d) + newScale;});
-		svg.selectAll(".link")
+		svg.selectAll("#chart-links path")
 			// .transition().duration(DEFAULT_DURATION)
 			.attr("stroke-width", LINK_WIDTH);
 	};
@@ -615,9 +621,9 @@ function TalkVisualizer(containerID, processor) {
 	var chart = svg
 				.append("g").attr("id", "chart")
 				.attr("transform", d3Translate([center.x,center.y]));
-	var chartLinks = chart.append("g");	// grupo para los links
-	var chartFocus = chart.append("g");	// grupo para los focos 
-	var chartNodes = chart.append("g");	// grupo para los nodos 
+	var chartLinks = chart.append("g").attr("id", "chart-links");	// grupo para los links
+	var chartFocus = chart.append("g").attr("id", "chart-focus");	// grupo para los focos 
+	var chartNodes = chart.append("g").attr("id", "chart-nodes");	// grupo para los nodos 
 
 	var chartInteraction = svg
 				.append("g").attr("id", "d3-chart-interaction")
@@ -719,6 +725,8 @@ function TalkVisualizer(containerID, processor) {
 				.style("opacity", 1)
 				.attr("transform", d3Translate(chartPosition));
 		};
+		// Clase para el contenedor de svg
+		svg.attr("class", LAYOUT_TYPE);
 	};
 	// colapsa/expandir hijos
 	function clickOnNode(d) {
@@ -729,23 +737,30 @@ function TalkVisualizer(containerID, processor) {
 	};
 	// Resaltado de las interacciones de un usuario, cuadno los mensajes están aagrupados
 	function filterUserInteraction(d) {
-		d3.selectAll(".link").classed("fade", function(l) {
+		d3.selectAll("#chart-links path").classed("fade", function(l) {
 			return ((l.source.author != d) && (l.target.author != d));
 		});
 	};
 	// Resaltado de los links de un hilo de conversación:
 	function filterConversation(d) {
 		var conversation = processor.getConversation(d.target);
-		d3.selectAll(".link").classed("highlight", function(l) {
-			return ((conversation.indexOf(l.target)>=0) && (conversation.indexOf(l.source)>=0));
-		});
+		d3.selectAll("#chart-links path")
+			.each(function(l) {
+				var thiz = d3.select(this);
+				if ((conversation.indexOf(l.target)>=0) && (conversation.indexOf(l.source)>=0)) {
+					thiz.style("stroke-width", LINK_WIDTH*3)
+						.style("stroke", "#f30");
+				};
+			});
 		// Al salir, se deselecciona la conversación
 		d3.select(this)
 			.on("click", function(d) {
 				dispatchConversation(d.target);			// se muestra la conversación completa
 			})
 			.on("mouseleave", function(p) {
-				d3.selectAll(".link").classed("highlight", false);
+				d3.selectAll("#chart-links path")
+					.style("stroke-width", LINK_WIDTH)
+					.style("stroke", null);
 			});
 	};
 	/* Colapsa los nodos de la estructura de datos de árbol */
@@ -768,11 +783,10 @@ function TalkVisualizer(containerID, processor) {
 	/* Visualización de los focos del grafo, cuandod hay agrupación */
 	function updateFocus() {
 		/* Focos de autores */
-		var f_author = chartFocus.selectAll(".focus-author")
+		var f_author = chartFocus.selectAll("g")
 		  	.data(authorFocus, function(d) { return d.graph_id || (d.graph_id = ++author_index); });
 		var f_authorEnter = f_author.enter().append("g")
-			.attr("class", "focus-author")
-			.attr("transform", d3TranslateNode)
+			.style("-webkit-transform", d3TranslateNode3D)
 			.on("mouseenter", filterUserInteraction)	// filtrado de interacciones
 			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
 		f_authorEnter.append("image")
@@ -785,11 +799,12 @@ function TalkVisualizer(containerID, processor) {
 				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY,
 					$("<div>").text("@" + d.nickname));
 			});
-		var f_authorUpdate = f_author.transition()
-			.duration(DURATION)
-			.attr("transform", d3TranslateNode)
-		var f_authorExit = f_author.exit().transition().duration(DEFAULT_DURATION)
+		// update:
+		f_author.style("-webkit-transform", d3TranslateNode3D)
+		// exit:
+		f_author.exit()
 			.style("opacity", 0)
+			.transition().delay(DEFAULT_DURATION)
 			.remove();
 	};
 	/* Actualización de los nodos: mensajes */
@@ -797,63 +812,65 @@ function TalkVisualizer(containerID, processor) {
 		var node = chartNodes.selectAll(".node")
 		  	.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
 		var nodeEnter = node.enter().append("g")
-			.attr("class", function(d) {
-				return "node user-" + d.usuarioOrigen;
-			})
-			.attr("transform", d3TranslateNode)
-			.style("opacity", 0)
-			.call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
-			.on("click", clickOnNode)
-			.on("mouseenter", function(d, e) {
-				// var tooltipConfig = {autoClose: "no"};
-				// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
-			});
+			.attr("class", function(d) { return "node user-" + d.usuarioOrigen; })
+			.style("-webkit-transform", d3TranslateNode3D)
+			.style("opacity", 0);
+			// .call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
+			// .on("click", clickOnNode)
+			// .on("mouseenter", function(d, e) {
+			// 	// var tooltipConfig = {autoClose: "no"};
+			// 	// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
+			// });
 			// .call(FORCE.drag);
 
-		nodeEnter.append("path")
-			.attr("class", "shape")
-			.attr("d", SQUARE)
-			.attr("fill", getMsgColor)
-			.attr("stroke-width", NODE_BORDER);
-
-		// Transition nodes to their new position.
-		var nodeUpdate = node.transition()
-			.duration(DURATION)
+		nodeEnter.append("rect")
+			.attr("x",-5)
+			.attr("y",-5)
+			.attr("width",10)
+			.attr("height",10)
+			.style("fill", getMsgColor)
+			.style("stroke-width", NODE_BORDER);
+		// update:
+		node.style("-webkit-transform", d3TranslateNode3D)
 			.style("opacity", 1)
-			.attr("transform", d3TranslateNode)
-			.select(".shape")
-				.attr("fill", getMsgColor);
-
-		var nodeExit = node.exit().transition().duration(DURATION)
+			.select("rect").attr("fill", getMsgColor);
+		// exit:
+		node.exit()
 			.style("opacity", 0)
+			.transition().delay(DEFAULT_DURATION)
 			.remove();
-		nodeExit.select(".shape")
-			.transition().duration(DURATION)
-			.attr("r", 1e-6);
 	};
 	/* Actualización de links: enlaces entre mensajes */
 	function updateTreeLinks() {
-		var linkWidth = getLinkWidth();
-		// var linkOpacity = (LAYOUT_TYPE=="timeline") ? 0.1 : 1;
-		var link = chartLinks.selectAll("path.link")
+		// Muy interesante: http://stackoverflow.com/questions/10942013/smil-animations-fail-on-dynamically-loaded-external-svg
+		var link = chartLinks.selectAll("path")
 			.data(links, function(d) { return d.target.id; });
 		// Los nuevos nodos entran en la posición previa del padre
 		link.enter().append("path")
-			.attr("class", "link")
-			.attr("d", diagonal)
-			.attr("stroke-width", linkWidth)
+			.style("stroke-width", LINK_WIDTH)
 			.style("opacity", 0)
-			.on("mouseenter", filterConversation);
+			.on("mouseenter", filterConversation)
+			.append("animate")
+				.attr("dur", "0.5s")
+				.attr("attributeName", "d")
+				.attr("begin", "mouseover")
+				.attr("fill", "freeze")
+				.attr("d-old", diagonal);
 		// Transición a nueva posición
-		link.transition()
-			.duration(DURATION)
-			.attr("stroke-width", linkWidth)
-			.style("opacity", null)
-			.attr("d", diagonal);
+		link.style("opacity", null)
+			.style("stroke-width", LINK_WIDTH)
+			.select("animate")
+				.each(function(d) {
+					var newPath = diagonal(d);
+					var thiz = d3.select(this);
+					thiz.attr("from", thiz.attr("d-old"))
+						.attr("to", newPath)
+						.attr("d-old", newPath);
+				});
 		// Transition exiting nodes to the parent's new position.
-		link.exit().transition()
-			.duration(DURATION)
+		link.exit()
 			.style("opacity", 0)
+			.transition().delay(DEFAULT_DURATION)
 			.remove();
 	};
 	/* Actualización del gráfico de interacciones */
@@ -1143,6 +1160,7 @@ function TalkVisualizer(containerID, processor) {
 			updateNodes();
 			updateTreeLinks();
 		};
+		document.getElementById("svg").setCurrentTime(0);
 		TOC(true);
 	};
 	function resetZoom() { TIMELINE_SCROLL=0; ZOOM.translate([0,0]); ZOOM.scale(1); ZOOM.event(svg); };

@@ -7,6 +7,9 @@ function d3Translate(vector) {
 function d3TranslateNode(node) {
     return " translate(" + [node.x, node.y] + ")";
 };
+function d3TranslateNode3D(node) {
+    return " translate3d(" + [node.x+"px", node.y+"px", "0px"] + ")";  
+};
 function d3Scale(scale) {
 	return " scale(" + scale + ")";
 };
