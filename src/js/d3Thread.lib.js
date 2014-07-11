@@ -515,7 +515,7 @@ function TalkVisualizer(containerID, processor) {
 		RADIUS = RADIUS_DEFAULT
 		NODE_BORDER_DEFAULT = 1,
 		NODE_BORDER = NODE_BORDER_DEFAULT,
-		LINK_WIDTH_DEFAULT = 1,
+		LINK_WIDTH_DEFAULT = 0.5,
 		LINK_WIDTH_TIMELINE_DEFAULT = 3,
 		LINK_WIDTH = LINK_WIDTH_DEFAULT;
 	function getLinkWidth() {
@@ -725,6 +725,8 @@ function TalkVisualizer(containerID, processor) {
 				.style("opacity", 1)
 				.attr("transform", d3Translate(chartPosition));
 		};
+		// Clase para el contenedor de svg
+		svg.attr("class", LAYOUT_TYPE);
 	};
 	// colapsa/expandir hijos
 	function clickOnNode(d) {
@@ -742,16 +744,23 @@ function TalkVisualizer(containerID, processor) {
 	// Resaltado de los links de un hilo de conversación:
 	function filterConversation(d) {
 		var conversation = processor.getConversation(d.target);
-		d3.selectAll("#chart-links path").classed("highlight", function(l) {
-			return ((conversation.indexOf(l.target)>=0) && (conversation.indexOf(l.source)>=0));
-		});
+		d3.selectAll("#chart-links path")
+			.each(function(l) {
+				var thiz = d3.select(this);
+				if ((conversation.indexOf(l.target)>=0) && (conversation.indexOf(l.source)>=0)) {
+					thiz.style("stroke-width", LINK_WIDTH*3)
+						.style("stroke", "#f30");
+				};
+			});
 		// Al salir, se deselecciona la conversación
 		d3.select(this)
 			.on("click", function(d) {
 				dispatchConversation(d.target);			// se muestra la conversación completa
 			})
 			.on("mouseleave", function(p) {
-				d3.selectAll("#chart-links path").classed("highlight", false);
+				d3.selectAll("#chart-links path")
+					.style("stroke-width", LINK_WIDTH)
+					.style("stroke", null);
 			});
 	};
 	/* Colapsa los nodos de la estructura de datos de árbol */
@@ -774,10 +783,9 @@ function TalkVisualizer(containerID, processor) {
 	/* Visualización de los focos del grafo, cuandod hay agrupación */
 	function updateFocus() {
 		/* Focos de autores */
-		var f_author = chartFocus.selectAll(".focus-author")
+		var f_author = chartFocus.selectAll("g")
 		  	.data(authorFocus, function(d) { return d.graph_id || (d.graph_id = ++author_index); });
 		var f_authorEnter = f_author.enter().append("g")
-			.attr("class", "focus-author")
 			.style("-webkit-transform", d3TranslateNode3D)
 			.on("mouseenter", filterUserInteraction)	// filtrado de interacciones
 			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
@@ -835,29 +843,22 @@ function TalkVisualizer(containerID, processor) {
 	/* Actualización de links: enlaces entre mensajes */
 	function updateTreeLinks() {
 		// Muy interesante: http://stackoverflow.com/questions/10942013/smil-animations-fail-on-dynamically-loaded-external-svg
-		var linkWidth = getLinkWidth();
-		// var linkOpacity = (LAYOUT_TYPE=="timeline") ? 0.1 : 1;
 		var link = chartLinks.selectAll("path")
 			.data(links, function(d) { return d.target.id; });
 		// Los nuevos nodos entran en la posición previa del padre
 		link.enter().append("path")
-			// .attr("class", "link")
-			// .attr("d", diagonal)
-			.attr("stroke-width", linkWidth)
+			.style("stroke-width", LINK_WIDTH)
 			.style("opacity", 0)
 			.on("mouseenter", filterConversation)
 			.append("animate")
 				.attr("dur", "0.5s")
 				.attr("attributeName", "d")
-				.attr("restart", "always")
 				.attr("begin", "mouseover")
-				// .attr("repeatCount", 5)
 				.attr("fill", "freeze")
-				// .attr("onend", "updatePath")
 				.attr("d-old", diagonal);
 		// Transición a nueva posición
-		link.attr("stroke-width", linkWidth)
-			.style("opacity", 1)
+		link.style("opacity", null)
+			.style("stroke-width", LINK_WIDTH)
 			.select("animate")
 				.each(function(d) {
 					var newPath = diagonal(d);
@@ -865,7 +866,6 @@ function TalkVisualizer(containerID, processor) {
 					thiz.attr("from", thiz.attr("d-old"))
 						.attr("to", newPath)
 						.attr("d-old", newPath);
-					// this.beginElement();
 				});
 		// Transition exiting nodes to the parent's new position.
 		link.exit()
