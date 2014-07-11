@@ -24,11 +24,11 @@ body {
   cursor: default;
 }
 #chart-focus g {
-  transition: -webkit-transform .5s ease, opacity .5s ease;
+  transition: -webkit-transform .5s linear, opacity .5s linear;
 }
 
 .node {
-  transition: -webkit-transform .5s ease, opacity .5s ease;
+  transition: -webkit-transform .5s linear, opacity .5s linear;
 }
 .node rect {
   stroke: #fff;
@@ -37,7 +37,7 @@ body {
 #chart-links path {
   fill: none;
   stroke: #ccc;
-  transition: opacity .5s ease, stroke .2s ease, stroke-width .5s ease;
+  transition: opacity .5s linear, stroke .2s linear, stroke-width .5s linear;
 }
 #chart-links path.tree {
   opacity: 1;
@@ -60,7 +60,7 @@ body {
 }
 
 #d3-chart-interaction .chord, #d3-chart-interaction .user {
-  transition: opacity .5s ease;
+  transition: opacity .5s linear;
 }
 #d3-chart-interaction:hover .fade {
   opacity: .1 !important;
@@ -87,7 +87,7 @@ body {
   border-right: 1px solid #ccc;
   overflow-x: hidden;
   box-shadow: 0 0 15px rgba(100,100,100,.5);
-  transition: width .5s ease; 
+  transition: width .5s linear; 
 }
 #chart-messages {
   width: 300px;
@@ -273,7 +273,7 @@ h2.redtitle {
   content: " ";
   background-color: #000;
   border-radius: 2px;
-  transition: left .2s ease;
+  transition: left .2s linear;
 }
 #conversation .check.on:before {
   background-color: #fff;
@@ -424,7 +424,7 @@ h2.redtitle {
   color:  #666;
   box-shadow: 0 1px 2px #d9d9d9;
   opacity: .3;
-  transition: opacity .25s ease;
+  transition: opacity .25s linear;
 }
 #chart-options:hover {
   opacity: 1;
@@ -476,7 +476,7 @@ h2.redtitle {
   top: 4px;
   border-radius: 50px;
   opacity: 0;
-  transition: opacity .2s ease;
+  transition: opacity .2s linear;
 }
 #conversation .radio.on:after {
   opacity: 1;
