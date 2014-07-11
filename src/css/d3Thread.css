@@ -37,11 +37,26 @@ body {
 .link {
   fill: none;
   stroke: #ccc;
+  transition: opacity .5s ease, stroke .2s ease, stroke-width .5s ease;
+}
+.link.tree {
+  opacity: 1;
+}
+.link.timeline {
+  opacity: .1;
+  stroke-width: 5 !important;
 }
 
 .link.highlight {
-  stroke: #f30;
+  stroke: #f30 !important;
   opacity: 1 !important;
+}
+.link.select {
+  stroke: #f30 !important;
+  opacity: 1 !important;
+}
+#chart:hover .fade {
+  opacity: .1;
 }
 
 #d3-chart-interaction .chord, #d3-chart-interaction .user {
