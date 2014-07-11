@@ -23,35 +23,35 @@ body {
   top: 40px;
   cursor: default;
 }
-
-.node circle {
-  cursor: pointer;
+#chart-focus g {
+  transition: -webkit-transform .5s ease, opacity .5s ease;
 }
 
 .node {
-  font: 10px sans-serif;
+  transition: -webkit-transform .5s ease, opacity .5s ease;
 }
-.shape {
+.node rect {
   stroke: #fff;
+  cursor: pointer;
 }
-.link {
+#chart-links path {
   fill: none;
   stroke: #ccc;
   transition: opacity .5s ease, stroke .2s ease, stroke-width .5s ease;
 }
-.link.tree {
+#chart-links path.tree {
   opacity: 1;
 }
-.link.timeline {
+#chart-links path.timeline {
   opacity: .1;
   stroke-width: 5 !important;
 }
 
-.link.highlight {
+#chart-links path.highlight {
   stroke: #f30 !important;
   opacity: 1 !important;
 }
-.link.select {
+#chart-links path.select {
   stroke: #f30 !important;
   opacity: 1 !important;
 }
