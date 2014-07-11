@@ -23,6 +23,18 @@ body {
   top: 40px;
   cursor: default;
 }
+#svg, .mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+#d3-chart-container .mask {
+  pointer-events: none;
+  background-image: url(/img/graphy.png);
+  opacity: .5;
+}
 #chart-focus g {
   transition: -webkit-transform .5s linear, opacity .5s linear;
 }
@@ -38,7 +50,6 @@ body {
   fill: none;
   stroke: #ccc;
   transition: opacity .2s linear, stroke .5s linear;
-  pointer-events: auto;
 }
 
 .tree #chart-links path {
@@ -61,8 +72,9 @@ body {
   stroke: #34ffc0 !important;
   opacity: 1 !important;
 }
-#chart {
-  pointer-events: all !important;
+
+#chart .background {
+  fill: transparent;
 }
 #chart:hover .fade {
   opacity: .2;
@@ -70,9 +82,6 @@ body {
 
 #d3-chart-interaction .chord, #d3-chart-interaction .user {
   transition: opacity .5s linear;
-}
-#d3-chart-interaction {
-  pointer-events: all !important;
 }
 #d3-chart-interaction:hover .fade {
   opacity: .1 !important;
@@ -413,8 +422,13 @@ h2.redtitle {
   position: absolute;
   right: 0;
   bottom: 0;
-  left: 449px;
-  height: 200px;
+  left: 0;
+  height: 250px;
+  transition: opacity .5s linear;
+}
+#d3-chart-container:not(.timeline) #d3-frequency {
+  opacity: 0;
+  pointer-events: none;
 }
 #d3-frequency h2 {
   margin: 5px;

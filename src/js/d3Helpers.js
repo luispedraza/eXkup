@@ -1,9 +1,9 @@
 function d3Translate(vector) {
 	return " translate(" + vector + ")";
 };
-// function d3TranslateNodeXXYY(node) {
-//     return " translate(" + [node.xx, node.yy] + ")";
-// };
+function d3Translate3D(vector) {
+    return " translate3d(" + [vector[0]+"px", vector[1]+"px", "0px"] + ")";
+}
 function d3TranslateNode(node) {
     return " translate(" + [node.x, node.y] + ")";
 };

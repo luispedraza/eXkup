@@ -511,22 +511,15 @@ function DataProcessor(data) {
 function TalkVisualizer(containerID, processor) {
 	// console.log(data);
 	// console.log(JSON.stringify(data));
-	var RADIUS_DEFAULT = 10,
-		RADIUS = RADIUS_DEFAULT
-		NODE_BORDER_DEFAULT = 1,
-		NODE_BORDER = NODE_BORDER_DEFAULT,
-		LINK_WIDTH_DEFAULT = 0.5,
-		LINK_WIDTH_TIMELINE_DEFAULT = 3,
+	var LINK_WIDTH_DEFAULT = 0.6,
 		LINK_WIDTH = LINK_WIDTH_DEFAULT;
-	function getLinkWidth() {
-		var scale = ZOOM.scale();
-		return ((LAYOUT_TYPE=="timeline") ? LINK_WIDTH_TIMELINE_DEFAULT : LINK_WIDTH_DEFAULT)/scale;
-	};
+	
 	var root = processor.tree;
 	var container = document.querySelector(containerID),
 		rect = container.getBoundingClientRect(),
 		width = rect.width,
 		height = rect.height;
+	var CONTAINER = d3.select(container);
 	var center = {x: width/2, y: height/2};
 	var margin = 65;
 	var node_index = 0,
@@ -560,13 +553,24 @@ function TalkVisualizer(containerID, processor) {
 		.padding(0);
 		// .sortGroups(d3.ascending)
 		// .sortSubgroups(d3.ascending);
-	var SQUARE = d3.svg.symbol().size(RADIUS_DEFAULT*RADIUS_DEFAULT).type("square");	// pra dibujar cuadrados;
 	var TIMELINE_SCROLL = 0;
+
+	/* Inicialización del fondo de los contenedores, para eventos en grupo e imagen de fondo */
+	function initBackground(selection) {
+		selection.append("rect")
+			.attr("class", "background")
+			.attr("x", -10000)
+			.attr("y", -10000)
+			.attr("width", 20000)
+			.attr("height", 20000);
+	};
+
 	/* zoom behavior: */
 	function zoomAction() {
 		var vector = d3.event.translate;
 		var scale = d3.event.scale;
-		svg.attr("transform", d3Translate(vector) + d3Scale(scale));
+		// svg.attr("transform", d3Translate(vector) + d3Scale(scale));
+		svg.style("-webkit-transform", d3Translate3D(vector) + d3Scale(scale));
 	};
 	function zoomActionTimeline() {
 		var vector = d3.event.translate;
@@ -575,7 +579,7 @@ function TalkVisualizer(containerID, processor) {
 		if (scale<1) translation = (TIMELINE_SCROLL-=10);
 		else if (scale>1) translation = (TIMELINE_SCROLL+=10);
 		else translation = vector[1]+TIMELINE_SCROLL;
-		svg.attr("transform", d3Translate([0,translation]));
+		svg.style("-webkit-transform", d3Translate3D([0,translation]));
 		ZOOM.scale(1);
 	};
 	/* para activar o desactivar temporalmente el zoom cuando se hace algo con una selección */
@@ -592,19 +596,14 @@ function TalkVisualizer(containerID, processor) {
 	};
 
 	function onZoomEnd() {
-		console.log("zoomend");
 		var scale = ZOOM.scale();
-		NODE_BORDER = NODE_BORDER_DEFAULT/scale;
-		LINK_WIDTH = getLinkWidth();
+		LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
 		var newScale = d3Scale(1/scale);
-		svg.selectAll(".node")
-			.transition().duration(DEFAULT_DURATION)
+		chartNodes.selectAll(".node")
 			.style("-webkit-transform", function(d) {return d3TranslateNode3D(d) + newScale;});
-		// svg.selectAll(".focus-author")
-		// 	.transition().duration(DURATION)
-		// 	.attr("transform", function(d) { return d3TranslateNode(d) + newScale;});
-		svg.selectAll("#chart-links path")
-			// .transition().duration(DEFAULT_DURATION)
+		chartFocus.selectAll("g")
+			.style("-webkit-transform", function(d) {return d3TranslateNode3D(d) + newScale;});
+		chartLinks.selectAll("path")
 			.attr("stroke-width", LINK_WIDTH);
 	};
 	// var ___COUNT___ = 0;
@@ -612,15 +611,17 @@ function TalkVisualizer(containerID, processor) {
 		.scaleExtent([.25,8])
 		.on("zoom", zoomAction)
 		.on("zoomend", onZoomEnd);
-	var svg = d3.select(containerID).append("svg")
-		.attr("id", "svg")
-		.on("dblclick", resetZoom)
-		.call(ZOOM)
-		.on("dblclick.zoom", null)
-		.append("g");
+	var svg = d3.select(containerID)
+		.insert("svg", ":first-child")
+			.attr("id", "svg")
+			.on("dblclick", resetZoom)
+			.call(ZOOM)
+			.on("dblclick.zoom", null)
+			.append("g");
 	var chart = svg
 				.append("g").attr("id", "chart")
-				.attr("transform", d3Translate([center.x,center.y]));
+				.attr("transform", d3Translate([center.x,center.y]))
+				.call(initBackground);	// inicialización del fondo del elemento
 	var chartLinks = chart.append("g").attr("id", "chart-links");	// grupo para los links
 	var chartFocus = chart.append("g").attr("id", "chart-focus");	// grupo para los focos 
 	var chartNodes = chart.append("g").attr("id", "chart-nodes");	// grupo para los nodos 
@@ -726,7 +727,7 @@ function TalkVisualizer(containerID, processor) {
 				.attr("transform", d3Translate(chartPosition));
 		};
 		// Clase para el contenedor de svg
-		svg.attr("class", LAYOUT_TYPE);
+		CONTAINER.attr("class", LAYOUT_TYPE);
 	};
 	// colapsa/expandir hijos
 	function clickOnNode(d) {
@@ -748,7 +749,7 @@ function TalkVisualizer(containerID, processor) {
 			.each(function(l) {
 				var thiz = d3.select(this);
 				if ((conversation.indexOf(l.target)>=0) && (conversation.indexOf(l.source)>=0)) {
-					thiz.style("stroke-width", LINK_WIDTH*3)
+					thiz.style("stroke-width", LINK_WIDTH*4)
 						.style("stroke", "#f30");
 				};
 			});
@@ -759,6 +760,7 @@ function TalkVisualizer(containerID, processor) {
 			})
 			.on("mouseleave", function(p) {
 				d3.selectAll("#chart-links path")
+					.transition().delay(500).duration(DEFAULT_DURATION)
 					.style("stroke-width", LINK_WIDTH)
 					.style("stroke", null);
 			});
@@ -828,8 +830,7 @@ function TalkVisualizer(containerID, processor) {
 			.attr("y",-5)
 			.attr("width",10)
 			.attr("height",10)
-			.style("fill", getMsgColor)
-			.style("stroke-width", NODE_BORDER);
+			.style("fill", getMsgColor);
 		// update:
 		node.style("-webkit-transform", d3TranslateNode3D)
 			.style("opacity", 1)
@@ -1053,7 +1054,7 @@ function TalkVisualizer(containerID, processor) {
 			var nodes = [];
 			var N = groups.length;
 			var angStep = _2_PI/N;
-			var R0 = _MIN(width, height)/2;
+			var R0 = _MIN(width, height)/2 - margin;
 			var R = R0 - 25;
 			groups.forEach(function(g,i) {
 				var rStep = _MIN(15, (R-100)/g.children.length);
@@ -1163,7 +1164,12 @@ function TalkVisualizer(containerID, processor) {
 		document.getElementById("svg").setCurrentTime(0);
 		TOC(true);
 	};
-	function resetZoom() { TIMELINE_SCROLL=0; ZOOM.translate([0,0]); ZOOM.scale(1); ZOOM.event(svg); };
+	function resetZoom() { 
+		TIMELINE_SCROLL=0; 
+		ZOOM.translate([0,0]); 
+		ZOOM.scale(1); 
+		ZOOM.event(svg); 
+	};
 	this.config = function(configuration) {
 		configureLayout(configuration);
 		update();
@@ -1171,11 +1177,10 @@ function TalkVisualizer(containerID, processor) {
 	};
 	this.updateGraph = function() { update(); };
 	this.highlightUsers = function (users, highlight) {
-		var selector = users.map(function(u) {return ".user-"+u+" .shape";}).join(",");
-		var radius = highlight ? RADIUS*3 : RADIUS;
+		var selector = users.map(function(u) {return ".user-"+u;}).join(",");
+		var scale = d3Scale((highlight ? 2 : 1)/(ZOOM.scale()));
 		d3.selectAll(selector)
-			.transition().duration(DURATION)
-			.attr("r", radius);
+			.style("-webkit-transform", function(d) {return d3TranslateNode3D(d) + scale; });
 	};
 	configureLayout();	// para que haya un layout inicial de árbol
 	update();
@@ -1270,7 +1275,6 @@ function populateController(processor) {
 };
 /* Visualización de frecuencias */
 function FrequencyVisualizer(element, processor) {
-	var frequencies = processor.getFrequencies();
 	var container = document.querySelector(element),
 		rect = container.getBoundingClientRect(),
 		width = rect.width,
@@ -1279,12 +1283,13 @@ function FrequencyVisualizer(element, processor) {
 		element: container,
 		series: [{
 			color: "lightblue",
-			data: frequencies.data,
+			data: [],
 			name: "Mensajes/h"
 		}]
 	});
 	this.updateGraph = function() {
-		var data = frequencies.data
+		var frequencies = processor.getFrequencies();
+		var data = frequencies.data;
 		graph.series[0].data = data;
 		graph.update();
 	};
@@ -1295,7 +1300,7 @@ function FrequencyVisualizer(element, processor) {
 		tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
 		element: container,
 	});
-	graph.render();
+	// graph.render();
 };
 
 
