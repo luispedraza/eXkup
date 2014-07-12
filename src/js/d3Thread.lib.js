@@ -802,6 +802,7 @@ function TalkVisualizer(containerID, processor) {
 			.style("fill", getMsgColor);
 		// update:
 		node.style("-webkit-transform", d3TranslateNode3D)
+			.transition().delay(1)
 			.style("opacity", 1)
 			.select("rect").attr("fill", getMsgColor);
 		// exit:
@@ -827,7 +828,8 @@ function TalkVisualizer(containerID, processor) {
 				.attr("fill", "freeze")
 				.attr("d-old", diagonal);
 		// Transición a nueva posición
-		link.style("opacity", null)
+		link.transition().delay(1)
+			.style("opacity", null)
 			.style("stroke-width", LINK_WIDTH)
 			.select("animate")
 				.each(function(d) {

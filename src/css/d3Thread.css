@@ -117,20 +117,19 @@ body {
   content: "ALGUNO";
 }
 .expandable {
-  overflow-y: scroll;
   position: absolute;
   top: 0;
   font-size: 12px;
   -webkit-box-sizing: border-box;
-  overflow-x: hidden;
+  overflow: visible;
   transition: height .5s linear; 
   /* background-color: rgba(255,255,255,.9); */
 }
 
 .expandable.on {
   box-shadow: 0 0 15px rgba(100,100,100,.5);
-  /* box-shadow: 0 0 15px rgba(100,100,100,.5); */
   background-color: rgba(255,255,255,.9);
+  bottom: 0;
 }
 
 #chart-messages {
@@ -232,6 +231,16 @@ body {
   width: 500px;
   left: 0;
 }
+#chart-control .section {
+  border-top: 1px dotted #ccc;
+  height: 150px;
+  overflow: hidden;
+  transition: height .5s ease;
+}
+#chart-control .section:hover {
+  height: 250px;
+  overflow: hidden;
+}
 .expandable h2.redtitle {
   margin: 0;
   padding: 10px;
@@ -276,12 +285,15 @@ body {
 }
 .expandable .content {
   height: 0;
-  overflow: hidden;
-  padding: 0 10px;
+  padding: 10px;
+  opacity: 0;
+  transition: opacity .5s ease;
+  pointer-events: none;
 }
 .expandable.on .content {
   height: auto;
-  padding: 10px;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .expandable > div {
@@ -430,6 +442,9 @@ body {
 }
 .words-list .list {
   counter-reset: nwords;
+    -webkit-column-count: 5;
+  -webkit-column-rule: 1px solid #ccc;
+  overflow: hidden;
 }
 .words-list li:before {
   content: counter(nwords, decimal-leading-zero);
@@ -445,11 +460,6 @@ body {
 .words-list li.on:before, .words-list li.on:hover:before {
   background-color: #f30;
   color:  #fff;
-}
-.on .words-list .list {
-  -webkit-column-count: 5;
-  -webkit-column-rule: 1px solid #ccc;
-  overflow: hidden;
 }
 
 .images-list img {
