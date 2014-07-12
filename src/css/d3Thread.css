@@ -35,6 +35,15 @@ body {
   background-image: url(/img/graphy.png);
   opacity: .5;
 }
+
+#chart {
+  transition: -webkit-transform .5s linear, opacity .5s linear;
+}
+.interaction #chart {
+  pointer-events: none;
+  opacity: 0;
+}
+
 #chart-focus g {
   transition: -webkit-transform .5s linear, opacity .5s linear;
 }
@@ -52,9 +61,15 @@ body {
   transition: opacity .2s linear, stroke .5s linear;
 }
 
-.tree #chart-links path {
-  
+#d3-chart-interaction {
+  pointer-events: none;
+  transition: opacity .5s linear;
 }
+
+.interaction #d3-chart-interaction {
+  pointer-events: auto;
+}
+
 .timeline #chart-links path {
   stroke-dasharray: 5;
   animation: dash 5s linear infinite;

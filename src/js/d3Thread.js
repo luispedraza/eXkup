@@ -11,7 +11,7 @@ function initThread(apiData) {
 	CONVERSATION = new Conversation(PROCESSOR.tree); // conversación: mensajes de la barra izquierda
 };
 
-var TEST = 2;
+var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -135,6 +135,16 @@ $("#chart-options .option").on("click", function() {
 	$("#chart-options .option").removeClass('on');
 	$this.toggleClass('on', !selected);
 	updateConfiguration();
+});
+
+
+var doResize;
+$(window).resize(function() {
+	clearTimeout(doResize);
+	doResize = setTimeout(function() {
+		VISUALIZER.updateGraph();
+		FREQUENCIES.updateGraph();
+	}, 1000);
 });
 
 /* Actualización de filtros */
