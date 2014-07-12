@@ -1,7 +1,7 @@
 body {
-  width: auto;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
   -webkit-box-sizing: border-box;
-  height: 1000px;
 }
 /*********************/
 /* Elementos del SVG */
@@ -10,7 +10,7 @@ body {
 #d3-chart {
   position: absolute;
   top: 0;
-  left: 450px;
+  left: 0;
   right: 0;
   bottom: 0;
 }
@@ -20,8 +20,8 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  top: 40px;
-  cursor: default;
+  top: 0;
+  /* cursor: default; */
 }
 #svg, .mask {
   position: absolute;
@@ -32,8 +32,8 @@ body {
 }
 #d3-chart-container .mask {
   pointer-events: none;
-  background-image: url(/img/graphy.png);
-  opacity: .5;
+  background-image: url(/img/graph-bkg.png);
+  opacity: .8;
 }
 
 #chart {
@@ -109,6 +109,7 @@ body {
 /******************/
 /* Elementos HTML */
 /******************/
+
 #switch.AND:before {
   content: "TODOS";
 }
@@ -116,23 +117,25 @@ body {
   content: "ALGUNO";
 }
 .expandable {
-  margin: 0;
-  background-color: rgba(255,255,255,1);
   overflow-y: scroll;
-  max-height: 100%;
-  position: fixed;
+  position: absolute;
   top: 0;
-  bottom: 0;
   font-size: 12px;
   -webkit-box-sizing: border-box;
-  border-right: 1px solid #ccc;
   overflow-x: hidden;
-  box-shadow: 0 0 15px rgba(100,100,100,.5);
-  transition: width .5s linear; 
+  transition: height .5s linear; 
+  /* background-color: rgba(255,255,255,.9); */
 }
+
+.expandable.on {
+  box-shadow: 0 0 15px rgba(100,100,100,.5);
+  /* box-shadow: 0 0 15px rgba(100,100,100,.5); */
+  background-color: rgba(255,255,255,.9);
+}
+
 #chart-messages {
   width: 300px;
-  left: 150px;
+  right: 0;
 }
 
 #chart-messages .msg-container {
@@ -226,39 +229,63 @@ body {
 }
 
 #chart-control {
-  width: 150px;
-  left:  0;
+  width: 500px;
+  left: 0;
 }
-h2.redtitle {
-  color: #fff;
-  background-color: #f30;
+.expandable h2.redtitle {
   margin: 0;
   padding: 10px;
   font-size: 14px;
   display: block;
   font-weight: bold;
   position: relative;
+  opacity: .2;
+  transition: all .2s ease;
+  cursor: pointer;
+}
+.expandable.on h2.redtitle, .expandable:hover h2.redtitle {
+  color: #fff;
+  background-color: #f30;
+  opacity: 1;
+}
+.expandable.on .expand:before, .expandable:hover .expand:before {
+  color: #fff;
+  background-color: #f30;
+  opacity: 1;
 }
 .expandable .expand {
   position: absolute;
-  background-color: #000;
+  font-size: 18px;
   right: 0;
   top: 0;
   bottom: 0;
-  padding: 10px;
-  cursor: pointer;
+  padding: 5px;
+}
+.expandable .expand:before {
+  transition: all .25s ease;
+  opacity: 0;
 }
 .expandable p {
   color: #666;
   font-size: 10px;
-  padding: 0 10px;
+  /* padding: 0 10px; */
 }
+
 .expandable.on .expand:before {
   -webkit-transform: rotate(180deg);
 }
+.expandable .content {
+  height: 0;
+  overflow: hidden;
+  padding: 0 10px;
+}
+.expandable.on .content {
+  height: auto;
+  padding: 10px;
+}
 
 .expandable > div {
-  padding: 0 10px;
+  /* padding: 0 10px; */
 }
 .expandable h3 {
   text-transform: uppercase;
@@ -445,6 +472,7 @@ h2.redtitle {
   left: 0;
   height: 250px;
   transition: opacity .5s linear;
+  overflow: hidden;
 }
 #d3-chart-container:not(.timeline) #d3-frequency {
   opacity: 0;
@@ -461,8 +489,8 @@ h2.redtitle {
 #chart-options {
   position: absolute;
   margin: 10px;
-  right: 0;
-  top: 30px;
+  right: 300px;
+  top: 0;
   border: 1px solid #ccc;
   padding: 10px;
   background-color: rgba(255,255,255,.9);

@@ -1,5 +1,4 @@
 var MESES = new Array("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre");
-var TIME_TOOLTIP_TIMER = null;	// tooltip para la fecha del mensaje
 
 var _PI = Math.PI;
 var _2_PI = 2*_PI;

@@ -28,12 +28,9 @@
 </head>
 <body id="conversation">
 	<div id="d3-chart">
-		<h2 class="redtitle fa fa-eye"> GRÁFICO</h2>
 		<div id="d3-chart-container">
-			<div id="d3-frequency">
-				<h2>Frecuencia (mensajes/hora)</h2>
-			</div>
-			<!-- <div class="mask"></div> -->
+			<div id="d3-frequency"></div>
+			<div class="mask"></div>
 		</div>
 	</div>
 	<div id="chart-options">
@@ -48,38 +45,44 @@
 		</div>
 	</div>
 
-	<div id="chart-messages" class="expandable" data-width="max">
-		<h2 class="redtitle fa fa-comments"> CONVERSACIÓN<div class="fa fa-chevron-right expand"></div></h2>
-		<div id="chart-output"></div>
+	<div id="chart-messages" class="expandable on">
+		<h2 class="redtitle fa fa-comments"> CONVERSACIÓN
+			<div class="fa fa-chevron-circle-down expand"></div>
+		</h2>
+		<div class="content">
+			<div id="chart-output"></div>
+		</div>
 	</div>
 	
-	<div id="chart-control" class="expandable" data-width="500px">
-		<h2 class="redtitle fa fa-sliders"> SELECCIÓN<div class="fa fa-chevron-right expand"></div></h2>
-		<p><b>SELECCIONA</b> los mensajes que cumplen con <b id="switch" class="OR"></b> de los siguientes criterios:</p>
-		<div class="users-list">
-			<h3>Usuarios (<span id="n-users"></span>)<span id="check-all-users" class="check"></span></h3>
-			<div class="list-head item">
-				<span id="sort-nickname" class="nickname sort-users fa fa-sort" data-field="nickname"> nickname</span>
-				<span class="color-picker"></span>
-				<span id="sort-nmessages" class="nmessages sort-users fa fa-sort" data-field="nMessages"> mensajes</span>
-				<span id="sort-ndeleted" class="ndeleted sort-users fa fa-sort" data-field="nDeleted"> borrados</span>
-				<span id="sort-nwords" class="nwords sort-users fa fa-sort" data-field="nWords"> palabras</span>
-				<span id="sort-nreplies" class="nreplies sort-users fa fa-sort" data-field="nReplies"> respuestas</span>
+	<div id="chart-control" class="expandable on">
+		<h2 class="redtitle fa fa-sliders"> SELECCIÓN<div class="fa fa-chevron-circle-down expand"></div></h2>
+		<div class="content">
+			<p><b>SELECCIONA</b> los mensajes que cumplen con <b id="switch" class="OR"></b> de los siguientes criterios:</p>
+			<div class="users-list">
+				<h3>Usuarios (<span id="n-users"></span>)<span id="check-all-users" class="check"></span></h3>
+				<div class="list-head item">
+					<span id="sort-nickname" class="nickname sort-users fa fa-sort" data-field="nickname"> nickname</span>
+					<span class="color-picker"></span>
+					<span id="sort-nmessages" class="nmessages sort-users fa fa-sort" data-field="nMessages"> mensajes</span>
+					<span id="sort-ndeleted" class="ndeleted sort-users fa fa-sort" data-field="nDeleted"> borrados</span>
+					<span id="sort-nwords" class="nwords sort-users fa fa-sort" data-field="nWords"> palabras</span>
+					<span id="sort-nreplies" class="nreplies sort-users fa fa-sort" data-field="nReplies"> respuestas</span>
+				</div>
+				<ul class="list"></ul>
 			</div>
-			<ul class="list"></ul>
-		</div>
-		<div class="words-list">
-			<h3>Top Palabras</h3>
-			<ol class="list columns"></ol>
-		</div>
-		<div class="images-list">
-			<h3>Imágenes</h3>
-			<ul class="list"></ul>
-		</div>
-		<div class="videos-list">
-			<h3>Vídeos</h3>
-			<ul class="list"></ul>
-		</div>
+			<div class="words-list">
+				<h3>Top Palabras</h3>
+				<ol class="list columns"></ol>
+			</div>
+			<div class="images-list">
+				<h3>Imágenes</h3>
+				<ul class="list"></ul>
+			</div>
+			<div class="videos-list">
+				<h3>Vídeos</h3>
+				<ul class="list"></ul>
+			</div>
+		</div>	<!-- content -->
 	</div>
 	<script type="text/javascript" src="js/d3Thread.js"></script>
 </body>

@@ -4,8 +4,7 @@ function onMessageEnter() {
 	$this.find(".author")
 		.on("click", onAuthorClick);
 	$this.find(".time")
-		.on("mouseover", onTimeMouseover)
-		.on("mouseout", onTimeMouseout);
+		.on("mouseenter", onTimeMouseEnter);
 	$this.find(".themes li")
 		.on("click", onThemeClick);
 	$control = $this.find(".msg_control");
@@ -17,51 +16,60 @@ function onMessageEnter() {
 		.on("click", onForwardMessageClick);
 	$control.find(".delete")
 		.on("click", onDeleteMessageClick);
-};
-/* Remueve los eventos de un mensaje */
-function onMessageExit() {
-	$this = $(this);
-	$this.find(".author")
-		.off("click");
-	$this.find(".time")
-		.off("mouseover")
-		.off("mouseout");
-	$this.find(".themes li")
-		.off("click");
-	$control = $this.find(".msg_control");
-	$control.find(".fav")
-		.off("click");
-	$control.find(".reply")
-		.off("click");
-	$control.find(".fwd")
-		.off("click");
-	$control.find(".delete")
-		.off("click");
+	$this.on("mouseleave", function() {
+		$thiz = $(this);
+		$thiz.find(".author")
+			.off("click");
+		$thiz.find(".time")
+			.off("mouseenter");
+		$thiz.find(".themes li")
+			.off("click");
+		$control = $thiz.find(".msg_control");
+		$control.find(".fav")
+			.off("click");
+		$control.find(".reply")
+			.off("click");
+		$control.find(".fwd")
+			.off("click");
+		$control.find(".delete")
+			.off("click");
+		$thiz.off("mouseleave");
+	});
 };
 
 /* Función que se ejecuta al hacer click en un elemento de la lista de temas */
-function onThemeClick() {
-	loadBoard($(this).attr("data-theme"));
+function onThemeClick(e) {
+	e.stopPropagation();
+	$("body").trigger("loadBoard", this.getAttribute("data-theme"));
+};
+/* Función que se ejecuta al mostrar el thread al que pertenece un mensaje */
+function onShowThreadClick(e) {
+	e.stopPropagation();
+	$("body").trigger("loadBoard", [null, 
+		this.getAttribute("data-thread"), 
+		$(this).closest(".message").attr("data-id")]);
 };
 
 /* Función que se ejecuta al hacer click en el autor de un mensaje */
-function onAuthorClick() {
-	loadBoard("t1-" + this.getAttribute("data-user"));
+function onAuthorClick(e) {
+	e.stopPropagation();
+	$("body").trigger("loadBoard", "t1-" + this.getAttribute("data-user"));
 };
 /* Función que se ejecuta al pasar el cursor sobre la fecha de publicación */
-function onTimeMouseover() {
+function onTimeMouseEnter() {
 	var $this = $(this);
-	TIME_TOOLTIP_TIMER = setTimeout(function() {
+	window._timeTooltipTimer = setTimeout(function() {
 		var date = new Date(parseInt($this.attr("data-ts")));
 		$this.append($("<span>").addClass('time-tooltip')
 			.append($("<span>").text(formatDate(date, true)))
 			.append($("<span>").text(date.toLocaleTimeString())));
 	}, 500);
+	$this.on("mouseout", function() {
+		clearTimeout(window._timeTooltipTimer);
+		$(this).find(".time-tooltip").remove();
+	});
 };
-function onTimeMouseout() {
-	clearTimeout(TIME_TOOLTIP_TIMER);
-	$(this).find(".time-tooltip").remove();
-};
+
 /* Functión que se ejecuta al hacer click en el nombre del autor al que se responde */
 function onReplyClick() {
 	var $this = $(this);
@@ -75,7 +83,8 @@ function onReplyClick() {
 	});
 };
 /* Agrega o elimina un mensaje de la lista de favoritos */
-function onAddFavoriteClick() {
+function onAddFavoriteClick(e) {
+	e.stopPropagation();
 	var $favBtn = $(this),
 		$msg = $favBtn.closest('.message'),
 		m_id = $msg.attr("data-id");	// id del mensaje
@@ -126,10 +135,7 @@ function onForwardMessageClick() {
 	var mID = $(this).closest('.message').attr("data-id");
 	showEditor({command: "forward", mID: mID});
 };
-/* Función que se ejecuta al mostrar el thread al que pertenece un mensaje */
-function onShowThreadClick() {
-	loadBoard(null, this.getAttribute("data-thread"), $(this).closest(".message").attr("data-id"));
-};
+
 /* Función que se ejecuta al hacer click en el enlace al mensaje reenviados */
 function onForwardedMessageClick() {
 	var $this = $(this);
@@ -170,4 +176,3 @@ function onDeleteMessageClick() {
 			});
 		});
 };
-

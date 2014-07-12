@@ -11,7 +11,7 @@ function initThread(apiData) {
 	CONVERSATION = new Conversation(PROCESSOR.tree); // conversación: mensajes de la barra izquierda
 };
 
-var TEST = 1;
+// var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -99,16 +99,8 @@ $("#check-all-users").on("click", function() {
 });
 // Ordenación de usuarios:
 $("#chart-control .sort-users").on("click", sortUsers);
-$(".expand").on("click", function() {
+$(".expandable h2").on("click", function() {
 	var $expandable = $(this).closest(".expandable").toggleClass('on');
-	var newSize = "";
-	if ($expandable.hasClass('on')) {
-		var newSize = $expandable.attr("data-width");
-		if (newSize=="max") {
-			newSize = (window.innerWidth - $expandable.offset().left - 20) + "px";
-		};
-	};
-	$expandable.css("width", newSize);
 });
 
 function updateConfiguration() {
@@ -137,11 +129,9 @@ $("#chart-options .option").on("click", function() {
 	updateConfiguration();
 });
 
-
-var doResize;
 $(window).resize(function() {
-	clearTimeout(doResize);
-	doResize = setTimeout(function() {
+	clearTimeout(window.doResize);
+	window.doResize = setTimeout(function() {
 		VISUALIZER.updateGraph();
 		FREQUENCIES.updateGraph();
 	}, 1000);

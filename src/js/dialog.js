@@ -85,7 +85,10 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 	};
 	// cerrar el modal cuando se hace click fuera de la ventana 
 	$modal.on("click", function(e) {
-		if (e.target.className == "modal") removeDialog();
+		if (e.target.className == "modal"){
+			removeDialog();
+			if (callback) callback();	
+		};
 	});
 	// Algunos elementos del contenido pueden cerrar el diálogo (independientemente de que tengan otros eventos asociados)
 	$modal.find(".close-on-click").on("click", removeDialog);
