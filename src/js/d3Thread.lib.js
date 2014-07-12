@@ -718,7 +718,7 @@ function TalkVisualizer(containerID, processor) {
 			.each(function(l) {
 				var thiz = d3.select(this);
 				if ((conversation.indexOf(l.target)>=0) && (conversation.indexOf(l.source)>=0)) {
-					thiz.style("stroke-width", LINK_WIDTH*4)
+					thiz.style("stroke-width", LINK_WIDTH*20)
 						.style("stroke", "#f30");
 				};
 			});
@@ -920,11 +920,12 @@ function TalkVisualizer(containerID, processor) {
 		var users = interaction.users;
 		var matrix = interaction.matrix;
 		var nMessages = sumArray(matrix);
+		var rect = getBoundingRect();
 		if (!chord_index_array) {
 			chord_index_array = initArray(users.length, users.length, null);
 		};
 		CHORD.matrix(matrix);
-		var outerRadius = _MIN(width, height)/2 - margin;
+		var outerRadius = _MIN(rect.width, rect.height)/2 - margin;
 		var innerRadius = outerRadius*.8;
 		var arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius);
 		var fChord = d3.svg.chord().radius(innerRadius);
@@ -1258,7 +1259,7 @@ function FrequencyVisualizer(element, processor) {
 	var graph = new Rickshaw.Graph({
 		element: container,
 		series: [{
-			color: "lightblue",
+			color: "rgba(112, 230, 214, 0.5)",
 			data: [],
 			name: "Mensajes/h"
 		}]

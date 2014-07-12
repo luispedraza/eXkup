@@ -51,6 +51,9 @@ body {
 .node {
   transition: -webkit-transform .5s linear, opacity .5s linear;
 }
+.graph .node {
+  transition: opacity .5s linear; 
+}
 .node rect {
   stroke: #fff;
   cursor: pointer;
@@ -63,11 +66,13 @@ body {
 
 #d3-chart-interaction {
   pointer-events: none;
-  transition: opacity .5s linear;
+  opacity: 0;
+  transition: -webkit-transform .5s linear, opacity .5s linear;
 }
 
 .interaction #d3-chart-interaction {
   pointer-events: auto;
+  opacity: 1;
 }
 
 .timeline #chart-links path {
