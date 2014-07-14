@@ -32,7 +32,7 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 					setTimeout(function() {
 						if (currentIteration>iterations) {
 							callbackEnd();
-							removeDialog();
+							// removeDialog();
 						} else {
 							var initial = currentIteration*span;
 							dataArray.slice(initial, initial+span).forEach(callbackItem);

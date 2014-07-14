@@ -981,5 +981,6 @@ $(function() {
 			popup.loadBoard(id, threadID, originalMsgID);
 		});
 	});
+	
 });
 

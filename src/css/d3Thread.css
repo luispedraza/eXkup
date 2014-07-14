@@ -48,20 +48,20 @@ body {
   transition: -webkit-transform .5s linear, opacity .5s linear;
 }
 
-.node {
+#chart-nodes g {
   transition: -webkit-transform .5s linear, opacity .5s linear;
 }
-.graph .node {
+.graph #chart-nodes g {
   transition: opacity .5s linear; 
 }
-.node rect {
+#chart-nodes rect {
   stroke: #fff;
   cursor: pointer;
 }
 #chart-links path {
   fill: none;
-  stroke: #ccc;
-  transition: opacity .2s linear, stroke .5s linear;
+  stroke: #666;
+  transition: opacity .2s linear;
 }
 
 #d3-chart-interaction {
@@ -76,14 +76,15 @@ body {
 }
 
 .timeline #chart-links path {
-  stroke-dasharray: 5;
-  animation: dash 5s linear infinite;
+  stroke-dasharray: 5,2;
+  stroke: #ccc;
+  /*animation: dash 5s linear infinite;*/
 }
-@keyframes dash {
+/*@keyframes dash {
   to {
     stroke-dashoffset: -100;
   }
-}
+}*/
 .graph #chart-links path {
   
 }
@@ -97,7 +98,7 @@ body {
   fill: transparent;
 }
 #chart:hover .fade {
-  opacity: .2;
+  opacity: .1;
 }
 
 #d3-chart-interaction .chord, #d3-chart-interaction .user {
@@ -117,19 +118,19 @@ body {
   content: "ALGUNO";
 }
 .expandable {
+  margin: 10px;
   position: absolute;
   top: 0;
   font-size: 12px;
-  -webkit-box-sizing: border-box;
-  overflow: visible;
-  transition: height .5s linear; 
-  /* background-color: rgba(255,255,255,.9); */
+  transition: height .5s linear, opacity .5s linear; 
+  overflow: hidden;
+  opacity: .2;
 }
 
-.expandable.on {
+.expandable:hover {
   box-shadow: 0 0 15px rgba(100,100,100,.5);
   background-color: rgba(255,255,255,.9);
-  bottom: 0;
+  opacity: 1;
 }
 
 #chart-messages {
@@ -228,12 +229,15 @@ body {
 }
 
 #chart-control {
-  width: 500px;
   left: 0;
+  width: 120px;
+}
+#chart-control:hover {
+  width: 500px;
 }
 #chart-control .section {
   border-top: 1px dotted #ccc;
-  height: 150px;
+  height: 26px;
   overflow: hidden;
   transition: height .5s ease;
 }
@@ -241,59 +245,26 @@ body {
   height: 250px;
   overflow: hidden;
 }
-.expandable h2.redtitle {
+.expandable h2 {
   margin: 0;
   padding: 10px;
   font-size: 14px;
   display: block;
   font-weight: bold;
-  position: relative;
-  opacity: .2;
-  transition: all .2s ease;
-  cursor: pointer;
 }
-.expandable.on h2.redtitle, .expandable:hover h2.redtitle {
-  color: #fff;
-  background-color: #f30;
-  opacity: 1;
-}
-.expandable.on .expand:before, .expandable:hover .expand:before {
-  color: #fff;
-  background-color: #f30;
-  opacity: 1;
-}
-.expandable .expand {
-  position: absolute;
-  font-size: 18px;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  padding: 5px;
-}
-.expandable .expand:before {
-  transition: all .25s ease;
-  opacity: 0;
-}
+
 .expandable p {
   color: #666;
   font-size: 10px;
-  /* padding: 0 10px; */
 }
 
-.expandable.on .expand:before {
-  -webkit-transform: rotate(180deg);
-}
 .expandable .content {
   height: 0;
-  padding: 10px;
-  opacity: 0;
-  transition: opacity .5s ease;
-  pointer-events: none;
+  padding: 0 10px;
 }
-.expandable.on .content {
+.expandable:hover .content {
   height: auto;
-  opacity: 1;
-  pointer-events: auto;
+  padding: 10px;
 }
 
 .expandable > div {
@@ -400,7 +371,7 @@ body {
   text-align: center;
 }
 .expandable .list {
-  max-height: 180px;
+  max-height: 220px;
   overflow-y:scroll;
   margin: 0;
   padding: 0;
@@ -429,7 +400,7 @@ body {
 
 /* palabras */
 .words-list .word {
-  font-size: 10px;
+  /* font-size: 10px; */
   text-transform: uppercase;
   overflow: hidden;   
   white-space: nowrap;   
@@ -442,26 +413,29 @@ body {
 }
 .words-list .list {
   counter-reset: nwords;
-    -webkit-column-count: 5;
+    
+  -webkit-column-count: 4;
   -webkit-column-rule: 1px solid #ccc;
   overflow: hidden;
+  font-size: 11px;
 }
 .words-list li:before {
   content: counter(nwords, decimal-leading-zero);
-  font-size: 8px;
   counter-increment: nwords;
-  /* background-color: #aaa; */
   padding: 2px;
-  /* color: #666; */
   width: 10px;
   height: 10px;
   margin-right: 2px;
+  color: #666;
 }
-.words-list li.on:before, .words-list li.on:hover:before {
+.words-list li.on, .words-list li.on:hover {
   background-color: #f30;
   color:  #fff;
 }
-
+.words-list li.on:before {
+  background-color: #fff;
+  color: #666;
+}
 .images-list img {
   height: 100px;
   margin-right: 5px;
@@ -499,19 +473,20 @@ body {
 #chart-options {
   position: absolute;
   margin: 10px;
-  right: 300px;
+  left: 300px;
   top: 0;
-  border: 1px solid #ccc;
   padding: 10px;
-  background-color: rgba(255,255,255,.9);
-  font-size: 12px;
+  font-size: 10px;
   color:  #666;
-  box-shadow: 0 1px 2px #d9d9d9;
   opacity: .3;
   transition: opacity .25s linear;
+  border: 1px solid transparent;
 }
 #chart-options:hover {
   opacity: 1;
+  background-color: rgba(255,255,255,.9);
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 2px #d9d9d9;
 }
 .options {
   margin-top: 5px;
@@ -524,7 +499,7 @@ body {
 }
 .layout, .option {
   display: inline-block;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 .option {
     vertical-align: middle;
@@ -534,6 +509,7 @@ body {
   position: relative;
   padding-left: 20px;
   cursor: pointer;
+  vertical-align: middle;
 }
 #conversation .radio:not(:first-child) {
   margin-left: 10px;
@@ -564,4 +540,24 @@ body {
 }
 #conversation .radio.on:after {
   opacity: 1;
+}
+
+
+/* Selector de rango */
+.range {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+.brush .background {
+  fill: rgba(204, 158, 59, .1);
+}
+.range .extent {
+  fill: rgba(204, 158, 59, .1);
+}
+.range .resize {
+  fill: #ccc;
+  cursor: pointer;
 }

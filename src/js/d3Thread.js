@@ -1,3 +1,4 @@
+var MARGIN = 60;	// marge estándar para los gráficos
 var PROCESSOR = null;
 var VISUALIZER = null;
 var FREQUENCIES = null;
@@ -5,13 +6,13 @@ var CONVERSATION = null;
 
 function initThread(apiData) {
 	PROCESSOR = new DataProcessor(apiData);
-	FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR);
-	VISUALIZER = new TalkVisualizer("#d3-chart-container", PROCESSOR);
-	populateController(PROCESSOR);
+	FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR, MARGIN);
+	VISUALIZER = new TalkVisualizer("#d3-chart-container", PROCESSOR, MARGIN);
 	CONVERSATION = new Conversation(PROCESSOR.tree); // conversación: mensajes de la barra izquierda
+	populateController(PROCESSOR);
 };
 
-var TEST = 2;
+var TEST = 3;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -58,6 +59,13 @@ function dispatchConversation(message) {
 	document.body.dispatchEvent(e);
 };
 
+function dispatchTimeRange(range) {
+	var e = document.createEvent("CustomEvent");
+	var detail = {'range': range};
+	e.initCustomEvent("timeRange", false, false, detail);
+	document.body.dispatchEvent(e);
+};
+
 /* Configuración de las opciones del gráfico */
 function updateSelector() {
 	var selID = $("#chart-options .layout.on").attr("id");
@@ -99,10 +107,8 @@ $("#check-all-users").on("click", function() {
 });
 // Ordenación de usuarios:
 $("#chart-control .sort-users").on("click", sortUsers);
-$(".expandable h2").on("click", function() {
-	var $expandable = $(this).closest(".expandable").toggleClass('on');
-});
 
+$(".expandable").draggable();
 function updateConfiguration() {
 	var layoutID = $("#chart-options .layout.on").attr("id");
 	var layout = layoutID.split("-")[1];
@@ -113,6 +119,7 @@ function updateConfiguration() {
 	VISUALIZER.config({layout: layout, options: options});
 };
 
+$("#chart-options").draggable();
 $("#chart-options .layout").on("click", function() {
 	var $this = $(this);
 	if ($this.hasClass('on')) return;
@@ -148,5 +155,11 @@ document.body.addEventListener("updateSelection", function(e) {
 document.body.addEventListener("conversation", function(e) {
 	var message = e.detail.message;
 	CONVERSATION.expand(message);
+});
+/* Selección de un nuevo rango de tiempo */
+/* Selección de conversación */
+document.body.addEventListener("timeRange", function(e) {
+	var range = e.detail.range;
+	VISUALIZER.selectTimeRange(range);
 });
 
