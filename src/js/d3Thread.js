@@ -12,7 +12,7 @@ function initThread(apiData) {
 	populateController(PROCESSOR);
 };
 
-var TEST = 3;
+var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;

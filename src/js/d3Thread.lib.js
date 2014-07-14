@@ -559,7 +559,6 @@ function TalkVisualizer(containerID, processor, margin) {
 			.attr("width", 20000)
 			.attr("height", 20000);
 	};
-
 	/* zoom behavior: */
 	function zoomAction() {
 		var vector = d3.event.translate;
@@ -620,9 +619,9 @@ function TalkVisualizer(containerID, processor, margin) {
 	var chartNodes = chart.append("g").attr("id", "chart-nodes");	// grupo para los nodos 
 
 	var chartInteraction = svg.append("g").attr("id", "d3-chart-interaction");
-
+	var timelineScale = d3.scale.linear();
 	var nodes, links, authorFocus;
-
+	var WIDTH, HEIGHT;	// ancho y alto del elemento contenedor
 	/* Configuración del layout de la visualización 
 	{	layout: tree, timeline, graph, interaction,
 		options: group-user
@@ -632,7 +631,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		/* Configuración de los focos del grafo */
 		function configureFocus(options) {
 			authorFocus = [];
-			FORCE.size([width, height]);
+			FORCE.size([WIDTH, HEIGHT]);
 			if (options.length==0) return;	// no hay configuración de focos 
 			selectedAuthors = processor.usersArray.filter(function(u) {
 				return u.selected;
@@ -652,7 +651,7 @@ function TalkVisualizer(containerID, processor, margin) {
 				});
 			} else {
 				var focusPadding = 100;		// espacio entre elementos
-				var N = _FLOOR((width-2*margin) / focusPadding);		// elementos por cada fila
+				var N = _FLOOR((WIDTH-2*margin) / focusPadding);		// elementos por cada fila
 				if (options[0]=="group-author") {
 					authorFocus = selectedAuthors;
 				} else if (options[0]=="group-replied") {
@@ -671,8 +670,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		LAYOUT_TYPE = configuration.layout || "tree";
 		LAYOUT_OPTIONS = configuration.options || {"group-author": false};
 		FORCE.stop();
-		var rect = getBoundingRect();
-		var center = [rect.width/2, rect.height/2];
+		var center = [WIDTH/2, HEIGHT/2];
 		var chartPosition = [center.x,center.y];
 
 		if (LAYOUT_TYPE=="interaction") {
@@ -682,7 +680,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		} else {
 			chartInteraction.style("-webkit-transform", d3Translate3D(center) + d3Scale(0));
 			if (LAYOUT_TYPE=="tree") {
-				LAYOUT.size([_2_PI, _MIN(rect.width, rect.height)/2-margin]);
+				LAYOUT.size([_2_PI, _MIN(WIDTH, HEIGHT)/2-margin]);
 				chart.style("-webkit-transform", d3Translate3D(center) + d3Scale(1));
 				ZOOM.on("zoom", zoomAction);
 			} else if (LAYOUT_TYPE=="timeline") {
@@ -690,7 +688,7 @@ function TalkVisualizer(containerID, processor, margin) {
 				chart.style("-webkit-transform", d3Translate3D([0,0]) + d3Scale(1));
 				ZOOM.on("zoom", zoomActionTimeline);
 			} else if (LAYOUT_TYPE=="graph") {
-				FORCE.size([rect.width, rect.height]);
+				FORCE.size([WIDTH, HEIGHT]);
 				chart.style("-webkit-transform", d3Translate3D([0,0]) + d3Scale(1));
 				ZOOM.on("zoom", zoomAction);
 			};
@@ -780,6 +778,21 @@ function TalkVisualizer(containerID, processor, margin) {
 			.transition().delay(DEFAULT_DURATION)
 			.remove();
 	};
+
+	/* Actualización de límites temporales */
+	function updateTimeRange() {
+		var range = chart.selectAll("g.resize")
+			.data(TS_RANGE);
+		range.enter().append("g")
+			.attr("class", "resize")
+			.style("-webkit-transform", function(d) {
+				return d3Translate3D([d,0]);
+			})
+			.append("rect")
+			.attr({"x": -2, "y": 0, "width": 4, "height": height});
+
+	};
+
 	/* Actualización de los nodos: mensajes */
 	function updateNodes() {
 		var node = chartNodes.selectAll("g")
@@ -920,12 +933,11 @@ function TalkVisualizer(containerID, processor, margin) {
 		var users = interaction.users;
 		var matrix = interaction.matrix;
 		var nMessages = sumArray(matrix);
-		var rect = getBoundingRect();
 		if (!chord_index_array) {
 			chord_index_array = initArray(users.length, users.length, null);
 		};
 		CHORD.matrix(matrix);
-		var outerRadius = _MIN(rect.width, rect.height)/2 - margin;
+		var outerRadius = _MIN(WIDTH, HEIGHT)/2 - margin;
 		var innerRadius = outerRadius*.8;
 		var arc = d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius);
 		var fChord = d3.svg.chord().radius(innerRadius);
@@ -1021,13 +1033,10 @@ function TalkVisualizer(containerID, processor, margin) {
 			});
 		};
 		function computeTreePositionsGrouped(groups) {
-			var rect = getBoundingRect(),
-				width = rect.width,
-				height = rect.height;
 			var nodes = [];
 			var N = groups.length;
 			var angStep = _2_PI/N;
-			var R0 = _MIN(width, height)/2 - margin;
+			var R0 = _MIN(WIDTH, HEIGHT)/2 - margin;
 			var R = R0 - 25;
 			groups.forEach(function(g,i) {
 				var rStep = _MIN(15, (R-100)/g.children.length);
@@ -1046,23 +1055,15 @@ function TalkVisualizer(containerID, processor, margin) {
 			return nodes;
 		};
 		function computeTimelinePositions(nodes) {
-			
-			var rect = getBoundingRect(),
-				width = rect.width,
-				height = rect.height;
-			var ts = d3.scale.linear().domain(TS_RANGE).range([margin,width-margin]);
 			nodes.forEach(function(node) {
 				node.y = margin + height*node.x/100;
-				node.x = ts(node.tsMensaje);
+				node.x = timelineScale(node.tsMensaje);
 			});
 		};
 		function computeTimelinePositionsGrouped(groups) {
-			var rect = getBoundingRect(),
-				width = rect.width,
-				height = rect.height;
 			var nodes = [];
 			var vStep = 20;
-			var ts = d3.scale.linear().domain(TS_RANGE).range([margin,width-margin]);
+			var ts = d3.scale.linear().domain(TS_RANGE).range([margin,WIDTH-margin]);
 			groups.forEach(function(g,i) {
 				var y = margin + i*vStep;
 				g.x = 15;
@@ -1088,6 +1089,12 @@ function TalkVisualizer(containerID, processor, margin) {
 			computeNode(node);
 			return result;
 		};
+		/* Algunas actualizaciones globales */
+		var rect = getBoundingRect();
+		WIDTH = rect.width;
+		HEIGHT = rect.height;
+		timelineScale.domain(TS_RANGE).range([margin,WIDTH-margin]);
+
 		if (LAYOUT_TYPE=="graph") {
 			diagonal = function(d) { return line([d.source, d.target]); };
 			nodes = computeForceInitial(root);
@@ -1142,6 +1149,7 @@ function TalkVisualizer(containerID, processor, margin) {
 			updateFocus();
 			updateNodes();
 			updateTreeLinks();
+			updateTimeRange();	// extremos del intervalo temporal
 		};
 		document.getElementById("svg").setCurrentTime(0);
 		TOC(true);
