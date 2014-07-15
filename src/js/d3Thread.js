@@ -7,12 +7,12 @@ var CONVERSATION = null;
 function initThread(apiData) {
 	PROCESSOR = new DataProcessor(apiData);
 	FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR, MARGIN);
-	VISUALIZER = new TalkVisualizer("#d3-chart-container", PROCESSOR, MARGIN);
+	VISUALIZER = new TalkVisualizer("#d3-chart", PROCESSOR, MARGIN);
 	CONVERSATION = new Conversation(PROCESSOR.tree); // conversación: mensajes de la barra izquierda
 	populateController(PROCESSOR);
 };
 
-var TEST = 3;
+var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;

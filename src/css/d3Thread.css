@@ -7,7 +7,7 @@ body {
 /* Elementos del SVG */
 /*********************/
 
-#d3-chart {
+#d3-chart, svg, .mask {
   position: absolute;
   top: 0;
   left: 0;
@@ -15,22 +15,7 @@ body {
   bottom: 0;
 }
 
-#d3-chart-container {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  /* cursor: default; */
-}
-#svg, .mask {
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-}
-#d3-chart-container .mask {
+.mask {
   pointer-events: none;
   background-image: url(/img/graph-bkg.png);
   opacity: .8;
@@ -44,20 +29,6 @@ body {
   opacity: 0;
 }
 
-#chart-focus g {
-  /*transition: -webkit-transform .5s linear, opacity .5s linear;*/
-}
-
-#chart-nodes g {
-/*  transition-property: -webkit-transform, opacity;
-  transition-duration: .5s;
-  transition-timing-function: linear;*/
-}
-
-.graph #chart-nodes g {
-  transition: opacity .5s linear;
-}
-
 #chart-nodes rect {
   stroke: #fff;
   cursor: pointer;
@@ -65,6 +36,7 @@ body {
 #chart-links path {
   fill: none;
   stroke: #666;
+  /*transition: stroke-path .5s linear;*/
 }
 
 #d3-chart-interaction {
@@ -83,18 +55,26 @@ body {
   stroke: #ccc;
   /*animation: dash 5s linear infinite;*/
 }
+
 /*@keyframes dash {
   to {
     stroke-dashoffset: -100;
   }
 }*/
-.graph #chart-links path {
-  
-}
 
 #chart-links path.select {
   stroke: #34ffc0 !important;
   opacity: 1 !important;
+}
+
+#svg .resize {
+  transition: opacity .5s linear;
+  fill: #ccc;
+  opacity: 0;
+}
+
+.timeline #svg .resize {
+  opacity: 1;
 }
 
 #chart .background {
@@ -104,9 +84,6 @@ body {
   opacity: .1;
 }
 
-#d3-chart-interaction .chord, #d3-chart-interaction .user {
-  /*transition: opacity .5s linear;*/
-}
 #d3-chart-interaction:hover .fade {
   opacity: .1 !important;
 }
@@ -459,12 +436,15 @@ body {
   left: 0;
   height: 250px;
   transition: opacity .5s linear;
-  overflow: hidden;
-}
-#d3-chart-container:not(.timeline) #d3-frequency {
   opacity: 0;
+  overflow: hidden;
   pointer-events: none;
 }
+.timeline #d3-frequency {
+  opacity: 1;
+  pointer-events: auto; 
+}
+
 #d3-frequency h2 {
   margin: 5px;
   color: #666;

@@ -524,8 +524,8 @@ function TalkVisualizer(containerID, processor, margin) {
 		author_index = 0,	// focos de autores (grafo)
 		chord_index = 0,
 		chord_index_array = null;	// almacena los índices de las cuerdas, ha de ser inicializado
-		DEFAULT_DURATION = 1000,
-	    DURATION = DEFAULT_DURATION;
+		DURATION_LONG = 1000,
+		DURATION_SHORT = 500;
 	var diagonal = null;	// función de pintado de los links
 	var diagonalTree = d3.svg.diagonal.radial()
 		.source(function(d) {return {x: d.source.ang, y: d.source.r}})
@@ -590,14 +590,18 @@ function TalkVisualizer(containerID, processor, margin) {
 	};
 
 	function onZoomEnd() {
+		console.log("zoomend");
 		var scale = ZOOM.scale();
 		LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
-		var newScale = d3Scale(1/scale);
-		chartNodes.selectAll(".node")
-			.style("-webkit-transform", function(d) {return d3TranslateNode3D(d) + newScale;});
+		ANTI_ZOOM_SCALE = d3Scale(1/scale);
+		chartNodes.selectAll("g")
+			.transition().duration(DURATION_SHORT)
+			.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
 		chartFocus.selectAll("g")
-			.style("-webkit-transform", function(d) {return d3TranslateNode3D(d) + newScale;});
+			.transition().duration(DURATION_SHORT)
+			.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
 		chartLinks.selectAll("path")
+			.transition().duration(DURATION_SHORT)
 			.style("stroke-width", LINK_WIDTH);
 	};
 	// var ___COUNT___ = 0;
@@ -624,7 +628,7 @@ function TalkVisualizer(containerID, processor, margin) {
 	var RECT = getBoundingRect(),
 		WIDTH = RECT.width,
 		HEIGHT = RECT.height;
-		console.log(RECT);
+	var ANTI_ZOOM_SCALE = d3Scale(1);
 	/* Configuración del layout de la visualización 
 	{	layout: tree, timeline, graph, interaction,
 		options: group-user
@@ -674,8 +678,6 @@ function TalkVisualizer(containerID, processor, margin) {
 		LAYOUT_OPTIONS = configuration.options || {"group-author": false};
 		FORCE.stop();
 		var center = [WIDTH/2, HEIGHT/2];
-
-		console.log(center);
 		var chartPosition = [center.x,center.y];
 
 		if (LAYOUT_TYPE=="interaction") {
@@ -734,7 +736,7 @@ function TalkVisualizer(containerID, processor, margin) {
 			})
 			.on("mouseleave", function(p) {
 				d3.selectAll("#chart-links path")
-					.transition().delay(500).duration(DEFAULT_DURATION)
+					.transition().delay(500).duration(DURATION_SHORT)
 					.style("stroke-width", LINK_WIDTH)
 					.style("stroke", null);
 			});
@@ -753,8 +755,8 @@ function TalkVisualizer(containerID, processor, margin) {
 		// 		m.y += (author.y - m.y) * k;
 		// 	});
 		// };
-		updateNodes();
-		updateTreeLinks();
+		updateNodes(false);
+		updateTreeLinks(false);
 	};
 	/* Visualización de los focos del grafo, cuandod hay agrupación */
 	function updateFocus() {
@@ -762,31 +764,32 @@ function TalkVisualizer(containerID, processor, margin) {
 		var f_author = chartFocus.selectAll("g")
 		  	.data(authorFocus, function(d) { return d.graph_id || (d.graph_id = ++author_index); });
 		var f_authorEnter = f_author.enter().append("g")
-			.style("-webkit-transform", d3TranslateNode3D)
+			.style("opacity", 0)
+			.attr("transform", d3TranslateNode)
 			.on("mouseenter", filterUserInteraction)	// filtrado de interacciones
 			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
 		f_authorEnter.append("image")
-			.attr("xlink:href", function(d) {return checkUserPhoto(d.pathfoto);})
-			.attr("x", -10)
-			.attr("y", -10)
-			.attr("width", 20)
-			.attr("height", 20)
+			.attr({
+				"xlink:href": function(d) {return checkUserPhoto(d.pathfoto);},
+				"x": -10, "y": -10, "width": 20, "height": 20})
 			.on("mouseenter", function (d) {
 				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY,
 					$("<div>").text("@" + d.nickname));
 			});
 		// update:
-		f_author.style("-webkit-transform", d3TranslateNode3D)
+		f_author.transition().duration(DURATION_LONG)
+			.style("opacity", 1)
+			.attr("transform", d3TranslateNode);
 		// exit:
 		f_author.exit()
+			.transition().duration(DURATION_LONG)
 			.style("opacity", 0)
-			.transition().delay(DEFAULT_DURATION)
 			.remove();
 	};
 
 	/* Actualización de límites temporales */
 	function updateTimeRange() {
-		var range = chart.selectAll("g.resize")
+		var range = d3.select("#svg").selectAll("g.resize")
 			.data(TS_RANGE);
 		range.enter().append("g")
 			.attr("class", "resize")
@@ -802,6 +805,7 @@ function TalkVisualizer(containerID, processor, margin) {
 
 	/* Actualización de los nodos: mensajes */
 	function updateNodes(animate) {
+		if (typeof animate === "undefined") animate = true;
 		var node = chartNodes.selectAll("g")
 		  	.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
 		var nodeEnter = node.enter().append("g")
@@ -820,20 +824,25 @@ function TalkVisualizer(containerID, processor, margin) {
 			.attr({"x": -5, "y": -5, "width": 10, "height": 10})
 			.style("fill", getMsgColor);
 		// update:
-		var _delay = DURATION/node.size();
-		node.transition().duration(DURATION)
-			.delay(function(d){return d.id*_delay;})
+		var selection = node,
+			_delay = DURATION_LONG/node_index;
+		if (animate) {
+			selection = node.transition().duration(DURATION_LONG)
+				.delay(function(d) {return d.id*_delay;});
+		};
+		selection
 			// .style({"-webkit-transform": d3TranslateNode3D, "opacity": 1})
 			.style("opacity", 1)
 			.attr("transform", d3TranslateNode)
 			.select("rect").attr("fill", getMsgColor);
 		// exit:
-		node.exit().transition().duration(DURATION)
+		node.exit().transition().duration(DURATION_SHORT)
 			.style("opacity", 0)
 			.remove();
 	};
 	/* Actualización de links: enlaces entre mensajes */
-	function updateTreeLinks() {
+	function updateTreeLinks(animate) {
+		if (typeof animate === "undefined") animate = true;
 		// Muy interesante: http://stackoverflow.com/questions/10942013/smil-animations-fail-on-dynamically-loaded-external-svg
 		var link = chartLinks.selectAll("path")
 			.data(links, function(d) { return d.target.id; });
@@ -850,9 +859,13 @@ function TalkVisualizer(containerID, processor, margin) {
 			// 		this.parentNode.setAttribute("d", diagonal(d));
 			// 	});
 		// Transición a nueva posición
-		var _delay = DURATION/link.size();
-		link.transition().duration(DURATION)
-			.delay(function(d) {return d.target.id*_delay;})
+		var selection = link,
+			_delay = DURATION_LONG/node_index;
+		if (animate) {
+			selection = link.transition().duration(DURATION_LONG)
+				.delay(function(d) {return d.target.id*_delay;});
+		};
+		selection
 			// .select("animate")
 			// 	.attr("to", diagonal);
 			.attr("d", diagonal)
@@ -860,8 +873,8 @@ function TalkVisualizer(containerID, processor, margin) {
 
 		// Transition exiting nodes to the parent's new position.
 		link.exit()
+			.transition().duration(DURATION_SHORT)
 			.style("opacity", 0)
-			.transition().delay(DEFAULT_DURATION)
 			.remove();
 	};
 	/* Actualización del gráfico de interacciones */
@@ -1116,6 +1129,8 @@ function TalkVisualizer(containerID, processor, margin) {
 				.links(forceLinks)
 				.start();
 			updateFocus();
+			updateNodes(false);
+			updateTreeLinks(false);
 			// force.nodes(nodes).links(LAYOUT.links(nodes));
 		} else if (LAYOUT_TYPE=="interaction") {
 			updateInteraction();
@@ -1351,7 +1366,6 @@ function RangeSelector(element, domain) {
 	brushg.selectAll("rect")
 		.attr("height", height);
 	this.update = function() {
-		console.log("update");
 		rect = container.getBoundingClientRect();
 		width = rect.width;
 		xScale.range([0,width]);
