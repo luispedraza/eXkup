@@ -45,15 +45,19 @@ body {
 }
 
 #chart-focus g {
-  transition: -webkit-transform .5s linear, opacity .5s linear;
+  /*transition: -webkit-transform .5s linear, opacity .5s linear;*/
 }
 
 #chart-nodes g {
-  transition: -webkit-transform .5s linear, opacity .5s linear;
+/*  transition-property: -webkit-transform, opacity;
+  transition-duration: .5s;
+  transition-timing-function: linear;*/
 }
+
 .graph #chart-nodes g {
-  transition: opacity .5s linear; 
+  transition: opacity .5s linear;
 }
+
 #chart-nodes rect {
   stroke: #fff;
   cursor: pointer;
@@ -61,7 +65,6 @@ body {
 #chart-links path {
   fill: none;
   stroke: #666;
-  transition: opacity .2s linear;
 }
 
 #d3-chart-interaction {
@@ -76,7 +79,7 @@ body {
 }
 
 .timeline #chart-links path {
-  stroke-dasharray: 5,2;
+  /*stroke-dasharray: 5,2;*/
   stroke: #ccc;
   /*animation: dash 5s linear infinite;*/
 }
@@ -102,7 +105,7 @@ body {
 }
 
 #d3-chart-interaction .chord, #d3-chart-interaction .user {
-  transition: opacity .5s linear;
+  /*transition: opacity .5s linear;*/
 }
 #d3-chart-interaction:hover .fade {
   opacity: .1 !important;

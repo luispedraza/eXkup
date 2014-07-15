@@ -12,7 +12,7 @@ function initThread(apiData) {
 	populateController(PROCESSOR);
 };
 
-var TEST = 1;
+var TEST = 3;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -63,6 +63,12 @@ function dispatchTimeRange(range) {
 	var e = document.createEvent("CustomEvent");
 	var detail = {'range': range};
 	e.initCustomEvent("timeRange", false, false, detail);
+	document.body.dispatchEvent(e);
+};
+function dispatchTimeRangeMove(range) {
+	var e = document.createEvent("CustomEvent");
+	var detail = {'range': range};
+	e.initCustomEvent("timeRangeMove", false, false, detail);
 	document.body.dispatchEvent(e);
 };
 
@@ -161,5 +167,9 @@ document.body.addEventListener("conversation", function(e) {
 document.body.addEventListener("timeRange", function(e) {
 	var range = e.detail.range;
 	VISUALIZER.selectTimeRange(range);
+});
+document.body.addEventListener("timeRangeMove", function(e) {
+	var range = e.detail.range;
+	VISUALIZER.moveTimeRange(range);
 });
 

@@ -524,7 +524,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		author_index = 0,	// focos de autores (grafo)
 		chord_index = 0,
 		chord_index_array = null;	// almacena los índices de las cuerdas, ha de ser inicializado
-		DEFAULT_DURATION = 500,
+		DEFAULT_DURATION = 1000,
 	    DURATION = DEFAULT_DURATION;
 	var diagonal = null;	// función de pintado de los links
 	var diagonalTree = d3.svg.diagonal.radial()
@@ -621,7 +621,10 @@ function TalkVisualizer(containerID, processor, margin) {
 	var chartInteraction = svg.append("g").attr("id", "d3-chart-interaction");
 	var timelineScale = d3.scale.linear();
 	var nodes, links, authorFocus;
-	var WIDTH, HEIGHT;	// ancho y alto del elemento contenedor
+	var RECT = getBoundingRect(),
+		WIDTH = RECT.width,
+		HEIGHT = RECT.height;
+		console.log(RECT);
 	/* Configuración del layout de la visualización 
 	{	layout: tree, timeline, graph, interaction,
 		options: group-user
@@ -671,6 +674,8 @@ function TalkVisualizer(containerID, processor, margin) {
 		LAYOUT_OPTIONS = configuration.options || {"group-author": false};
 		FORCE.stop();
 		var center = [WIDTH/2, HEIGHT/2];
+
+		console.log(center);
 		var chartPosition = [center.x,center.y];
 
 		if (LAYOUT_TYPE=="interaction") {
@@ -786,21 +791,24 @@ function TalkVisualizer(containerID, processor, margin) {
 		range.enter().append("g")
 			.attr("class", "resize")
 			.style("-webkit-transform", function(d) {
-				return d3Translate3D([d,0]);
+				return d3Translate3D([timelineScale(d),0]);
 			})
 			.append("rect")
-			.attr({"x": -2, "y": 0, "width": 4, "height": height});
-
+			.attr({"x": -2, "y": 0, "width": 4, "height": HEIGHT});
+		range.style("-webkit-transform", function(d) {
+				return d3Translate3D([timelineScale(d),0]);
+			});
 	};
 
 	/* Actualización de los nodos: mensajes */
-	function updateNodes() {
+	function updateNodes(animate) {
 		var node = chartNodes.selectAll("g")
 		  	.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
 		var nodeEnter = node.enter().append("g")
 			.attr("class", function(d) { return "user-" + d.usuarioOrigen; })
-			.style("-webkit-transform", d3TranslateNode3D)
+			.attr("transform", d3TranslateNode)
 			.style("opacity", 0);
+			// .style({"transform": d3TranslateNode, "opacity": 0});
 			// .call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
 			// .on("click", clickOnNode)
 			// .on("mouseenter", function(d, e) {
@@ -808,22 +816,20 @@ function TalkVisualizer(containerID, processor, margin) {
 			// 	// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
 			// });
 			// .call(FORCE.drag);
-
 		nodeEnter.append("rect")
-			.attr("x",-5)
-			.attr("y",-5)
-			.attr("width",10)
-			.attr("height",10)
+			.attr({"x": -5, "y": -5, "width": 10, "height": 10})
 			.style("fill", getMsgColor);
 		// update:
-		node.style("-webkit-transform", d3TranslateNode3D)
-			.transition().delay(1)
+		var _delay = DURATION/node.size();
+		node.transition().duration(DURATION)
+			.delay(function(d){return d.id*_delay;})
+			// .style({"-webkit-transform": d3TranslateNode3D, "opacity": 1})
 			.style("opacity", 1)
+			.attr("transform", d3TranslateNode)
 			.select("rect").attr("fill", getMsgColor);
 		// exit:
-		node.exit()
+		node.exit().transition().duration(DURATION)
 			.style("opacity", 0)
-			.transition().delay(DEFAULT_DURATION)
 			.remove();
 	};
 	/* Actualización de links: enlaces entre mensajes */
@@ -831,25 +837,27 @@ function TalkVisualizer(containerID, processor, margin) {
 		// Muy interesante: http://stackoverflow.com/questions/10942013/smil-animations-fail-on-dynamically-loaded-external-svg
 		var link = chartLinks.selectAll("path")
 			.data(links, function(d) { return d.target.id; });
-		// Los nuevos nodos entran en la posición previa del padre
 		link.enter().append("path")
 			.attr("d", diagonal)
-			.style("stroke-width", LINK_WIDTH)
-			.style("opacity", 0)
-			.on("mouseenter", filterConversation)
-			.append("animate")
-				.attr("dur", "0.5s")
-				.attr("attributeName", "d")
-				.attr("fill", "freeze")
-				.on("endEvent", function(d) {
-					this.parentNode.setAttribute("d", diagonal(d));
-				});
+			.style("stroke-width", 0)
+			.on("mouseenter", filterConversation);
+			// SMIL:
+			// .append("animate")
+			// 	.attr("dur", "0.5s")
+			// 	.attr("attributeName", "d")
+			// 	.attr("fill", "freeze")
+			// 	.on("endEvent", function(d) {
+			// 		this.parentNode.setAttribute("d", diagonal(d));
+			// 	});
 		// Transición a nueva posición
-		link.transition().delay(1)
-			.style("opacity", null)
-			.style("stroke-width", LINK_WIDTH)
-			.select("animate")
-				.attr("to", diagonal);
+		var _delay = DURATION/link.size();
+		link.transition().duration(DURATION)
+			.delay(function(d) {return d.target.id*_delay;})
+			// .select("animate")
+			// 	.attr("to", diagonal);
+			.attr("d", diagonal)
+			.style("stroke-width", LINK_WIDTH);
+
 		// Transition exiting nodes to the parent's new position.
 		link.exit()
 			.style("opacity", 0)
@@ -1056,13 +1064,13 @@ function TalkVisualizer(containerID, processor, margin) {
 		};
 		function computeTimelinePositions(nodes) {
 			nodes.forEach(function(node) {
-				node.y = margin + height*node.x/100;
+				node.y = margin + HEIGHT*node.x/100;
 				node.x = timelineScale(node.tsMensaje);
 			});
 		};
 		function computeTimelinePositionsGrouped(groups) {
 			var nodes = [];
-			var vStep = 20;
+			var vStep = 25;
 			var ts = d3.scale.linear().domain(TS_RANGE).range([margin,WIDTH-margin]);
 			groups.forEach(function(g,i) {
 				var y = margin + i*vStep;
@@ -1090,9 +1098,9 @@ function TalkVisualizer(containerID, processor, margin) {
 			return result;
 		};
 		/* Algunas actualizaciones globales */
-		var rect = getBoundingRect();
-		WIDTH = rect.width;
-		HEIGHT = rect.height;
+		RECT = getBoundingRect();
+		WIDTH = RECT.width;
+		HEIGHT = RECT.height;
 		timelineScale.domain(TS_RANGE).range([margin,WIDTH-margin]);
 
 		if (LAYOUT_TYPE=="graph") {
@@ -1164,7 +1172,10 @@ function TalkVisualizer(containerID, processor, margin) {
 		configureLayout(configuration);
 		resetZoom();
 	};
-	this.updateGraph = function() { update(); };
+	this.updateGraph = function() {
+		// window.requestAnimationFrame(update);
+		update(); 
+	};
 	this.highlightUsers = function (users, highlight) {
 		var selector = users.map(function(u) {return ".user-"+u;}).join(",");
 		var scale = d3Scale((highlight ? 2 : 1)/(ZOOM.scale()));
@@ -1174,6 +1185,10 @@ function TalkVisualizer(containerID, processor, margin) {
 	this.selectTimeRange = function(range) {
 		TS_RANGE = range;
 		if (LAYOUT_TYPE=="timeline") update();
+	};
+	this.moveTimeRange = function(range) {
+		TS_RANGE = range;
+		if (LAYOUT_TYPE=="timeline") updateTimeRange();
 	};
 	configureLayout();	// Establecimiento del layout inicial
 };
@@ -1350,6 +1365,8 @@ function RangeSelector(element, domain) {
 	// };
 	function brushMove() {
 		extent = brush.extent();
+		dispatchTimeRangeMove(extent);
+		dispatchTimeRange(extent);
 	};
 	function brushEnd() {
 		extent = brush.extent();
