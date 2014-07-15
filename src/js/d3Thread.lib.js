@@ -525,7 +525,8 @@ function TalkVisualizer(containerID, processor, margin) {
 		chord_index = 0,
 		chord_index_array = null;	// almacena los índices de las cuerdas, ha de ser inicializado
 		DURATION_LONG = 1000,
-		DURATION_SHORT = 500;
+		DURATION_SHORT = 500,
+		DURATION = DURATION_SHORT;
 	var diagonal = null;	// función de pintado de los links
 	var diagonalTree = d3.svg.diagonal.radial()
 		.source(function(d) {return {x: d.source.ang, y: d.source.r}})
@@ -812,7 +813,6 @@ function TalkVisualizer(containerID, processor, margin) {
 			.attr("class", function(d) { return "user-" + d.usuarioOrigen; })
 			.attr("transform", d3TranslateNode)
 			.style("opacity", 0);
-			// .style({"transform": d3TranslateNode, "opacity": 0});
 			// .call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
 			// .on("click", clickOnNode)
 			// .on("mouseenter", function(d, e) {
@@ -830,9 +830,7 @@ function TalkVisualizer(containerID, processor, margin) {
 			selection = node.transition().duration(DURATION_LONG)
 				.delay(function(d) {return d.id*_delay;});
 		};
-		selection
-			// .style({"-webkit-transform": d3TranslateNode3D, "opacity": 1})
-			.style("opacity", 1)
+		selection.style("opacity", 1)
 			.attr("transform", d3TranslateNode)
 			.select("rect").attr("fill", getMsgColor);
 		// exit:
@@ -843,35 +841,22 @@ function TalkVisualizer(containerID, processor, margin) {
 	/* Actualización de links: enlaces entre mensajes */
 	function updateTreeLinks(animate) {
 		if (typeof animate === "undefined") animate = true;
-		// Muy interesante: http://stackoverflow.com/questions/10942013/smil-animations-fail-on-dynamically-loaded-external-svg
 		var link = chartLinks.selectAll("path")
 			.data(links, function(d) { return d.target.id; });
 		link.enter().append("path")
 			.attr("d", diagonal)
 			.style("stroke-width", 0)
 			.on("mouseenter", filterConversation);
-			// SMIL:
-			// .append("animate")
-			// 	.attr("dur", "0.5s")
-			// 	.attr("attributeName", "d")
-			// 	.attr("fill", "freeze")
-			// 	.on("endEvent", function(d) {
-			// 		this.parentNode.setAttribute("d", diagonal(d));
-			// 	});
-		// Transición a nueva posición
+		// update:
 		var selection = link,
 			_delay = DURATION_LONG/node_index;
 		if (animate) {
 			selection = link.transition().duration(DURATION_LONG)
 				.delay(function(d) {return d.target.id*_delay;});
 		};
-		selection
-			// .select("animate")
-			// 	.attr("to", diagonal);
-			.attr("d", diagonal)
+		selection.attr("d", diagonal)
 			.style("stroke-width", LINK_WIDTH);
-
-		// Transition exiting nodes to the parent's new position.
+		// exit:
 		link.exit()
 			.transition().duration(DURATION_SHORT)
 			.style("opacity", 0)
