@@ -524,9 +524,8 @@ function TalkVisualizer(containerID, processor, margin) {
 		author_index = 0,	// focos de autores (grafo)
 		chord_index = 0,
 		chord_index_array = null;	// almacena los índices de las cuerdas, ha de ser inicializado
-		DURATION_LONG = 1000,
-		DURATION_SHORT = 500,
-		DURATION = DURATION_SHORT;
+		DURATION = 500,
+		DELAY = .5;
 	var diagonal = null;	// función de pintado de los links
 	var diagonalTree = d3.svg.diagonal.radial()
 		.source(function(d) {return {x: d.source.ang, y: d.source.r}})
@@ -591,19 +590,19 @@ function TalkVisualizer(containerID, processor, margin) {
 	};
 
 	function onZoomEnd() {
-		console.log("zoomend");
-		var scale = ZOOM.scale();
-		LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
-		ANTI_ZOOM_SCALE = d3Scale(1/scale);
-		chartNodes.selectAll("g")
-			.transition().duration(DURATION_SHORT)
-			.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
-		chartFocus.selectAll("g")
-			.transition().duration(DURATION_SHORT)
-			.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
-		chartLinks.selectAll("path")
-			.transition().duration(DURATION_SHORT)
-			.style("stroke-width", LINK_WIDTH);
+		// console.log("zoomend");
+		// var scale = ZOOM.scale();
+		// LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
+		// ANTI_ZOOM_SCALE = d3Scale(1/scale);
+		// chartNodes.selectAll("g")
+		// 	.transition().duration(DURATION)
+		// 	.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
+		// chartFocus.selectAll("g")
+		// 	.transition().duration(DURATION)
+		// 	.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
+		// chartLinks.selectAll("path")
+		// 	.transition().duration(DURATION)
+		// 	.style("stroke-width", LINK_WIDTH);
 	};
 	// var ___COUNT___ = 0;
 	var ZOOM = d3.behavior.zoom()
@@ -737,7 +736,7 @@ function TalkVisualizer(containerID, processor, margin) {
 			})
 			.on("mouseleave", function(p) {
 				d3.selectAll("#chart-links path")
-					.transition().delay(500).duration(DURATION_SHORT)
+					.transition().delay(500).duration(DURATION)
 					.style("stroke-width", LINK_WIDTH)
 					.style("stroke", null);
 			});
@@ -778,12 +777,12 @@ function TalkVisualizer(containerID, processor, margin) {
 					$("<div>").text("@" + d.nickname));
 			});
 		// update:
-		f_author.transition().duration(DURATION_LONG)
+		f_author.transition().duration(DURATION)
 			.style("opacity", 1)
 			.attr("transform", d3TranslateNode);
 		// exit:
 		f_author.exit()
-			.transition().duration(DURATION_LONG)
+			.transition().duration(DURATION)
 			.style("opacity", 0)
 			.remove();
 	};
@@ -824,17 +823,16 @@ function TalkVisualizer(containerID, processor, margin) {
 			.attr({"x": -5, "y": -5, "width": 10, "height": 10})
 			.style("fill", getMsgColor);
 		// update:
-		var selection = node,
-			_delay = DURATION_LONG/node_index;
+		var selection = node;
 		if (animate) {
-			selection = node.transition().duration(DURATION_LONG)
-				.delay(function(d) {return d.id*_delay;});
+			selection = node.transition().duration(DURATION)
+				.delay(function(d) {return d.id * DELAY;});
 		};
 		selection.style("opacity", 1)
 			.attr("transform", d3TranslateNode)
 			.select("rect").attr("fill", getMsgColor);
 		// exit:
-		node.exit().transition().duration(DURATION_SHORT)
+		node.exit().transition().duration(DURATION)
 			.style("opacity", 0)
 			.remove();
 	};
@@ -848,17 +846,16 @@ function TalkVisualizer(containerID, processor, margin) {
 			.style("stroke-width", 0)
 			.on("mouseenter", filterConversation);
 		// update:
-		var selection = link,
-			_delay = DURATION_LONG/node_index;
+		var selection = link;
 		if (animate) {
-			selection = link.transition().duration(DURATION_LONG)
-				.delay(function(d) {return d.target.id*_delay;});
+			selection = link.transition().duration(DURATION)
+				.delay(function(d) {return d.target.id * DELAY;});
 		};
 		selection.attr("d", diagonal)
 			.style("stroke-width", LINK_WIDTH);
 		// exit:
 		link.exit()
-			.transition().duration(DURATION_SHORT)
+			.transition().duration(DURATION)
 			.style("opacity", 0)
 			.remove();
 	};
@@ -1180,7 +1177,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		var selector = users.map(function(u) {return ".user-"+u;}).join(",");
 		var scale = d3Scale((highlight ? 2 : 1)/(ZOOM.scale()));
 		d3.selectAll(selector)
-			.style("-webkit-transform", function(d) {return d3TranslateNode3D(d) + scale; });
+			.style("transform", function(d) {return d3TranslateNode(d) + scale; });
 	};
 	this.selectTimeRange = function(range) {
 		TS_RANGE = range;
