@@ -13,7 +13,9 @@ var _MIN = Math.min;
 var _MAX = Math.max;
 var _RANDOM = Math.random;
 var _FLOOR = Math.floor;
+var _CEIL = Math.ceil;
 var _ROUND = Math.round;
+var _SQRT = Math.sqrt;
 
 var TABLONES = {
 	mios: "t1-",

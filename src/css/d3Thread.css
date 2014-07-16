@@ -36,7 +36,6 @@ body {
 #chart-links path {
   fill: none;
   stroke: #666;
-  /*transition: stroke-path .5s linear;*/
 }
 
 #d3-chart-interaction {
@@ -81,9 +80,16 @@ body {
   fill: transparent;
 }
 #chart:hover .fade {
-  opacity: .1;
+  opacity: .1 !important;
 }
 
+#d3-chart-interaction .user path {
+  stroke: #fff;
+}
+#d3-chart-interaction path.chord {
+  stroke: #ccc;
+  opacity: .8;
+}
 #d3-chart-interaction:hover .fade {
   opacity: .1 !important;
 }
@@ -315,7 +321,7 @@ body {
 }
 
 #check-all-users {
-  margin-left: 5px;
+  /* margin-left: 5px; */
   vertical-align: middle;
 }
 
@@ -452,6 +458,12 @@ body {
   font-weight: normal;
 }
 
+path.focus {
+  stroke: #f30;
+  opacity: .3;
+  /*stroke-dasharray: 2,1;*/
+}
+
 /* OPciones de visualización */
 #chart-options {
   position: absolute;
@@ -459,7 +471,7 @@ body {
   left: 300px;
   top: 0;
   padding: 10px;
-  font-size: 10px;
+  font-size: 12px;
   color:  #666;
   opacity: .3;
   transition: opacity .25s linear;
@@ -472,7 +484,7 @@ body {
   box-shadow: 0 1px 2px #d9d9d9;
 }
 .options {
-  margin-top: 5px;
+  margin-top: 10px;
   height: 0;
   overflow: hidden;
   transition: height .25s linear;
