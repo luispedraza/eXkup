@@ -22,7 +22,7 @@ function TalkVisualizer(containerID, processor, margin) {
 	// console.log(data);
 	// console.log(JSON.stringify(data));
 	var LINK_WIDTH_DEFAULT = 0.5,
-	LINK_WIDTH = LINK_WIDTH_DEFAULT;
+		LINK_WIDTH = LINK_WIDTH_DEFAULT;
 	var root = processor.tree;
 	var CONTAINER = d3.select(containerID);
 	function getBoundingRect() {
@@ -37,20 +37,29 @@ function TalkVisualizer(containerID, processor, margin) {
 		DELAY = .5;
 	var diagonal = null;	// función de pintado de los links
 	var diagonalTree = d3.svg.diagonal.radial()
-	.source(function(d) {return {x: d.source.ang, y: d.source.r}})
-	.target(function(d) {return {x: d.target.ang, y: d.target.r}})
-	.projection(function(d) {return [d.y, d.x+_PI_2]; });
-	var line = d3.svg.line()
-	.x(function(d) { return d.x; })
-	.y(function(d) { return d.y; });
+		.source(function(d) {return {x: d.source.ang, y: d.source.r}})
+		.target(function(d) {return {x: d.target.ang, y: d.target.r}})
+		.projection(function(d) {return [d.y, d.x+_PI_2]; });
+	// var line = d3.svg.line()
+	// 	.x(function(d) { return d.x; })
+	// 	.y(function(d) { return d.y; });
+	// function diagonalGraph(d) { return line([d.source, d.target]); };
+	function diagonalGraph(d) { return d3Line(d.source,d.target); };
+
 	var LAYOUT_TYPE, LAYOUT_OPTIONS;	// opciones de configuración: agrupaciones, etc
 	var LAYOUT = d3.layout.tree()
-	.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
+		.separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 	// Para cálculo de distancias entre fotos del grafo agrupado:
 	var LINK_DISTANCE = 20;
-	var FORCE = null;
+	var FORCE = d3.layout.force()
+		.size([WIDTH, HEIGHT])
+		.charge(-100)
+		.gravity(0.1)
+		.friction(.9)
+		// .linkDistance(function (l) { return l.distance; })
+		.on("tick", tickUpdate);
 	var CHORD = d3.layout.chord()
-	.padding(0);
+		.padding(0);
 		// .sortGroups(d3.ascending)
 		// .sortSubgroups(d3.ascending);
 		var TIMELINE_SCROLL = 0;
@@ -115,22 +124,29 @@ function TalkVisualizer(containerID, processor, margin) {
 		.scaleExtent([.25,8])
 		.on("zoom", zoomAction)
 		.on("zoomend", onZoomEnd);
-	var svg = d3.select(containerID)
+	var svgElement = d3.select(containerID)
 		.insert("svg", ":first-child")
 		.attr("id", "svg")
 		.on("dblclick", resetZoom)
 		.call(ZOOM)
-		.on("dblclick.zoom", null)
-		.append("g");
+		.on("dblclick.zoom", null);
+	// Para redondear imágenes:
+	svgElement.append("defs")
+		.append("clipPath").attr("id", "round-clip")
+			.append("circle").attr("r", 10);
+
+	var svg = svgElement.append("g");
 	var chart = svg.append("g").attr("id", "chart")
 				.call(initBackground);	// inicialización del fondo del elemento
+	var chartFocusLinks = chart.append("g").attr("id", "chart-focus-links");	// enlaces entre focos
 	var chartFocus = chart.append("g").attr("id", "chart-focus");	// grupo para los focos 
 	var chartLinks = chart.append("g").attr("id", "chart-links");	// grupo para los links
 	var chartNodes = chart.append("g").attr("id", "chart-nodes");	// grupo para los nodos 
 
 	var chartInteraction = svg.append("g").attr("id", "d3-chart-interaction");
 	var timelineScale = d3.scale.linear();
-	var nodes, links, authorFocus;
+	// mensajes, enlaces entre mensajes, autores, enlaces entre autores
+	var nodes, links, authorFocus, authorLinks;
 	var RECT = getBoundingRect(),
 	WIDTH = RECT.width,
 	HEIGHT = RECT.height;
@@ -213,22 +229,28 @@ function TalkVisualizer(containerID, processor, margin) {
 	/* actualización del grafo en cada tic */
 	function tickUpdate(e) {
 		if (LAYOUT_OPTIONS["group-author"]) {
-			var q = d3.geom.quadtree(authorFocus),
-			i = 0,
-			n = authorFocus.length;
-			while (++i < n) q.visit(collide(authorFocus[i]));
-			// /* foco de autores */
-			authorFocus.forEach(function(a) {
-				var r = a.radius;
-				var angStep = _2_PI/a.children.length;
-				a.children.forEach(function(c,i) {
-					var ang = i*angStep;
-					c.x = a.x + r * _COS(ang);
-					c.y = a.y + r * _SIN(ang);
-				});
-			});
+			(function oldDistribution(focus) {
+				// esta función corresponde a una distribución inicial de prueba, se deja como recuerdo
+				(function collideFocus(focus) {
+					var q = d3.geom.quadtree(focus),
+					i = 0,
+					n = focus.length;
+					while (++i < n) q.visit(collide(focus[i]));
+				})(focus);
+				// distribuir mensajes alrededor del autor
+				// (function distributeMessages(focus) {
+				// 	focus.forEach(function(a) {
+				// 		var r = a.radius;
+				// 		var angStep = _2_PI/a.children.length;
+				// 		a.children.forEach(function(c,i) {
+				// 			var ang = i*angStep;
+				// 			c.x = a.x + r * _COS(ang);
+				// 			c.y = a.y + r * _SIN(ang);
+				// 		});
+				// 	});
+				// })(focus);
+			})(authorFocus);
 		};
-		
 		// if (LAYOUT_OPTIONS["group-author"]) {
 		// 	var k = 0.1 * e.alpha;
 		// 	nodes.forEach(function(m, i) {
@@ -238,11 +260,13 @@ function TalkVisualizer(containerID, processor, margin) {
 		// 	});
 		// };
 		updateFocus(false);
+		updateFocusLinks(false);
 		updateNodes(false);
 		updateTreeLinks(false);
 	};
 	/* Visualización de los focos del grafo, cuandod hay agrupación */
 	function updateFocus(animate) {
+		if (typeof animate === "undefined") animate = true;
 		/* Focos de autores */
 		var f_author = chartFocus.selectAll("g")
 			.data(authorFocus, function(d) { return d.graph_id || (d.graph_id = ++author_index); });
@@ -252,53 +276,49 @@ function TalkVisualizer(containerID, processor, margin) {
 			.on("mouseenter", filterUserInteraction)	// filtrado de interacciones
 			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
 		f_authorEnter.append("circle")
-			.attr("r", function(d) { return d.radius || 20})
-			.attr("fill", getUserColor);
+			.attr({"r": 0, "fill": getUserColor});
 		f_authorEnter.append("image")
 			.attr({
 				"xlink:href": function(d) {return checkUserPhoto(d.pathfoto);},
-				"x": -10, "y": -10, "width": 20, "height": 20})
+				"x": -10, "y": -10, "width": 20, "height": 20,
+				"clip-path": "url(#round-clip)"})
 			.on("mouseenter", function (d) {
 				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY,
 					$("<div>").text("@" + d.nickname));
 			});
 		// update:
-		var selection = f_author;
-		if (animate) selection = f_author.transition().duration(DURATION);
-		selection.style("opacity", 1)
+		(animate ? f_author.transition().duration(DURATION) : f_author)
+			.style("opacity", 1)
 			.attr("transform", d3TranslateNode)
-			.selectAll("circle").attr("r", function(d) { return d.radius});
+			.selectAll("circle").attr("r", function(d) { return d.radius; });
 		// exit:
-		f_author.exit()
-			.transition().duration(DURATION)
+		(animate ? f_author.exit().transition().duration(DURATION) : f_author.exit())
 			.style("opacity", 0)
 			.remove();
 	};
 
 	/* Actualización de límites temporales */
 	function updateTimeRange() {
+		function resizePosition(d) { return d3Translate3D([timelineScale(d),0]);};
 		var range = d3.select("#svg").selectAll("g.resize")
-		.data(TS_RANGE);
+			.data(TS_RANGE);
 		range.enter().append("g")
-		.attr("class", "resize")
-		.style("-webkit-transform", function(d) {
-			return d3Translate3D([timelineScale(d),0]);
-		})
-		.append("rect")
-		.attr({"x": -2, "y": 0, "width": 4, "height": HEIGHT});
-		range.style("-webkit-transform", function(d) {
-			return d3Translate3D([timelineScale(d),0]);
-		});
+			.attr("class", "resize")
+			.style("-webkit-transform",resizePosition)
+				.append("rect").attr({"x": -2, "y": 0, "width": 4, "height": 0});
+		// update:
+		range.style("-webkit-transform", resizePosition)
+			.select("rect").attr("height", HEIGHT);
 	};
 	/* Actualización de los nodos: mensajes */
 	function updateNodes(animate) {
 		if (typeof animate === "undefined") animate = true;
 		var node = chartNodes.selectAll("g")
-		.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
+			.data(nodes, function(d) { return d.id || (d.id = ++node_index); });
 		var nodeEnter = node.enter().append("g")
-		.attr("class", function(d) { return "user-" + d.usuarioOrigen; })
-		.attr("transform", d3TranslateNode)
-		.style("opacity", 0);
+			.attr("class", function(d) { return "user-" + d.usuarioOrigen; })
+			.attr("transform", d3TranslateNode)
+			.style("opacity", 0);
 			// .call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
 			// .on("click", clickOnNode)
 			// .on("mouseenter", function(d, e) {
@@ -306,60 +326,60 @@ function TalkVisualizer(containerID, processor, margin) {
 			// 	// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
 			// });
 			// .call(FORCE.drag);
-			nodeEnter.append("rect")
+		nodeEnter.append("rect")
 			.attr({"x": -5, "y": -5, "width": 10, "height": 10})
 			.style("fill", getMsgColor);
 		// update:
-		var selection = node;
-		if (animate) {
-			selection = node.transition().duration(DURATION)
-			.delay(function(d) {return d.id * DELAY;});
-		};
-		selection.style("opacity", 1)
-		.attr("transform", d3TranslateNode)
-		.select("rect").attr("fill", getMsgColor);
+		(animate 
+		? node.transition().duration(DURATION).delay(function(d) {return d.id * DELAY;})
+		: node)
+			.style("opacity", 1)
+			.attr("transform", d3TranslateNode)
+			.select("rect").attr("fill", getMsgColor);
 		// exit:
-		node.exit().transition().duration(DURATION)
-		.style("opacity", 0)
-		.remove();
+		(animate ? node.exit().transition().duration(DURATION) : node.exit())
+			.style("opacity", 0)
+			.remove();
 	};
 	/* Actualización de links: enlaces entre mensajes */
 	function updateTreeLinks(animate) {
 		if (typeof animate === "undefined") animate = true;
 		var link = chartLinks.selectAll("path")
-		.data(links, function(d) { return d.target.id; });
+			.data(links, function(d) { return d.target.id; });
 		link.enter().append("path")
-		.attr("d", diagonal)
-		.style("stroke-width", 0)
-		.on("mouseenter", filterConversation);
+			.attr("d", diagonal)
+			.style("stroke-width", 0)
+			.on("mouseenter", filterConversation);
 		// update:
-		var selection = link;
-		if (animate) {
-			selection = link.transition().duration(DURATION)
-			.delay(function(d) {return d.target.id * DELAY;});
-		};
-		selection.attr("d", diagonal)
-		.style("stroke-width", LINK_WIDTH);
+		(animate 
+		? link.transition().duration(DURATION).delay(function(d) {return d.target.id * DELAY;})
+		: link)
+			.attr("d", diagonal)
+			.style("stroke-width", LINK_WIDTH);
 		// exit:
-		link.exit()
-		.transition().duration(DURATION)
-		.style("opacity", 0)
-		.remove();
-		// // FOCUS LINKS
-		// var fLink = chartFocus.selectAll("path.focus")
-		// 	.data(focusLinks, function(d) { return d.target.id; });
-		// fLink.enter().append("path")
-		// 	.attr("class", "focus")
-		// 	.attr("d", function(d) { return line([d.source, d.target]);})
-		// 	.style("stroke-width", 0);
-		// // update:
-		// fLink.attr("d", function(d) { return line([d.source, d.target]);})
-		// 	.style("stroke-width", LINK_WIDTH);
-		// // exit:
-		// fLink.exit()
-		// 	.transition().duration(DURATION)
-		// 	.style("opacity", 0)
-		// 	.remove();
+		(animate ? link.exit().transition().duration(DURATION) : link.exit())
+			.style("opacity", 0)
+			.remove();
+	};
+	/* Links entre autores, si hay agrupación */
+	function updateFocusLinks(animate) {
+		var flink = chartFocusLinks.selectAll("path")
+			.data(authorLinks, function(d) { return d.target.graph_id; });
+		flink.enter().append("path")
+			.attr("d", diagonal)
+			.style("stroke-width", 0);
+		// update:
+		(animate
+		? flink.transition().duration(DURATION).delay(function(d) {return d.target.id * DELAY;})
+		: flink)
+			.attr("d", diagonal)
+			.style("stroke-width", function(l) {
+				return 4 * LINK_WIDTH * l.width;
+			});
+		// exit:
+		(animate ? flink.exit().transition().duration(DURATION) : flink.exit())
+			.style("opacity", 0)
+			.remove();
 	};
 	/* Actualización del gráfico de interacciones */
 	function updateInteraction () {
@@ -448,14 +468,14 @@ function TalkVisualizer(containerID, processor, margin) {
 		var fChord = d3.svg.chord().radius(innerRadius);
 		// Agregamos un grupo por usuario
 		var groups = chartInteraction.selectAll("g.user")
-		.data(CHORD.groups);
+			.data(CHORD.groups);
 		var groupsEnter = groups.enter().append("g")
-		.attr("class", "user")
-		.on("mouseenter", function(d,i) {
-			filterUser(d,i);
-				// var configTooltip = {autoClose: "no"};
-				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createUserTooltip(d,i));
-			});
+			.attr("class", "user")
+			.on("mouseenter", function(d,i) {
+				filterUser(d,i);
+					// var configTooltip = {autoClose: "no"};
+					new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createUserTooltip(d,i));
+				});
 		// groupsEnter.append("title").text(function(d,i) {
 		// 	return users[i].nickname;
 		// });
@@ -477,7 +497,6 @@ function TalkVisualizer(containerID, processor, margin) {
 				return d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius).startAngle(this._startAngle).endAngle(this._startAngle)(d);
 			})
 			.style("fill", function(d,i) { return users[i].color; });
-
 		groups.select("path")
 			.transition().duration(DURATION)
 			.style("fill", function(d,i) { return users[i].color; })
@@ -495,34 +514,34 @@ function TalkVisualizer(containerID, processor, margin) {
 
 		// Agregamos/actualizamos las cuerdas:
 		var chords = chartInteraction.selectAll("path.chord")
-		.data(CHORD.chords, function(d) { 
-			var i = d.source.index;
-			var j = d.source.subindex;
-			return chord_index_array[i][j] || (chord_index_array[i][j] = ++chord_index); 
-		});
+			.data(CHORD.chords, function(d) { 
+				var i = d.source.index;
+				var j = d.source.subindex;
+				return chord_index_array[i][j] || (chord_index_array[i][j] = ++chord_index); 
+			});
 		var chordsEnter = chords.enter().append("path")
-		.each(function(d) {
-			this._source = {startAngle: d.source.startAngle, endAngle: d.source.startAngle};
-			this._target = {startAngle: d.target.startAngle, endAngle: d.target.startAngle};
-		})
-		.attr("class", "chord")
-		.style("fill", function(d) { return users[d.source.index].color; })
-		.attr("d", function(d) {
-			return d3.svg.chord().radius(innerRadius).source(this._source).target(this._target)();
-		});
-		
+			.each(function(d) {
+				this._source = {startAngle: d.source.startAngle, endAngle: d.source.startAngle};
+				this._target = {startAngle: d.target.startAngle, endAngle: d.target.startAngle};
+			})
+			.attr("class", "chord")
+			.style("fill", function(d) { return users[d.source.index].color; })
+			.attr("d", function(d) {
+				return d3.svg.chord().radius(innerRadius).source(this._source).target(this._target)();
+			});
 		chords.transition().duration(DURATION)
-		.call(chordTween);
-
+			.call(chordTween);
 		chords.exit()
-		.transition().duration(DURATION)
-		.call(chordTween, 0)
-		.remove();
+			.transition().duration(DURATION)
+			.call(chordTween, 0)
+			.remove();
 	};
 	/* Principal función de actualización */
 	function update(source) {
 		TIC();
 		if (typeof source == "undefined") source = root;
+		// Limpieza de la actualización anterior:
+		nodes=[], links=[], authorFocus=[], authorLinks=[];
 		/* Cálculo de las posiciones de cada nodo, layouts de árbol y timeline */
 		function computeTreePositions(nodes) {
 			nodes.forEach(function(node) {
@@ -533,18 +552,18 @@ function TalkVisualizer(containerID, processor, margin) {
 			});
 		};
 		function computeTreePositionsGrouped(groups) {
-			var nodes = [];
-			var N = groups.length;
-			var angStep = _2_PI/N;
-			var R0 = _MIN(WIDTH, HEIGHT)/2 - margin;
-			var R = R0 - 25;
+			var nodes = [],
+				N = groups.length,
+				angStep = _2_PI/N,
+				R0 = _MIN(WIDTH, HEIGHT)/2 - margin,
+				R = R0 - 25;
 			groups.forEach(function(g,i) {
-				var rStep = _MIN(15, (R-100)/g.children.length);
-				var ang = i*angStep;
+				var rStep = _MIN(15, (R-100)/g.children.length),
+					ang = i*angStep;
 				g.x = R0 * _COS(ang);
 				g.y = R0 * _SIN(ang);
 				g.radius = 20;
-				// posiciones de los mensajes 
+				// posiciones de los mensajes
 				g.children.forEach(function(c,i) {
 					c.ang = ang;
 					var r = c.r = R - i*rStep
@@ -563,8 +582,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		};
 		function computeTimelinePositionsGrouped(groups) {
 			var nodes = [];
-			var vStep = 25;
-			var ts = d3.scale.linear().domain(TS_RANGE).range([margin,WIDTH-margin]);
+			var vStep = 30;
 			groups.forEach(function(g,i) {
 				var y = margin + i*vStep;
 				g.x = 15;
@@ -573,7 +591,7 @@ function TalkVisualizer(containerID, processor, margin) {
 				// posiciones de los mensajes 
 				g.children.forEach(function(c) {
 					c.y = y;
-					c.x = ts(c.tsMensaje);
+					c.x = timelineScale(c.tsMensaje);
 				});
 				nodes = nodes.concat(g.children);
 			});
@@ -591,80 +609,76 @@ function TalkVisualizer(containerID, processor, margin) {
 			computeNode(node);
 			return result;
 		};
-		function computeFocusGrid(focus) {
-			var N = focus.length;
-			var w = WIDTH-2*margin, h = HEIGHT-2*margin;	// ancho y alto efectivos sin margenes
-			// Intento que los usuarios cubran el área de manera óptima, calculando espaciado constante:
-			// Ni * Nj = N; ((Ni-1)*s)*((Nj-1)*s) = w*h; Ni/Nj = h/w; y se resuelve
-			var Nj = _MAX(_FLOOR(_SQRT(N*w/h)), 2),
-			Ni = _CEIL(N/Nj),
-			focusPadding = _SQRT((w*h)/(Ni*Nj - Ni - Nj));
-			focusPadding = _MIN(focusPadding, h/(Ni-1));
-			focusPadding = _MIN(focusPadding, w/(Nj-1));
-			focus.forEach(function(a,i) {
-				var i_row = _FLOOR(i/Nj);
-				var i_col = i%Nj;
-				a.px = a.x = margin + i_col * focusPadding;
-				a.py = a.y = margin + i_row * focusPadding;
-				a.fixed = true;
-			});
-		};
+		// function computeFocusGrid(focus) {
+		// 	var N = focus.length;
+		// 	var w = WIDTH-2*margin, h = HEIGHT-2*margin;	// ancho y alto efectivos sin margenes
+		// 	// Intento que los usuarios cubran el área de manera óptima, calculando espaciado constante:
+		// 	// Ni * Nj = N; ((Ni-1)*s)*((Nj-1)*s) = w*h; Ni/Nj = h/w; y se resuelve
+		// 	var Nj = _MAX(_FLOOR(_SQRT(N*w/h)), 2),
+		// 	Ni = _CEIL(N/Nj),
+		// 	focusPadding = _SQRT((w*h)/(Ni*Nj - Ni - Nj));
+		// 	focusPadding = _MIN(focusPadding, h/(Ni-1));
+		// 	focusPadding = _MIN(focusPadding, w/(Nj-1));
+		// 	focus.forEach(function(a,i) {
+		// 		var i_row = _FLOOR(i/Nj);
+		// 		var i_col = i%Nj;
+		// 		a.px = a.x = margin + i_col * focusPadding;
+		// 		a.py = a.y = margin + i_row * focusPadding;
+		// 		a.fixed = true;
+		// 	});
+		// };
 		/* Algunas actualizaciones globales */
 		RECT = getBoundingRect();
 		WIDTH = RECT.width;
 		HEIGHT = RECT.height;
 		timelineScale.domain(TS_RANGE).range([margin,WIDTH-margin]);
-		if (FORCE) FORCE.stop();
+		FORCE.stop();
 		if (LAYOUT_TYPE=="graph") {
-			diagonal = function(d) { return line([d.source, d.target]); };
+			diagonal = diagonalGraph;
+			var linkDistance;
 			var forceNodes = [], forceLinks = [];	// nodos y links para force layout
 			if (LAYOUT_OPTIONS["group-author"]) {
 				// Cálculo del radio de un foco
 				function focusRadius(f) {
-					return _MAX(f.children.length * 20 / _2_PI, 40);
+					// pi*R^2 = 2 * n_mensajes * L^2, donde L es el lado del cuadrado de un mensaje (10 pixeles)
+					return 15 + (10 * _SQRT(2 * f.children.length / _PI));
+				};
+				function initFocusGraph(focus, interaction) {
+					/* Inicialización de radios de focos (área proporcional al número de mensajes)
+						y links entre focos (ancho proporcional al número de interacciones) */
+					var links = [];
+					focus.forEach(function(a,i) {
+						a.px = a.x; a.py = a.py;		// posición previa, si la hubiera
+						for (var j=i+1, len=authorFocus.length; j<len; j++) {
+							var inter = interaction[i][j] + interaction[j][i];
+							if (inter!=0) {	// existe interacción
+								var t = authorFocus[j];
+								var sourceR = a.radius || (a.radius = focusRadius(a));
+								var targetR = t.radius || (t.radius = focusRadius(t));
+								var d = sourceR + targetR + 100;
+								// Link entre autores, con ancho proporcional a la interacción
+								links.push({"source": a, "target": t, "distance": d, "width": inter});
+							};
+						};
+					});
+					return links;
 				};
 				var groups = processor.groupByAuthor();
 				authorFocus = groups.authors;			// los focos de autores
 				var interaction = groups.interaction;	// matriz de interacciones
+				authorLinks = forceLinks = initFocusGraph(authorFocus, interaction);
 				forceNodes = groups.authors;	// los nodos del grafo son los autores
-				authorFocus.forEach(function(a,i) {
-					a.px = a.x; a.py = a.py;		// posición previa, si la hubiera
-					for (var j=i+1, len=authorFocus.length; j<len; j++) {
-						var inter = interaction[i][j] + interaction[j][i];
-						if (inter!=0) {	// existe interacción
-							var t = authorFocus[j];
-							var sourceR = a.radius || (a.radius = focusRadius(a));
-							var targetR = t.radius || (t.radius = focusRadius(t));
-							var d = sourceR + targetR + LINK_DISTANCE;
-							forceLinks.push({"source": a, "target": t, "distance": d});
-						};
-					};
-				});
-				FORCE = d3.layout.force()
-					.size([WIDTH, HEIGHT])
-					.charge(-100)
-					.gravity(0.1)
-					.friction(.9)
-					// .linkDistance(function (l) { return l.distance; })
-					.on("tick", tickUpdate)
-					.nodes(forceNodes)
-					.links(forceLinks)
-					.start();
+				linkDistance = function(l) {return l.distance;};
 			} else {
-				forceNodes = computeForceInitial(root);
-				forceLinks = LAYOUT.links(forceNodes);
-				authorFocus = [];
-				FORCE = d3.layout.force()
-					.size([WIDTH, HEIGHT])
-					.charge(-100)
-					.gravity(0.1)
-					.friction(.9)
-					.linkDistance(LINK_DISTANCE)
-					.on("tick", tickUpdate)
-					.nodes(forceNodes)
-					.links(forceLinks)
-					.start();
+				nodes = forceNodes = computeForceInitial(root);	// posiciones iniciales para transición suave
+				links = forceLinks = LAYOUT.links(forceNodes);
+				linkDistance = LINK_DISTANCE;
 			};
+			FORCE.size([WIDTH, HEIGHT])
+				.linkDistance(linkDistance)
+				.nodes(forceNodes)
+				.links(forceLinks)
+				.start();
 		} else if (LAYOUT_TYPE=="interaction") {
 			updateInteraction();
 		} else if (LAYOUT_TYPE=="tree") {
@@ -681,6 +695,7 @@ function TalkVisualizer(containerID, processor, margin) {
 			};
 			links = LAYOUT.links(nodes);
 			updateFocus();
+			updateFocusLinks();
 			updateNodes();
 			updateTreeLinks();
 		} else if (LAYOUT_TYPE=="timeline") {
@@ -695,10 +710,11 @@ function TalkVisualizer(containerID, processor, margin) {
 				computeTimelinePositions(nodes);
 			};
 			links = LAYOUT.links(nodes);
+			updateTimeRange();	// extremos del intervalo temporal
 			updateFocus();
+			updateFocusLinks();
 			updateNodes();
 			updateTreeLinks();
-			updateTimeRange();	// extremos del intervalo temporal
 		};
 		document.getElementById("svg").setCurrentTime(0);
 		TOC(true);

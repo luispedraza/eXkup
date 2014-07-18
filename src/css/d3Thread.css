@@ -37,6 +37,11 @@ body {
   fill: none;
   stroke: #666;
 }
+#chart-focus-links path {
+  fill: none;
+  stroke: #59c093;
+}
+
 
 #d3-chart-interaction {
   pointer-events: none;
@@ -445,10 +450,11 @@ body {
   opacity: 0;
   overflow: hidden;
   pointer-events: none;
+  background: linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,1));
 }
 .timeline #d3-frequency {
   opacity: 1;
-  pointer-events: auto; 
+  pointer-events: auto;
 }
 
 #d3-frequency h2 {
@@ -457,11 +463,10 @@ body {
   font-size: 12px;
   font-weight: normal;
 }
-
-path.focus {
-  stroke: #f30;
-  opacity: .3;
-  /*stroke-dasharray: 2,1;*/
+#chart-focus circle {
+  opacity: .7;
+  stroke-width: 1px;
+  stroke: #fff;
 }
 
 /* OPciones de visualización */
@@ -553,5 +558,7 @@ path.focus {
 }
 .range .resize {
   fill: #ccc;
-  cursor: pointer;
+}
+#d3-chart:not(.timeline) .range .resize, #d3-chart:not(.timeline) .range .extent, #d3-chart:not(.timeline) .resize, #d3-chart:not(.timeline) .range .background {
+  cursor: auto !important;
 }

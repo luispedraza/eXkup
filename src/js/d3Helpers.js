@@ -66,6 +66,10 @@ function hiveLink(d) {
         + " " + _COS(a2) * t.r + "," + _SIN(a2) * t.r
         + " " + _COS(t.ang) * t.r + "," + _SIN(t.ang) * t.r;
 };
+/* Construye una línea entre source y target */
+function d3Line(s,t) {
+    return "M"+s.x+","+s.y+"L"+t.x+","+t.y;
+};
 
 // http://bl.ocks.org/mbostock/3231298
 function collide(node) {
