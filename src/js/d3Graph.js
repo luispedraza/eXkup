@@ -53,7 +53,7 @@ function TalkVisualizer(containerID, processor, margin) {
 	var LINK_DISTANCE = 20;
 	var FORCE = d3.layout.force()
 		.size([WIDTH, HEIGHT])
-		.charge(-100)
+		.charge(-1000)
 		.gravity(0.1)
 		.friction(.9)
 		// .linkDistance(function (l) { return l.distance; })
@@ -118,6 +118,10 @@ function TalkVisualizer(containerID, processor, margin) {
 		// chartLinks.selectAll("path")
 		// 	.transition().duration(DURATION)
 		// 	.style("stroke-width", LINK_WIDTH);
+	};
+
+	function onFocusClick(d,i) {
+		console.log(d);
 	};
 	// var ___COUNT___ = 0;
 	var ZOOM = d3.behavior.zoom()
@@ -274,6 +278,7 @@ function TalkVisualizer(containerID, processor, margin) {
 			.style("opacity", 0)
 			.attr("transform", d3TranslateNode)
 			.on("mouseenter", filterUserInteraction)	// filtrado de interacciones
+			.on("click", onFocusClick)
 			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
 		f_authorEnter.append("circle")
 			.attr({"r": 0, "fill": getUserColor});
@@ -290,7 +295,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		(animate ? f_author.transition().duration(DURATION) : f_author)
 			.style("opacity", 1)
 			.attr("transform", d3TranslateNode)
-			.selectAll("circle").attr("r", function(d) { return d.radius; });
+			.selectAll("circle").attr("r", function(d) { return d.radius - 10; });
 		// exit:
 		(animate ? f_author.exit().transition().duration(DURATION) : f_author.exit())
 			.style("opacity", 0)
@@ -318,14 +323,14 @@ function TalkVisualizer(containerID, processor, margin) {
 		var nodeEnter = node.enter().append("g")
 			.attr("class", function(d) { return "user-" + d.usuarioOrigen; })
 			.attr("transform", d3TranslateNode)
-			.style("opacity", 0);
+			.style("opacity", 0)
 			// .call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
 			// .on("click", clickOnNode)
 			// .on("mouseenter", function(d, e) {
 			// 	// var tooltipConfig = {autoClose: "no"};
 			// 	// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
 			// });
-			// .call(FORCE.drag);
+			.call(FORCE.drag);
 		nodeEnter.append("rect")
 			.attr({"x": -5, "y": -5, "width": 10, "height": 10})
 			.style("fill", getMsgColor);
@@ -655,7 +660,7 @@ function TalkVisualizer(containerID, processor, margin) {
 								var t = authorFocus[j];
 								var sourceR = a.radius || (a.radius = focusRadius(a));
 								var targetR = t.radius || (t.radius = focusRadius(t));
-								var d = sourceR + targetR + 100;
+								var d = sourceR + targetR + 20;
 								// Link entre autores, con ancho proporcional a la interacción
 								links.push({"source": a, "target": t, "distance": d, "width": inter});
 							};

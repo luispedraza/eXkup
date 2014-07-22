@@ -8,7 +8,7 @@ function onVideos(result)
 { 
 	var list = []
 	for (f in result) list = list.concat(result[f]);
-	document.getElementById("imageselector").style.display = "block";
+		document.getElementById("imageselector").style.display = "block";
 	divimages = document.getElementById("images");
 	for (i=0; i in list; i++)
 	{		
@@ -25,10 +25,10 @@ function onVideos(result)
 		viddiv = document.createElement("div");
 		viddiv.className = "video";
 		viddiv.innerHTML ="<object width='200' height='auto'><param name='movie' value='" + 
-			list[i] +
-			"'></param><param name='wmode' value='transparent'></param><embed src='" +
-			list[i] + 
-			"' type='application/x-shockwave-flash' wmode='transparent' width='200' height='auto'></embed></object>";	
+		list[i] +
+		"'></param><param name='wmode' value='transparent'></param><embed src='" +
+		list[i] + 
+		"' type='application/x-shockwave-flash' wmode='transparent' width='200' height='auto'></embed></object>";	
 		divimages.appendChild(viddiv);
 	}
 }
