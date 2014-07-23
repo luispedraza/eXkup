@@ -16,7 +16,9 @@ body {
   width: 100%;
   height: 100%;
 }
-
+.msg-menu-item:hover {
+  cursor: pointer;
+}
 .mask {
   pointer-events: none;
   background-image: url(/img/graph-bkg.png);
@@ -34,6 +36,9 @@ body {
 #chart-nodes rect {
   stroke: #fff;
   cursor: pointer;
+}
+#chart-nodes .selected > rect {
+  stroke: #000;
 }
 #chart-links path {
   fill: none;
@@ -110,21 +115,6 @@ body {
 #switch.OR:before {
   content: "ALGUNO";
 }
-.expandable {
-  margin: 10px;
-  position: absolute;
-  top: 0;
-  font-size: 12px;
-  transition: height .5s linear, opacity .5s linear; 
-  overflow: hidden;
-  opacity: .2;
-}
-
-.expandable:hover {
-  box-shadow: 0 0 15px rgba(100,100,100,.5);
-  background-color: rgba(255,255,255,.9);
-  opacity: 1;
-}
 
 #chart-messages {
   width: 300px;
@@ -200,6 +190,9 @@ body {
   top: 5px;
   color: #ccc;
 }
+.tooltip-header {
+  height: 15px;
+}
 .interaction-tooltip {
   width: 300px;
   font-size: 10px;
@@ -246,20 +239,52 @@ body {
   font-weight: bold;
 }
 
+.expandable {
+  margin: 10px;
+  position: absolute;
+  top: 0;
+  font-size: 12px;
+  transition: height .5s linear, opacity .5s linear; 
+  overflow: hidden;
+  opacity: .2;
+  height: 30px;
+  overflow: hidden;
+}
+
+.expandable .fix {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    cursor: pointer;
+    display: none;
+}
+.expandable .fix:hover {
+  color: #f30;
+  opacity: .5;
+}
+.expandable:hover .fix {
+  display: block;
+}
+.expandable.fixed .fix {
+  display: block;
+  color: #f30;
+}
+
+.expandable:hover, .expandable.fixed {
+  box-shadow: 0 0 15px rgba(100,100,100,.5);
+  background-color: rgba(255,255,255,.9);
+  opacity: 1;
+  height: auto;
+  max-height: 500px;
+  overflow-y: scroll;
+}
 .expandable p {
   color: #666;
   font-size: 10px;
 }
-
 .expandable .content {
-  height: 0;
-  padding: 0 10px;
-}
-.expandable:hover .content {
-  height: auto;
   padding: 10px;
 }
-
 .expandable > div {
   /* padding: 0 10px; */
 }

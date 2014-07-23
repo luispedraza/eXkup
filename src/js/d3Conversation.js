@@ -86,11 +86,13 @@ function Conversation(tree) {
 	/* Expandir la conversación a un mensaje arbitrario */
 	this.expand = function(m) {
 		$rootMsgContainer.find(".msg-container.on")
-		.removeClass('on')
-		.css("width", "")
-		.each(function() { $(this).find(".message").remove(); })
-		.siblings().css("width", "");
+			.removeClass('on')
+			.css("width", "")
+			.each(function() { $(this).find(".message").remove(); })
+			.siblings().css("width", "");
 		$(m.container).trigger("click");
+		// mostramos las conversaciones
+		$rootMsgContainer.closest(".expandable").toggleClass("fixed", true);
 	};
 	var update = this.update = function() {
 		$mainContainer = $("#chart-output").empty();

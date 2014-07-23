@@ -8,11 +8,11 @@ function initThread(apiData) {
 	PROCESSOR = new DataProcessor(apiData);
 	FREQUENCIES = new FrequencyVisualizer("#d3-frequency", PROCESSOR, MARGIN);
 	VISUALIZER = new TalkVisualizer("#d3-chart", PROCESSOR, MARGIN);
-	CONVERSATION = new Conversation(PROCESSOR.tree); // conversación: mensajes de la barra izquierda
+	CONVERSATION = new Conversation(PROCESSOR.tree); // ventana de conversaciones
 	populateController(PROCESSOR);
 };
 
-var TEST = 3;
+var TEST = 1;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -114,7 +114,11 @@ $("#check-all-users").on("click", function() {
 // Ordenación de usuarios:
 $("#chart-control .sort-users").on("click", sortUsers);
 
-$(".expandable").draggable();
+$(".expandable").draggable().find(".fix").on("click", function() {
+	$(this).closest(".expandable").toggleClass("fixed");
+});
+
+
 function updateConfiguration() {
 	var layoutID = $("#chart-options .layout.on").attr("id");
 	var layout = layoutID.split("-")[1];

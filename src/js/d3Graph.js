@@ -104,8 +104,73 @@ function TalkVisualizer(containerID, processor, margin) {
 		});
 	};
 
+	// Menú contextual para los mensajes
+	function ContextMenu(element) {
+		var radius = 50,
+			d3Element = d3.select(element).classed("selected", true),
+			data = d3Element.datum();
+		var menuItems = 
+		[
+			{"title": "ver mensaje", "action": "showMessage", "color": "#72c078", "data": data},
+			{"title": "ver conversación", "action": "showConversation", "color": "#c08444", "data": data},
+			{"title": "ver autor", "action": "showAuthor", "color": "#6784c0", "data": data}
+		];
+		var menu = chart.append("g")
+			.attr({"class": "msg-menu",
+					"transform": d3TranslateNode(data)
+				})
+			.on("mouseleave", clearContextMenu);
+		menu.append("circle").attr({
+			"r": 0,
+			"fill": "rgba(255,255,255,.2)",
+			"stroke": "#ddd",
+			"stroke-width": 2,
+			"stroke-dasharray": "3"
+			})
+			.transition().duration(DURATION)
+				.attr("r", radius);
+		var items = menu.selectAll(".msg-menu-item").data(menuItems);
+		items.enter().append("g").attr("class", "msg-menu-item")
+			.attr("transform",d3Translate([0,0]))
+			.on("click", clickOnItem)
+			.append("circle")
+				.attr("r", 0)
+				.style("fill", function(d) { return d.color; });
+		items.transition().duration(DURATION)
+			.attr("transform", function(d,i) {
+				var angle = i * _2_PI/menuItems.length,
+					x = radius * _COS(angle)
+					y = radius * _SIN(angle);
+				return d3Translate([x,y]);
+			});
+		items.selectAll("circle")
+			.transition().duration(DURATION).ease("bounce")
+			.attr("r", 30);
+		// a ejecutar al hacer click en una opción del menú contextual
+		function clickOnItem(d) {
+			switch (d.action) {
+				case "showMessage":
+					var tooltipConfig = {"autoClose": false, "delay": 0};
+					new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d.data), tooltipConfig);
+					break;
+				case "showConversation":
+					dispatchConversation(d.data);
+					break;
+				case "showAuthor":
+					$("body").trigger("loadBoard", "t1-" + d.data.author.nickname);
+					break;
+			};			
+		};
+
+		function clearContextMenu() {
+			d3Element.classed("selected", false);
+			menu.transition().duration(DURATION)
+				.style("opacity", 0)
+				.remove();
+		};
+	};
+
 	function onZoomEnd() {
-		// console.log("zoomend");
 		// var scale = ZOOM.scale();
 		// LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
 		// ANTI_ZOOM_SCALE = d3Scale(1/scale);
@@ -118,6 +183,11 @@ function TalkVisualizer(containerID, processor, margin) {
 		// chartLinks.selectAll("path")
 		// 	.transition().duration(DURATION)
 		// 	.style("stroke-width", LINK_WIDTH);
+		// chartFocusLinks.selectAll("path")
+		// 	.transition().duration(DURATION)
+		// 	.style("stroke-width", function(l) {
+		// 		return l.width / scale;
+		// 	});
 	};
 
 	function onFocusClick(d,i) {
@@ -178,7 +248,6 @@ function TalkVisualizer(containerID, processor, margin) {
 				chart.style("-webkit-transform", d3Translate3D(center) + d3Scale(1));
 				ZOOM.on("zoom", zoomAction);
 			} else if (LAYOUT_TYPE=="timeline") {
-				LAYOUT.size([100, 100]);
 				chart.style("-webkit-transform", d3Translate3D([0,0]) + d3Scale(1));
 				ZOOM.on("zoom", zoomActionTimeline);
 			} else if (LAYOUT_TYPE=="graph") {
@@ -270,7 +339,9 @@ function TalkVisualizer(containerID, processor, margin) {
 	};
 	/* Visualización de los focos del grafo, cuandod hay agrupación */
 	function updateFocus(animate) {
+		console.log(authorFocus);
 		if (typeof animate === "undefined") animate = true;
+		var radiusValue = (LAYOUT_TYPE=="graph") ? (function(l) {return l.radius;}) : 20;
 		/* Focos de autores */
 		var f_author = chartFocus.selectAll("g")
 			.data(authorFocus, function(d) { return d.graph_id || (d.graph_id = ++author_index); });
@@ -295,7 +366,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		(animate ? f_author.transition().duration(DURATION) : f_author)
 			.style("opacity", 1)
 			.attr("transform", d3TranslateNode)
-			.selectAll("circle").attr("r", function(d) { return d.radius - 10; });
+			.selectAll("circle").attr("r", radiusValue);
 		// exit:
 		(animate ? f_author.exit().transition().duration(DURATION) : f_author.exit())
 			.style("opacity", 0)
@@ -326,10 +397,9 @@ function TalkVisualizer(containerID, processor, margin) {
 			.style("opacity", 0)
 			// .call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
 			// .on("click", clickOnNode)
-			// .on("mouseenter", function(d, e) {
-			// 	// var tooltipConfig = {autoClose: "no"};
-			// 	// new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createMessage(d), tooltipConfig);
-			// });
+			.on("mouseenter", function(d, e) {
+				new ContextMenu(this);
+			})
 			.call(FORCE.drag);
 		nodeEnter.append("rect")
 			.attr({"x": -5, "y": -5, "width": 10, "height": 10})
@@ -379,7 +449,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		: flink)
 			.attr("d", diagonal)
 			.style("stroke-width", function(l) {
-				return 4 * LINK_WIDTH * l.width;
+				return l.width / ZOOM.scale();
 			});
 		// exit:
 		(animate ? flink.exit().transition().duration(DURATION) : flink.exit())
@@ -581,7 +651,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		};
 		function computeTimelinePositions(nodes) {
 			nodes.forEach(function(node) {
-				node.y = margin + HEIGHT*node.x/100;
+				node.y = margin + node.x;
 				node.x = timelineScale(node.tsMensaje);
 			});
 		};
@@ -710,6 +780,7 @@ function TalkVisualizer(containerID, processor, margin) {
 				authorFocus = groups.authors;
 				nodes = computeTimelinePositionsGrouped(authorFocus);
 			} else {
+				LAYOUT.size([root.children.length * 20, 100]);
 				nodes = LAYOUT.nodes(root);
 				authorFocus = [];
 				computeTimelinePositions(nodes);

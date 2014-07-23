@@ -97,12 +97,11 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 /* Para mostrar información contextual sobre un elementos */
 function ChartTooltip(whereMouseMoved,x,y,content,config) {
 	if (typeof config == "undefined") config = {};
-	var delay = config.delay || 800;
-	var autoClose = config.autoClose || "yes";
-	if (!typeof delay ==="undefined") delay=800;
+	var delay = (typeof config.delay === "undefined") ? 800 : config.delay;
+	var autoClose = (typeof config.autoClose === "undefined") ? true : config.autoClose;
 	$(whereMouseMoved).on("mouseleave",function() {
 		clearTimeout(timeout);
-		if (autoClose=="yes") close();
+		if (autoClose) close();
 		$(this).off("mouseleave");
 	});
 	var $element = $("<div>");
@@ -113,7 +112,7 @@ function ChartTooltip(whereMouseMoved,x,y,content,config) {
 			.append($("<div>").addClass('tooltip-header'))
 			.append(content)
 			.draggable()
-			.appendTo('#d3-chart-container');
+			.appendTo('body');
 		if (!autoClose) {
 			$element.find(".tooltip-header")
 				.append($("<div>").addClass('close fa fa-times')
