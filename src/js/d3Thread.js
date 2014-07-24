@@ -130,7 +130,7 @@ function updateConfiguration() {
 };
 
 $("#chart-options").draggable();
-$("#chart-options .layout").on("click", function() {
+$("#chart-options .layout").on("click", function(e) {
 	var $this = $(this);
 	if ($this.hasClass('on')) return;
 	$("#chart-options .layout").removeClass('on');
@@ -138,7 +138,7 @@ $("#chart-options .layout").on("click", function() {
 	updateSelector();
 	updateConfiguration();
 });
-$("#chart-options .option").on("click", function() {
+$("#chart-options .option").on("click", function(e) {
 	var $this = $(this);
 	var selected = $this.hasClass('on');
 	$("#chart-options .option").removeClass('on');

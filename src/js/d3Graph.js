@@ -106,46 +106,76 @@ function TalkVisualizer(containerID, processor, margin) {
 
 	// Menú contextual para los mensajes
 	function ContextMenu(element) {
-		var radius = 50,
-			d3Element = d3.select(element).classed("selected", true),
-			data = d3Element.datum();
+		var radius = 40,
+			timeout = setTimeout(initContextMenu, 400),
+			d3Element = d3.select(element).classed("selected", true)
+				.on("mouseleave", function() {
+					clearTimeout(timeout);
+					if (!menu) d3.select(this).classed("selected", false);
+				}),
+			data = d3Element.datum(),
+			color = getMsgColor(data);
 		var menuItems = 
 		[
-			{"title": "ver mensaje", "action": "showMessage", "color": "#72c078", "data": data},
-			{"title": "ver conversación", "action": "showConversation", "color": "#c08444", "data": data},
-			{"title": "ver autor", "action": "showAuthor", "color": "#6784c0", "data": data}
+			{"title": "ver mensaje", "action": "showMessage", "color": color, "data": data},
+			{"title": "ver conversación", "action": "showConversation", "color": color, "data": data},
+			{"title": "ver autor", "action": "showAuthor", "color": color, "data": data}
 		];
-		var menu = chart.append("g")
-			.attr({"class": "msg-menu",
-					"transform": d3TranslateNode(data)
+		var menu, items;
+		/* Inicialización del menú contextual de mensaje */
+		function initContextMenu() {
+			menu = chart.append("g")
+				.attr({"class": "msg-menu",
+						"transform": d3TranslateNode(data) + ANTI_ZOOM_SCALE
+					})
+				.on("mouseleave", clearContextMenu);
+			menu.append("circle").attr({
+				"r": 0,
+				"fill": "rgba(255,255,255,.5)",
+				"stroke": "#ddd",
+				"stroke-width": 2,
+				"stroke-dasharray": "3"
 				})
-			.on("mouseleave", clearContextMenu);
-		menu.append("circle").attr({
-			"r": 0,
-			"fill": "rgba(255,255,255,.2)",
-			"stroke": "#ddd",
-			"stroke-width": 2,
-			"stroke-dasharray": "3"
-			})
-			.transition().duration(DURATION)
-				.attr("r", radius);
-		var items = menu.selectAll(".msg-menu-item").data(menuItems);
-		items.enter().append("g").attr("class", "msg-menu-item")
-			.attr("transform",d3Translate([0,0]))
-			.on("click", clickOnItem)
-			.append("circle")
+				.transition().duration(DURATION)
+					.attr("r", radius);
+			
+			items = menu.selectAll(".msg-menu-item").data(menuItems);
+			var itemsEnter = items.enter().append("g")
+				.attr("class", "msg-menu-item")
+				.attr("transform",d3Translate([0,0]))
+				.on("click", clickOnItem);
+			itemsEnter.append("circle")
 				.attr("r", 0)
 				.style("fill", function(d) { return d.color; });
-		items.transition().duration(DURATION)
-			.attr("transform", function(d,i) {
-				var angle = i * _2_PI/menuItems.length,
-					x = radius * _COS(angle)
-					y = radius * _SIN(angle);
-				return d3Translate([x,y]);
-			});
-		items.selectAll("circle")
-			.transition().duration(DURATION).ease("bounce")
-			.attr("r", 30);
+			// el icono:
+			itemsEnter.append("text")
+				.attr({"font-size": "25px",
+					"dy": ".35em",
+					"font-family": "fontawesome",
+					"text-anchor": "middle",
+					"stroke": "#fff",
+					"stroke-width": "1px",
+					"fill": "#333"
+				})
+				.text(function(d) {
+					switch(d.action) {
+						case "showMessage": return "\uF075";
+						case "showConversation": return "\uF086";
+						case "showAuthor": return "\uF007";
+					};
+				});
+
+			items.transition().duration(200).ease("bounce")
+				.attr("transform", function(d,i) {
+					var angle = i * _2_PI/menuItems.length,
+						x = radius * _COS(angle)
+						y = radius * _SIN(angle);
+					return d3Translate([x,y]);
+				});
+			items.selectAll("circle")
+				.transition().duration(200).ease("bounce")
+				.attr("r", 20);
+		};
 		// a ejecutar al hacer click en una opción del menú contextual
 		function clickOnItem(d) {
 			switch (d.action) {
@@ -169,25 +199,26 @@ function TalkVisualizer(containerID, processor, margin) {
 				.remove();
 		};
 	};
-
+	var ZOOM_SCALE, ZOOM_TR;
 	function onZoomEnd() {
-		// var scale = ZOOM.scale();
-		// LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
-		// ANTI_ZOOM_SCALE = d3Scale(1/scale);
-		// chartNodes.selectAll("g")
-		// 	.transition().duration(DURATION)
-		// 	.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
-		// chartFocus.selectAll("g")
-		// 	.transition().duration(DURATION)
-		// 	.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
-		// chartLinks.selectAll("path")
-		// 	.transition().duration(DURATION)
-		// 	.style("stroke-width", LINK_WIDTH);
-		// chartFocusLinks.selectAll("path")
-		// 	.transition().duration(DURATION)
-		// 	.style("stroke-width", function(l) {
-		// 		return l.width / scale;
-		// 	});
+		console.log("zoomend");
+		var scale = ZOOM.scale();
+		LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
+		ANTI_ZOOM_SCALE = d3Scale(1/scale);
+		chartNodes.selectAll("g")
+			.transition().duration(DURATION)
+			.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
+		chartFocus.selectAll("g")
+			.transition().duration(DURATION)
+			.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
+		chartLinks.selectAll("path")
+			.transition().duration(DURATION)
+			.style("stroke-width", LINK_WIDTH);
+		chartFocusLinks.selectAll("path")
+			.transition().duration(DURATION)
+			.style("stroke-width", function(l) {
+				return l.width / scale;
+			});
 	};
 
 	function onFocusClick(d,i) {
@@ -205,9 +236,9 @@ function TalkVisualizer(containerID, processor, margin) {
 		.call(ZOOM)
 		.on("dblclick.zoom", null);
 	// Para redondear imágenes:
-	svgElement.append("defs")
-		.append("clipPath").attr("id", "round-clip")
-			.append("circle").attr("r", 10);
+	var svgDefs = svgElement.append("defs");
+	svgDefs.append("clipPath").attr("id", "round-clip")
+		.append("circle").attr("r", 10);
 
 	var svg = svgElement.append("g");
 	var chart = svg.append("g").attr("id", "chart")
@@ -802,8 +833,8 @@ function TalkVisualizer(containerID, processor, margin) {
 		ZOOM.event(svg); 
 	};
 	this.config = function(configuration) {
-		configureLayout(configuration);
 		resetZoom();
+		configureLayout(configuration);
 	};
 	this.updateGraph = function() {
 		// window.requestAnimationFrame(update);
