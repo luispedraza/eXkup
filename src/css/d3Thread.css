@@ -193,6 +193,12 @@ body {
 .tooltip-header {
   height: 15px;
 }
+.tooltip-header .close {
+  cursor: pointer;
+}
+.tooltip-header .close:hover {
+  color: #000;
+}
 .interaction-tooltip {
   width: 300px;
   font-size: 10px;

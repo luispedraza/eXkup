@@ -18,16 +18,14 @@
 	color: #666;
 	box-shadow: -3px 2px 8px 0px rgba(50, 50, 50, 0.75);
 }
-.dlg_msg {
+.dlg-title {
 	font-size: 16px;
 	color:  black;
 }
-.dlg_extra {
-	/* margin-top: 10px; */
-	/* max-height: 300px; */
+.dlg-content {
 	overflow-y: hidden;
 }
-.dlg .btn {
+.dlg .dlg-btn {
 	display: inline-block;
 	background-color: #666;
 	color: white;
@@ -41,7 +39,7 @@
 	text-transform: uppercase;
 }
 
-.dlg .btn:hover {
+.dlg .dlg-btn:hover {
 	background-color: #000;
 }
 

@@ -124,10 +124,8 @@ function TalkVisualizer(containerID, processor, margin) {
 		var menu, items;
 		/* Inicialización del menú contextual de mensaje */
 		function initContextMenu() {
-			menu = chart.append("g")
-				.attr({"class": "msg-menu",
-						"transform": d3TranslateNode(data) + ANTI_ZOOM_SCALE
-					})
+			menu = d3Element.append("g")
+				.attr({"class": "msg-menu"})
 				.on("mouseleave", clearContextMenu);
 			menu.append("circle").attr({
 				"r": 0,
@@ -145,7 +143,10 @@ function TalkVisualizer(containerID, processor, margin) {
 				.attr("transform",d3Translate([0,0]))
 				.on("click", clickOnItem);
 			itemsEnter.append("circle")
-				.attr("r", 0)
+				.attr({"r": 0,
+					"stroke": "#fff",
+					"stroke-width": "1px"
+				})
 				.style("fill", function(d) { return d.color; });
 			// el icono:
 			itemsEnter.append("text")
@@ -205,7 +206,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		var scale = ZOOM.scale();
 		LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
 		ANTI_ZOOM_SCALE = d3Scale(1/scale);
-		chartNodes.selectAll("g")
+		chartNodes.selectAll("#chart-nodes > g")
 			.transition().duration(DURATION)
 			.attr("transform", function(d) {return d3TranslateNode(d) + ANTI_ZOOM_SCALE;});
 		chartFocus.selectAll("g")

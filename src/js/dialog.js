@@ -1,27 +1,29 @@
 /* Show a modal dialog onscreen */
-function ModalDialog(msg, extra, buttons, callback, timeout) {
+function ModalDialog(config) {
 	var THAT = this;
 	function removeDialog() {
-		modalDialog.modal.fadeOut(function() { this.remove(); });
+		THAT.modal.fadeOut(function() { this.remove(); });
 	};
+	var title = config.title,
+		content = config.content,
+		buttons = config.buttons,
+		callback = config.callback,
+		timeout = config.timeout;
 	this.close = removeDialog;
-	var modalDialog = this;
 	var $modal = this.modal = $("<div class='modal'><div class='dlg'></div></div>");
 	var $dlg = $modal.find(".dlg");
 	// insertamos el diálogo modal
 	$("body").append($modal);
-	if (msg) {
-		$("<div class='dlg_msg'>"+msg+"</div>").appendTo($dlg);
-	};
-	if (extra) {
-		var $extra = $("<div class='dlg_extra'></div>");
-		if (extra.type == "progress") {
-			var callbackItem = extra.callbackItem;	// a ejecutar sobre cada item
-			var callbackEnd = extra.callbackEnd;	// a ejecutar al final
-			var dataArray = extra.data;				// array de items
-			var span = extra.span;					// elementos a procesar por iteración
+	if (title) { $dlg.append($("<div>").addClass("dlg-title").text(title)); };
+	if (content) {
+		var $content = $("<div>").addClass("dlg-content");
+		if (content.type == "progress") {
+			var callbackItem = content.callbackItem;	// a ejecutar sobre cada item
+			var callbackEnd = content.callbackEnd;	// a ejecutar al final
+			var dataArray = content.data;				// array de items
+			var span = content.span;					// elementos a procesar por iteración
 			$bar = $("<div>").addClass('loading-progress'); 	// la barra de progreso
-			$extra
+			$content
 				.append($("<div>").addClass('loading-container')
 					.append($("<div>").addClass('loading-bar')
 						.append($bar)));
@@ -48,32 +50,32 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 			THAT.stopProgress = function() {
 				currentIteration = iterations;
 			};
-		} else if (extra.type=="spinner") {
-			$extra
+		} else if (content.type=="spinner") {
+			$content
 				.append($("<div>").addClass('spinner fa fa-spinner fa-spin'))
-				.append($("<div>").text(extra.text));
+				.append($("<div>").text(content.text));
 		} else {
-			$extra.append(extra);
+			$content.append(content);
 		};
-		$dlg.append($extra);
+		$dlg.append($content);
 	};
 	if (buttons) {
-		buttonsDiv = $("<div class='dlg_buttons'></div>");
+		buttonsDiv = $("<div>").addClass("dlg-buttons");
 		$dlg.append(buttonsDiv);
 		for (var b=0; b<buttons.length; b++) {
-			var btn = $("<div class='btn'>"+buttons[b]+"</div>");
-			btn.on("click", function() {
-				removeDialog();
-				if (callback) {
-					// posible valor de retorno generado en el diálogo modal 
-					returnArray = $dlg.find("[data-return]").map(function() {
-						return $(this).attr("data-return");
-					})
-					.get();
-					callback(this.textContent, returnArray);
-				};
-			});
-			buttonsDiv.append(btn);
+			buttonsDiv.append($("<div>")
+				.addClass("dlg-btn")
+				.text(buttons[b])	
+				.on("click", function() {
+					removeDialog();
+					if (callback) {
+						// posible valor de retorno generado en el diálogo modal
+						returnArray = $dlg.find("[data-return]").map(function() {
+							return $(this).attr("data-return");
+						}).get();
+						callback(this.textContent, returnArray);
+					};
+				}));
 		};
 	};
 	// optional timeout function
@@ -85,7 +87,7 @@ function ModalDialog(msg, extra, buttons, callback, timeout) {
 	};
 	// cerrar el modal cuando se hace click fuera de la ventana 
 	$modal.on("click", function(e) {
-		if (e.target.className == "modal"){
+		if (e.target.className == "modal") {
 			removeDialog();
 			if (callback) callback();	
 		};

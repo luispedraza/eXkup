@@ -491,10 +491,11 @@ function Popup($container, callback) {
 		var $this = $(this);
 		var user = $this.attr("data-user");
 		var followed = $this.hasClass('on');
-		new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir a este usuario", 
-			"Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " a este usuario en Eskup", 
-			[(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
-			function(result) {
+		var modalCongif = {
+			title: (followed ? "Dejar de" : "Comenzar a") + " seguir a este usuario",
+			content: "Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " a este usuario en Eskup",
+			buttons: [(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
+			callback: function(result) {
 				if (result == "Cancelar") return;
 				API.followUsers([user],
 					result == "Comenzar a seguirlo",
@@ -504,10 +505,17 @@ function Popup($container, callback) {
 							fillProfile();
 							fillFollowTo();	// se recargan los usuarios seguidos
 						} else {
-							new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+							new ModalDialog({
+								title: "ERROR",
+								content: "Se ha producido un error al procesar la petición", 
+								buttons: ["OK"], 
+								timeout: 2000
+							});
 						};
 					});
-			});
+			}
+		};
+		new ModalDialog(modalCongif);
 	};
 
 	/* Bloquear o desbloquear a un usuario */
@@ -515,22 +523,28 @@ function Popup($container, callback) {
 		var $this = $(this);
 		var user = $this.attr("data-user");
 		var blocked = $this.hasClass('on');
-		new ModalDialog((blocked ? "Desbloquear" : "Bloquear") + " a este usuario", 
-			"Si continúas, " + (blocked ? "dejarás de bloquear" : "comenzarás a bloquear") + " a este usuario en Eskup", 
-			[(blocked ? "Desbloquear" : "Bloquear"), "Cancelar"],
-			function(result) {
+		new ModalDialog({
+			title: (blocked ? "Desbloquear" : "Bloquear") + " a este usuario", 
+			content: "Si continúas, " + (blocked ? "dejarás de bloquear" : "comenzarás a bloquear") + " a este usuario en Eskup", 
+			buttons: [(blocked ? "Desbloquear" : "Bloquear"), "Cancelar"],
+			callback: function(result) {
 				if (result == "Cancelar") return;
 				API.blockUsers([user],
 					result == "Bloquear",
 					function(r) {
-						if (r == "OK") {
-							$this.toggleClass('on');
+						if (r == "OK") { $this.toggleClass('on');
 						} else {
-							new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+							new ModalDialog({
+								title: "ERROR", 
+								content: "Se ha producido un error al procesar la petición", 
+								buttons: ["OK"], 
+								timeout: 2000
+							});
 						};
 						if (callback) callback();
 					});
-			});
+			}
+		});
 	};
 
 	/* Seguir o dejar de seguir un tema */
@@ -538,10 +552,11 @@ function Popup($container, callback) {
 		var $this = $(this);
 		var theme = $this.attr("data-theme");
 		var followed = $this.hasClass('on');
-		new ModalDialog((followed ? "Dejar de" : "Comenzar a") + " seguir este tema", 
-			"Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " este tema en Eskup", 
-			[(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
-			function(result) {
+		new ModalDialog({
+			title: (followed ? "Dejar de" : "Comenzar a") + " seguir este tema", 
+			content: "Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " este tema en Eskup", 
+			buttons: [(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
+			callback: function(result) {
 				if (result == "Cancelar") return;
 				API.followThemes([theme],
 					result == "Comenzar a seguirlo",
@@ -552,10 +567,16 @@ function Popup($container, callback) {
 							fillFollowThemes();	// se recargan los temas seguidos
 							fillThemes();	// se recarga la lista de temas seguidos
 						} else {
-							new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+							new ModalDialog({
+								title: "ERROR", 
+								content: "Se ha producido un error al procesar la petición", 
+								buttons: ["OK"], 
+								timeout: 2000
+							});
 						};
 					});
-			});
+			}
+		});
 	};
 
 	/* Escribir o dejar de escribir en un tema */
@@ -567,10 +588,11 @@ function Popup($container, callback) {
 		var writable = $this.attr('data-writable');
 		if ((typeof typesuscription === "undefined")||(typesuscription == "1")) {
 			// no se precisa autorización
-			new ModalDialog(((writable=="1") ? "Dejar de" : "Comenzar a") + " escribir en este tema",
-				"Si continúas, " + ((writable=="1") ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
-				[((writable=="1") ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
-				function(result) {
+			new ModalDialog({
+				title: ((writable=="1") ? "Dejar de" : "Comenzar a") + " escribir en este tema",
+				content: "Si continúas, " + ((writable=="1") ? "dejarás de escribir" : "comenzarás a escribir") + " en este tema en Eskup", 
+				buttons: [((writable=="1") ? "Dejar de " : "Comenzar a ") + "escribir", "Cancelar"],
+				callback: function(result) {
 					if (result == "Cancelar") return;
 					API.writeThemes([theme],
 						result == "Comenzar a escribir",
@@ -581,10 +603,16 @@ function Popup($container, callback) {
 								fillProfile();
 								fillWritableThemes();	// se recargan los temas en que escribo
 							} else {
-								new ModalDialog("ERROR", "Se ha producido un error al procesar la petición", ["OK"], null, 2000);
+								new ModalDialog({
+									title: "ERROR", 
+									content: "Se ha producido un error al procesar la petición", 
+									buttons: ["OK"], 
+									timeout: 2000
+								});
 							};
 						});
-				});
+				}
+			});
 		} else if (typesuscription == "2") {
 			// se precisa autorización
 			// TODO: hay que hacerlo, pero no sé si quedan eventos de este tipo
@@ -593,12 +621,11 @@ function Popup($container, callback) {
 
 	/* Carga de una conversación completa */
 	function showThread(threadID, originalMsgID) {
-		// var modal = new ModalDialog("Cargando datos",
-		// 	"<div class='loading'><i class='fa fa-refresh fa-spin'></i> Por favor, espera mientras se carga la conversación</div>", 
-		// 	[]);
-		var modal = new ModalDialog("Cargando datos", {type:"spinner", text: "Obteniendo datos del servidor..."}, []);
+		var modal = new ModalDialog({
+			title: "Cargando datos", 
+			content: {type:"spinner", text: "Obteniendo datos del servidor..."}
+		});
 		API.loadThread(threadID, function(info) {
-			// TIC();
 			modal.close()
 			var $tree = $("#tree").empty();
 			var aux = {};
@@ -662,12 +689,16 @@ function Popup($container, callback) {
 									addNode(API.buildThreadMessage(item, info.perfilesUsuarios), item.idMsgRespuesta);
 								},
 								callbackEnd: onEnd};
-			modal = new ModalDialog("Procesando " + messages.length + " mensajes",
-				dlgConfig, ["Cancelar"], function(r) {
-				if (r=="Cancelar") {
-					modal.stopProgress();
-					$tree.empty();
-				};
+			modal = new ModalDialog({
+				title: "Procesando " + messages.length + " mensajes",
+				content: dlgConfig, 
+				button: ["Cancelar"], 
+				callback: function(r) {
+					if (r=="Cancelar") {
+						modal.stopProgress();
+						$tree.empty();
+					};
+				}
 			});
 			modal.runProgress();
 			// replies.forEach(function(m) {
@@ -878,12 +909,13 @@ function Popup($container, callback) {
 			$("#history-right").on("click", function() {loadBoard(1);});
 			enableDynamicLoad(true);
 			$(".board-selector").on("click", function() { loadBoard(this.id); });
-			$("#logout").on("click", function() { 
-				new ModalDialog("Cerrar sesión",
-					"¿Deseas cerrar tu sesión en Eskup?", 
-					["Aceptar", "Cancelar"], function(r) {
-						if (r=="Aceptar") API.logOut();
-					});
+			$("#logout").on("click", function() {
+				new ModalDialog({
+					title: "Cerrar sesión",
+					content: "¿Deseas cerrar tu sesión en Eskup?", 
+					buttons: ["Aceptar", "Cancelar"],
+					callback: function(r) {if (r=="Aceptar") API.logOut(); }
+				});
 			});
 			$("#closetree").on("click", function() {
 				loadBoard(-1);
@@ -964,8 +996,9 @@ $(function() {
 			return;
 		}; 
 		$container = $("<div>").attr("id", "eskup-popup");
-		new ModalDialog("", $container, null, function() {
-			window.popup = null;
+		new ModalDialog({
+			content: $container,
+			callback: function() { window.popup = null;}
 		});
 		window.popup = new Popup($container, function() {
 			callback(window.popup);
