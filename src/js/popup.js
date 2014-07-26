@@ -20,7 +20,7 @@ function createMessage(msg, themes) {
 	var user = msg.usuarioOrigen;
 	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
 	// Creación del nuevo mensaje:	
-	$msg = $("<div>").addClass('message')
+	$msg = $("<div>").addClass('message ' + (API.checkFavorite(m_id) ? " favorite" : ""))
 		.attr("data-author", user)
 		.attr("data-id", m_id)
 		.on("mouseenter", onMessageEnter);
@@ -63,7 +63,7 @@ function createMessage(msg, themes) {
 	};
 	// Elementos de control:
 	var $control = $("<div>").addClass('msg_control')
-		.append($("<div>").addClass('btn fav fa fa-star' + (API.checkFavorite(m_id) ? " on" : ""))
+		.append($("<div>").addClass('btn fav fa fa-star')
 			.text(" favorito"))
 		.append($("<div>").addClass('btn reply fa fa-mail-reply')
 			.text(" responder"))

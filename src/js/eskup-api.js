@@ -393,7 +393,7 @@ function EskupApi() {
 	this.checkThemeFollowed = function(theme) { return theme in FOLLOWED_THEMES; };
 
 	// Comprueba si un mensaje está en mis favoritos
-	this.checkFavorite = function(msgid) { return (FAVORITES.indexOf(msgid) >= 0); };
+	this.checkFavorite = function(msgid) {console.log(msgid, FAVORITES); return (FAVORITES.indexOf(msgid) >= 0); };
 
 	/* Agegar mensake a favoritos */
 	this.addFavorite = function(msgID, callback) {

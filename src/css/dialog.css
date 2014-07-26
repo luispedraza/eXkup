@@ -1,5 +1,6 @@
 .modal {
-	position: absolute;
+	position: fixed;
+	/* width: 100%; */
 	left: 0;
 	right: 0;
 	top: 0;
@@ -17,6 +18,10 @@
 	border: 1px solid #fff;
 	color: #666;
 	box-shadow: -3px 2px 8px 0px rgba(50, 50, 50, 0.75);
+}
+#eskup-popup .dlg {
+	width: 450px;
+	max-height: 500px;
 }
 .dlg-title {
 	font-size: 16px;

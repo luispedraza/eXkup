@@ -150,7 +150,7 @@ function TalkVisualizer(containerID, processor, margin) {
 				.style("fill", function(d) { return d.color; });
 			// el icono:
 			itemsEnter.append("text")
-				.attr({"font-size": "25px",
+				.attr({"font-size": "20px",
 					"dy": ".35em",
 					"font-family": "fontawesome",
 					"text-anchor": "middle",

@@ -91,19 +91,32 @@ function onAddFavoriteClick(e) {
 	if (!$msg.hasClass("favorite")) {		// marvar favorito
 		API.addFavorite(m_id, function(status, statusInfo) {
 			if (status == 0) {
-				new ModalDialog("El mensaje se ha agregado a tus favoritos.", null, [], null, 2000);
+				new ModalDialog({
+					title: "El mensaje se ha agregado a tus favoritos.",
+					content: "Puedes ver tus mensajes favoritos en la sección \"FAVORITOS\" de esta extensión",
+					timeout: 2000
+				});
 				$msg.toggleClass('favorite');
 			} else {
-				new ModalDialog("Error: No se pudo agregar el mensaje a favoritos.", statusInfo, [], null, 2000);
+				new ModalDialog({
+					title: "Error agregando favorito.",
+					content: statusInfo,
+					timeout: 2000
+				});
 			};
 		});
 	} else {						// desmarcar favorito
-		new ModalDialog("¿Seguro que desea eliminar este mensaje de sus favoritos?",
-			$msg[0].outerHTML,
-			["Sí", "Cancelar"], function(result) {
+		new ModalDialog({
+			title: "¿Deseas eliminar este mensaje favorito?",
+			content: $("<div>").addClass("fav-2-delete").append($msg.first().clone()),
+			buttons: ["Sí", "Cancelar"], 
+			callback: function(result) {
 				if (result == "Sí") {
 					API.removeFavorite(m_id, function(status, statusInfo) {
-						new ModalDialog("El mensaje se ha eliminado de tus favoritos.", null, [], null, 2000);
+						new ModalDialog({
+							title: "El mensaje se ha eliminado de tus favoritos.",
+							timeout: 2000
+						});
 						$msg.toggleClass('favorite');
 						// además lo eliminamos del tablón de favoritos
 						if (CURRENT_THEME.id == "favs") {
@@ -113,11 +126,12 @@ function onAddFavoriteClick(e) {
 						};
 					});
 				};
-			});
+			}
+		});
 	};
 };
 
-/* Respuesta a un mensaje */
+/* Escribir respuesta a un mensaje */
 function onReplyMessageClick() {
 	var $msg = $(this).closest('.message');
 	var mID = $msg.attr("data-id");
@@ -149,7 +163,11 @@ function onForwardedMessageClick() {
 					.addClass('conversation mark forwarded')
 					.fadeIn(500));
 		} else {	// el mensaje original puede estar elminado
-			new ModalDialog("El mensaje original ha sido eliminado", null, ["Aceptar"], null, 2000);
+			new ModalDialog({
+				title: "El mensaje original ha sido eliminado",
+				buttons: ["Aceptar"],
+				timeout: 2000
+			});
 		};
 	});
 };
@@ -157,22 +175,30 @@ function onForwardedMessageClick() {
 function onDeleteMessageClick() {
 	var $message = $(this).closest('.message');
 	var msgID = $message.attr("data-id");
-	new ModalDialog("¿Seguro que desea borrar este mensaje?", "", ["Sí", "No"],
-		function(result) {
+	new ModalDialog({
+		title: "Eliminación de un mensaje",
+		content: "¿Seguro que desea borrar este mensaje?",
+		buttons: ["Sí", "No"],
+		callback: function(result) {
 			if (result=="No") return;
 			API.deleteMessage(msgID, function(info) {
 				if (info.status=="ok") {
-					new ModalDialog("Eliminación correcta",
-						"El mensaje ha sido eliminado con éxito, aunque el cambio puede tardar en verse reflejado en los servidores de Eskup.",
-						["OK"], null, 2000);
+					new ModalDialog({
+						title: "Eliminación correcta",
+						content: "El mensaje ha sido eliminado con éxito, aunque el cambio puede tardar en verse reflejado en los servidores de Eskup.",
+						buttons: ["OK"], 
+						timeout: 2000
+					});
 					$message.remove();
 				} else {
-					new ModalDialog("Se ha producido un error",
-						"No ha sido posible eliminar el mensaje. Vuelve a intentarlo de nuevo más tarde.",
-						["OK"],
-						null,
-						2000);
+					new ModalDialog({
+						title: "Se ha producido un error",
+						content: "No ha sido posible eliminar el mensaje. Vuelve a intentarlo de nuevo más tarde.",
+						buttons: ["OK"],
+						timeout: 2000
+					});
 				};
 			});
-		});
+		}
+	});
 };

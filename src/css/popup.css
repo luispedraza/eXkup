@@ -933,7 +933,14 @@ span.time-tooltip span:first-child {
     color: #ccc;
     margin-top: 8px;
 }
-.modal .msg_control, #replying-message .msg_control {
+/* Cuando se borra un favorito */
+.modal .fav-2-delete {
+    background-color: #eee;
+    padding: 5px;
+    margin-top: 10px;
+}
+/* Favoritos borrados y mensajes respondidos */
+.modal .fav-2-delete .msg_control, #replying-message .msg_control {
     display: none;
 }
 
