@@ -105,7 +105,7 @@ ul.navigator {
     color: #666;
     font-weight: 300;
     margin: 3px 0;
-    max-height: 300px;
+    max-height: 320px;
     overflow-y: auto;
 }
 ul.navigator li {
@@ -208,6 +208,8 @@ ul.navigator li:hover {
     width: 140px;
     text-align: right;
     padding: 15px 5px;
+    position: relative;
+    height: 515px;
 }
 
 #navigation h1 {
@@ -220,7 +222,7 @@ ul.navigator li:hover {
     float: right;
     background-color: #eee;
     width: 450px;
-    height: 595px;
+    height: 590px;
     overflow-y: hidden;
     overflow-x: hidden;
     margin-top: -45px;
@@ -681,36 +683,38 @@ form.search .button {
     bottom: 0;
     width: 100%;
     height: 34px;
-    /* overflow: hidden; */
     z-index: 200;
     transition: height .25s ease-in-out;
     pointer-events:none;
 }
 /* el mensaje que se está contestanddo */
 #replying-message {
-    /* background-color: #f8f8f8; */
     border-bottom: 1px dotted #ccc;
     border-top: 1px dotted #ccc;
     max-height: 200px;
     overflow-y: scroll;
     padding: 0 20px;
 }
-#edit-section h1 {
-    background-color: #666;
+#edit-button {
+    background-color: #f30;
     color: #fff;
     text-align: center;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 300;
     height: 20px;
-    padding: 10px 5px;
+    padding: 5px;
     cursor: pointer;
-    margin: 0;
-    width: 140px;
-    pointer-events:auto;
+    /* margin: 0; */
+    /* width: 140px; */
+    /* pointer-events:auto; */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 5px;
 }
-#edit-section.on h1 {
-    visibility: hidden;
-    display: none;
+#edit-button:hover {
+    background-color: #000;
 }
 
 #edit-section .edit-description {

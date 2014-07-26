@@ -87,10 +87,15 @@ function Finder(container, provider, appender) {
 };
 
 /* Clase para gestionar el editor 
+	@param config{ 	container: elemento contenedor del editor,
+					api: api de Eskup,
+					onCancel: función a ejecutar por el botón #cancel}
 */
-function Editor(container, api, callback) {
+function Editor(config) {
+	var container = config.container, 
+		API = config.api,	// el objeto de la api que se emplea para enviar mensaje
+		onCancel = config.onCancel;
 	var THAT = this;
-	var API = api;		// el objeto de la api que se emplea para enviar mensaje
 	var MAXCHAR_DEFAULT = 280;
 	var MAXCHAR = MAXCHAR_DEFAULT;		// máximo de caracteres para el mensaje
 	var CONFIG;			// configuración que almacena el editor
@@ -100,7 +105,7 @@ function Editor(container, api, callback) {
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
 		$("#send").on("click", send);
-		//$("#cancel").on("click", reset);
+		$("#cancel").on("click", onCancel);
 		$("#setitalic").on("click", function() { document.execCommand('italic',false,null); });
 		$("#setbold").on("click", function() { document.execCommand('bold',false,null); });
 		$("#newmessage").on("keyup", count)					// Contador de caracteres
@@ -110,8 +115,6 @@ function Editor(container, api, callback) {
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
 		USER_FINDER = new Finder($("#search-user"), API.findUsers, addUsers);				// buscador de usuarios
 		THEME_FINDER = new Finder($("#search-theme"), API.findWritableThemes, addThemes);	// buscador de temas
-		reset();
-		if (callback) callback();
 	});
 
 	/* Esta función intercepta el comando de pegado para eliminar las etiquetas 
@@ -222,49 +225,35 @@ function Editor(container, api, callback) {
 		Si el objeto de configuración es null, se resetea
 	*/
 	this.configure = function(config) {
-		reset();
-		if (config == null) {
-			reset();
-			return;
-		};
+		// Opciones por defecto:
+		var title = "ESCRIBIENDO UN NUEVO MENSAJE",
+			sendButtonText = "ENVIAR";
 		var command = config.command;
-		// Temas del mensaje
 		if ((command=="reply") || (command=="forward")) {
 			API.getMessage(config.mID, function(data) {
-				console.log(data);
 				var msg = data.mensajes[0];
 				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
 				if (command=="reply") {
-					CONFIG.mID = config.mID;
-					// INvestigación del hilo:
+					title = "RESPONDIENDO AL MENSAJE:";
+					// Investigación del hilo:
 					var hilo = msg.hilo;
 					if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios"))
 						configureMaxChar("comments");
-					configureSendButton("RESPONDER");
 				} else if (command=="forward") {
+					title = "REENVIANDO EL MENSAJE:";
 					var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
 					var $newMsg = $("#newmessage");
 					$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
-					configureSendButton("REENVIAR");
-					count();
-					if (msg.cont_adicional) {
-						configureImage(msg.cont_adicional);
-					};
+					sendButtonText = "REENVIAR";
+					if (msg.cont_adicional) { configureImage(msg.cont_adicional); };
 				};
 			});
-		};
-		if (command=="replyPrivate") {
-			CONFIG.mID = config.mID;
+		} else if (command=="replyPrivate") {
+			title = "RESPONDIENDO AL MENSAJE PRIVADO:";
 			configureUsers([config.user]);		// destinatario del privado
 			configureSendButton("RESPONDER");
-		} else {
-			configureSendButton("ENVIAR");
 		};
-		CONFIG.command = command;
-	};
-
-	function configureSendButton(text) {
-		$("#send").text(text);
+		$("#send").text(sendButtonText);
 	};
 
 	function configureMaxChar(n) {
@@ -333,18 +322,6 @@ function Editor(container, api, callback) {
 				}, 1000);
 			};
 		});
-	};
-	/* Se resetea el editor */
-	function reset() {
-		$("#newmessage").empty();
-		configureSendButton("ENVIAR");
-		CONFIG = {command: "send"};
-		MAXCHAR = MAXCHAR_DEFAULT;
-		configureThemes([]);
-		configureUsers([]);
-		$("#send2fb").prop("checked", false);
-		$("#send2tt").prop("checked", false);
-		count();
 	};
 
 	function configureImage(imgURL) {

@@ -93,7 +93,6 @@ function createMessage(msg, themes) {
 	@param callbak: 	a ejecutar al terminar la carga del modal
  */
 function Popup($container, callback) {
-	var EDITOR = null;			// El editor de mensajes
 	var LOADING = false;
 	var CURRENT_THEME = null;	// el tablón actual
 	var HISTORY = [];			// historial de tablones, para navegacion
@@ -215,46 +214,19 @@ function Popup($container, callback) {
 		};
 	};
 
-	/* Función que se ejecuta al pulsar en nuevo mensaje */
-	function onNewMessage() {
-		showEditor(true);
-		// $("#edit-section-h1").off();	// se vuelve a cerrar presionando cancel
-	};
-
-	/* Función que se ejecuta al cancelar en el editor */
-	function onCancelEditor() {
-		$("#replying-message").remove();	// si se estuviera respondiendo a un mensaje
-		showEditor(null);					// se oculta y resetea el editor
-		// $("#edit-section-h1").off().on("click", onNewMessage);
-	};
-
-	/* Gestión de la ventana de edición 
-		@param config: 	true o false: muestra u oculta el editor
-						null: resetea el editor y lo cierra
-						si se pasa un objeto, se muestra el editor con esa configuración
-	*/
+	/* Gestión de la ventana de edición */
 	function showEditor(config) {
-		if (typeof config === "object") {
-			var infoMessage = "ESCRIBIENDO UN NUEVO MENSAJE";
-			if (config) {
-				switch (config.command) {
-					case "replyPrivate":
-						infoMessage = "RESPONDIENDO AL MENSAJE PRIVADO:";
-						break;
-					case "reply":
-						infoMessage = "RESPONDIENDO AL MENSAJE:";
-						break;
-					case "forward":
-						infoMessage = "REENVIANDO EL MENSAJE:";
-						break;
-				};
-			};
-			$("#edit-section").toggleClass('on', config != null)
-				.find(".edit-description").text(infoMessage);
-			EDITOR.configure(config);	// configuración del editor	
-		} else {
-			$("#edit-section").toggleClass("on", config);
-		};
+		config = config || {};
+		var $editorContainer = config.container = $("<div>");
+		var modal = new ModalDialog({
+			content: $editorContainer
+		});
+		// Se construye el editor
+		new Editor({
+			container: $editorContainer,
+			api: API,
+			onCancel: function() {modal.close();}
+		});
 	};
 
 	/* Carga de un tablón en la ventana de mensajes 
@@ -874,9 +846,6 @@ function Popup($container, callback) {
 				chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
 				return;
 			};
-			EDITOR = new Editor("#editor-container", API, function() {
-				$("#cancel").on("click", onCancelEditor);
-			});	// se innicializa en este contenedor 
 			TABLONES["mios"] = "t1-" + userID;
 			fillHeader();
 			fillThemes();
@@ -928,7 +897,7 @@ function Popup($container, callback) {
 			$("#mouse-follow").on("click", function() {
 				$(this).toggleClass('on');
 			});
-			$("#edit-section-h1").on("click", onNewMessage);
+			$("#edit-button").on("click", showEditor);
 			/* Mostrar el perfil */
 			$("#profile-item").on("click", function() {
 				showProfile();
