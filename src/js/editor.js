@@ -92,16 +92,44 @@ function Finder(container, provider, appender) {
 					onCancel: función a ejecutar por el botón #cancel}
 */
 function Editor(config) {
-	var container = config.container, 
+	var THAT = this,
+		CONFIG = config,			// configuración que almacena el editor
+		container = config.container,g bhj
 		API = config.api,	// el objeto de la api que se emplea para enviar mensaje
-		onCancel = config.onCancel;
-	var THAT = this;
-	var MAXCHAR_DEFAULT = 280;
-	var MAXCHAR = MAXCHAR_DEFAULT;		// máximo de caracteres para el mensaje
-	var CONFIG;			// configuración que almacena el editor
-	var USER_FINDER = null;
-	var THEME_FINDER = null; 
+		onCancel = config.onCancel,
+		MAXCHAR_DEFAULT = 280,
+		MAXCHAR = MAXCHAR_DEFAULT,		// máximo de caracteres para el mensaje
+		USER_FINDER = null,
+		THEME_FINDER = null,
+		title = "ESCRIBIENDO UN NUEVO MENSAJE",
+		sendButtonText = "ENVIAR",
+		command = config.command;
 
+	if ((command=="reply") || (command=="forward")) {
+		API.getMessage(config.mID, function(data) {
+			var msg = data.mensajes[0];
+			configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
+			if (command=="reply") {
+				title = "RESPONDIENDO AL MENSAJE:";
+				// Investigación del hilo:
+				var hilo = msg.hilo;
+				if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios"))
+					configureMaxChar("comments");
+			} else if (command=="forward") {
+				title = "REENVIANDO EL MENSAJE:";
+				var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
+				var $newMsg = $("#newmessage");
+				$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
+				sendButtonText = "REENVIAR";
+				if (msg.cont_adicional) { configureImage(msg.cont_adicional); };
+			};
+		});
+	} else if (command=="replyPrivate") {
+		title = "RESPONDIENDO AL MENSAJE PRIVADO:";
+		configureUsers([config.user]);		// destinatario del privado
+		configureSendButton("RESPONDER");
+	};
+	$("#send").text(sendButtonText);
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
 		$("#send").on("click", send);
@@ -115,6 +143,7 @@ function Editor(config) {
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
 		USER_FINDER = new Finder($("#search-user"), API.findUsers, addUsers);				// buscador de usuarios
 		THEME_FINDER = new Finder($("#search-theme"), API.findWritableThemes, addThemes);	// buscador de temas
+
 	});
 
 	/* Esta función intercepta el comando de pegado para eliminar las etiquetas 
@@ -219,41 +248,6 @@ function Editor(config) {
 				.append($("<span>").text("@"+u));
 			return $li;
 		}));
-	};
-
-	/* Configuración del editor.
-		Si el objeto de configuración es null, se resetea
-	*/
-	this.configure = function(config) {
-		// Opciones por defecto:
-		var title = "ESCRIBIENDO UN NUEVO MENSAJE",
-			sendButtonText = "ENVIAR";
-		var command = config.command;
-		if ((command=="reply") || (command=="forward")) {
-			API.getMessage(config.mID, function(data) {
-				var msg = data.mensajes[0];
-				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
-				if (command=="reply") {
-					title = "RESPONDIENDO AL MENSAJE:";
-					// Investigación del hilo:
-					var hilo = msg.hilo;
-					if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios"))
-						configureMaxChar("comments");
-				} else if (command=="forward") {
-					title = "REENVIANDO EL MENSAJE:";
-					var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
-					var $newMsg = $("#newmessage");
-					$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
-					sendButtonText = "REENVIAR";
-					if (msg.cont_adicional) { configureImage(msg.cont_adicional); };
-				};
-			});
-		} else if (command=="replyPrivate") {
-			title = "RESPONDIENDO AL MENSAJE PRIVADO:";
-			configureUsers([config.user]);		// destinatario del privado
-			configureSendButton("RESPONDER");
-		};
-		$("#send").text(sendButtonText);
 	};
 
 	function configureMaxChar(n) {

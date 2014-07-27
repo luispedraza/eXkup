@@ -2,18 +2,26 @@
 function ModalDialog(config) {
 	var THAT = this;
 	function removeDialog() {
-		THAT.modal.fadeOut(function() { this.remove(); });
+		$modal.fadeOut(function() { this.remove(); });
 	};
+	this.close = removeDialog;
 	var title = config.title,
 		content = config.content,
 		buttons = config.buttons,
 		callback = config.callback,
-		timeout = config.timeout;
-	this.close = removeDialog;
-	var $modal = this.modal = $("<div class='modal'><div class='dlg'></div></div>");
-	var $dlg = $modal.find(".dlg");
+		timeout = config.timeout,
+		$container = config.container ? $(config.container) : $("#eskup-popup");	// contenedor del popup
+	var $modal = $("<div>").addClass("modal")
+		.on("click", function(e) {
+			// Cerrar el modal al hacer click fuera de la ventana
+			if (e.target.className == "modal") {
+				removeDialog();
+				if (callback) callback();	
+			};
+		});
+	var $dlg = $("<div>").addClass("dlg").appendTo($modal);
 	// insertamos el diálogo modal
-	$("body").append($modal);
+	$container.append($modal);
 	if (title) { $dlg.append($("<div>").addClass("dlg-title").text(title)); };
 	if (content) {
 		var $content = $("<div>").addClass("dlg-content");
@@ -85,13 +93,6 @@ function ModalDialog(config) {
 			if (callback) callback();
 		}, timeout);
 	};
-	// cerrar el modal cuando se hace click fuera de la ventana 
-	$modal.on("click", function(e) {
-		if (e.target.className == "modal") {
-			removeDialog();
-			if (callback) callback();	
-		};
-	});
 	// Algunos elementos del contenido pueden cerrar el diálogo (independientemente de que tengan otros eventos asociados)
 	$modal.find(".close-on-click").on("click", removeDialog);
 };

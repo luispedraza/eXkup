@@ -40,14 +40,15 @@ function onMessageEnter() {
 /* Función que se ejecuta al hacer click en un elemento de la lista de temas */
 function onThemeClick(e) {
 	e.stopPropagation();
-	$("body").trigger("loadBoard", this.getAttribute("data-theme"));
+	$("body").trigger("loadBoard", {id:this.getAttribute("data-theme")});
 };
 /* Función que se ejecuta al mostrar el thread al que pertenece un mensaje */
 function onShowThreadClick(e) {
 	e.stopPropagation();
-	$("body").trigger("loadBoard", [null, 
-		this.getAttribute("data-thread"), 
-		$(this).closest(".message").attr("data-id")]);
+	$("body").trigger("loadBoard", {
+		threadID: this.getAttribute("data-thread"), 
+		originalMsgID: $(this).closest(".message").attr("data-id")
+	});
 };
 
 /* Función que se ejecuta al hacer click en el autor de un mensaje */

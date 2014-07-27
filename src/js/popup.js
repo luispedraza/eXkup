@@ -218,14 +218,11 @@ function Popup($container, callback) {
 	function showEditor(config) {
 		config = config || {};
 		var $editorContainer = config.container = $("<div>");
+		config.api = API;
+		config.onCancel = function() {modal.close();};
+		new Editor(config);
 		var modal = new ModalDialog({
 			content: $editorContainer
-		});
-		// Se construye el editor
-		new Editor({
-			container: $editorContainer,
-			api: API,
-			onCancel: function() {modal.close();}
 		});
 	};
 
@@ -249,7 +246,7 @@ function Popup($container, callback) {
 				CURRENT_THEME = HISTORY[++HISTORY_POSITION];
 			} else return;
 		} else {
-			if (id === null) {	// thread
+			if (threadID) {	// thread
 				if (CURRENT_THEME && (CURRENT_THEME.type == "thread") && (CURRENT_THEME.id == threadID)) return; // se pide el mismo thread
 				CURRENT_THEME = {type: "thread", id: threadID, original: originalMsgID};
 			} else {			// tablón
@@ -967,6 +964,7 @@ $(function() {
 		$container = $("<div>").attr("id", "eskup-popup");
 		new ModalDialog({
 			content: $container,
+			container: "body",
 			callback: function() { window.popup = null;}
 		});
 		window.popup = new Popup($container, function() {
@@ -978,9 +976,9 @@ $(function() {
 		window.popup = new Popup($("body"));
 	};
 	// Eventos de funcionalidad del popup:
-	$("body").on("loadBoard", function(e, id, threadID, originalMsgID) {
+	$("body").on("loadBoard", function(e, config) {
 		getPopup(function(popup) {
-			popup.loadBoard(id, threadID, originalMsgID);
+			popup.loadBoard(config.id, config.threadID, config.originalMsgID);
 		});
 	});
 	
