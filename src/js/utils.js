@@ -359,6 +359,15 @@ function prettyArray(array) {
 		}).join(" ");
 	}).join("\n"));
 };
+
+/* Eliminación de elementos duplicados de un array */
+function removeDuplicates(array) {
+	result = [];
+	array.forEach(function(e) {
+		if (result.indexOf(e) === -1) result.push(e);
+	});
+	return result;
+};
 /* Encuentra el máximo de una matriz diagonal */
 function maxDiagonalArray(array, ini) {
 	var max = 0, imax = 0 , jmax = 0;

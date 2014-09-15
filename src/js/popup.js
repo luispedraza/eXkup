@@ -214,18 +214,6 @@ function Popup($container, callback) {
 		};
 	};
 
-	/* Gestión de la ventana de edición */
-	function showEditor(config) {
-		config = config || {};
-		var $editorContainer = config.container = $("<div>");
-		config.api = API;
-		config.onCancel = function() {modal.close();};
-		new Editor(config);
-		var modal = new ModalDialog({
-			content: $editorContainer
-		});
-	};
-
 	/* Carga de un tablón en la ventana de mensajes 
 		@param id: identificador del tablón,
 					-1: retrocede en el historial
@@ -894,7 +882,9 @@ function Popup($container, callback) {
 			$("#mouse-follow").on("click", function() {
 				$(this).toggleClass('on');
 			});
-			$("#edit-button").on("click", showEditor);
+			$("#edit-button").on("click", function() {	
+				new Editor({"api": API});	// Nuevo editor de mensajes, opciones por defecto
+			});	
 			/* Mostrar el perfil */
 			$("#profile-item").on("click", function() {
 				showProfile();

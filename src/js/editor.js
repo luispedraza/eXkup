@@ -1,35 +1,60 @@
 
 /* Clase especial para reealizar búsquedas con selector 
-	@param container: contenedor del widget
+	@param $container: contenedor del widget
 	@param provider: proveedor de datos
-	@param appender: función para agregar resultados al pulsar enter
+	@param callback: función a ejecutar cada vez que cambia la selección
+	empleado en selección de temas y de usuarios para enviar mensaje
 */
-function Finder(container, provider, appender) {
-	var $container = container,
-		$input = $container.find("input"),	// valor de búsquedda
-		$found = $container.find("ul");		// resultados de búsqueda
-	var dataProvider = provider;
-	var appenderFunction = appender;
-
+function Finder(container, provider, callback) {
+	var $container = container,		// contenedor del widget
+		dataProvider = provider,	// proveedor de datos de búsqueda
+		selection = [],				// lista de elementos seleccionados
+		value = null,				// valor de búsqueda tecleado por el usuario
+		$input = null,				// el campo de búsqueda
+		$found = null;				// muestra la lista de sugerencias del servidor
+	// carga dinámica del html del widget:
+	var $widget = $("<div>");
+	$widget.load(chrome.extension.getURL("finder_widget.html"), function() {
+		$input = $widget.find(".finder input")
+			.on("focus", searchValue)						
+			.on("keyup", searchValue)			// buscar datos en el servidor
+			.on("keydown", onKeySelector)		// seleccionar de la lista encontrada con cursores
+			.on("blur", function() {
+				value = null;					// se borra el valor de búsqueda
+				$found.fadeOut();				// se ocultan los resultados
+			});
+		$found = $widget.find(".finder ul");
+		$container.append($widget);
+	});
+	// Función que devuelve la selección actual del widget
+	this.getSelection = function() {return selection;};
+	/* Desactivación(activación) del widget */
+	this.disable = function() { $container.fadeOut(); };
+	this.enable = function() { $container.fadeIn(); };
 	/* Buscador de usuarios para enviar privados */
 	function searchValue(e) {
 		var newValue = $input.val();
-		var oldValue = $input.attr("data-value");
-		if (newValue==oldValue) return;
-		$input.attr("data-value", newValue);
-		dataProvider(newValue, function(users) {
+		console.log(newValue, value);
+		if (newValue==value) return;
+		value = newValue;		// guardamos el nuevo valor de búsqueda
+		dataProvider(value, function(results) {
 			$found.empty();
-			if (users) {
+			if (results) {
 				$found.fadeIn();
-				if (users.answer.length) {
-					$found.append(users.answer.map(function(u, i) {
+				if (results.answer.length) {
+					// filtrado de elementos ya agregados:
+					var answer = results.answer.filter(function(e) {
+						console.log(e);
+						return selection.indexOf(e.nick) == -1;
+					});
+					$found.append(answer.map(function(u, i) {
 						var $li = $("<li>")
 							.attr("data-info", u.nick)
+							.addClass((i==0) ? "on" : "")
 							.append($("<img>").attr("src", checkUserPhoto(u.pathfoto)))
-							.append($("<span>").addClass("nickname").text("@" + u.nick))
+							.append($("<span>").addClass("nickname").text(u.nick))
 							.append($("<span>").text(u.nombrebonito))
 							.on("click", function() {selectItem($(this));});
-						if (i==0) $li.addClass('on');
 						return $li;
 					}));
 				} else {
@@ -40,11 +65,14 @@ function Finder(container, provider, appender) {
 			};
 		});
 	};
-
-	/* Selección de usuarios de la lista encontrada */
+	/* Eventos del teclado sobre el widget: 
+		- selección arriba/abajo
+		- enter
+		- escape
+	*/
 	function onKeySelector(e) {
 		var move = 0;
-		if (e.which == 40) { // keydown
+		if (e.which == 40) { 		// keydown
 			move = 1;
 		} else if (e.which == 38) {	// keyup
 			move = -1;
@@ -71,69 +99,59 @@ function Finder(container, provider, appender) {
 		};
 		return true;
 	};
-
+	/* Selección de un item de la lista */
 	function selectItem($item) {
-		appenderFunction([$item.attr("data-info")]);	// se añade el nuevo resultado
-		$input.val("").trigger("keyup");
+		var key = $item.attr("data-info");	// clave del elemento seleccionado
+		if (selection.indexOf(key) == -1) {	// elemento no seleccionado
+			selection.push(key);	// se agrega la nueva clave
+			$("<li>")
+				.attr("data-key", key)
+				.append($("<span>").addClass('del fa fa-times')
+					// eliminación de un elemento:
+					.on("click", function(e) {
+						var $theLi = $(this).closest("li").remove();
+						var thisKey = $theLi.attr("data-key");
+						selection.splice(selection.indexOf(thisKey),1); // se elimina el elemento
+						if (callback) callback();
+					}))
+				.append($("<span>").text(key))
+				.insertBefore($widget.find(".finder"));	// se agrega la nueva selección al widget
+		};
+		// reseteo del widget:
+		value = null;
+		$input.val("").trigger("keyup");	// se vacía el campo de búsqueda
+		// ejecución de callback
+		if (callback) callback();
 	};
-
-	$input		
-		.on("focus", searchValue)						
-		.on("keyup", searchValue)		// buscar datos en el servidor
-		.on("keydown", onKeySelector)		// seleccionar de la lista encontrada con cursores
-		.on("blur", function() {
-			$found.fadeOut();		// se ocultan los resultados
-		});
 };
 
 /* Clase para gestionar el editor 
 	@param config{ 	container: elemento contenedor del editor,
-					api: api de Eskup,
-					onCancel: función a ejecutar por el botón #cancel}
+					api: api de Eskup
+				}
 */
 function Editor(config) {
 	var THAT = this,
-		CONFIG = config,			// configuración que almacena el editor
-		container = config.container,g bhj
+		container = config.container || null;
 		API = config.api,	// el objeto de la api que se emplea para enviar mensaje
-		onCancel = config.onCancel,
+		command = config.command || "send",	// por defecto, envío de  un nuevo mensaje
 		MAXCHAR_DEFAULT = 280,
 		MAXCHAR = MAXCHAR_DEFAULT,		// máximo de caracteres para el mensaje
 		USER_FINDER = null,
 		THEME_FINDER = null,
 		title = "ESCRIBIENDO UN NUEVO MENSAJE",
 		sendButtonText = "ENVIAR",
-		command = config.command;
-
-	if ((command=="reply") || (command=="forward")) {
-		API.getMessage(config.mID, function(data) {
-			var msg = data.mensajes[0];
-			configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
-			if (command=="reply") {
-				title = "RESPONDIENDO AL MENSAJE:";
-				// Investigación del hilo:
-				var hilo = msg.hilo;
-				if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios"))
-					configureMaxChar("comments");
-			} else if (command=="forward") {
-				title = "REENVIANDO EL MENSAJE:";
-				var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
-				var $newMsg = $("#newmessage");
-				$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
-				sendButtonText = "REENVIAR";
-				if (msg.cont_adicional) { configureImage(msg.cont_adicional); };
-			};
-		});
-	} else if (command=="replyPrivate") {
-		title = "RESPONDIENDO AL MENSAJE PRIVADO:";
-		configureUsers([config.user]);		// destinatario del privado
-		configureSendButton("RESPONDER");
+		API_CONFIG = {"command": command};	// Configuración del mensaje para la API
+	if (!container) {
+		// Si no hay definido contenedor, se muestra el editor en una ventana modal
+		container = $("<div>");
+		var modal = new ModalDialog({content: container});
+		$("#cancel").on("click", function() {modal.close();});
 	};
-	$("#send").text(sendButtonText);
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
-		$("#send").on("click", send);
-		$("#cancel").on("click", onCancel);
+		$("#send").on("click", sendMessage);
+		// $("#cancel").on("click", function() {});
 		$("#setitalic").on("click", function() { document.execCommand('italic',false,null); });
 		$("#setbold").on("click", function() { document.execCommand('bold',false,null); });
 		$("#newmessage").on("keyup", count)					// Contador de caracteres
@@ -141,9 +159,36 @@ function Editor(config) {
 		$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
-		USER_FINDER = new Finder($("#search-user"), API.findUsers, addUsers);				// buscador de usuarios
-		THEME_FINDER = new Finder($("#search-theme"), API.findWritableThemes, addThemes);	// buscador de temas
-
+		USER_FINDER = new Finder($("#send2user"), API.findUsers, onDestinationChange);				// buscador de usuarios
+		THEME_FINDER = new Finder($("#send2theme"), API.findWritableThemes, onDestinationChange);	// buscador de temas
+		// Configuración adicional:
+		if ((command=="reply") || (command=="forward")) {
+			// Obtención del mensaje original, respondido o reenviado
+			API.getMessage(config.mID, function(data) {
+				var msg = data.mensajes[0];
+				// temas a los que pertenece el mensaje original:
+				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
+				if (command=="reply") {
+					title = "RESPONDIENDO AL MENSAJE:";
+					// Investigación del hilo:
+					var hilo = msg.hilo;
+					if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios"))
+						configureMaxChar("comments");
+				} else if (command=="forward") {
+					title = "REENVIANDO EL MENSAJE:";
+					var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
+					var $newMsg = $("#newmessage");
+					$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
+					sendButtonText = "REENVIAR";
+					if (msg.cont_adicional) { configureImage(msg.cont_adicional); };
+				};
+			});
+		} else if (command=="replyPrivate") {
+			title = "RESPONDIENDO AL MENSAJE PRIVADO:";
+			configureUsers([config.user]);		// destinatario del privado
+			configureSendButton("RESPONDER");
+		};
+		$("#send").text(sendButtonText);
 	});
 
 	/* Esta función intercepta el comando de pegado para eliminar las etiquetas 
@@ -156,19 +201,25 @@ function Editor(config) {
 		count();
 	};
 
-	/* Agrega temas destino
-		@param themes: array de nicknames
+	/* 	Gestión de la visibilidad de los widgets de selección 
+		de destino de usuarios y de temas. No es compatible el envío de 
+		un mensaje a un usuario de forma privada, con el envío del mismo 
+		mensaje a un tema o tablón público
 	*/
-	function addThemes(themes) {
-		if (CONFIG.themes) themes = CONFIG.themes.concat(themes);
-		configureThemes(themes);
+	function onDestinationChange() {
+		var userDestination = USER_FINDER.getSelection();
+		(userDestination.length)  ? THEME_FINDER.disable() : THEME_FINDER.enable();
+		var themeDestination = THEME_FINDER.getSelection();
+		(themeDestination.length)  ? USER_FINDER.disable() : USER_FINDER.enable();
 	};
+
+
 	/* Elimina temas destino
 		@param themes: array de nicknames
 	*/
 	function removeThemes(themes) {
-		if (!CONFIG.themes) return;
-		var current = CONFIG.themes.slice(0);	// copia de la configuración actual
+		if (!API_CONFIG.themes) return;
+		var current = API_CONFIG.themes.slice(0);	// copia de la configuración actual
 		themes.forEach(function(t) {
 			var position = current.indexOf(t);
 			if (position>=0) current.splice(position,1);
@@ -209,7 +260,7 @@ function Editor(config) {
 			} else {
 				$("#NOsend2theme").hide();
 			};
-			CONFIG.themes = goodThemes;	// temas a los que se enviará el mensaje
+			API_CONFIG.themes = goodThemes;	// temas a los que se enviará el mensaje
 			configureMaxChar(maxChar);
 		});
 	};
@@ -218,37 +269,17 @@ function Editor(config) {
 		@param users: array de nicknames
 	*/
 	function addUsers(users) {
-		if (CONFIG.users) users = CONFIG.users.concat(users);
+		API_CONFIG.users = removeDuplicates((API_CONFIG.users || []).concat(users));
 		configureUsers(users);
 	};
-	/* Elimina destinatarios privados a la configuración
-		@param users: array de nicknames
+	/* Agrega temas destino
+		@param themes: array de nicknames
 	*/
-	function removeUsers(users) {
-		if (!CONFIG.users) return;
-		var current = CONFIG.users.slice(0);	// copia de la configuración actual
-		users.forEach(function(t) {
-			var position = current.indexOf(t);
-			if (position>=0) current.splice(position,1);
-		});
-		configureUsers(current);
+	function addThemes(themes) {
+		API_CONFIG.themes = removeDuplicates((API_CONFIG.themes || []).concat(themes));
+		configureThemes(themes);
 	};
 
-	/* Actualiza en el editor los destinatarios privados del mensaje
-	*/
-	function configureUsers(users) {
-		CONFIG.users = users;
-		$list = $("#send2user ul.linear").empty().append(users.map(function(u) {
-			var $li = $("<li>").attr("data-user", u)
-				.append($("<span>").addClass('del fa fa-times')
-					.on("click", function(e) {
-						var thisUser = $(this).closest("li").attr("data-user");
-						removeUsers([thisUser]);
-					}))
-				.append($("<span>").text("@"+u));
-			return $li;
-		}));
-	};
 
 	function configureMaxChar(n) {
 		if (typeof n === "undefined") MAXCHAR = MAXCHAR_DEFAULT;
@@ -295,19 +326,23 @@ function Editor(config) {
 		});
 	};
 
-	/* Envía un nuevo mensaje */
-	function send() {
-		CONFIG.message = $("#newmessage").text();
+	/* Envío de un nuevo mensaje */
+	function sendMessage() {
+		console.log("configuracion", API_CONFIG);
+		API_CONFIG.users = USER_FINDER.getSelection();		// destinatarios seleccionados
+		API_CONFIG.themes = THEME_FINDER.getSelection();	// temas seleccionados
+		API_CONFIG.message = $("#newmessage").text();		// el mensaje que será enviado
 		// destinos sociales:
 		var social = [];
 		if ($("#send2fb").prop("checked")) social.push("facebook");
 		if ($("#send2tt").prop("checked")) social.push("twitter");
-		if (social.length) CONFIG.social = social;
+		if (social.length) API_CONFIG.social = social;
 		// imagen del mensaje
 		var newimg = $("#newimage.loaded canvas").get(0);
 		if (newimg && newimg.width) 
-			CONFIG.image = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
-		API.update(CONFIG, function (result) {
+			API_CONFIG.image = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
+		console.log("nueva configuracion",API_CONFIG);
+		API.update(API_CONFIG, function (result) {
 			if (result.status == "error") {
 				new ModalDialog("Error al enviar el mensaje", result.info);
 			} else {
