@@ -245,11 +245,9 @@ function Popup($container, callback) {
 			HISTORY = HISTORY.slice(0, ++HISTORY_POSITION);
 			HISTORY.push(CURRENT_THEME);
 		};
-
 		/* Gestión de los botones de navegación */
 		$("#history-left").toggleClass('disabled', HISTORY_POSITION==0);
 		$("#history-right").toggleClass('disabled', HISTORY_POSITION==HISTORY.length-1);
-
 		if (previousTheme && (previousTheme.type == "thread") && (CURRENT_THEME.type != "thread")) {
 			// esto es que hemos cerrado un thread
 			showTreeBoard(false);
@@ -325,6 +323,7 @@ function Popup($container, callback) {
 
 	/* Selecciona el board actual en la interfaz */
 	function uiSelectBoard(board) {
+		console.log(board);
 		// selección del tablón actual en el menú lateral
 		$(".board-selector.on").removeClass("on");
 		$("#"+board).addClass("on");
