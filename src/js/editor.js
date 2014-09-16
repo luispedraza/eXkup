@@ -128,6 +128,11 @@ function Finder(container, provider, callback) {
 /* Clase para gestionar el editor 
 	@param config{ 	container: elemento contenedor del editor,
 					api: api de Eskup
+					title: título del editor
+					command: comando para la api
+					mID: Id del mensaje respondido
+					user: usuario al que se responde en privado
+					callback: callback opcional a ejecutar al cerrar el editor
 				}
 */
 function Editor(config) {
@@ -135,22 +140,26 @@ function Editor(config) {
 		container = config.container || null;
 		API = config.api,	// el objeto de la api que se emplea para enviar mensaje
 		command = config.command || "send",	// por defecto, envío de  un nuevo mensaje
+		mID = config.mID,
+		user = config.user,
+		callback = config.callback,
 		MAXCHAR_DEFAULT = 280,
 		MAXCHAR = MAXCHAR_DEFAULT,		// máximo de caracteres para el mensaje
 		USER_FINDER = null,
 		THEME_FINDER = null,
-		title = "ESCRIBIENDO UN NUEVO MENSAJE",
-		sendButtonText = "ENVIAR",
+		modal = null,
 		API_CONFIG = {"command": command};	// Configuración del mensaje para la API
 	if (!container) {
 		// Si no hay definido contenedor, se muestra el editor en una ventana modal
 		container = $("<div>");
-		var modal = new ModalDialog({content: container});
-		$("#cancel").on("click", function() {modal.close();});
+		modal = new ModalDialog({content: container});
 	};
 	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
 	$(container).load(chrome.extension.getURL("editor.html"), function() {
+		var title = "ESCRIBIENDO UN NUEVO MENSAJE",	// título por defecto
+			sendButtonText = "ENVIAR";				// texto por defecto del boton de enviar
 		$("#send").on("click", sendMessage);
+		$("#cancel").on("click", closeEditor);
 		// $("#cancel").on("click", function() {});
 		$("#setitalic").on("click", function() { document.execCommand('italic',false,null); });
 		$("#setbold").on("click", function() { document.execCommand('bold',false,null); });
@@ -188,8 +197,15 @@ function Editor(config) {
 			configureUsers([config.user]);		// destinatario del privado
 			configureSendButton("RESPONDER");
 		};
+		$("#editor-title").text(title);
 		$("#send").text(sendButtonText);
 	});
+	
+	// Cierre del diálogo de edición
+	function closeEditor() {
+		if (modal) modal.close();
+		if (callback) callback();
+	};
 
 	/* Esta función intercepta el comando de pegado para eliminar las etiquetas 
 		//http://stackoverflow.com/questions/12027137/javascript-trick-for-paste-as-plain-text-in-execcommand
