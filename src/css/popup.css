@@ -671,23 +671,6 @@ form.search .button {
 }
 
 /* Editor */
-#edit-section {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 34px;
-    z-index: 200;
-    transition: height .25s ease-in-out;
-    pointer-events:none;
-}
-/* el mensaje que se está contestanddo */
-#replying-message {
-    border-bottom: 1px dotted #ccc;
-    border-top: 1px dotted #ccc;
-    max-height: 200px;
-    overflow-y: scroll;
-    padding: 0 20px;
-}
 #edit-button {
     background-color: #f30;
     color: #fff;
@@ -709,42 +692,16 @@ form.search .button {
 #edit-button:hover {
     background-color: #000;
 }
+/*#edit-section {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 34px;
+    z-index: 200;
+    transition: height .25s ease-in-out;
+    pointer-events:none;
+}*/
 
-#edit-section .edit-description {
-    display: none;
-    font-size: 20px;
-    /* padding: 15px 0; */
-}
-
-#edit-section.on {
-    height: 550px;
-    pointer-events:auto;
-    background-color: #f8f8f8;
-}
-
-#edit-section.on .edit-description {
-    display: block;
-    /* background-color: #666; */
-    padding: 15px 10px;
-    height: 15px;
-}
-#edit-section h1:before {
-    transition: -webkit-transform .25s ease;
-    position: absolute;
-    font-size: 8px;
-    left: 69px;
-    top: -8px;
-    background: #666;
-    width: 10px;
-    height: 10px;
-    text-align: center;
-    padding: 2px 4px 8px 4px;
-    border-radius: 30px;
-    z-index: 320;
-}
-#edit-section.on h1:before {
-    -webkit-transform:rotate(180deg);
-}
 
 /* Profile */
 #profile-section {
@@ -946,7 +903,7 @@ span.time-tooltip span:first-child {
     margin-top: 10px;
 }
 /* Favoritos borrados y mensajes respondidos */
-.modal .fav-2-delete .msg_control, #replying-message .msg_control {
+.modal .fav-2-delete .msg_control {
     display: none;
 }
 
@@ -978,10 +935,6 @@ span.time-tooltip span:first-child {
     max-width: 100%;
     margin: 10px 0;
     display: block;
-}
-#replying-message .msg_content  img {
-    width: 150px;
-
 }
 .themes {
     font-size: 11px;

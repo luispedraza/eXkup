@@ -28,7 +28,8 @@
 	color:  black;
 }
 .dlg-content {
-	overflow-y: hidden;
+	overflow-y: scroll;
+	max-height: 350px;
 }
 .dlg .dlg-btn {
 	display: inline-block;

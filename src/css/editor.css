@@ -222,7 +222,7 @@
 }
 .send2 ul.linear > li:not(.finder) {
 	background-color: #eee;
-	padding: 0 2px;
+	padding: 2px 2px;
 	font-size: 11px;
 	border-radius: 2px;
 }
@@ -370,4 +370,19 @@
 }
 #send2theme .finder span.nickname {
 	display: none;
+}
+
+/* el mensaje que se está contestando */
+#replying-message {
+    border-bottom: 1px dotted #ccc;
+    border-top: 1px dotted #ccc;
+    max-height: 200px;
+    overflow-y: scroll;
+    padding: 0 20px;
+}
+#replying-message .msg_control {
+    display: none;
+}
+#replying-message .msg_content  img {
+    width: 150px;
 }

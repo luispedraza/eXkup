@@ -34,7 +34,6 @@ function Finder(container, provider, callback) {
 	/* Buscador de usuarios para enviar privados */
 	function searchValue(e) {
 		var newValue = $input.val();
-		console.log(newValue, value);
 		if (newValue==value) return;
 		value = newValue;		// guardamos el nuevo valor de búsqueda
 		dataProvider(value, function(results) {
@@ -44,7 +43,6 @@ function Finder(container, provider, callback) {
 				if (results.answer.length) {
 					// filtrado de elementos ya agregados:
 					var answer = results.answer.filter(function(e) {
-						console.log(e);
 						return selection.indexOf(e.nick) == -1;
 					});
 					$found.append(answer.map(function(u, i) {
@@ -136,6 +134,7 @@ function Finder(container, provider, callback) {
 				}
 */
 function Editor(config) {
+	console.log(config);
 	var THAT = this,
 		container = config.container || null;
 		API = config.api,	// el objeto de la api que se emplea para enviar mensaje
@@ -257,7 +256,6 @@ function Editor(config) {
 				(t in wthemes) ? goodThemes.push(t) : badThemes.push(t);
 				var nChar = themesInfo[t].numero_caracteres_mensaje;
 				maxChar = (maxChar===null) ? nChar : Math.min(maxChar, nChar);
-				console.log(themesInfo[t]);
 			});
 			$("#send2theme ul.linear").empty().append(goodThemes.map(function(t) {
 				return $("<li>").attr("data-theme", t)
@@ -338,7 +336,11 @@ function Editor(config) {
 					})
 					.appendTo(t.active ? $linkCurrent : $linkOther);
 			});
-			new ModalDialog("Selecciona la URL que quieres insertar:", $links, ["Cancelar"], null);
+			new ModalDialog({
+				title: "Selecciona la URL que quieres insertar:", 
+				content: $links, 
+				buttons: ["Cancelar"]
+			});
 		});
 	};
 
@@ -359,12 +361,17 @@ function Editor(config) {
 			API_CONFIG.image = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
 		console.log("nueva configuracion",API_CONFIG);
 		API.update(API_CONFIG, function (result) {
+			console.log(result);
 			if (result.status == "error") {
-				new ModalDialog("Error al enviar el mensaje", result.info);
+				new ModalDialog({
+					title: "Error al enviar el mensaje", 
+					content: result.info});
 			} else {
-				ModalDialog("Mensaje enviado correctamente", null, ["Aceptar"], function() {
-					$("#cancel").trigger("click");	// resetea y oculta el editor
-				}, 1000);
+				new ModalDialog({
+					title: "Mensaje enviado correctamente", 
+					buttons: ["Aceptar"],
+					callback: function() {$("#cancel").trigger("click");}, 
+					timeout: 1500});
 			};
 		});
 	};
@@ -389,16 +396,16 @@ function Editor(config) {
 	function insertImage() {
 		chrome.tabs.executeScript({ file: "exe/getimages.js", allFrames: true }, function(result) {
 			var $selector = $("<div>").addClass('images-selector');
-			var dlg = new ModalDialog("Selecciona la imagen que quieras insertar", 
-				$selector,
-				["Insertar", "Cancelar", "Abrir el Editor"], 
-				function(r, data) {
-					if (r=="Insertar") {
-						configureImage(data[0]);	// agrega la imagen al editor
-					} else if (r == "Abrir el Editor") {
-						// lanzar el editor de imágenes
+			var dlg = new ModalDialog({
+				title: "Selecciona la imagen que quieras insertar", 
+				content: $selector,
+				buttons: ["Insertar", "Cancelar", "Abrir el Editor"], 
+				callback: function(r, data) {
+					if (r=="Insertar") {					// agrega la imagen al editor
+						configureImage(data[0]);	
+					} else if (r == "Abrir el Editor") { 	// lanzar el editor de imágenes
 						chrome.tabs.create({url:"image_editor.html"});
-					};
+					};}
 				});
 			loadImages(result, null, function($div) {
 				$selector.append($div);

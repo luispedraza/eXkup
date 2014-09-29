@@ -944,22 +944,23 @@ function Popup($container, callback) {
 	});
 };
 
+function getPopup(callback) {
+	if (window.popup) {
+		callback(window.popup);
+		return;
+	}; 
+	$container = $("<div>").attr("id", "eskup-popup");
+	new ModalDialog({
+		content: $container,
+		container: "body",
+		callback: function() { window.popup = null;}
+	});
+	window.popup = new Popup($container, function() {
+		callback(window.popup);
+	});
+};
+
 $(function() {
-	function getPopup(callback) {
-		if (window.popup) {
-			callback(window.popup);
-			return;
-		}; 
-		$container = $("<div>").attr("id", "eskup-popup");
-		new ModalDialog({
-			content: $container,
-			container: "body",
-			callback: function() { window.popup = null;}
-		});
-		window.popup = new Popup($container, function() {
-			callback(window.popup);
-		});
-	};
 	/* Inicialización por defecto del popup */
 	if (document.body.id=="eskup-popup") {
 		window.popup = new Popup($("body"));
