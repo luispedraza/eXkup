@@ -158,7 +158,11 @@ function onReplyMessageClick() {
 /* Reenvío de un mensaje */
 function onForwardMessageClick() {
 	var mID = $(this).closest('.message').attr("data-id");
-	showEditor({command: "forward", mID: mID});
+	new Editor({
+		"api": API,
+		"command": "forward",
+		"mID": mID
+	});
 };
 
 /* Función que se ejecuta al hacer click en el enlace al mensaje reenviados */

@@ -49,19 +49,10 @@
 	float: right;
 	position: relative;
 	display: none;
+	background-color: #eee;
 }
 #newimage.loaded {
 	display: block;
-}
-#newimage:before {
-	display: block;
-	position: absolute;
-	font-size: 25px;
-	top: -20px;
-	right: 0;
-	color: #f30;
-	-webkit-transform: rotate(70deg);
-	text-outline: 5px 5px #ffffff;
 }
 
 #canvasimage {

@@ -100,6 +100,13 @@ function Finder(container, provider, callback) {
 	/* Selección de un item de la lista */
 	function selectItem($item) {
 		var key = $item.attr("data-info");	// clave del elemento seleccionado
+		addItem(key);
+		// reseteo del widget:
+		value = null;
+		$input.val("").trigger("keyup");	// se vacía el campo de búsqueda
+	};
+	/* Agregación de un nuevo elemento al widget */
+	function addItem(key) {
 		if (selection.indexOf(key) == -1) {	// elemento no seleccionado
 			selection.push(key);	// se agrega la nueva clave
 			$("<li>")
@@ -113,13 +120,20 @@ function Finder(container, provider, callback) {
 						if (callback) callback();
 					}))
 				.append($("<span>").text(key))
-				.insertBefore($widget.find(".finder"));	// se agrega la nueva selección al widget
+				.insertBefore($widget.find(".finder"));	// se agrega la nueva selección al widget	
 		};
-		// reseteo del widget:
-		value = null;
-		$input.val("").trigger("keyup");	// se vacía el campo de búsqueda
 		// ejecución de callback
 		if (callback) callback();
+	};
+	/* agrega un conjunto de items al widget 
+		@param items: lista de identificadores de items
+		Esta función sirve de interfaz de la clase de widget para añadir
+		tablones destino o usuarios destino desde el exterior,
+		por ejemplo al reponder a un mensaje que aparce en tablones, o que es privado
+	*/
+	this.addItemList = function(items) {
+		console.log(items);
+		items.forEach(function(item) {addItem(item);});
 	};
 };
 
@@ -173,31 +187,34 @@ function Editor(config) {
 		THEME_FINDER = new Finder($("#send2theme"), API.findWritableThemes, onDestinationChange);	// buscador de temas
 		// Configuración adicional:
 		if ((command=="reply") || (command=="forward")) {
+			if (command=="reply") {
+				title = "RESPONDIENDO AL MENSAJE:";
+				sendButtonText = "RESPONDER";
+			} else if (command=="forward") {
+				title = "REENVIANDO EL MENSAJE:";
+				sendButtonText = "REENVIAR";
+			};
 			// Obtención del mensaje original, respondido o reenviado
 			API.getMessage(config.mID, function(data) {
 				var msg = data.mensajes[0];
 				// temas a los que pertenece el mensaje original:
 				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
 				if (command=="reply") {
-					console.log("respondiendo");
-					title = "RESPONDIENDO AL MENSAJE:";
 					// Investigación del hilo:
 					var hilo = msg.hilo;
 					if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios"))
 						configureMaxChar("comments");
 				} else if (command=="forward") {
-					title = "REENVIANDO EL MENSAJE:";
 					var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
 					var $newMsg = $("#newmessage");
 					$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
-					sendButtonText = "REENVIAR";
 					if (msg.cont_adicional) { configureImage(msg.cont_adicional); };
 				};
 			});
 		} else if (command=="replyPrivate") {
 			title = "RESPONDIENDO AL MENSAJE PRIVADO:";
-			configureUsers([config.user]);		// destinatario del privado
-			configureSendButton("RESPONDER");
+			USER_FINDER.addItemList([config.user]);		// configuración del destinatario del privado
+			sendButtonText ="RESPONDER";
 		};
 		if (mHTML) {$("#replying-message").html(mHTML);};
 		$("#editor-title").text(title);
@@ -256,19 +273,13 @@ function Editor(config) {
 			if (typeof themesInfo==="undefined") themesInfo = wthemes;
 			var goodThemes = [], badThemes = [];
 			var maxChar = null;
+			// filtrado de temas en que se puede escribir
 			themes.forEach(function(t) {
 				(t in wthemes) ? goodThemes.push(t) : badThemes.push(t);
-				var nChar = themesInfo[t].numero_caracteres_mensaje;
+				var nChar = themesInfo[t].numero_caracteres_mensaje;	// caracteres para este tema
 				maxChar = (maxChar===null) ? nChar : Math.min(maxChar, nChar);
 			});
-			$("#send2theme ul.linear").empty().append(goodThemes.map(function(t) {
-				return $("<li>").attr("data-theme", t)
-					.append($("<span>").addClass('del fa fa-times').on("click", function(e) {
-						var thisTheme = $(this).closest("li").attr("data-theme");
-						removeThemes([thisTheme]);
-					}))
-					.append($("<span>").text(themesInfo[t].nombre));
-			}));
+			THEME_FINDER.addItemList(goodThemes);	// configuración de temas de destino
 			if (badThemes.length) {
 				$("#NOsend2theme").show()
 					.find("ul").empty()
@@ -278,8 +289,7 @@ function Editor(config) {
 			} else {
 				$("#NOsend2theme").hide();
 			};
-			API_CONFIG.themes = goodThemes;	// temas a los que se enviará el mensaje
-			configureMaxChar(maxChar);
+			configureMaxChar(maxChar);		// configuración del número de caracteres del mensaje
 		});
 	};
 
@@ -298,7 +308,7 @@ function Editor(config) {
 		configureThemes(themes);
 	};
 
-
+	/* Configuración del máximo de caracteres del mensaje */
 	function configureMaxChar(n) {
 		if (typeof n === "undefined") MAXCHAR = MAXCHAR_DEFAULT;
 		else if (n === "comments") MAXCHAR = 1120;
@@ -316,7 +326,6 @@ function Editor(config) {
 		else if (remaining <= 50) $counter.attr('class', 'warning1');
 		else $counter.attr('class', '');
 	};
-
 	/* Inserción de texto al final del nuevo mensaje */
 	function insertText(txt) {
 		$newmessage = $("#newmessage");
