@@ -3,6 +3,7 @@
 	@param $container: contenedor del widget
 	@param provider: proveedor de datos
 	@param callback: función a ejecutar cada vez que cambia la selección
+	@param initValues: (opcional) valores iniciales almacenados en el widget
 	empleado en selección de temas y de usuarios para enviar mensaje
 */
 function Finder(container, provider, callback) {
@@ -11,7 +12,8 @@ function Finder(container, provider, callback) {
 		selection = [],				// lista de elementos seleccionados
 		value = null,				// valor de búsqueda tecleado por el usuario
 		$input = null,				// el campo de búsqueda
-		$found = null;				// muestra la lista de sugerencias del servidor
+		$found = null,				// muestra la lista de sugerencias del servidor
+		loadedHTML = false;				// indica si se ha cargado el html del widget
 	// carga dinámica del html del widget:
 	var $widget = $("<div>");
 	$widget.load(chrome.extension.getURL("finder_widget.html"), function() {
@@ -25,6 +27,7 @@ function Finder(container, provider, callback) {
 			});
 		$found = $widget.find(".finder ul");
 		$container.append($widget);
+		loadedHTML = true;
 	});
 	// Función que devuelve la selección actual del widget
 	this.getSelection = function() {return selection;};
@@ -132,8 +135,14 @@ function Finder(container, provider, callback) {
 		por ejemplo al reponder a un mensaje que aparce en tablones, o que es privado
 	*/
 	this.addItemList = function(items) {
-		console.log(items);
-		items.forEach(function(item) {addItem(item);});
+		function helper() {
+			setTimeout(function() {
+				if (loadedHTML) items.forEach(function(item) {addItem(item);});
+				else helper();
+			}, 10);
+		};
+		// hay que esperar a que el html del wdiget esté cargado
+		helper();
 	};
 };
 
@@ -183,6 +192,7 @@ function Editor(config) {
 		$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
 		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
+		var initThemes = 
 		USER_FINDER = new Finder($("#send2user"), API.findUsers, onDestinationChange);				// buscador de usuarios
 		THEME_FINDER = new Finder($("#send2theme"), API.findWritableThemes, onDestinationChange);	// buscador de temas
 		// Configuración adicional:

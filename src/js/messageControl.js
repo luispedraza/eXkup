@@ -137,7 +137,8 @@ function onReplyMessageClick() {
 	var $msg = $(this).closest('.message');
 	var mID = $msg.attr("data-id");
 	var mHTML = $msg.get(0).outerHTML;	// html del mensaje respondido
-	if ($msg.hasClass("private")) {		// respuesta a un privado
+	// respuesta a un privado
+	if ($msg.hasClass("private")) {		
 		new Editor({
 			"api": API,
 			"command": "replyPrivate",
@@ -145,7 +146,8 @@ function onReplyMessageClick() {
 			"mHTML": mHTML,
 			"user": $msg.attr("data-author")
 		});
-	} else {							// respuesta normal		
+	// respuesta normal
+	} else {		
 		new Editor({
 			"api": API,
 			"command": "reply",
