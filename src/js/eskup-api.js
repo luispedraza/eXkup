@@ -151,7 +151,10 @@ function EskupApi() {
 		});
 	};
 
-	/* Completa la información de un mensaje */
+	/* Completa la información de un mensaje 
+		@param msg: mensaje
+		@param usersInfo: información de usuarios
+	*/
 	this.buildMessage = function(msg, usersInfo) {
 		var user = usersInfo[msg.usuarioOrigen];
 		msg.pathfoto = checkUserPhoto(user.pathfoto);

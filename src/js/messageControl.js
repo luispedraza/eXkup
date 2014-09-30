@@ -137,18 +137,24 @@ function onReplyMessageClick() {
 	var $msg = $(this).closest('.message');
 	var mID = $msg.attr("data-id");
 	var mHTML = $msg.get(0).outerHTML;	// html del mensaje respondido
-	new Editor({
-		"api": API,
-		"command": "reply",
-		"mID": mID,
-		"mHTML": mHTML
-	});
-	// if (CURRENT_THEME.id=="3") {	// respuesta a un privado
-	// 	showEditor({command: "replyPrivate", mID: mID, user: $msg.attr("data-author")});
-	// } else {						// respuesta normal
-	// 	showEditor({command: "reply", mID: mID});
-	// };
+	if ($msg.hasClass("private")) {		// respuesta a un privado
+		new Editor({
+			"api": API,
+			"command": "replyPrivate",
+			"mID": mID,
+			"mHTML": mHTML,
+			"user": $msg.attr("data-author")
+		});
+	} else {							// respuesta normal		
+		new Editor({
+			"api": API,
+			"command": "reply",
+			"mID": mID,
+			"mHTML": mHTML
+		});
+	};
 };
+
 /* Reenvío de un mensaje */
 function onForwardMessageClick() {
 	var mID = $(this).closest('.message').attr("data-id");

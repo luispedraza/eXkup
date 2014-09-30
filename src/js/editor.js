@@ -130,6 +130,7 @@ function Finder(container, provider, callback) {
 					command: comando para la api
 					mID: Id del mensaje respondido
 					user: usuario al que se responde en privado
+					mHTML: html del mensaje que se está respondiendo
 					callback: callback opcional a ejecutar al cerrar el editor
 				}
 */
@@ -141,6 +142,7 @@ function Editor(config) {
 		command = config.command || "send",	// por defecto, envío de  un nuevo mensaje
 		mID = config.mID,
 		user = config.user,
+		mHTML = config.mHTML,
 		callback = config.callback,
 		MAXCHAR_DEFAULT = 280,
 		MAXCHAR = MAXCHAR_DEFAULT,		// máximo de caracteres para el mensaje
@@ -177,6 +179,7 @@ function Editor(config) {
 				// temas a los que pertenece el mensaje original:
 				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
 				if (command=="reply") {
+					console.log("respondiendo");
 					title = "RESPONDIENDO AL MENSAJE:";
 					// Investigación del hilo:
 					var hilo = msg.hilo;
@@ -196,6 +199,7 @@ function Editor(config) {
 			configureUsers([config.user]);		// destinatario del privado
 			configureSendButton("RESPONDER");
 		};
+		if (mHTML) {$("#replying-message").html(mHTML);};
 		$("#editor-title").text(title);
 		$("#send").text(sendButtonText);
 	});

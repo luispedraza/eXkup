@@ -13,14 +13,16 @@ var API = new EskupApi();	// La API de Eskup
 /* Función que crea un nuevo mensaje
 	@param msg: mensaje a agregar
 	@param themes: información complementaria (temas)
+	@param isPrivate: el mensaje es privado? true/false
 	@return: nuevo mensaje agregado
 */
-function createMessage(msg, themes) {	
+function createMessage(msg, themes, isPrivate) {	
 	var m_id = msg.idMsg;
 	var user = msg.usuarioOrigen;
 	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
-	// Creación del nuevo mensaje:	
-	$msg = $("<div>").addClass('message ' + (API.checkFavorite(m_id) ? " favorite" : ""))
+	// Creación del nuevo mensaje:
+	var msgClass = 'message ' + (API.checkFavorite(m_id) ? " favorite " : "") + (isPrivate ? " private " : "");
+	$msg = $("<div>").addClass(msgClass)
 		.attr("data-author", user)
 		.attr("data-id", m_id)
 		.on("mouseenter", onMessageEnter);
@@ -302,11 +304,12 @@ function Popup($container, callback) {
 				if (messages.length == 0) {
 					noMoreMessages();
 				} else {
+					var isPrivate = CURRENT_THEME.id == "3";	// es un tablón de mensajes privados
 					messages.forEach(function(m) {
 						if (!m.borrado) {
 							API.buildMessage(m, usersInfo);
 							// se van agregando nuevos mensajes:
-							$newMessages = $newMessages.add(createMessage(m, themesInfo).appendTo($board));	
+							$newMessages = $newMessages.add(createMessage(m, themesInfo, isPrivate).appendTo($board));	
 						};
 					});
 					if (Math.ceil(info.numMensajes / API.NUMMSG) == CURRENT_PAGE) {
@@ -944,20 +947,23 @@ function Popup($container, callback) {
 	});
 };
 
+/* Obtiene el popup actual
+	y si no existe, crea uno nuevo 
+*/
 function getPopup(callback) {
 	if (window.popup) {
 		callback(window.popup);
-		return;
-	}; 
-	$container = $("<div>").attr("id", "eskup-popup");
-	new ModalDialog({
-		content: $container,
-		container: "body",
-		callback: function() { window.popup = null;}
-	});
-	window.popup = new Popup($container, function() {
-		callback(window.popup);
-	});
+	} else {
+		var $container = $("<div>").attr("id", "eskup-popup");
+		new ModalDialog({
+			content: $container,
+			container: "body",
+			callback: function() { window.popup = null;}
+		});
+		window.popup = new Popup($container, function() {
+			callback(window.popup);
+		});
+	};
 };
 
 $(function() {
@@ -971,6 +977,5 @@ $(function() {
 			popup.loadBoard(config.id, config.threadID, config.originalMsgID);
 		});
 	});
-	
 });
 
