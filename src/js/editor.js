@@ -2,11 +2,10 @@
 /* Clase especial para reealizar búsquedas con selector 
 	@param $container: contenedor del widget
 	@param provider: proveedor de datos
-	@param callback: función a ejecutar cada vez que cambia la selección
-	@param initValues: (opcional) valores iniciales almacenados en el widget
+	@param onSelChange: función a ejecutar cada vez que cambia la selección
 	empleado en selección de temas y de usuarios para enviar mensaje
 */
-function Finder(container, provider, callback) {
+function Finder(container, provider, onSelChange) {
 	var $container = container,		// contenedor del widget
 		dataProvider = provider,	// proveedor de datos de búsqueda
 		selection = [],				// lista de elementos seleccionados
@@ -120,13 +119,13 @@ function Finder(container, provider, callback) {
 						var $theLi = $(this).closest("li").remove();
 						var thisKey = $theLi.attr("data-key");
 						selection.splice(selection.indexOf(thisKey),1); // se elimina el elemento
-						if (callback) callback();
+						if (onSelChange) onSelChange();
 					}))
 				.append($("<span>").text(key))
 				.insertBefore($widget.find(".finder"));	// se agrega la nueva selección al widget	
 		};
-		// ejecución de callback
-		if (callback) callback();
+		// ejecución de callback de cambio de selección
+		if (onSelChange) onSelChange();
 	};
 	/* agrega un conjunto de items al widget 
 		@param items: lista de identificadores de items
@@ -147,89 +146,99 @@ function Finder(container, provider, callback) {
 };
 
 /* Clase para gestionar el editor 
-	@param config{ 	container: elemento contenedor del editor,
+	@param config { container: elemento contenedor del editor,
 					api: api de Eskup
-					title: título del editor
 					command: comando para la api
-					mID: Id del mensaje respondido
-					user: usuario al que se responde en privado
-					mHTML: html del mensaje que se está respondiendo
+					msg: json del mensaje respondido o reenviado
+					themes: temas del mensaje original
 					callback: callback opcional a ejecutar al cerrar el editor
 				}
 */
 function Editor(config) {
-	console.log(config);
 	var THAT = this,
 		container = config.container || null;
 		API = config.api,	// el objeto de la api que se emplea para enviar mensaje
 		command = config.command || "send",	// por defecto, envío de  un nuevo mensaje
-		mID = config.mID,
-		user = config.user,
-		mHTML = config.mHTML,
+		mID = config.mID,				// ID del mensaje, si es respondido o reenviado 
 		callback = config.callback,
-		MAXCHAR_DEFAULT = 280,
+		MAXCHAR_DEFAULT = 280,			// número de caracteres por defecto para un mensaje
 		MAXCHAR = MAXCHAR_DEFAULT,		// máximo de caracteres para el mensaje
 		USER_FINDER = null,
 		THEME_FINDER = null,
-		modal = null,
-		API_CONFIG = {"command": command};	// Configuración del mensaje para la API
-	if (!container) {
-		// Si no hay definido contenedor, se muestra el editor en una ventana modal
-		container = $("<div>");
-		modal = new ModalDialog({content: container});
-	};
-	// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
-	$(container).load(chrome.extension.getURL("editor.html"), function() {
-		var title = "ESCRIBIENDO UN NUEVO MENSAJE",	// título por defecto
-			sendButtonText = "ENVIAR";				// texto por defecto del boton de enviar
-		$("#send").on("click", sendMessage);
-		$("#cancel").on("click", closeEditor);
-		// $("#cancel").on("click", function() {});
-		$("#setitalic").on("click", function() { document.execCommand('italic',false,null); });
-		$("#setbold").on("click", function() { document.execCommand('bold',false,null); });
-		$("#newmessage").on("keyup", count)					// Contador de caracteres
-			.on("paste", onPaste);							// Interceptar pegadp
-		$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
-		$("#insertimage").on("click", insertImage);			// Inserción de imágenes
-		$("#insertlink").on("click", insertLink);			// Inserción de enlaces
-		var initThemes = 
-		USER_FINDER = new Finder($("#send2user"), API.findUsers, onDestinationChange);				// buscador de usuarios
-		THEME_FINDER = new Finder($("#send2theme"), API.findWritableThemes, onDestinationChange);	// buscador de temas
-		// Configuración adicional:
-		if ((command=="reply") || (command=="forward")) {
-			if (command=="reply") {
-				title = "RESPONDIENDO AL MENSAJE:";
-				sendButtonText = "RESPONDER";
-			} else if (command=="forward") {
-				title = "REENVIANDO EL MENSAJE:";
-				sendButtonText = "REENVIAR";
-			};
-			// Obtención del mensaje original, respondido o reenviado
-			API.getMessage(config.mID, function(data) {
-				var msg = data.mensajes[0];
-				// temas a los que pertenece el mensaje original:
-				configureThemes(Object.keys(data.perfilesEventos), data.perfilesEventos);
-				if (command=="reply") {
-					// Investigación del hilo:
-					var hilo = msg.hilo;
-					if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios"))
-						configureMaxChar("comments");
-				} else if (command=="forward") {
-					var fwdText = "fwd @" + msg.usuarioOrigen + ": ";
-					var $newMsg = $("#newmessage");
-					$newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
-					if (msg.cont_adicional) { configureImage(msg.cont_adicional); };
-				};
-			});
-		} else if (command=="replyPrivate") {
-			title = "RESPONDIENDO AL MENSAJE PRIVADO:";
-			USER_FINDER.addItemList([config.user]);		// configuración del destinatario del privado
-			sendButtonText ="RESPONDER";
+		modal = null;
+	/* Inicialización del editor */
+	(function initEditor() {
+		if (!container) {
+			// Si no hay definido contenedor, se muestra el editor en una ventana modal
+			container = $("<div>");
+			modal = new ModalDialog({content: container});
 		};
-		if (mHTML) {$("#replying-message").html(mHTML);};
-		$("#editor-title").text(title);
-		$("#send").text(sendButtonText);
-	});
+		// http://stackoverflow.com/questions/5643263/loading-html-into-page-element-chrome-extension
+		// carga dinámica del HTML del editor
+		$(container).load(chrome.extension.getURL("editor.html"), function() {
+			var title = "Escribiendo un nuevo mensaje",	// título por defecto
+				sendButtonText = "ENVIAR";				// texto por defecto del boton de enviar
+			/* Rellenar los campos del forumlario de título y botón enviar */
+			function fillTitleAndSendButton() {
+				$("#editor-title").text(title);
+				$("#send").text(sendButtonText);
+			};
+			// Inicialización de eventos
+			$("#send").on("click", sendMessage);
+			$("#cancel").on("click", closeEditor);
+			// $("#cancel").on("click", function() {});
+			$("#setitalic").on("click", function() { document.execCommand('italic',false,null); });
+			$("#setbold").on("click", function() { document.execCommand('bold',false,null); });
+			$("#newmessage").on("keyup", count)					// Contador de caracteres
+				.on("paste", onPaste);							// Interceptar pegadp
+			$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
+			$("#insertimage").on("click", insertImage);			// Inserción de imágenes
+			$("#insertlink").on("click", insertLink);			// Inserción de enlaces
+			// Inicialización de widgets de búsqueda
+			USER_FINDER = new Finder($("#send2user"), API.findUsers, onDestinationChange);				// buscador de usuarios
+			THEME_FINDER = new Finder($("#send2theme"), API.findWritableThemes, onDestinationChange);	// buscador de temas
+			// Configuración adicional
+			if (mID) {
+				// se trata de un mensaje respondido o reenviado. Obtenemos el mensaje original:
+				API.getMessage(mID, function(data) {
+					var msg = data.mensajes[0],				// json del mensaje original
+						themes = data.perfilesEventos,		// temas destino del mensaje original
+						hilo = msg.hilo,					// hilo del mensaje
+						user = msg.usuarioOrigen,			// usuario emisor del mensaje original
+						$msg = createMessage(msg, themes),	// jQuery del mensaje original
+						mHTML = $msg.get(0).outerHTML;		// HTML del mensaje original
+					// temas a los que pertenece el mensaje original:
+					// Investigación del hilo:
+					if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios")) {
+						configureMaxChar("comments");
+					} else {
+						configureThemes(Object.keys(themes), themes);
+					};
+					if (command=="reply") {
+						title = "Respondiendo al mensaje de @" + user + ":";
+						sendButtonText = "RESPONDER";
+						$("#replying-message").html(mHTML);
+					} else if (command=="forward") {
+						var fwdText = "fwd @" + user + ": ";
+						// var $newMsg = $("#newmessage");
+						// $newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
+						$("#newmessage").html(fwdText + msg.contenido);
+						if (msg.cont_adicional) { configureImage(msg.cont_adicional); };
+						title = "Reenviando el mensaje de @" + user + ":";
+						sendButtonText = "REENVIAR";
+					} else if (command == "replyPrivate") {
+						title = "Respondiendo al privado de @:" + user + ":";
+						USER_FINDER.addItemList([config.user]);		// configuración del destinatario del privado
+						sendButtonText ="RESPONDER";
+						$("#replying-message").html(mHTML);
+					};
+					fillTitleAndSendButton();
+				});
+			} else {
+				fillTitleAndSendButton();
+			};
+		});
+	})();
 	
 	// Cierre del diálogo de edición
 	function closeEditor() {
@@ -257,20 +266,6 @@ function Editor(config) {
 		(userDestination.length)  ? THEME_FINDER.disable() : THEME_FINDER.enable();
 		var themeDestination = THEME_FINDER.getSelection();
 		(themeDestination.length)  ? USER_FINDER.disable() : USER_FINDER.enable();
-	};
-
-
-	/* Elimina temas destino
-		@param themes: array de nicknames
-	*/
-	function removeThemes(themes) {
-		if (!API_CONFIG.themes) return;
-		var current = API_CONFIG.themes.slice(0);	// copia de la configuración actual
-		themes.forEach(function(t) {
-			var position = current.indexOf(t);
-			if (position>=0) current.splice(position,1);
-		});
-		configureThemes(current);
 	};
 	
 	/* Configurar los tablones destinatarios de un mensaje 
@@ -301,21 +296,6 @@ function Editor(config) {
 			};
 			configureMaxChar(maxChar);		// configuración del número de caracteres del mensaje
 		});
-	};
-
-	/* Agrega destinatarios privados a la configuración
-		@param users: array de nicknames
-	*/
-	function addUsers(users) {
-		API_CONFIG.users = removeDuplicates((API_CONFIG.users || []).concat(users));
-		configureUsers(users);
-	};
-	/* Agrega temas destino
-		@param themes: array de nicknames
-	*/
-	function addThemes(themes) {
-		API_CONFIG.themes = removeDuplicates((API_CONFIG.themes || []).concat(themes));
-		configureThemes(themes);
 	};
 
 	/* Configuración del máximo de caracteres del mensaje */
@@ -369,22 +349,24 @@ function Editor(config) {
 
 	/* Envío de un nuevo mensaje */
 	function sendMessage() {
-		console.log("configuracion", API_CONFIG);
-		API_CONFIG.users = USER_FINDER.getSelection();		// destinatarios seleccionados
-		API_CONFIG.themes = THEME_FINDER.getSelection();	// temas seleccionados
-		API_CONFIG.message = $("#newmessage").text();		// el mensaje que será enviado
 		// destinos sociales:
 		var social = [];
 		if ($("#send2fb").prop("checked")) social.push("facebook");
 		if ($("#send2tt").prop("checked")) social.push("twitter");
+		var newimg = $("#newimage.loaded canvas").get(0);
+		var API_CONFIG = {
+			command: command,
+			mID: mID,
+			users: USER_FINDER.getSelection(),		// destinatarios seleccionados
+			themes: THEME_FINDER.getSelection(),	// temas seleccionados
+			message: $("#newmessage").text()		// mensaje que será enviado
+		};
 		if (social.length) API_CONFIG.social = social;
 		// imagen del mensaje
-		var newimg = $("#newimage.loaded canvas").get(0);
 		if (newimg && newimg.width) 
 			API_CONFIG.image = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
-		console.log("nueva configuracion",API_CONFIG);
+		console.log("Configuración API: ",API_CONFIG);
 		API.update(API_CONFIG, function (result) {
-			console.log(result);
 			if (result.status == "error") {
 				new ModalDialog({
 					title: "Error al enviar el mensaje", 

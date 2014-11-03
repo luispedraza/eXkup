@@ -134,36 +134,23 @@ function onAddFavoriteClick(e) {
 
 /* Escribir respuesta a un mensaje */
 function onReplyMessageClick() {
-	var $msg = $(this).closest('.message');
-	var mID = $msg.attr("data-id");
-	var mHTML = $msg.get(0).outerHTML;	// html del mensaje respondido
-	// respuesta a un privado
-	if ($msg.hasClass("private")) {		
-		new Editor({
-			"api": API,
-			"command": "replyPrivate",
-			"mID": mID,
-			"mHTML": mHTML,
-			"user": $msg.attr("data-author")
-		});
-	// respuesta normal
-	} else {		
-		new Editor({
-			"api": API,
-			"command": "reply",
-			"mID": mID,
-			"mHTML": mHTML
-		});
-	};
+	var $msg = $(this).closest('.message'),
+		isPrivate = $msg.hasClass("private"),
+		mID = $msg.attr("data-id");
+	new Editor({
+		"command": (isPrivate ? "replyPrivate" : "reply"),
+		"mID": mID,
+ 		"api": API
+	});
 };
 
 /* Reenvío de un mensaje */
 function onForwardMessageClick() {
 	var mID = $(this).closest('.message').attr("data-id");
 	new Editor({
-		"api": API,
 		"command": "forward",
-		"mID": mID
+ 		"api": API,
+ 		"mID": mID
 	});
 };
 

@@ -221,6 +221,8 @@ function Popup($container, callback) {
 					-1: retrocede en el historial
 					1: avanza en el historial
 					null: se pide un thread, entonces se usan threadID, originalMsgID
+		@param threadID: identificador del thread
+		@param originalMsgID: id del mensaje en el que se hizo click para acceder al thread
 	*/
 	function loadBoard(id, threadID, originalMsgID) {
 		showSearchForm(false);
@@ -265,7 +267,7 @@ function Popup($container, callback) {
 				showThread(CURRENT_THEME.id, CURRENT_THEME.original);
 			};	
 		};
-		uiSelectBoard(CURRENT_THEME.id);
+		uiSelectBoard(id);
 	};
 	this.loadBoard = loadBoard;
 
@@ -324,43 +326,73 @@ function Popup($container, callback) {
 		});
 	};
 
-	/* Selecciona el board actual en la interfaz */
-	function uiSelectBoard(board) {
-		console.log(board);
-		// selección del tablón actual en el menú lateral
+	/* Selección del tablón actual en la interfaz de usuario
+		@param id: ID del elemento seleccionado con el ratón
+	*/
+	function uiSelectBoard(id) {
+		/* función de ayuda para introducir la información del tablón actual:
+			@param title: título del tablón
+			@param $descContent: HTML con la descripción del tablón
+			@param className: (opcional) clase a aplicar a la descripción del tablón
+		*/
+		function fillTitleAndDescription(title, $descContent, className) {
+			$("#board-title").text(title);
+			$("#board-description")
+				.empty()
+				.removeClass()
+				.addClass(className || "")
+				.append($descContent);
+		};
+		if (typeof id=="undefined") fillTitleAndDescription("Hilo de comentarios");
+		// Selección del elemento del menú:
 		$(".board-selector.on").removeClass("on");
-		$("#"+board).addClass("on");
-		// información sobre el tablero actual:
-		$title = $("#board-title").text("");
-		$description = $("<div>").appendTo($("#board-description").empty());
-		if (board == getBoard("sigo")) {
-			$description
-				.append($("<p>").text("Aquí encontrarás todos los mensajes publicados por los usuarios a los que sigues, y en los temas que sigues."));
-			$title.text("Mensajes de usuarios y temas que sigo");
-		} else if (board == getBoard("todo")) {
-			$title.text("Todos los mensajes de Eskup");
-		} else if (board == getBoard("mios")) {
-			$title.text("Mensajes enviados por mí");
-		} else if (board == getBoard("priv")) {
-			$title.text("Mis mensajes privados");
-		} else if (board == getBoard("favs")) {
-			$title.text("Mis mensajes favoritos");
+		$("#"+id).addClass("on");	// current board menu item
+		// Información del tablón mostrado:
+		var title = null, 											// texto del título del tablón
+			$descriptionContent = null;								// HTML con la descripción del tablón
+		
+		// tablones de la primera parte del menú, que no requieren obtener información adicional del servidor:
+		switch (id) {
+			case "sigo":
+				title = "Mensajes de usuarios y temas que sigo";
+				$descriptionContent = $("<p>").text("Todos los mensajes publicados por los usuarios a los que sigues, y en los temas que sigues.");
+				break;
+			case "todo":
+				title = "Todos los mensajes de Eskup";
+				$descriptionContent = $("<p>").text("Todos los mensajes publicados en Eskup.");
+				break;
+			case "mios":
+				title = "Mensajes enviados por mí";
+				$descriptionContent = $("<p>").text("Los mensajes que has enviado a Eskup.");
+				break;
+			case "priv":
+				title = "Mis mensajes privados";
+				$descriptionContent = $("<p>").text("Mensajes privados enviados o recibidos por ti.");
+				break;
+			case "favs":
+				title = "Mis mensajes favoritos";
+				$descriptionContent = $("<p>").text("Mensajes que has marcado como favoritos en esta máquina, y que se almacenan localmente en tu navegador.");
+		};
+		if (title) {
+			fillTitleAndDescription(title, $descriptionContent);
 		} else {
-			var boardInfo = board.split("-");
+			// tablones o threads, que requieren obtener información adicional del servidor
+			var $description = $("<div>");
+			var boardInfo = id.split("-");	// current board API ID
 			switch (boardInfo[0]) {
-				case "ev": 	// UN EVENTO
-					$description.addClass("theme-information");
-					var theme = boardInfo[1];
+				case "ev": // se trata de un evento de Eskup
+					var theme = boardInfo[1];	// identificador del tema
 					API.loadThemeInfo(theme, function(themeInfo) {
+						console.log(themeInfo);
 						$("<img>").attr("src", themeInfo.pathfoto).appendTo($description);
 						$("<p>").html(themeInfo.descripcion).appendTo($description);
 						var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
 						var $apoyos = null;
 						for (var a in themeInfo.apoyos) {
 							var apoyo = themeInfo.apoyos[a];
-							var apoyo_title = apoyo.titulo_apoyo;
-							var apoyo_link = apoyo.enlace_apoyo;
-							if (apoyo_title) {
+							if (apoyo.titulo_apoyo.length) {
+								var apoyo_title = apoyo.titulo_apoyo;
+								var apoyo_link = apoyo.enlace_apoyo;
 								$apoyos = ($apoyos || $("<ul>").attr("class", "links"));
 								$apoyos.append($("<li>").append( apoyo_link ? makeLink(apoyo_title, apoyo_link) : apoyo_title));
 							};
@@ -383,14 +415,11 @@ function Popup($container, callback) {
 									.attr("data-writable", themeInfo.estado_escritura)
 									.on("click", onWriteTheme));			
 						};
-						$description.append($themeControl);
-						$title.text(themeInfo.nombre);
+						fillTitleAndDescription(themeInfo.nombre, $description, "theme-information");
 					});
 					break;
-
 				case "t1": 	// UN USUARIO
-					$description.addClass("user-information");
-					var user = boardInfo[1];
+					var user = boardInfo[1];	// el id del tablón de usuario
 					API.loadProfile(user, function(userInfo) {
 						var userURL = "http://eskup.elpais.com/" + user + "/";
 						// enlaces de usuario
@@ -435,12 +464,10 @@ function Popup($container, callback) {
 								.append($("<div>").addClass("write")
 									.append(makeLink(userInfo.numero_eventos_escribe, userURL + "temasescritos"))));
 						$description.append($stats);
-
-						$title.text("Mensajes de @" + user + " - " + userInfo.nombre + " " + userInfo.apellidos);
-					});
-					break;
-				default: 	// UN THREAD
-					$title.text("Se está mostrando un thread");
+						fillTitleAndDescription("Mensajes de @" + user + " - " + userInfo.nombre + " " + userInfo.apellidos,
+							$description, 
+							"user-information");
+					});					
 			};
 		};
 	};
@@ -700,7 +727,6 @@ function Popup($container, callback) {
 	function showProfile() {
 		$(this).toggleClass('on');
 		$("#profile-container").toggleClass('on');
-		// $("#profile-container .selector-item").removeClass('on');	// para obligar recarga en click
 	};
 
 	/* Carga en el perfil la lista de usuarios a quienes sigo */
@@ -887,11 +913,7 @@ function Popup($container, callback) {
 			$("#edit-button").on("click", function() {	
 				new Editor({"api": API});	// Nuevo editor de mensajes, opciones por defecto
 			});	
-			/* Mostrar el perfil */
-			$("#profile-item").on("click", function() {
-				showProfile();
-				fillProfile();
-			});
+
 			// Mostrar secciones del perfil
 			$("#profile-section .selector-item h4").on("click", function() {
 				$("#profile-section .selector-item").removeClass('on');
@@ -904,6 +926,12 @@ function Popup($container, callback) {
 			/* Información sobre el tablón actual */
 			$("#board-title").on("click", function() {
 				$("#messages-header").toggleClass("on");
+			});
+			/* Mostrar el perfil */
+			$("#profile-item").on("click", function() {
+				$(this).toggleClass("on");
+				showProfile();
+				fillProfile();
 			});
 			/* Muestra la visualiación de un thread */
 			$("#show-d3").on("click", function() {

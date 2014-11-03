@@ -5,7 +5,7 @@
     margin: 5px 10px;
 }
 #editor {
-	height: 260px;
+	height: 300px;
 	overflow-y: scroll;
 	position: relative;
 	background-color: #fff;
@@ -366,14 +366,18 @@
 /* el mensaje que se está contestando */
 #replying-message {
     border-bottom: 1px dotted #ccc;
-    /* border-top: 1px dotted #ccc; */
-    max-height: 200px;
+    max-height: 150px;
     overflow-y: scroll;
-    /* padding: 0 20px; */
 }
 #replying-message .msg_control {
     display: none;
 }
-#replying-message .msg_content  img {
-    width: 150px;
+#replying-message .msg_content img {
+    max-width: 150px;
+}
+#replying-message .msg_content {
+	font-size: 12px;
+}
+#replying-message .msg_header {
+	display: none;
 }

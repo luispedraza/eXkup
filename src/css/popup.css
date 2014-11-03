@@ -71,14 +71,13 @@ a:hover {
     height: 0;
     width: 100%;
     position: absolute;
-    top: 47px;
+    top: 40px;
     overflow: hidden;
     transition: height .25s linear;
     z-index: 300;
-    /* color:  #fff; */
 }
 #profile-container.on {
-    height: 550px;
+    height: 560px;
 }
 /* Navegación */
 .section-container {
@@ -123,37 +122,35 @@ ul.navigator li:hover {
 
 #thm-section {
     margin-top: 0.8em;
-
 }
 
 #header {
-    height: 37px;
-    padding: 5px 5px;
-    background-color: #1e5070;
     color: #fff;
     position: relative;
-
-    vertical-align:  top;
-    width: 140px;
 }
 #profile-item {
     cursor: pointer;
     position: relative;
     z-index: 320;
+    background-color: #1e5070;
+    padding: 6px;
+    width: 140px;
 }
 #profile-item:before {
     transition: -webkit-transform .25s ease;
     position: absolute;
-    font-size: 8px;
-    left: 64px;
-    top: 29px;
+    font-size: 10px;
+    left: 5px;
+    top: 40px;
     background: #1e5070;
     width: 10px;
     height: 9px;
     text-align: center;
-    padding: 9px 4px 2px 4px;
-    border-radius: 30px;
+    padding: 2px;
     z-index: 320;
+}
+#profile-item.on:before{
+    -webkit-transform: rotate(180deg);
 }
 #header-menu {
     position: absolute;
@@ -181,7 +178,7 @@ ul.navigator li:hover {
     border-bottom: 2px solid #fff;
 }
 #user-avatar {
-    width: 35px;
+    width: 30px;
     border: 1px solid #fff;
     float:  left;
     margin-right: 3px;
@@ -191,7 +188,7 @@ ul.navigator li:hover {
     float: left;
 }
 #user-nickname {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     margin-top: 5px;
 }
@@ -224,14 +221,12 @@ ul.navigator li:hover {
     position: absolute;
     top:0;
     right: 0;
-    /* padding: 5px; */
     width: 450px;
 }
 
 #messages-header {
     background-color: rgba(255, 51, 0, 0.9);
     z-index: 100;
-    /* border-bottom: 1px solid #fff; */
     transition: all .25s ease;
 }
 #messages-header.on {
@@ -240,17 +235,12 @@ ul.navigator li:hover {
 
 #messages-header .nav {
     float: right;
-    /* border: 1px solid #fff; */
-    /* padding: 5px; */
-    /* background-color: #fff; */
     font-size: 18px;
-    /* display: block; */
     margin-top: 10px;
     margin-right: 5px;
 }
 #messages-header .button {
     border: 0;
-    /* background-color: #666; */
     color: #fff;
     padding: 4px;
     cursor: pointer;
@@ -277,7 +267,6 @@ form.search {
     overflow: hidden;
     opacity: 0;
     transition: all .2s ease;
-    /* transition: width .2s ease; */
     -webkit-user-select: none;
     border-bottom-left-radius: 15px;
 }
@@ -293,7 +282,6 @@ form.search a:hover {
 form.search input[type=text] {
     outline: none;
     border: 0;
-    /* margin: 2px 1px 2px 5px; */
     padding: 6px;
     width: 120px;
     transition: width .2s ease;
@@ -301,7 +289,6 @@ form.search input[type=text] {
     border-radius: 100px;
 }
 form.search .button {
-    /* background-color: #ddd; */
     width: 15px;
     text-align: center;
     display: inline-block;
@@ -321,44 +308,32 @@ form.search .button {
 
 #search-info {
     color: #fff;
-    /* margin-left: 5px; */
-    /* width: 46px; */
 }
 
 #board-info {
     color: #fff;
-    /* display: block; */
 }
 
 #board-title {
     white-space: nowrap;
     text-overflow: ellipsis;
     cursor: pointer;
-    font-size: 16px;
-    /* margin-top: 10px; */
-    /* margin-bottom: 21px; */
+    font-size: 14px;
     display: block;
-    /* max-width: 300px; */
     overflow: hidden;
-    /* margin-right: 42px; */
     font-weight: bold;
-    /* border-bottom: 1px solid #fff; */
-    padding: 10px 5px 21px 5px;
+    padding: 15px 5px;
 }
 #board-title:before {
     transition: -webkit-transform .25s ease;
     position: absolute;
-    font-size: 8px;
-    left: 225px;
-    top: 36px;
+    font-size: 10px;
+    left: 5px;
+    top: 40px;
     background-color: rgba(255, 51, 0, 0.85);
-    width: 10px;
-    height: 7px;
     text-align: center;
-    padding: 7px 4px 4px 4px;
-    border-radius: 30px;
+    padding: 2px;
     z-index: 500;
-    /* border-bottom: 1px solid #fff; */
 }
 #board-description {
     clear: both;
@@ -370,15 +345,14 @@ form.search .button {
     position: relative;
 }
 #messages-header.on #board-description {
-    border-top: 1px dotted #f30;
     height: 220px;
-    /* margin-top: 15px; */
     padding-top: 20px;
 }
 
 #messages-header.on #board-title:before {
     -webkit-transform:rotate(180deg);
     border: none;
+    background-color: transparent;
 }
 
 #board-description img {
@@ -390,8 +364,6 @@ form.search .button {
 #board-description img.avatar {
     float: left;
     height: 80px;
-    /* border: 1px solid #fff; */
-    /* margin-top: 13px; */
     margin-left: 0;
     margin-right: 10px;
 }
@@ -415,20 +387,14 @@ form.search .button {
     width: 450px;
 }
 .eskup-info .stats {
-    /* float: left; */
     display: inline-block;
-    /* background: #f30; */
-    /* margin-right: 5px; */
-    /* padding: 2px; */
     text-align: right;
     font-size: 13px;
     padding: 10px;
-    /* width: 126px; */
 }
 .eskup-info .stats:before {
     display: block;
     width: 100%;
-    /* font-size: 12px; */
     text-transform: uppercase;
 }
 .eskup-info .info-users:before {
@@ -441,18 +407,11 @@ form.search .button {
     content: "temas";
 }
 .eskup-info .stats div {
-    /* display: inline-block; */
-    /* margin: 3px; */
-    /* width: 60px; */
-    /* height: 30px; */
-    /* background-color: #fff; */
     margin-top: 10px;
 }
 .eskup-info .stats div a {
     display: inline-block;
-    /* margin-top: 10px; */
     font-size: 20px;
-    /* text-decoration: none; */
     background-color: #fff;
     border-radius: 100px;
     padding: 5px;
@@ -464,9 +423,6 @@ form.search .button {
 }
 .eskup-info .stats div:before {
     display: inline-block;
-    /* width: 100%; */
-    /* font-size: 12px; */
-    /* background-color: #f30; */
     margin-right: 6px;
 }
 .eskup-info .info-users .from:before {
@@ -505,10 +461,9 @@ form.search .button {
     color:  #f30;
 }
 #board-description .links li {
-    /* margin-right: 5px; */
-    padding: 2px 3px;
     display: list-item;
-    margin-top: 2px;
+    margin-bottom: 2px;
+    list-style-type: square;
 }
 #board-description .links li.eskup:before {
     content: " ";
@@ -520,19 +475,22 @@ form.search .button {
     overflow: visible;
 }
 #board-description .links a {
-    /* text-decoration: none; */
+    border-bottom: 1px dotted #fff;
     display: inline-block;
     color: #fff;
+    padding: 0;
 }
 
-#board-description .links li:hover {
-    background-color:#f30;
-    color: #fff;
+#board-description .links a:hover {
+    border-bottom: 1px solid #f30;
+    background-color: transparent;
+    color: #f30;
 }
+
 /* Control del tema */
 .theme-control {
     float: right;
-    margin-top: 15px;
+    /* margin-top: 15px; */
 }
 .control-item {
     background-color: #1e5070;
@@ -636,8 +594,6 @@ form.search .button {
     left: 450px;
     overflow-x: scroll;
     height: 515px;
-    /* padding-bottom: 122px; */
-    /* border: 1px solid red; */
 }
 #board.switch {
     left: -450px;
@@ -692,23 +648,13 @@ form.search .button {
 #edit-button:hover {
     background-color: #000;
 }
-/*#edit-section {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 34px;
-    z-index: 200;
-    transition: height .25s ease-in-out;
-    pointer-events:none;
-}*/
-
 
 /* Profile */
 #profile-section {
     overflow: auto;
     padding: 20px;
-    margin: 5px;
-    height: 500px;
+    margin: 15px;
+    height: 490px;
     position: relative;
     background-color: #fff;
 }
@@ -749,18 +695,14 @@ form.search .button {
 }
 .card {
     -webkit-transition: all 400ms ease;
-    -moz-transition: all 400ms ease;
-    -o-transition: all 400ms ease;
     transition: all 400ms ease;
     -webkit-transform:  translate3d(0px, 100px, 0) rotateX(-30deg) scale(1.25, 1.25);
-    -moz-transform: translate3d(0px, 100px, 0) rotateX(-30deg) scale(1.25, 1.25);
     transform: translate3d(0px, 100px, 0) rotateX(-30deg) scale(1.25, 1.25);
     opacity: 0;
 }
 
 .card.appeared{
     -webkit-transform: translate3d(0px, 0px, 0px) rotateX(0)  scale(1, 1);
-    -moz-transform:  translate3d(0px, 0px, 0px) rotateX(0)  scale(1, 1);
     transform: translate3d(0px, 0px, 0px) rotateX(0)  scale(1, 1);
     opacity: 1;
 }
@@ -798,7 +740,6 @@ form.search .button {
     top: 43px;
     font-size: 12px;
     background-color: #fff;
-    /* border: 1px solid #ddd; */
     border-radius: 10px;
     padding: 1px 5px;
     z-index: 50;
@@ -1082,16 +1023,7 @@ span.time-tooltip span:first-child {
 }
 .selector .theme-control {
     display: none;
-    /* padding-top: 0px; */
 }
 .selector li:hover .theme-control {
     display: block;
-}
-
-#follow-to {
-
-}
-
-#follow-me {
-
 }

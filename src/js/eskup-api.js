@@ -1,14 +1,14 @@
 function EskupApi() {
-	var THAT = this;
-	var PUBLIC_KEY = "";
-	var USER_ID = "";
-	var WRITABLE_THEMES = null;	// temas en los que puedo escribir
-	var FOLLOWED_THEMES = null;	// temas que sigo
-	var THEMES_INFO = {}; 	// información sobre eventos
-	var USER_PROFILE = {};	// información de perfil de usuarios
-	var LAST_THREAD = {id: null, info: null};		// guarda el último thread leído
-	var FAVORITES = (typeof localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : new Array();	// lista de temas favoritos que se almacena en localStorage
-	var INESKUP = "http://eskup.elpais.com/Ineskup"
+	var THAT = this,
+		PUBLIC_KEY = "",
+		USER_ID = "",
+		WRITABLE_THEMES = null,	// temas en los que puedo escribir
+		FOLLOWED_THEMES = null,	// temas que sigo
+		THEMES_INFO = {}, 	// información sobre eventos
+		USER_PROFILE = {},	// información de perfil de usuarios
+		LAST_THREAD = {id: null, info: null},		// guarda el último thread leído
+		FAVORITES = (typeof localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : new Array(),	// lista de temas favoritos que se almacena en localStorage
+		INESKUP = "http://eskup.elpais.com/Ineskup";
 
 	this.NUMMSG = 50;		// número de mensajes que se pedirán cada vez
 
@@ -184,9 +184,12 @@ function EskupApi() {
 		});
 	};
 
-	/* Borrar un mensaje de dEskup */
-	this.deleteMessage = function(msgID, callback) {
-		var params = eskupParams({c: "del", x: msgID});
+	/* Borrar un mensaje de dEskup 
+		@param mID: id del mensaje que se deea borrar
+		@param callback: función a ejecutar al terminar la operación, sobre la respuesta obtenida
+	*/
+	this.deleteMessage = function(mID, callback) {
+		var params = eskupParams({c: "del", x: mID});
 		apiCall("GET", INESKUP, params, function(r) {
 			if (callback) callback(eskupParseResponse(r));
 		});
@@ -348,12 +351,16 @@ function EskupApi() {
 	/* Carga de mensajes favoritos, por compatibilidad con otras APIs */
 	this.loadFavorites = function(callback) { if (callback) callback(FAVORITES); };
 
-	/* Función para enviar un mensaje a través de la API */
+	/* Función para enviar un mensaje a través de la API 
+		@param config {
+			command: comando a ejecutar (send, forward, reply, replyPrivate, edit)
+		}
+	*/
 	this.update = function(data, callback) {
 		var commands = {send: "add",
 						forward: "add",
 						replyPrivate: "add",
-						replyPvt: "add",
+						reply: "reply",
 						edit: "edit"};
 		var params = eskupParams();
 		var method = "POST";

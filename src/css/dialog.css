@@ -5,7 +5,6 @@
 	top: 0;
 	bottom: 0;
 	background-color: rgba(0,0,0,.7);
-	/* background-image: url('../img/modal-background.png'); */
 	z-index: 1000;
 }
 .dlg {
@@ -21,8 +20,7 @@
 }
 #eskup-popup .dlg {
 	width: 450px;
-	/* max-height: 500px; */
-	height: 480px;
+	max-height: 480px;
 	margin-top: 50px;
 }
 .dlg-title {
@@ -31,7 +29,6 @@
 }
 .dlg-content {
 	overflow-y: scroll;
-	/* max-height: 400px; */
 }
 .dlg .dlg-btn {
 	display: inline-block;
