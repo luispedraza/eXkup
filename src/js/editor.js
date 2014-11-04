@@ -178,10 +178,11 @@ function Editor(config) {
 		$(container).load(chrome.extension.getURL("editor.html"), function() {
 			var title = "Escribiendo un nuevo mensaje",	// título por defecto
 				sendButtonText = "ENVIAR";				// texto por defecto del boton de enviar
-			/* Rellenar los campos del forumlario de título y botón enviar */
+			/* Rellenar los campos del formulario de título y botón enviar */
 			function fillTitleAndSendButton() {
 				$("#editor-title").text(title);
 				$("#send").text(sendButtonText);
+				configureMaxChar();
 			};
 			// Inicialización de eventos
 			$("#send").on("click", sendMessage);
@@ -203,14 +204,14 @@ function Editor(config) {
 				API.getMessage(mID, function(data) {
 					var msg = data.mensajes[0],				// json del mensaje original
 						themes = data.perfilesEventos,		// temas destino del mensaje original
-						hilo = msg.hilo,					// hilo del mensaje
+						thread = msg.hilo,					// hilo del mensaje
 						user = msg.usuarioOrigen,			// usuario emisor del mensaje original
 						$msg = createMessage(msg, themes),	// jQuery del mensaje original
 						mHTML = $msg.get(0).outerHTML;		// HTML del mensaje original
 					// temas a los que pertenece el mensaje original:
 					// Investigación del hilo:
-					if (hilo && (data.perfilesHilos["_"+hilo].tipo === "comentarios")) {
-						configureMaxChar("comments");
+					if (thread && (data.perfilesHilos["_"+thread].tipo === "comentarios")) {
+						configureMaxChar("comments");	// los comentarios admiten más caracteres
 					} else {
 						configureThemes(Object.keys(themes), themes);
 					};
@@ -294,7 +295,8 @@ function Editor(config) {
 			} else {
 				$("#NOsend2theme").hide();
 			};
-			configureMaxChar(maxChar);		// configuración del número de caracteres del mensaje
+			// actualización del número máximo de caracteres
+			MAXCHAR = maxChar;
 		});
 	};
 

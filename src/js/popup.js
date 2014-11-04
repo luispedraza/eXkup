@@ -91,7 +91,7 @@ function createMessage(msg, themes, isPrivate) {
 };
 
 /* Clase controlador de popup
-	@param $container: contenedor del popup (puede estar en un modal)
+	@param $container: 	contenedor del popup (puede estar en un modal)
 	@param callbak: 	a ejecutar al terminar la carga del modal
  */
 function Popup($container, callback) {
@@ -114,6 +114,9 @@ function Popup($container, callback) {
 			$("#board").off("scroll");
 		};
 	};
+
+	/* Devuelve el tema actualmente mostrado en el popup */
+	this.getCurrentTheme = function() { return CURRENT_THEME;};
 
 	/* Clase para realizar búsquedas sobre los mensajes */
 	function SearchFunction() {

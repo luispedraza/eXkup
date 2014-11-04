@@ -119,12 +119,13 @@ function onAddFavoriteClick(e) {
 							timeout: 2000
 						});
 						$msg.toggleClass('favorite');
-						// además lo eliminamos del tablón de favoritos
-						if (CURRENT_THEME.id == "favs") {
-							$msg.fadeOut(function() {
-								$(this).remove();
-							});
-						};
+						// Además lo eliminamos del tablón de favoritos
+						getPopup(function(popup) {
+							var currentTheme = popup.getCurrentTheme();
+							if (currentTheme.id == "favs") {
+								$msg.fadeOut(function() { $(this).remove(); });
+							};
+						});
 					});
 				};
 			}

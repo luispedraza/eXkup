@@ -259,7 +259,7 @@ ul.navigator li:hover {
 form.search {
     position: absolute;
     right: 0;
-    top: 47px;
+    top: 44px;
     background-color: rgba(255, 51, 0, .85);
     z-index: 95;
     height: 0;
@@ -845,6 +845,11 @@ span.time-tooltip span:first-child {
     background-color: #eee;
     padding: 5px;
     margin-top: 10px;
+    /* max-height: 300px; */
+}
+.modal .fav-2-delete .message {
+    max-height: 300px;
+    overflow-y: scroll;
 }
 /* Favoritos borrados y mensajes respondidos */
 .modal .fav-2-delete .msg_control {
