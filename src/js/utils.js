@@ -112,15 +112,13 @@ function dataURItoBlob(dataURI) {
 	@param date: Date del mensaje
 	@param now: Date actual
 */
-function getTimeAgo(date, now) {
-	var elapsed = (now - date) / 1000;
+function getTimeAgo(date) {
+	var elapsed = (new Date() - date) / 1000;
 	if (elapsed<60) {			// menos de 1 minuto
 		return _ROUND(elapsed) + " s.";
-	}
-	else if (elapsed<3600) {	// menos de 1 horra
+	} else if (elapsed<3600) {	// menos de 1 horra
 		return _ROUND(elapsed/60) + " min.";
-	}
-	else if (elapsed<86400) {	// menos de 1 día
+	} else if (elapsed<86400) {	// menos de 1 día
 		return _ROUND(elapsed/3600) + " h.";
 	}
 	return formatDate(date, false);

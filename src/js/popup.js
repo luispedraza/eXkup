@@ -33,7 +33,7 @@ function createMessage(msg, themes, isPrivate) {
 			.text("@" + user + (msg.usuarioOrigenNombre ? (" (" + msg.usuarioOrigenNombre + ")") : ""))
 			.attr("data-user", user))
 		.append(
-			makeLink(getTimeAgo(new Date(tsMessage), new Date()),"http://eskup.elpais.com/" + m_id)
+			makeLink(getTimeAgo(new Date(tsMessage)),"http://eskup.elpais.com/" + m_id)
 				.addClass("time fa fa-clock-o").attr("data-ts", tsMessage));
 	// Mensaje reenviado
 	if (msg.reenvio) {
@@ -333,6 +333,7 @@ function Popup($container, callback) {
 		@param id: ID del elemento seleccionado con el ratón
 	*/
 	function uiSelectBoard(id) {
+		console.log(id);
 		/* función de ayuda para introducir la información del tablón actual:
 			@param title: título del tablón
 			@param $descContent: HTML con la descripción del tablón
@@ -429,6 +430,7 @@ function Popup($container, callback) {
 		case "t1": 	// UN USUARIO
 			var user = boardInfo[1];	// el id del tablón de usuario
 			API.loadProfile(user, function(userInfo) {
+				console.log(userInfo);
 				var userURL = "http://eskup.elpais.com/" + user + "/";
 				// enlaces de usuario
 				var $links = $("<ul>").attr("class", "links");
@@ -972,9 +974,7 @@ function Popup($container, callback) {
 					};
 				} else {
 					// cargar tablón de eventos seguidos
-					var evObj = document.createEvent('MouseEvents');
-				    evObj.initEvent("click", true, false);
-				    document.getElementById("sigo").dispatchEvent(evObj);
+					$("#sigo").click();
 				};
 			});
 			if (callback) callback();

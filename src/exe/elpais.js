@@ -6,13 +6,17 @@ if (found) {
 	if (found[1] == "eskup") {
 		// es una página de eskup
 		found = currentLocation.match(/eskup\.elpais\.com\/C([\w-]+)\/?.*$/);	// conversación
-		if (found) result = {type: "thread", id: found[1]};
-		else {
+		if (found) {
+			result = {type: "thread", id: found[1]};
+		} else {
 			found = currentLocation.match(/eskup\.elpais\.com\/\*([\w-]+)$/);	// tema
-			if (found) result = {type: "theme", id: found[1]};	
-			else {
-				found = currentLocation.match(/eskup\.elpais\.com\/([\w]+)\/?.*$/);		// usuario
-				if (found) result = {type: "user", id: found[1]};		
+			if (found) {
+				result = {type: "theme", id: found[1]};		
+			} else {
+				found = currentLocation.match(/eskup\.elpais\.com\/([\w]+)\/?$/);		// usuario
+				if (found && (found.length<40)) {
+					result = {type: "user", id: found[1]};
+				}
 			};
 		};
 	} else {

@@ -220,6 +220,7 @@ function Editor(config) {
 						sendButtonText = "RESPONDER";
 						$("#replying-message").html(mHTML);
 					} else if (command=="forward") {
+						console.log(msg);
 						var fwdText = "fwd @" + user + ": ";
 						// var $newMsg = $("#newmessage");
 						// $newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
