@@ -124,6 +124,16 @@
 /* Selector de imágenes */
 .images-selector h2 {
 	font-size: 14px;
+	background-color: #f30;
+	padding: 3px;
+	color: #fff;
+}
+
+.images-selector .images-list {
+	max-height: 300px;
+	overflow-y: auto;
+	border: 1px solid #ddd;
+	padding: 10px;
 }
 
 .images-selector img {

@@ -3,45 +3,60 @@
 //divcode.type ="text/javascript";
 //divwhere.appendChild(divcode);
 
-function insertEskup() {
-	var items = document.getElementsByClassName("js-stream-item");
-	for (i=0; i<items.length; i++) {
-		item = items[i];
-		if (item.getElementsByClassName("action-eskup-container").length) 
-			continue;
-		var info = item.getElementsByClassName("tweet")[0];
-		tweet_id = info.getAttribute("data-item-id");
-		console.log(tweet_id);
-		// header, footer y content
-		var header = item.getElementsByClassName("stream-item-header")[0];
-		var content = item.getElementsByClassName("js-tweet-text")[0];
-		var footer = item.getElementsByClassName("stream-item-footer")[0];
-		// elementos del header
-		var avatar = header.getElementsByClassName("avatar")[0].src;
-		var username = header.getElementsByClassName("username")[0].innerText;
-		var fullname = header.getElementsByClassName("fullname")[0].innerText;
+(function init() {
+	if (!window.jQuery) return;
+	// Inserción de los botones en los lugares correctos (al pie de cada twitt)
+	(function insertButtons() {
+		// obtener elementos de acción del tweet
+		$(".ProfileTweet-actionList").each(function(i,list) {
+			$list = $(list);
+			if ($list.hasClass("eskup-inserted")) 
+				// nada que hacer: botón ya insertado
+				return;
+			$button = $("<div>").addClass("action-eskup-container")
+				.on("click", function() {
+					alert("hola!");
+				})
+				.append($("<a>").attr("href", "#").addClass("ProfileTweet-action js-tooltip").attr("data-original-title", "Enviar a Eskup")
+					// .tooltip({placement: "top"})
+					.append($("<span>").addClass("icon icon-eskup")));
+			$list
+				.addClass("eskup-inserted")
+				.find(".ProfileTweet-action--retweet").after($button);
+			console.log("insertado");
 
-		// las acciones: 
-		var actions = item.getElementsByClassName("tweet-actions")[0];
-		var eskupli = document.createElement("li");
-		eskupli.className = "action-eskup-container";
-		var eskupa = document.createElement("a");
-		eskupa.href = "#";
-		var eskupi = document.createElement("i");
-		eskupi.className = "sm-eskup";
-		var eskupb = document.createElement("b");
-		eskupb.innerText = "Eskup";
-		eskupa.appendChild(eskupi);
-		eskupa.appendChild(eskupb);
-		eskupli.appendChild(eskupa);
-		actions.appendChild(eskupli);
+			// var info = item.getElementsByClassName("tweet")[0];
+			// tweet_id = info.getAttribute("data-item-id");
+			// console.log(tweet_id);
+			// // header, footer y content
+			// var header = item.getElementsByClassName("stream-item-header")[0];
+			// var content = item.getElementsByClassName("js-tweet-text")[0];
+			// var footer = item.getElementsByClassName("stream-item-footer")[0];
+			// // elementos del header
+			// var avatar = header.getElementsByClassName("avatar")[0].src;
+			// var username = header.getElementsByClassName("username")[0].innerText;
+			// var fullname = header.getElementsByClassName("fullname")[0].innerText;
 
-		console.log(avatar, username, fullname);
-		console.log(content.innerHTML);
-		console.log("-------------------------------")
-	}
-}
+			// // las acciones: 
+			// var actions = item.getElementsByClassName("tweet-actions")[0];
+			// var eskupli = document.createElement("li");
+			// eskupli.className = "action-eskup-container";
+			// var eskupa = document.createElement("a");
+			// eskupa.href = "#";
+			// var eskupi = document.createElement("i");
+			// eskupi.className = "sm-eskup";
+			// var eskupb = document.createElement("b");
+			// eskupb.innerText = "Eskup";
+			// eskupa.appendChild(eskupi);
+			// eskupa.appendChild(eskupb);
+			// eskupli.appendChild(eskupa);
+			// actions.appendChild(eskupli);
 
+			// console.log(avatar, username, fullname);
+			// console.log(content.innerHTML);
+		});
+	})();
+})();
 
 // function Send2EskupOption()
 // {
@@ -201,16 +216,3 @@ function insertEskup() {
 // {	
 // 	//InsertEskupElements();
 // }
-
-
-
-insertEskup();
-
-
-
-
-
-
-
-
-

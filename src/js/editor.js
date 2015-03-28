@@ -149,7 +149,7 @@ function Finder(container, provider, onSelChange) {
 	@param config { container: elemento contenedor del editor,
 					api: api de Eskup
 					command: comando para la api
-					msg: json del mensaje respondido o reenviado
+					msg: JSON del mensaje respondido o reenviado
 					themes: temas del mensaje original
 					callback: callback opcional a ejecutar al cerrar el editor
 				}
@@ -407,18 +407,19 @@ function Editor(config) {
 			var dlg = new ModalDialog({
 				title: "Selecciona la imagen que quieras insertar", 
 				content: $selector,
-				buttons: ["Insertar", "Cancelar", "Abrir el Editor"], 
+				buttons: ["Insertar", "Cancelar", "Abrir el Editor"],
 				callback: function(r, data) {
-					if (r=="Insertar") {					// agrega la imagen al editor
+					if (r == "Insertar") {					// agrega la imagen al editor
 						configureImage(data[0]);	
 					} else if (r == "Abrir el Editor") { 	// lanzar el editor de imágenes
 						chrome.tabs.create({url:"image_editor.html"});
 					};}
 				});
-			loadImages(result, null, function($div) {
+			loadImages(result, $selector, function($div) {
 				$selector.append($div);
 				$selector.find("img").on("click", function() {
-					$selector.find("img").removeClass('on');
+					// a ejecutar cuando se hace click sobre una imagen:
+					$selector.find("img.on").removeClass('on');
 					$(this).addClass('on');
 					$selector.attr("data-return", this.src);	// la imagen seleccionada
 				});
@@ -427,16 +428,14 @@ function Editor(config) {
 	};
 	/* recibe la lista de imágenes capturadas, para insertar 
 		@param result: array de resutlados de captura de imágenes
-		@para divItem: el lugar en el que insertar las imágenes capturadas
+		@param $container: el lugar en el que insertar las imágenes capturadas
 		@param onClickImage: callback a ejecutar cuando se hace click en una imagen
 	*/
-	function loadImages(result, divItem, callback) {
-		if (!divItem) {
-			divItem = $("<div>").addClass('images')
-				.append($("<h2>").text("Imágenes encontradas en: " + result[0].title))
-				.append($("<div>").addClass('images-list'));
-		};
-		var $imagesList = divItem.find(".images-list");
+	function loadImages(result, $container, callback) {
+		console.log(result);
+		var $imagesList = $("<div>").addClass('images-list');
+		$container.append($("<h2>").text("Imágenes encontradas en: " + result[0].title))
+				.append($imagesList);
 		var urls = [];
 		var images = [];
 		result.forEach(function(d) {urls = urls.concat(d.images)});
@@ -449,7 +448,7 @@ function Editor(config) {
 					return (((a.width*a.height)>(b.width*b.height)) ? -1 : 1);
 				});
 				$imagesList.append(images);
-				callback(divItem);
+				callback($container);
 			};
 		};
 		urls.forEach(function(url, index, array) {

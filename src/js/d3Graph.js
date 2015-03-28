@@ -14,7 +14,11 @@ function updateButtons() {
 function onShowEditor() {
 	$container = $("<div>").addClass('editor-container');
 	EDITOR = new Editor($container, API);
-	new ModalDialog("Nuevo mensaje", $container, ["Cancelar"]);
+	new ModalDialog({
+		title: "Nuevo mensaje", 
+		container: $container,
+		buttons: ["Cancelar"]
+	});
 };
 
 // VISUALIZACIÓN DE MENSAJES:

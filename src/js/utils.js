@@ -43,14 +43,14 @@ function TOC(print) {
 };
 
 Array.prototype.shuffle = function() {
- 	var len = this.length;
+	var len = this.length;
 	var i = len;
-	 while (i--) {
-	 	var p = parseInt(_RANDOM()*len);
+	while (i--) {
+		var p = parseInt(_RANDOM()*len);
 		var t = this[i];
-  	this[i] = this[p];
-  	this[p] = t;
- 	};
+		this[i] = this[p];
+		this[p] = t;
+	};
 };
 
 
@@ -70,9 +70,9 @@ function makeRegexp(term) {
 	@parama text: texto del enlace
 	@param href: dirección del enlace
 	@param clamp: acortar el texto dejándolo en este número de caracteres (excluyendo http://www.)
-*/
-function makeLink(text, href, clamp) {
-	return $("<a>")
+	*/
+	function makeLink(text, href, clamp) {
+		return $("<a>")
 		.attr("href", "#")
 		.attr("data-url", href)
 		.attr("title", href)
@@ -80,40 +80,40 @@ function makeLink(text, href, clamp) {
 		.on("click", function() {
 			chrome.tabs.update({url: this.getAttribute("data-url")
 		});
-	});
-};
-
-/* Devuelve el tablón correspondiente a un identificador */
-function getBoard(id) { return TABLONES[id] || id; };
-
-function randomColor() {
-	return '#'+_FLOOR(_RANDOM()*16777215).toString(16);
-};
-
-function encodeParams(dict) {
-	params = "";
-	for (var k in dict) {
-		params += k + "=" + encodeURI(dict[k]) +"&";
+		});
 	};
-	return params;
-};
 
-function dataURItoBlob(dataURI) {
-	var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-    var binary = atob(dataURI.split(',')[1]);
-    var array = [];
-    for(var i = 0; i < binary.length; i++) {
-        array.push(binary.charCodeAt(i));
-    }
-    return new Blob([new Uint8Array(array)], {type: mimeString});
-};
+	/* Devuelve el tablón correspondiente a un identificador */
+	function getBoard(id) { return TABLONES[id] || id; };
+
+	function randomColor() {
+		return '#'+_FLOOR(_RANDOM()*16777215).toString(16);
+	};
+
+	function encodeParams(dict) {
+		params = "";
+		for (var k in dict) {
+			params += k + "=" + encodeURI(dict[k]) +"&";
+		};
+		return params;
+	};
+
+	function dataURItoBlob(dataURI) {
+		var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+		var binary = atob(dataURI.split(',')[1]);
+		var array = [];
+		for(var i = 0; i < binary.length; i++) {
+			array.push(binary.charCodeAt(i));
+		}
+		return new Blob([new Uint8Array(array)], {type: mimeString});
+	};
 
 /* Cuánto tiempo hace que el mensaje fue enviado
 	@param date: Date del mensaje
 	@param now: Date actual
-*/
-function getTimeAgo(date) {
-	var elapsed = (new Date() - date) / 1000;
+	*/
+	function getTimeAgo(date) {
+		var elapsed = (new Date() - date) / 1000;
 	if (elapsed<60) {			// menos de 1 minuto
 		return _ROUND(elapsed) + " s.";
 	} else if (elapsed<3600) {	// menos de 1 horra
@@ -171,45 +171,45 @@ function checkUserPhoto(path) {
 	https://developer.chrome.com/apps/app_external
 	https://developers.google.com/youtube/player_parameters
 	http://developer.vimeo.com/player/embedding
-*/
-function processContent($content, replace) {
-	var $links = $content.find("a");
-	$links.each(function() {
-		var $this = $(this),
+	*/
+	function processContent($content, replace) {
+		var $links = $content.find("a");
+		$links.each(function() {
+			var $this = $(this),
 			ID = null,
 			href = ($this.attr("title") || $this.attr("href"));	// esto es porque los cort.as trae la url original en el title :)
-		if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
-			var videoMatch = href.match(/[?&]v=([^&]+)/);
-			if (videoMatch && (ID=videoMatch[1])) {
-				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["YOUTUBE"].replace("_____ID_____", ID)));
-				else this.__video__ = {service: "YOUTUBE", id: ID};
-				return;
-			};
-		} else if (href.match(/https?:\/\/[w\.]*vimeo.com/)) {
-			var videoMatch = href.match(/https?:\/\/[w\.]*vimeo.com\/(\d+)/);
-			if (videoMatch && (ID=videoMatch[1])) {
-				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["VIMEO"].replace("_____ID_____", ID)));
-				else this.__video__ = {service: "VIMEO", id: ID};
-				return;
-			};
-		} else if (href.match(/https?:\/\/[w\.]*zappinternet.com\/video\//)) {
-			var videoMatch = href.match(/https?:\/\/[w\.]*zappinternet.com\/video\/(.+?)\//);
-			if (videoMatch && (ID=videoMatch[1])) {
-				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["ZAPPINTERNET"].replace("_____ID_____", ID)));
-				else this.__video__ = {service: "ZAPPINTERNET", id: ID};
-				return;
-			};
-		} else if (href.match(/https?:\/\/[w\.]*dailymotion.com\/video\//)) {
-			var videoMatch = href.match(/https?:\/\/[w\.]*dailymotion.com\/video\/([\w-]+)/);
-			if (videoMatch && (ID=videoMatch[1])) {
-				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["DAILYMOTION"].replace("_____ID_____", ID)));
-				else this.__video__ = {service: "DAILYMOTION", id: ID};
-				return;
-			};
-		};
-		if (replace) $this.replaceWith(makeLink(href ,href, 20).addClass('a-link'));
-	});
-	return $links;
+if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
+	var videoMatch = href.match(/[?&]v=([^&]+)/);
+	if (videoMatch && (ID=videoMatch[1])) {
+		if (replace) $this.replaceWith($(VIDEO_TEMPLATES["YOUTUBE"].replace("_____ID_____", ID)));
+		else this.__video__ = {service: "YOUTUBE", id: ID};
+		return;
+	};
+} else if (href.match(/https?:\/\/[w\.]*vimeo.com/)) {
+	var videoMatch = href.match(/https?:\/\/[w\.]*vimeo.com\/(\d+)/);
+	if (videoMatch && (ID=videoMatch[1])) {
+		if (replace) $this.replaceWith($(VIDEO_TEMPLATES["VIMEO"].replace("_____ID_____", ID)));
+		else this.__video__ = {service: "VIMEO", id: ID};
+		return;
+	};
+} else if (href.match(/https?:\/\/[w\.]*zappinternet.com\/video\//)) {
+	var videoMatch = href.match(/https?:\/\/[w\.]*zappinternet.com\/video\/(.+?)\//);
+	if (videoMatch && (ID=videoMatch[1])) {
+		if (replace) $this.replaceWith($(VIDEO_TEMPLATES["ZAPPINTERNET"].replace("_____ID_____", ID)));
+		else this.__video__ = {service: "ZAPPINTERNET", id: ID};
+		return;
+	};
+} else if (href.match(/https?:\/\/[w\.]*dailymotion.com\/video\//)) {
+	var videoMatch = href.match(/https?:\/\/[w\.]*dailymotion.com\/video\/([\w-]+)/);
+	if (videoMatch && (ID=videoMatch[1])) {
+		if (replace) $this.replaceWith($(VIDEO_TEMPLATES["DAILYMOTION"].replace("_____ID_____", ID)));
+		else this.__video__ = {service: "DAILYMOTION", id: ID};
+		return;
+	};
+};
+if (replace) $this.replaceWith(makeLink(href ,href, 20).addClass('a-link'));
+});
+return $links;
 };
 
 function insertVideo($element, v) {
@@ -310,10 +310,10 @@ function roundTimeSeconds(ts) {
 /* INicializa una matriz con el mismo valor */
 function initArray(dim1, dim2, value) {
 	return Array.apply(null, Array(dim1))
-		.map(function () { 
-			return Array.apply(null, Array(dim2))
-				.map(function () { return value;});
-			});
+	.map(function () { 
+		return Array.apply(null, Array(dim2))
+		.map(function () { return value;});
+	});
 };
 
 function sumArray(array) {
@@ -384,4 +384,42 @@ function maxDiagonalArray(array, ini) {
 };
 
 
+
+function Options() {
+	var OPTIONS_KEY = "exkupOptions";
+	var DEFAULT_OPTIONS = {
+		defaultBoard: "sigo",
+		defaultFont: ""
+	};
+	
+	function saveOptions(o) {
+		if (typeof o === "undefined") o = options;
+		localStorage.setItem(OPTIONS_KEY, JSON.stringify(o));
+	}
+
+	// Restores select box state to saved value from localStorage.
+	function getOptions() {
+		return JSON.parse(localStorage.getItem(OPTIONS_KEY)) || DEFAULT_OPTIONS;
+	}
+
+	this.setDefaultFont = function(f) {
+		options.defaultFont = f;
+		saveOptions();
+	}
+
+	this.getDefaultFont = function() {
+		return options.defaultFont;
+	}
+
+	this.setDefaultBoard = function(b) {
+		options.defaultBoard = b;
+		saveOptions();
+	}
+
+	this.getDefaultBoard = function() {
+		return options.defaultBoard;
+	}
+
+	var options = getOptions();
+}
 

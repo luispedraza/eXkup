@@ -2,22 +2,54 @@
 <head>
   <meta charset="utf-8" />
   <title>Opciones de la extensión de Chrome para Eskup</title>
-  <script type="text/javascript" src="js/options.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/bootstrap-formhelpers.min.css">
 </head>
 
-<body>
-<p>Mensajes a mostrar al arrancar la extensión:</p>
-<select>
-  <option>Tablones</option>
-  <option>----</option>
-  <option>Todos</option>
-  <option>Seguidos</option>
-  <option>Propios</option>
-  <option>Privados</option>
-  <option>Favoritos</option>
-  <option>TEMAS</option>
-  <option>----</option>
-</select>
+<body class="container">
+  <h1>Opciones de eXkup</h1>
+
+  <div class="row">
+    <div class="col-sm-2">
+      <h3>
+        Tablón predefinido. <br><span class="small">Este tablón se mostrará al arrancar la extensión</span>
+      </h3>
+    </div>
+    <div class="col-sm-4">
+      <select>
+        <option>Tablones</option>
+        <option>----</option>
+        <option>Todos</option>
+        <option>Seguidos</option>
+        <option>Propios</option>
+        <option>Privados</option>
+        <option>Favoritos</option>
+        <option>TEMAS</option>
+        <option>----</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-2">
+      <h3>
+        Tipografía de la extensión.<br><span class="small">Selecciona el tipo de letra de la extensión</span>
+      </h3>
+    </div>
+    <div class="col-sm-4">
+      <h4>Google Fonts</h4>
+      <div id="option-google-font" class="bfh-selectbox bfh-googlefonts" data-font="Lato"></div>
+      <h4>Fuente del sistema</h4>
+      <div id="option-system-font" class="bfh-selectbox bfh-fonts" data-font="Arial"></div>
+    </div>
+  </div>
+
   
+
+  <script build="no" type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
+  <script build="no" type="text/javascript" src="lib/bootstrap.min.js"></script>
+  <script build="no" type="text/javascript" src="lib/bootstrap-formhelpers.js"></script>
+  <script type="text/javascript" src="js/utils.js"></script>
+  <script type="text/javascript" src="js/options.js"></script>
 </body>
 </html>

@@ -1,81 +1,106 @@
-/* Show a modal dialog onscreen */
+/* Show a modal dialog onscreen 
+	config = {
+		type = "progress", "spinner", "html"
+		progress = {
+			callbackItem,			función a ejecutar sobre cada item
+			callbackEnd, 			función a ejectuar al final del proceso
+			data,					array de items a procesar
+			span,					número de elementos a procesar en cada iteración
+		}
+		title (string), 			ej: "Título del modal"
+		content, 					html content ej: "<h1>Title</h1><div>Este es el contenido</div>"
+		buttons (array(string)), 	ej. ["OK", "Cancel"]
+		callback (function), 		
+		timeout (int), 				Tiempo que tardará en cerrarse el modal automáticamente
+		container ($)				Contenedor del modal, si existe.
+	}
+*/
 function ModalDialog(config) {
+	console.log(config);
 	var THAT = this;
-	function removeDialog() {
-		$modal.fadeOut(function() { this.remove(); });
+	this.close = function() { 
+		$modal.fadeOut(function() { 
+			this.remove(); 
+		}); 
 	};
-	this.close = removeDialog;
 	var title = config.title,
+		type = config.type,
 		content = config.content,
 		buttons = config.buttons,
 		callback = config.callback,
 		timeout = config.timeout,
-		$container = config.container ? $(config.container) : $("#eskup-popup");	// contenedor del popup
-	var $modal = $("<div>").addClass("modal")
-		.on("click", function(e) {
-			// Cerrar el modal al hacer click fuera de la ventana
-			if (e.target.className == "modal") {
-				removeDialog();
-				if (callback) callback();	
-			};
-		});
-	var $dlg = $("<div>").addClass("dlg").appendTo($modal);
+		$container = config.container || $("#eskup-popup");	// contenedor del popup
+	var $modal = $("<div>")
+			.addClass("modal")
+			.on("click", function(e) {
+				// Cerrar el modal al hacer click fuera de la ventana
+				if (e.target.className == "modal") {
+					THAT.close();
+					if (callback) callback();	
+				};
+			});
+	var $dlg = $("<div>")
+			.addClass("dlg")
+			.appendTo($modal);
 	// insertamos el diálogo modal
 	$container.append($modal);
-	if (title) { $dlg.append($("<div>").addClass("dlg-title").text(title)); };
-	if (content) {
-		var $content = $("<div>").addClass("dlg-content");
-		if (content.type == "progress") {
-			var callbackItem = content.callbackItem;	// a ejecutar sobre cada item
-			var callbackEnd = content.callbackEnd;	// a ejecutar al final
-			var dataArray = content.data;				// array de items
-			var span = content.span;					// elementos a procesar por iteración
-			$bar = $("<div>").addClass('loading-progress'); 	// la barra de progreso
-			$content
-				.append($("<div>").addClass('loading-container')
-					.append($("<div>").addClass('loading-bar')
-						.append($bar)));
-			var iterations = Math.floor(dataArray.length/span);	// número de procesamientos
-			var currentIteration = 0;	// procesamiento actual
-			THAT.runProgress = function(value) {
-				function processSpanArray() {
-					setTimeout(function() {
-						if (currentIteration>iterations) {
-							callbackEnd();
-							// removeDialog();
-						} else {
-							var initial = currentIteration*span;
-							dataArray.slice(initial, initial+span).forEach(callbackItem);
-							var completed = Math.floor(100*currentIteration/iterations) + "%";
-							$bar.css("width", completed).text(completed);
-							currentIteration++;
-							processSpanArray();	// se vuelve a llamar a la función
-						};
-					}, 50);
-				};
-				processSpanArray();
+	// Inserción del contenido del diálogo:
+	if (title) { 
+		$dlg.append($("<div>").addClass("dlg-title").text(title)); 
+	};
+	var $content = $("<div>").addClass("dlg-content");
+	if (type == "progress") {
+		var progress = config.progress;
+		var callbackItem = progress.callbackItem;	// a ejecutar sobre cada item
+		var callbackEnd = progress.callbackEnd;		// a ejecutar al final
+		var dataArray = progress.data;				// array de items
+		var span = progress.span;					// elementos a procesar por iteración
+		$bar = $("<div>").addClass('loading-progress'); 	// la barra de progreso
+		$content
+			.append($("<div>").addClass('loading-container')
+				.append($("<div>").addClass('loading-bar')
+					.append($bar)));
+		var iterations = Math.floor(dataArray.length/span);	// número de procesamientos
+		var currentIteration = 0;	// procesamiento actual
+		THAT.runProgress = function(value) {
+			function processSpanArray() {
+				setTimeout(function() {
+					if (currentIteration>iterations) {
+						callbackEnd();
+						// close();
+					} else {
+						var initial = currentIteration*span;
+						dataArray.slice(initial, initial+span).forEach(callbackItem);
+						var completed = Math.floor(100*currentIteration/iterations) + "%";
+						$bar.css("width", completed).text(completed);
+						currentIteration++;
+						processSpanArray();	// se vuelve a llamar a la función
+					};
+				}, 50);
 			};
-			THAT.stopProgress = function() {
-				currentIteration = iterations;
-			};
-		} else if (content.type=="spinner") {
-			$content
-				.append($("<div>").addClass('spinner fa fa-spinner fa-spin'))
-				.append($("<div>").text(content.text));
-		} else {
-			$content.append(content);
+			processSpanArray();
 		};
+		THAT.stopProgress = function() {
+			currentIteration = iterations;
+		};
+	} else if (type == "spinner") {
+		$content
+			.append($("<div>").addClass('spinner fa fa-spinner fa-spin'))
+			.append($("<div>").text(content));
+	} else {
+		$content.append(content);
 		$dlg.append($content);
 	};
+	
 	if (buttons) {
-		buttonsDiv = $("<div>").addClass("dlg-buttons");
-		$dlg.append(buttonsDiv);
-		for (var b=0; b<buttons.length; b++) {
-			buttonsDiv.append($("<div>")
+		$buttonsDiv = $("<div>").addClass("dlg-buttons");
+		$dlg.append($buttonsDiv);
+		buttons.forEach(function(b) {
+			$buttonsDiv.append($("<div>")
 				.addClass("dlg-btn")
-				.text(buttons[b])	
+				.text(b)	
 				.on("click", function() {
-					removeDialog();
+					THAT.close();
 					if (callback) {
 						// posible valor de retorno generado en el diálogo modal
 						returnArray = $dlg.find("[data-return]").map(function() {
@@ -84,20 +109,20 @@ function ModalDialog(config) {
 						callback(this.textContent, returnArray);
 					};
 				}));
-		};
+		});
 	};
 	// optional timeout function
 	if (timeout) {
 		setTimeout(function() {
-			removeDialog();
+			THAT.close();
 			if (callback) callback();
 		}, timeout);
 	};
 	// Algunos elementos del contenido pueden cerrar el diálogo (independientemente de que tengan otros eventos asociados)
-	$modal.find(".close-on-click").on("click", removeDialog);
+	$modal.find(".close-on-click").on("click", close);
 };
 
-/* Para mostrar información contextual sobre un elementos */
+/* Para mostrar información contextual sobre un elemento */
 function ChartTooltip(whereMouseMoved,x,y,content,config) {
 	if (typeof config == "undefined") config = {};
 	var delay = (typeof config.delay === "undefined") ? 800 : config.delay;

@@ -486,7 +486,7 @@ function Popup($container, callback) {
 		var $this = $(this);
 		var user = $this.attr("data-user");
 		var followed = $this.hasClass('on');
-		var modalCongif = {
+		new ModalDialog({
 			title: (followed ? "Dejar de" : "Comenzar a") + " seguir a este usuario",
 			content: "Si continúas, " + (followed ? "dejarás de seguir" : "comenzarás a seguir") + " a este usuario en Eskup",
 			buttons: [(followed ? "Dejar de " : "Comenzar a ") + "seguirlo", "Cancelar"],
@@ -509,8 +509,7 @@ function Popup($container, callback) {
 						};
 					});
 			}
-		};
-		new ModalDialog(modalCongif);
+		});
 	};
 
 	/* Bloquear o desbloquear a un usuario */
@@ -617,8 +616,9 @@ function Popup($container, callback) {
 	/* Carga de una conversación completa */
 	function showThread(threadID, originalMsgID) {
 		var modal = new ModalDialog({
-			title: "Cargando datos", 
-			content: {type:"spinner", text: "Obteniendo datos del servidor..."}
+			title: "Cargando datos",
+			type: "spinner",
+			content: "Obteniendo datos del servidor..."
 		});
 		API.loadThread(threadID, function(info) {
 			modal.close()
@@ -677,16 +677,17 @@ function Popup($container, callback) {
 			var messages = info.mensajes;
 			addNode(API.buildThreadMessage(messages[0], info.perfilesUsuarios), null);
 			var replies = messages.slice(1);	// cojo todas las respuestas al nodo raíz
-			var dlgConfig = {	type: "progress",
-								data: replies,
-								span: 100,
-								callbackItem: function(item) {
-									addNode(API.buildThreadMessage(item, info.perfilesUsuarios), item.idMsgRespuesta);
-								},
-								callbackEnd: onEnd};
 			modal = new ModalDialog({
 				title: "Procesando " + messages.length + " mensajes",
-				content: dlgConfig, 
+				type: "progress",
+				progress: {
+					data: replies,
+					span: 100,
+					callbackItem: function(item) {
+						addNode(API.buildThreadMessage(item, info.perfilesUsuarios), item.idMsgRespuesta);
+					},
+					callbackEnd: onEnd
+				},
 				button: ["Cancelar"], 
 				callback: function(r) {
 					if (r=="Cancelar") {
@@ -860,6 +861,13 @@ function Popup($container, callback) {
 		});
 	};
 
+	/* Inicialización de las opciones de usuario */
+	function initOptions() {
+		var options = new Options();
+		// Tipografía de la extensión:
+		$("#eskup-popup").css("font-family", options.getDefaultFont());
+	}
+
 	/* INICIALIZACIÓN DEL POPUP */
 	$container.load(chrome.extension.getURL("popup_content.html"), function() {
 		/* Obtención de la clave pública de usuario, e inicialización del perfil */
@@ -958,17 +966,23 @@ function Popup($container, callback) {
 				});
 			});
 
-			// Inicialización de contenidos
+			// Inicialización de opciones de usuario 
+			initOptions();
+
+			// Inicialización de contenidos. Se busca si la página actual es de elpais.com
 			chrome.tabs.executeScript({ file: "exe/elpais.js" }, function(result) {
 				if (result && (result = result[0])) {
 					switch (result.type) {
 						case "thread":
+							// existe una conversación de elpais
 							loadBoard(null, result.id, result.id);
 							break;
 						case "theme":
+							// es un tema de conversación de eskup
 							loadBoard("ev-" + result.id);
 							break;
 						case "user":
+							// es la página de un usuario de eskup
 							loadBoard("t1-" + result.id);
 							break;
 					};
@@ -982,9 +996,7 @@ function Popup($container, callback) {
 	});
 };
 
-/* Obtiene el popup actual
-	y si no existe, crea uno nuevo 
-*/
+/* Obtiene el popup actual y si no existe, crea uno nuevo  */
 function getPopup(callback) {
 	if (window.popup) {
 		callback(window.popup);
