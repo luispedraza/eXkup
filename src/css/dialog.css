@@ -28,7 +28,7 @@
 	color:  black;
 }
 .dlg-content {
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 .dlg .dlg-btn {
 	display: inline-block;

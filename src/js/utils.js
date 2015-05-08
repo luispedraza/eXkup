@@ -383,8 +383,6 @@ function maxDiagonalArray(array, ini) {
 	return {"i": imax, "j": jmax, "max": max};
 };
 
-
-
 function Options() {
 	var OPTIONS_KEY = "exkupOptions";
 	var DEFAULT_OPTIONS = {

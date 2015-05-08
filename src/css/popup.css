@@ -3,6 +3,18 @@
     - rojo: #f30
 */
 
+.connection-error {
+    font-size:20px;
+    text-align: center;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f30;
+    color: #fff;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 50px;
+}
+
 #eskup-popup {
     width:600px;
     height: 600px;
@@ -112,7 +124,8 @@ ul.navigator li {
     font-size:  12px;
 }
 ul.navigator li.on {
-    color:#f30;
+    background-color:#f30;
+    color: #fff;
     font-weight: 400;
 }
 ul.navigator li:hover {
@@ -584,7 +597,7 @@ form.search .button {
     height: 550px;
     transition: left .5s ease;
     width: 450px;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding-top: 10px;
     padding-top: 50px;
 }
@@ -593,7 +606,7 @@ form.search .button {
 }
 #tree-board {
     left: 450px;
-    overflow-x: scroll;
+    overflow-x: auto;
     height: 515px;
 }
 #board.switch {
@@ -850,7 +863,7 @@ span.time-tooltip span:first-child {
 }
 .modal .fav-2-delete .message {
     max-height: 300px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 /* Favoritos borrados y mensajes respondidos */
 .modal .fav-2-delete .msg_control {
@@ -957,7 +970,7 @@ span.time-tooltip span:first-child {
 }
 .selector ul {
     height: 0;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 0;
     margin: 0;
     transition: height .25s ease;

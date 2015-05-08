@@ -1014,6 +1014,18 @@ function getPopup(callback) {
 };
 
 $(function() {
+	(function checkConnection() {
+		if (navigator.onLine) {
+			// Check for eskup server online
+		} else {
+			// Inform the user no connection availabe
+			$("body").append($("<p>")
+				.text("No hay conexión a Internet")
+				.addClass("connection-error")
+				);
+		};
+	})();
+	
 	/* Inicialización por defecto del popup */
 	if (document.body.id=="eskup-popup") {
 		window.popup = new Popup($("body"));

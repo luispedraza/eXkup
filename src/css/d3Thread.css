@@ -282,7 +282,7 @@ body {
   opacity: 1;
   height: auto;
   max-height: 500px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .expandable p {
   color: #666;
@@ -396,7 +396,7 @@ body {
 }
 .expandable .list {
   max-height: 220px;
-  overflow-y:scroll;
+  overflow-y:auto;
   margin: 0;
   padding: 0;
   overflow-x: hidden;

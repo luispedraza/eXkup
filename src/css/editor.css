@@ -37,7 +37,7 @@
 #newmessage {
 	outline: none;
 	height: 110px;
-	overflow-y: scroll;
+	overflow-y: auto;
 	overflow-x: hidden;
 	padding: 10px;
 }
@@ -309,7 +309,7 @@
 	width: 136px;
 	border: 1px solid #ccc;
 	max-height: 175px;
-	overflow-y: scroll;
+	overflow-y: auto;
 	display: none;
 }
 
@@ -367,7 +367,7 @@
 #replying-message {
     border-bottom: 1px dotted #ccc;
     max-height: 150px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 #replying-message .msg_control {
     display: none;

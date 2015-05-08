@@ -83,7 +83,7 @@ body {
 	margin: 5px;
 }
 #selector-items {
-	overflow: scroll;
+	overflow: auto;
 	padding: 10px;
 }
 #selector-items .item {
@@ -130,7 +130,7 @@ h1.off + div {
 
 h1.on + div {
 	height: 300px;
-	overflow: scroll;
+	overflow: auto;
 	border-bottom: 1px solid black;
 	padding-bottom: 5px;
 	-webkit-transition: height .5s ease;
