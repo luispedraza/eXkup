@@ -362,7 +362,7 @@ function Editor(config) {
 			mID: mID,
 			users: USER_FINDER.getSelection(),		// destinatarios seleccionados
 			themes: THEME_FINDER.getSelection(),	// temas seleccionados
-			message: $("#newmessage").text()		// mensaje que será enviado
+			message: $("#newmessage").html()		// contenido del mensaje que será enviado
 		};
 		if (social.length) API_CONFIG.social = social;
 		// imagen del mensaje
