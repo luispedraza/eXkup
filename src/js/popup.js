@@ -969,8 +969,9 @@ function Popup($container, callback) {
 			// Inicialización de opciones de usuario 
 			initOptions();
 
-			// Inicialización de contenidos. Se busca si la página actual es de elpais.com
-			chrome.tabs.executeScript({ file: "exe/elpais.js" }, function(result) {
+			// Inicialización de contenidos. Se busca si la página actual es de PRISA
+			// y se extraen los posibles comentarios de la noticia
+			chrome.tabs.executeScript({ file: "exe/search-for-comments.js" }, function(result) {
 				if (result && (result = result[0])) {
 					switch (result.type) {
 						case "thread":
