@@ -56,13 +56,6 @@ function Finder(options) {
 	this.getSelection = function() {
 		return selection;
 	};
-	/* Desactivación(activación) del widget */
-	this.disable = function() {
-		$container.fadeOut(); 
-	};
-	this.enable = function() { 
-		$container.fadeIn(); 
-	};
 	/* Buscador de usuarios para enviar privados */
 	function searchValue(e) {
 		var newValue = $input.val();
@@ -314,6 +307,15 @@ function Editor(config) {
 		if (callback) callback();
 	};
 
+	/* Selección de la clase .is-public para el editor */
+	function togglePublic(isPublic) {
+		container.find("#editor").toggleClass("is-public", isPublic);
+	}
+	/* Selección de la clase .is-private para el editor */
+	function togglePrivate(isPrivate) {
+		container.find("#editor").toggleClass("is-private", isPrivate);
+	}
+
 	/* Esta función intercepta el comando de pegado para eliminar las etiquetas 
 		//http://stackoverflow.com/questions/12027137/javascript-trick-for-paste-as-plain-text-in-execcommand
 	*/
@@ -330,10 +332,8 @@ function Editor(config) {
 		mensaje a un tema o tablón público
 	*/
 	function onDestinationChange() {
-		var userDestination = USER_FINDER.getSelection();
-		(userDestination.length)  ? THEME_FINDER.disable() : THEME_FINDER.enable();
-		var themeDestination = THEME_FINDER.getSelection();
-		(themeDestination.length)  ? USER_FINDER.disable() : USER_FINDER.enable();
+		togglePrivate(USER_FINDER.getSelection().length != 0);
+		togglePublic(THEME_FINDER.getSelection().length != 0);
 	};
 	
 	/* Configurar los tablones destinatarios de un mensaje 
