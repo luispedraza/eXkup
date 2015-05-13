@@ -128,7 +128,7 @@ function makeRegexp(term) {
 function formatDate(date, withYear) {
 	if (new Date().getFullYear() != date.getFullYear()) {
 		// el mensaje es de un año distinto
-		return [date.getDate(), date.getMonth(), date.getFullYear()].join("/");
+		return [date.getDate(), date.getMonth()+1, date.getFullYear()].join("/");
 	}
 	return date.getDate() + " de " + MESES[date.getMonth()] + (withYear ? (" de " + date.getFullYear()) : "");
 };
