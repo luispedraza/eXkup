@@ -84,7 +84,7 @@ a:hover {
     height: 0;
     width: 100%;
     position: absolute;
-    top: 40px;
+    top: 0;
     overflow: hidden;
     transition: height .25s linear;
     z-index: 300;
