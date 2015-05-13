@@ -69,14 +69,13 @@
 	bottom: 0;
 	display: none;
 	cursor: pointer;
-	background-color: #fff;
+	background-color: #000;
 	padding: 5px;
 }
 
 #removeimage:before {
-	color: #f30;
-	font-size: 20px;
-	margin: 5px;
+	color: #fff;
+	font-size: 25px;
 	cursor: pointer;
 }
 
@@ -84,7 +83,7 @@
 	display: block;
 }
 #newimage:hover canvas {
-	opacity: .2;
+	opacity: .7;
 }
 
 #counter {
@@ -288,6 +287,7 @@
 	right: 9px;
 	top: 10px;
 	font-size: 13px;
+	display: none;
 }
 #send2social:before {
 	content: "Enviar también a: ";
