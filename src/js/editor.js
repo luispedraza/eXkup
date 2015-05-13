@@ -1,68 +1,107 @@
 
 /* Clase especial para reealizar búsquedas con selector 
-	@param $container: contenedor del widget
-	@param provider: proveedor de datos
-	@param onSelChange: función a ejecutar cada vez que cambia la selección
+	@param options = {
+		title: Título del popup de búsqueda
+		container: contenedor del widget
+		provider: proveedor de datos
+		onSelChange: función a ejecutar cada vez que cambia la selección
+		}
 	empleado en selección de temas y de usuarios para enviar mensaje
 */
-function Finder(container, provider, onSelChange) {
-	var $container = container,		// contenedor del widget
-		dataProvider = provider,	// proveedor de datos de búsqueda
-		selection = [],				// lista de elementos seleccionados
-		value = null,				// valor de búsqueda tecleado por el usuario
-		$input = null,				// el campo de búsqueda
-		$found = null,				// muestra la lista de sugerencias del servidor
+function Finder(options) {
+	var title = options.title,
+		$container = options.container,
+		provider = options.provider,
+		onSelChange = options.onSelChange, 
+		selection = [],					// lista de elementos seleccionados
+		popupClicked = false,
+		value = null,					// valor de búsqueda tecleado por el usuario
+		$input = null,					// el campo de búsqueda
+		$found = null,					// muestra la lista de sugerencias del servidor
 		loadedHTML = false;				// indica si se ha cargado el html del widget
 	// carga dinámica del html del widget:
-	var $widget = $("<div>");
-	$widget.load(chrome.extension.getURL("finder_widget.html"), function() {
-		$input = $widget.find(".finder input")
-			.on("focus", searchValue)						
-			.on("keyup", searchValue)			// buscar datos en el servidor
-			.on("keydown", onKeySelector)		// seleccionar de la lista encontrada con cursores
+	$container.load(chrome.extension.getURL("finder_widget.html"), function() {
+		$container.find(".finder-title .close").on("click", hidePopupList);	// cerrar el popup de búsqueda
+		$container.find(".finder-title strong").text(title);
+		// Para evitar que se cierre la lista al hace click en un element
+		// a causa del oblur del input de texto:
+		$container.find(".finder-list").on("mousedown", function(){
+			popupClicked = true;
+		});
+		$found = $container.find(".finder .finder-list ul");
+		$input = $container.find(".finder input")
+			.on("focus", function() {
+				showPopupList();
+				searchValue();
+			})
 			.on("blur", function() {
-				value = null;					// se borra el valor de búsqueda
-				$found.fadeOut();				// se ocultan los resultados
-			});
-		$found = $widget.find(".finder ul");
-		$container.append($widget);
+				popupClicked ? (popupClicked = false) : hidePopupList();
+			})					
+			.on("keyup", searchValue)			// buscar datos en el servidor
+			.on("keydown", onKeySelector);		// seleccionar de la lista encontrada con cursores
+
 		loadedHTML = true;
 	});
+	// Muestra el listado de resultados
+	function showPopupList() {
+		$container.find(".finder-list").fadeIn();
+	};
+	// Oculta el listado de resultados
+	function hidePopupList() {
+		value = null;
+		$input.val("");
+		$container.find(".finder-list").fadeOut();
+	};
 	// Función que devuelve la selección actual del widget
-	this.getSelection = function() {return selection;};
+	this.getSelection = function() {
+		return selection;
+	};
 	/* Desactivación(activación) del widget */
-	this.disable = function() { $container.fadeOut(); };
-	this.enable = function() { $container.fadeIn(); };
+	this.disable = function() {
+		$container.fadeOut(); 
+	};
+	this.enable = function() { 
+		$container.fadeIn(); 
+	};
 	/* Buscador de usuarios para enviar privados */
 	function searchValue(e) {
 		var newValue = $input.val();
 		if (newValue==value) return;
 		value = newValue;		// guardamos el nuevo valor de búsqueda
-		dataProvider(value, function(results) {
+		provider(value, function(results) {
+			var answer = [];
 			$found.empty();
 			if (results) {
-				$found.fadeIn();
 				if (results.answer.length) {
 					// filtrado de elementos ya agregados:
-					var answer = results.answer.filter(function(e) {
+					answer = results.answer.filter(function(e) {
 						return selection.indexOf(e.nick) == -1;
 					});
-					$found.append(answer.map(function(u, i) {
-						var $li = $("<li>")
-							.attr("data-info", u.nick)
-							.addClass((i==0) ? "on" : "")
-							.append($("<img>").attr("src", checkUserPhoto(u.pathfoto)))
-							.append($("<span>").addClass("nickname").text(u.nick))
-							.append($("<span>").text(u.nombrebonito))
-							.on("click", function() {selectItem($(this));});
-						return $li;
-					}));
-				} else {
-					$found.append($("<li>").addClass("no-result").text("sin resultados"));
 				};
-			} else {
-				$found.fadeOut();
+				$found.append(answer.map(function(u, i) {
+					var nickname = u.nick,
+						prettyname = u.nombrebonito.replace(/^ +?\(|\)$/g, "");
+					var $li = $("<li>")
+						.attr("data-info", nickname)
+						.attr("data-pretty", prettyname)
+						.addClass((i==0) ? "on" : "")
+						.append($("<img>").attr("src", checkUserPhoto(u.pathfoto)))
+						.append($("<span>").addClass("nickname").text(nickname))
+						.append($("<span>").text(prettyname))
+						.hover(function() {
+							$found.find("li").removeClass("on");
+							$(this).addClass("on");
+						})
+						.click(function() {
+							selectItem($(this));
+						});
+					return $li;
+				}));
 			};
+			if (answer.length == 0) {
+				$found.append($("<li>").addClass("no-result").text("sin resultados"));
+			}
+			showPopupList();
 		});
 	};
 	/* Eventos del teclado sobre el widget: 
@@ -71,13 +110,7 @@ function Finder(container, provider, onSelChange) {
 		- escape
 	*/
 	function onKeySelector(e) {
-		var move = 0;
-		if (e.which == 40) { 		// keydown
-			move = 1;
-		} else if (e.which == 38) {	// keyup
-			move = -1;
-		};
-		if (move != 0) {
+		function moveSelection(move) {
 			e.preventDefault();
 			$list = $found.find("li");
 			var theIndex = $list.index($found.find("li.on"));
@@ -87,29 +120,50 @@ function Finder(container, provider, onSelChange) {
 				if (i==theIndex) $(this).removeClass("on");
 				else if (i==newIndex) $(this).addClass("on").get(0).scrollIntoView(false);
 			});
-			return false;
 		};
-		if (e.which == 13) {	// enter
-			selectItem($found.find("li.on"));
-			return false;
-		};
-		if (e.which == 27) {	// escape
-			$input.val("").trigger("keyup").blur();
-			return false;
-		};
-		return true;
+		var move = 0;
+		switch (e.which) {
+			case 40: 		// down arrow
+				moveSelection(1);
+				break;
+			case 38: 		// up arrow
+				moveSelection(-1);
+				break;
+			case 27: 		// escape
+				$input.blur();
+				hidePopupList();
+				break;
+			case 13: 		// enter
+				selectItem($found.find("li.on"));
+				break;
+			default:
+				return true;
+		}
+		return false;
+
+		// if (e.which == 27) {	// escape
+		// 	//$input.val("").trigger("keyup").blur();
+		// 	return false;
+		// };
+		// return true;
 	};
 	/* Selección de un item de la lista */
 	function selectItem($item) {
-		var key = $item.attr("data-info");	// clave del elemento seleccionado
-		addItem(key);
+		var key = $item.attr("data-info");			// clave del elemento seleccionado
+		if (!key) return;
+		var prettyname = $item.attr("data-pretty");
+		addItem(key, prettyname.length ? prettyname : null);
 		// reseteo del widget:
 		value = null;
-		$input.val("").trigger("keyup");	// se vacía el campo de búsqueda
+		$input.val("").trigger("keyup").focus();	// se vacía el campo de búsqueda
 	};
-	/* Agregación de un nuevo elemento al widget */
-	function addItem(key) {
+	/* Agregación de un nuevo elemento al widget 
+		@param key: clave del elemento
+		@param prettyname: nombre bonito del elemento
+	*/
+	function addItem(key, prettyname) {
 		if (selection.indexOf(key) == -1) {	// elemento no seleccionado
+			var name = (typeof prettyname === "undefined" || prettyname === null) ? key : prettyname;	// nombre de la etiqueta 
 			selection.push(key);	// se agrega la nueva clave
 			$("<li>")
 				.attr("data-key", key)
@@ -121,8 +175,8 @@ function Finder(container, provider, onSelChange) {
 						selection.splice(selection.indexOf(thisKey),1); // se elimina el elemento
 						if (onSelChange) onSelChange();
 					}))
-				.append($("<span>").text(key))
-				.insertBefore($widget.find(".finder"));	// se agrega la nueva selección al widget	
+				.append($("<span>").text(name))
+				.insertBefore($container.find(".finder"));	// se agrega la nueva selección al widget	
 		};
 		// ejecución de callback de cambio de selección
 		if (onSelChange) onSelChange();
@@ -163,8 +217,8 @@ function Editor(config) {
 		callback = config.callback,
 		MAXCHAR_DEFAULT = 280,			// número de caracteres por defecto para un mensaje
 		MAXCHAR = MAXCHAR_DEFAULT,		// máximo de caracteres para el mensaje
-		USER_FINDER = null,
-		THEME_FINDER = null,
+		USER_FINDER = null,				// widget de búsqueda de destino de usuarios (mensajes privados)
+		THEME_FINDER = null,			// widget de búsqueda de destino de temas
 		modal = null;
 	/* Inicialización del editor */
 	(function initEditor() {
@@ -195,9 +249,21 @@ function Editor(config) {
 			$("#insertvideo").on("click", insertVideo);			// Inserción de vídeos
 			$("#insertimage").on("click", insertImage);			// Inserción de imágenes
 			$("#insertlink").on("click", insertLink);			// Inserción de enlaces
-			// Inicialización de widgets de búsqueda
-			USER_FINDER = new Finder($("#send2user"), API.findUsers, onDestinationChange);				// buscador de usuarios
-			THEME_FINDER = new Finder($("#send2theme"), API.findWritableThemes, onDestinationChange);	// buscador de temas
+			// Inicialización de widgets de búsqueda: destino de usuarios y temas
+			// buscador de usuarios
+			USER_FINDER = new Finder({
+				title: "USUARIOS",
+				container: $("#send2user .finder-widget-container"), 
+				provider: API.findUsers, 
+				onSelChange: onDestinationChange
+				});	
+			// buscador de temas			
+			THEME_FINDER = new Finder({
+				title: "TEMAS",
+				container: $("#send2theme .finder-widget-container"), 
+				provider: API.findWritableThemes, 
+				onSelChange: onDestinationChange
+				});
 			// Configuración adicional
 			if (mID) {
 				// se trata de un mensaje respondido o reenviado. Obtenemos el mensaje original:
@@ -432,7 +498,6 @@ function Editor(config) {
 		@param onClickImage: callback a ejecutar cuando se hace click en una imagen
 	*/
 	function loadImages(result, $container, callback) {
-		console.log(result);
 		var $imagesList = $("<div>").addClass('images-list');
 		$container.append($("<h2>").text("Imágenes encontradas en: " + result[0].title))
 				.append($imagesList);
