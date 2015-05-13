@@ -103,12 +103,14 @@ function EskupApi() {
 		THAT.loadWritableThemes(function(themes) {
 			var result = {answer: [], num: 0, query: name};
 			for (k in themes) {
-				var auxText = [k, themes[k].nombre].join(" ");
-				if (auxText.match(nameRegexp)) {
+				var theme = themes[k];
+				var auxText = [k, theme.nombre].join(" ");
+				if (auxText.match(nameRegexp) && theme.activo==1) {
+					// se filtran también los temas inactivos
 					result.answer.push({
 						nick: k,
-						nombrebonito: themes[k].nombre,
-						pathfoto: themes[k].pathfoto
+						nombrebonito: theme.nombre,
+						pathfoto: theme.pathfoto
 					});
 					result.num++;
 				};
