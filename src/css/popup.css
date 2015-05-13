@@ -253,6 +253,9 @@ ul.navigator li:hover {
     margin-top: 10px;
     margin-right: 5px;
 }
+#messages-header.on .nav {
+    display: none;
+}
 #messages-header .button {
     border: 0;
     color: #fff;
