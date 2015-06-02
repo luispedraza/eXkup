@@ -681,15 +681,18 @@ form.search .button {
     position: relative;
     background-color: #fff;
 }
-#logout {
+#profile-toolbar {
+    padding: 20px;
     position: absolute;
     right: 0;
     top: 0;
-    padding: 5px;
-    font-size: 18px;
+}
+#profile-toolbar .button {
+    
+    font-size: 20px;
     cursor: pointer;
 }
-#logout:hover {
+#profile-toolbar .button:hover {
     color: #f30;
 }
 #profile-section .info {

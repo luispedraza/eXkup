@@ -916,6 +916,11 @@ function Popup($container, callback) {
 					callback: function(r) {if (r=="Aceptar") API.logOut(); }
 				});
 			});
+			$("#options").click(function() {
+				chrome.tabs.create({
+					url: "/options.html"
+				});
+			});
 			$("#closetree").on("click", function() {
 				loadBoard(-1);
 				// showTreeBoard(false);
