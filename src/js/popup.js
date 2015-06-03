@@ -333,7 +333,7 @@ function Popup($container, callback) {
 		@param id: ID del elemento seleccionado con el ratón
 	*/
 	function uiSelectBoard(id) {
-		console.log(id);
+		console.log("tablón seleccionado: ", id);
 		/* función de ayuda para introducir la información del tablón actual:
 			@param title: título del tablón
 			@param $descContent: HTML con la descripción del tablón
@@ -1020,27 +1020,23 @@ function getPopup(callback) {
 };
 
 $(function() {
-	(function checkConnection() {
-		if (navigator.onLine) {
-			// Check for eskup server online
-		} else {
-			// Inform the user no connection availabe
-			$("body").append($("<p>")
-				.text("No hay conexión a Internet")
-				.addClass("connection-error")
-				);
+	if (navigator.onLine) {
+		/* Inicialización por defecto del popup */
+		if (document.body.id=="eskup-popup") {
+			window.popup = new Popup($("body"));
 		};
-	})();
-	
-	/* Inicialización por defecto del popup */
-	if (document.body.id=="eskup-popup") {
-		window.popup = new Popup($("body"));
-	};
-	// Eventos de funcionalidad del popup:
-	$("body").on("loadBoard", function(e, config) {
-		getPopup(function(popup) {
-			popup.loadBoard(config.id, config.threadID, config.originalMsgID);
+		// Eventos de funcionalidad del popup:
+		$("body").on("loadBoard", function(e, config) {
+			getPopup(function(popup) {
+				popup.loadBoard(config.id, config.threadID, config.originalMsgID);
+			});
 		});
-	});
+	} else {
+		// Inform the user no connection availabe
+		$("body").append($("<p>")
+			.text("No hay conexión a Internet")
+			.addClass("connection-error")
+			);
+	};
 });
 
