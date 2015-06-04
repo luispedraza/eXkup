@@ -168,7 +168,7 @@ function Finder(options) {
 						selection.splice(selection.indexOf(thisKey),1); // se elimina el elemento
 						if (onSelChange) onSelChange();
 					}))
-				.append($("<span>").text(name))
+				.append($("<span>").text(name).attr("title", name))
 				.insertBefore($container.find(".finder"));	// se agrega la nueva selección al widget	
 		};
 		// ejecución de callback de cambio de selección

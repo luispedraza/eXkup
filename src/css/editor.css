@@ -173,10 +173,11 @@
 	opacity: 0;
 	overflow: hidden;
 	transition: opacity .5s linear;
-	background-color: #f30;
+	border: 1px solid #ddd;
 	padding: 2px;
 	border-radius: 3px;
-	color: #fff;
+	color: #666;
+	background-color: rgba(200,50,50,.1)
 }
 
 #editor.is-public #send2user {
