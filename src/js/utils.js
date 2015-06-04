@@ -17,14 +17,6 @@ var _CEIL = Math.ceil;
 var _ROUND = Math.round;
 var _SQRT = Math.sqrt;
 
-var TABLONES = {
-	mios: "t1-",
-	sigo: "2",
-	priv: "3",
-	todo: "t1-ULTIMOSMENSAJES",
-	favs: "favs"
-};
-
 var VIDEO_TEMPLATES = {
 	"YOUTUBE": "<iframe class='video' type='text/html' src='http://www.youtube.com/embed/_____ID_____?autoplay=0' frameborder='0'/>",
 	"VIMEO": "<iframe class='video' src='http://player.vimeo.com/video/_____ID_____' frameborder='0'></iframe>",
@@ -71,42 +63,39 @@ function makeRegexp(term) {
 	@param href: dirección del enlace
 	@param clamp: acortar el texto dejándolo en este número de caracteres (excluyendo http://www.)
 	*/
-	function makeLink(text, href, clamp) {
-		return $("<a>")
-		.attr("href", "#")
-		.attr("data-url", href)
-		.attr("title", href)
-		.text((clamp) ? text.replace(/^http:\/\/[w\.]*/, "").slice(0,clamp)+"…" : text)
-		.on("click", function() {
-			chrome.tabs.update({url: this.getAttribute("data-url")
-		});
-		});
-	};
+function makeLink(text, href, clamp) {
+	return $("<a>")
+	.attr("href", "#")
+	.attr("data-url", href)
+	.attr("title", href)
+	.text((clamp) ? text.replace(/^http:\/\/[w\.]*/, "").slice(0,clamp)+"…" : text)
+	.on("click", function() {
+		chrome.tabs.update({url: this.getAttribute("data-url")
+	});
+	});
+};
 
-	/* Devuelve el tablón correspondiente a un identificador */
-	function getBoard(id) { return TABLONES[id] || id; };
+function randomColor() {
+	return '#'+_FLOOR(_RANDOM()*16777215).toString(16);
+};
 
-	function randomColor() {
-		return '#'+_FLOOR(_RANDOM()*16777215).toString(16);
+function encodeParams(dict) {
+	params = "";
+	for (var k in dict) {
+		params += k + "=" + encodeURI(dict[k]) +"&";
 	};
+	return params;
+};
 
-	function encodeParams(dict) {
-		params = "";
-		for (var k in dict) {
-			params += k + "=" + encodeURI(dict[k]) +"&";
-		};
-		return params;
-	};
-
-	function dataURItoBlob(dataURI) {
-		var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-		var binary = atob(dataURI.split(',')[1]);
-		var array = [];
-		for(var i = 0; i < binary.length; i++) {
-			array.push(binary.charCodeAt(i));
-		}
-		return new Blob([new Uint8Array(array)], {type: mimeString});
-	};
+function dataURItoBlob(dataURI) {
+	var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+	var binary = atob(dataURI.split(',')[1]);
+	var array = [];
+	for(var i = 0; i < binary.length; i++) {
+		array.push(binary.charCodeAt(i));
+	}
+	return new Blob([new Uint8Array(array)], {type: mimeString});
+};
 
 /* Cuánto tiempo hace que el mensaje fue enviado
 	@param date: Date del mensaje

@@ -162,7 +162,6 @@
 	top: 170px;
 	font-size: 12px;
 	padding: 10px;
-	/* width: 555px; */
 	right: 0;
 }
 
@@ -201,7 +200,6 @@
 
 .send2 {
 	margin-bottom: 10px;
-	/* min-height: 20px; */
 	clear: both;
 }
 .send2:after {
@@ -372,7 +370,6 @@
 	height: 25px;
 	float: left;
 	margin: 4px;
-	/* border: 1px solid #ddd; */
 }
 
 .finder li {
@@ -400,16 +397,14 @@
 .finder span {
 	display: block;
 	float: right;
-	width: 90px;
+	width: 75px;
 	font-size: 11px;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	padding-top: 2px;
 }
-.finder span.nickname {
-	/* font-weight: bold; */
-}
+
 #send2user .finder span.nickname:before {
 	content: "@";
 }

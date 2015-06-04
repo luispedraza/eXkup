@@ -13,7 +13,7 @@ function createMessage(msg, themes, isPrivate) {
 	$msg = $("<div>").addClass(msgClass)
 		.attr("data-author", user)
 		.attr("data-id", m_id)
-		.on("mouseenter", onMessageEnter);
+		.on("mouseenter", onMessageEnter);	// los eventos se inicializan cuando entra el ratón, por rendimiento
 	// La cabecera:
 	var $head = $("<div>").addClass('msg_header')
 		.append($("<img>").attr("src", msg.pathfoto))
@@ -122,7 +122,7 @@ function onThemeClick(e) {
 	e.stopPropagation();
 	$("body").trigger("loadBoard", {id:this.getAttribute("data-theme")});
 };
-/* Función que se ejecuta al mostrar el thread al que pertenece un mensaje */
+/* Función que se ejecuta al hacer click en el enlace al thread al que pertenece un mensaje */
 function onShowThreadClick(e) {
 	e.stopPropagation();
 	$("body").trigger("loadBoard", {
@@ -134,7 +134,9 @@ function onShowThreadClick(e) {
 /* Función que se ejecuta al hacer click en el autor de un mensaje */
 function onAuthorClick(e) {
 	e.stopPropagation();
-	$("body").trigger("loadBoard", "t1-" + this.getAttribute("data-user"));
+	$("body").trigger("loadBoard", {
+		id: "t1-" + this.getAttribute("data-user")
+	});
 };
 /* Función que se ejecuta al pasar el cursor sobre la fecha de publicación */
 function onTimeMouseEnter() {

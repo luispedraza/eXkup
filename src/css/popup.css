@@ -1,3 +1,26 @@
+/* SCROLLBAR TUNE */
+::-webkit-scrollbar {
+    width: 14px;
+    height: 18px;
+}
+::-webkit-scrollbar-thumb {
+    height: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    -webkit-border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.15);
+    -webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+}
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+/* END SCROLLBAR TUNE */
+
 /* colores
     - azul: #1e5070
     - rojo: #f30
@@ -367,6 +390,7 @@ form.search .button {
     transition: all .25s ease;
     padding: 0 10px;
     position: relative;
+    -webkit-user-select: none;
 }
 #messages-header.on #board-description {
     height: 220px;
@@ -387,13 +411,14 @@ form.search .button {
 }
 #board-description img.avatar {
     float: left;
-    height: 60px;
-    margin-left: 10px;
-    margin-right: 10px;
+    height: 75px;
+    /* margin-left: 10px; */
+    /* margin-right: 10px; */
+    margin: 0 10px 0 0;
 }
 #board-description p {
-    height: 90px;
-    overflow-y: auto;
+    /* height: 90px; */
+    /* overflow-y: auto; */
     margin: 0;
     margin-bottom: 10px;
 }
@@ -435,12 +460,13 @@ form.search .button {
 }
 .eskup-info .stats div a {
     display: inline-block;
-    font-size: 20px;
+    font-size: 15px;
     background-color: #fff;
-    border-radius: 100px;
+    border-radius: 5px;
     padding: 5px;
     min-width: 22px;
     text-align: center;
+    width: 55px;
 }
 .eskup-info .stats div a:hover {
     background-color: #000;
@@ -468,14 +494,9 @@ form.search .button {
     content: "escribe en";
 }
 #board-description .links {
-    float: left;
     padding: 0;
     margin-top: 15px;
-    list-style-type: none;
-    max-width: 290px;
-    height: 110px;
-    overflow-y: auto;
-    margin: 0;
+    margin: 10px 0;
 }
 #board-description .theme-information .links:before {
     content: "Más información:";
@@ -485,9 +506,9 @@ form.search .button {
     color:  #f30;
 }
 #board-description .links li {
-    display: list-item;
-    margin-bottom: 3px;
-    list-style-type: square;
+    display: inline;
+    margin-right: 15px;
+    list-style-type: none;
 }
 #board-description .links li:before {
     margin-right: 2px;

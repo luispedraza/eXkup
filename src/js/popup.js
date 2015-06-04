@@ -11,8 +11,6 @@
 	* MIT license
 	*/!function(a){var b=function(c){if(c&&c.childNodes){var d=a.makeArray(c.childNodes),e=null;a.each(d,function(a,d){3===d.nodeType?""===d.nodeValue?c.removeChild(d):null!==e?(e.nodeValue+=d.nodeValue,c.removeChild(d)):e=d:(e=null,d.childNodes&&b(d))})}};a.fn.highlightRegex=function(c,d){return"object"==typeof c&&"RegExp"!==c.constructor.name&&(d=c,c=void 0),"undefined"==typeof d&&(d={}),d.className=d.className||"highlight",d.tagType=d.tagType||"span",d.attrs=d.attrs||{},"undefined"==typeof c||""===c.source?a(this).find(d.tagType+"."+d.className).each(function(){a(this).replaceWith(a(this).text()),b(a(this).parent().get(0))}):a(this).each(function(){var e=a(this).get(0);b(e),a.each(a.makeArray(e.childNodes),function(e,f){var g,h,i,j,k,l;if(b(f),3==f.nodeType){if(a(f).parent(d.tagType+"."+d.className).length)return;for(;f.data&&(j=f.data.search(c))>=0&&(k=f.data.slice(j).match(c)[0],k.length>0);)g=document.createElement(d.tagType),g.className=d.className,a(g).attr(d.attrs),l=f.parentNode,h=f.splitText(j),f=h.splitText(k.length),i=h.cloneNode(!0),g.appendChild(i),l.replaceChild(g,h)}else a(f).highlightRegex(c,d)})}),a(this)}}(jQuery);
 
-
-
 	/* Clase controlador de popup
 		@param $container: 	elemento contenedor del popup
 		@param callbak: 	a ejecutar al terminar la carga del modal
@@ -142,6 +140,17 @@
 			};
 		};
 
+		/* Función a ejecutar al seleccionar un elemento de la barra de navegación */
+		function onBoardSelectorClick() {
+			showSearchForm(false);	// ocultar widget de búsquedas
+			// Selección del elemento de navegación actual:
+			$(".board-selector.on").removeClass("on");
+			$(this).addClass("on");
+			// Carga del tablón correspondiente:
+			loadBoard({
+				id: $(this).attr("data-board")
+			}); 
+		}
 		/* Carga de un tablón en la ventana de mensajes 
 			@param config = {
 				id: 			identificador del tablón,
@@ -151,9 +160,7 @@
 			@param config = -1: retrocede en el historial
 			@param config = 1: avanza en el historial
 		*/
-		// function loadBoard(id, threadID, originalMsgID) {
 		function loadBoard(config) {
-			showSearchForm(false);	// ocultar widget de búsquedas
 			var previousTheme = null;
 			if (config === -1) {
 				if (HISTORY_POSITION>0) {
@@ -170,7 +177,7 @@
 					if (CURRENT_THEME && (CURRENT_THEME.type == "thread") && (CURRENT_THEME.id == threadID)) return; // se pide el mismo thread
 					CURRENT_THEME = {type: "thread", id: config.threadID, original: config.originalMsgID};
 				} else {			// tablón
-					var newBoard = getBoard(config.id);
+					var newBoard = config.id;
 					if (CURRENT_THEME && (CURRENT_THEME.type == "board") && (CURRENT_THEME.id == newBoard)) return; 	// se pide el mismo tablón
 					CURRENT_THEME = {type: "board", id: newBoard};
 				};
@@ -192,7 +199,7 @@
 						loadBoardMessages(CURRENT_THEME.id);
 					};
 				} else if (CURRENT_THEME.type == "thread") {
-					showThread(CURRENT_THEME.id, CURRENT_THEME.original);
+					loadThreadMessages(CURRENT_THEME.id, CURRENT_THEME.original);
 				};	
 			};
 			// Actualización de otros elementos de interfaz de usuario para el id
@@ -202,6 +209,9 @@
 
 		/* Carga de mensajes de un tablón */
 		function loadBoardMessages(theme, callback) {
+			console.log("==============================");
+			console.log("tablón: ", theme);
+
 			function noMoreMessages() {
 				CURRENT_PAGE = -1;		// no cargar más páginas en el futuro
 				$board.append("<div class='no-messages'>No hay más mensajes para mostrar.</div>");
@@ -273,15 +283,12 @@
 					.addClass(className || "")
 					.append($descContent);
 			};
-			// Deselección del elemento de navegación actual
-			$(".board-selector.on").removeClass("on");
+			
 			if (typeof id=="undefined") {
 				fillTitleAndDescription("Hilo de comentarios");
 				return;
 				// Estaría bien completar obteniendo información adicional del servidor sobre el hilo actual
 			};
-			// Selección del elemento del menú:
-			$("#"+id).addClass("on");	// current board menu item
 			// Información del tablón mostrado:
 			var title = null, 											// texto del título del tablón
 				$descriptionContent = null;								// HTML con la descripción del tablón
@@ -356,7 +363,6 @@
 			case "t1": 	// UN USUARIO
 				var user = boardInfo[1];	// el id del tablón de usuario
 				API.loadProfile(user, function(userInfo) {
-					console.log(userInfo);
 					var userURL = "http://eskup.elpais.com/" + user + "/";
 					// enlaces de usuario
 					var $links = $("<ul>").attr("class", "links");
@@ -364,24 +370,22 @@
 					if (userInfo.urlblog) $links.append($("<li>").addClass("fa fa-pencil-square").append(makeLink("Blog", userInfo.urlblog)));
 					if (userInfo.urltwitter) $links.append($("<li>").addClass("fa fa-twitter").append(makeLink("Twitter", userInfo.urltwitter)));
 					if (userInfo.urlwebpersonal) $links.append($("<li>").addClass("fa fa-globe").append(makeLink("Web", userInfo.urlwebpersonal)));
-					$description.append($links);
 					// avatar
-					$("<img>").addClass("avatar").attr("src", checkUserPhoto(userInfo.pathfoto)).appendTo($description);
+					var $avatar = $("<img>").addClass("avatar").attr("src", checkUserPhoto(userInfo.pathfoto));
 					// descripción
-					$("<p>").html(userInfo.descripcion || "[Este usuario no ha proporcionado nincuna descripción.]").appendTo($description);
+					var $info = $("<p>").html(userInfo.descripcion || "[Este usuario no ha proporcionado nincuna descripción.]");
 					// control de usuario 
-					var $userControl = $("<div>").attr("class", "user-control").appendTo(($description));
-					$userControl
-						.append($("<div>")
-							.attr("class", "control-item " + ((userInfo.seguido == 1) ? "follow on" : "follow"))
-							.attr("data-user", user)
-							.on("click", onFollowUser))
-						.append($("<div>")
-							.attr("class", "control-item " + ((userInfo.bloqueado == 1) ? "blocked on" : "blocked"))
-							.attr("data-user", user)
-							.on("click", function() {
-								onBlockUser(this);
-							}));
+					var $userControl = $("<div>").attr("class", "user-control")
+							.append($("<div>")
+								.attr("class", "control-item " + ((userInfo.seguido == 1) ? "follow on" : "follow"))
+								.attr("data-user", user)
+								.on("click", onFollowUser))
+							.append($("<div>")
+								.attr("class", "control-item " + ((userInfo.bloqueado == 1) ? "blocked on" : "blocked"))
+								.attr("data-user", user)
+								.on("click", function() {
+									onBlockUser(this);
+								}));
 					// datos de eskup
 					var $stats = $("<div>").addClass('eskup-info')
 						.append($("<div>").addClass('stats info-users')
@@ -399,7 +403,13 @@
 								.append(makeLink(userInfo.numero_eventos, userURL + "temasseguidos")))
 							.append($("<div>").addClass("write")
 								.append(makeLink(userInfo.numero_eventos_escribe, userURL + "temasescritos"))));
-					$description.append($stats);
+					$description
+								.append($avatar)
+								.append($info)
+								.append($links)
+								.append($userControl)
+								.append($stats);
+					
 					fillTitleAndDescription("Mensajes de @" + user + " - " + userInfo.nombre + " " + userInfo.apellidos,
 						$description, 
 						"user-information");
@@ -540,14 +550,14 @@
 		};
 
 		/* Carga de una conversación completa */
-		function showThread(threadID, originalMsgID) {
+		function loadThreadMessages(threadID, originalMsgID) {
 			var modal = new ModalDialog({
 				title: "Cargando datos",
 				type: "spinner",
 				content: "Obteniendo datos del servidor..."
 			});
 			API.loadThread(threadID, function(info) {
-				modal.close()
+				modal.close();
 				var $tree = $("#tree").empty();
 				var aux = {};
 				/* agregar un nuevo nodo: item + children */
@@ -769,6 +779,16 @@
 			});
 		};
 
+		/* Rellena la navegación de tablones principales con la información del usuario */
+		function fillMainBoards(userID) {
+			$("#sigo").attr("data-board", "2");
+			$("#todo").attr("data-board", "t1-ULTIMOSMENSAJES");
+			$("#mios").attr("data-board", "t1-" + userID);
+			$("#priv").attr("data-board", "3");
+			$("#menc").attr("data-board", "t4-" + userID);
+			$("#favs").attr("data-board", "favs");
+		};
+
 		/* Rellena la cabecera del popup con información del usuario */
 		function fillHeader() {
 			API.loadProfile(null, function(user) {
@@ -786,14 +806,9 @@
 					themeID = "ev-"+theme.__key;
 					var $item = $("<li>")
 						.attr("class", "board-selector")
-						.attr("data-theme", themeID)
-						.attr("id", themeID)
+						.attr("data-board", themeID)
 						.text(theme.nombre)
-						.on("click", function() { 
-							loadBoard({
-								id: $(this).attr("data-theme")
-							}); 
-						})
+						.on("click", onBoardSelectorClick)
 						.appendTo($divThemes);
 				});
 			});
@@ -814,7 +829,7 @@
 					chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
 					return;
 				};
-				TABLONES["mios"] = "t1-" + userID;
+				fillMainBoards(userID);
 				fillHeader();
 				fillThemes();
 
@@ -845,7 +860,7 @@
 				$("#history-left").on("click", function() {loadBoard(-1);});
 				$("#history-right").on("click", function() {loadBoard(1);});
 				enableDynamicLoad(true);
-				$(".board-selector").on("click", function() { loadBoard({id: this.id}); });
+				$(".board-selector").on("click", onBoardSelectorClick);
 				$("#logout").on("click", function() {
 					new ModalDialog({
 						title: "Cerrar sesión",
