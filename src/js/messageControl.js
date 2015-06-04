@@ -1,3 +1,83 @@
+/* Función que crea un nuevo mensaje
+	@param msg: mensaje a agregar
+	@param themes: información complementaria (temas)
+	@param isPrivate: el mensaje es privado? true/false
+	@return: nuevo mensaje agregado
+*/
+function createMessage(msg, themes, isPrivate) {	
+	var m_id = msg.idMsg;
+	var user = msg.usuarioOrigen;
+	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
+	// Creación del nuevo mensaje:
+	var msgClass = 'message ' + (API.checkFavorite(m_id) ? " favorite " : "") + (isPrivate ? " private " : "");
+	$msg = $("<div>").addClass(msgClass)
+		.attr("data-author", user)
+		.attr("data-id", m_id)
+		.on("mouseenter", onMessageEnter);
+	// La cabecera:
+	var $head = $("<div>").addClass('msg_header')
+		.append($("<img>").attr("src", msg.pathfoto))
+		.append($("<a>").attr("href", "#").addClass("author")
+			.text("@" + user + (msg.usuarioOrigenNombre ? (" (" + msg.usuarioOrigenNombre + ")") : ""))
+			.attr("data-user", user))
+		.append(
+			makeLink(getTimeAgo(new Date(tsMessage)),"http://eskup.elpais.com/" + m_id)
+				.addClass("time fa fa-clock-o").attr("data-ts", tsMessage));
+	// Mensaje reenviado
+	if (msg.reenvio) {
+		$head.append($("<span>").addClass('btn reply2link fa fa-retweet')
+			.text("mensaje reenviado")
+			.attr("data-forward", msg.reenvio)
+			.on("click", onForwardedMessageClick));
+	};
+	// El contenido del mensaje:
+	var $content = $("<div>").addClass('msg_content').html(msg.contenido);
+	processContent($content, true);				// PROCESAMIENTO DE LOS CONTENIDOS: ENLACES, VÍDEOS...
+	if (msg.cont_adicional) {
+		$content.append($("<img>").attr("src", msg.cont_adicional));
+	};
+	// Temas del mensaje
+	var $themes = $("<ul>").addClass("themes nodisplay");
+	if (themes) {
+		var msgThemes = msg.CopiaEnTablones.split( "," ).filter(function(d) {return d.split("-")[0] == "ev"});	// temas del mensajes
+		if (msgThemes.length) {
+			$themes.removeClass('nodisplay');
+			msgThemes.forEach(function(themeKey) {
+				var themeID = themeKey.split("-")[1];
+				$themes.append($("<li>")
+					.attr("data-theme", themeKey)
+					.text(themes[themeID].nombre));
+			});
+			$msg.attr("data-themes", JSON.stringify(msgThemes.map(function(d){return d.split("-")[1];})));
+		};
+	};
+	// Elementos de control:
+	var $control = $("<div>").addClass('msg_control')
+		.append($("<div>").addClass('btn fav fa fa-star')
+			.text(" favorito"))
+		.append($("<div>").addClass('btn reply fa fa-mail-reply')
+			.text(" responder"))
+		.append($("<div>").addClass('btn fwd fa fa-retweet')
+			.text(" reenviar"));
+	// Hilos de mensajes
+	if (msg.idMsgRespuesta && (msg.idMsgRespuesta != m_id)) {
+		$head.append($("<span>").addClass('btn reply2link fa fa-mail-reply')
+			.text(msg.autorMsgRespuesta + ((msg.usuarioRespuestaNombre) ? (" (" + msg.usuarioRespuestaNombre + ")") : ""))
+			.attr("data-reply", msg.idMsgRespuesta)
+			.on("click", onReplyClick));
+		$control.append($("<div>").addClass('btn thlink fa fa-comments')
+			.text(" charla")
+			.attr("data-thread", msg.hilo)
+			.on("click", onShowThreadClick));
+	};
+	// Mensaje propio
+	if (user == API.getUserNickname()) {
+		$control.append($("<div>").addClass('btn delete fa fa-trash-o')
+			.text(" borrar"));
+	};
+	return $msg.append([$head, $content, $themes, $control]);
+};
+
 /* Inicializa los eventos de un mensaje */
 function onMessageEnter() {
 	$this = $(this);

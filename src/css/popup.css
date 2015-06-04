@@ -387,8 +387,8 @@ form.search .button {
 }
 #board-description img.avatar {
     float: left;
-    height: 80px;
-    margin-left: 0;
+    height: 60px;
+    margin-left: 10px;
     margin-right: 10px;
 }
 #board-description p {
@@ -486,8 +486,11 @@ form.search .button {
 }
 #board-description .links li {
     display: list-item;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     list-style-type: square;
+}
+#board-description .links li:before {
+    margin-right: 2px;
 }
 #board-description .links li.eskup:before {
     content: " ";
@@ -499,10 +502,10 @@ form.search .button {
     overflow: visible;
 }
 #board-description .links a {
-    border-bottom: 1px dotted #fff;
     display: inline-block;
     color: #fff;
     padding: 0;
+    border-bottom: 1px solid transparent;
 }
 
 #board-description .links a:hover {
