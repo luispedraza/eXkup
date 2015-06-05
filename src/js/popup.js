@@ -209,9 +209,6 @@
 
 		/* Carga de mensajes de un tablón */
 		function loadBoardMessages(theme, callback) {
-			console.log("==============================");
-			console.log("tablón: ", theme);
-
 			function noMoreMessages() {
 				CURRENT_PAGE = -1;		// no cargar más páginas en el futuro
 				$board.append("<div class='no-messages'>No hay más mensajes para mostrar.</div>");
@@ -269,7 +266,6 @@
 			@param id: ID del elemento seleccionado con el ratón
 		*/
 		function uiSelectBoard(id) {
-			console.log("tablón seleccionado: ", id);
 			/* función de ayuda para introducir la información del tablón actual:
 				@param title: título del tablón
 				@param $descContent: HTML con la descripción del tablón
@@ -325,7 +321,6 @@
 				case "ev": // se trata de un evento de Eskup
 					var theme = boardInfo[1];	// identificador del tema
 					API.loadThemeInfo(theme, function(themeInfo) {
-						console.log(themeInfo);
 						$("<img>").attr("src", themeInfo.pathfoto).appendTo($description);
 						$("<p>").html(themeInfo.descripcion).appendTo($description);
 						var $themeControl = $("<div>").attr("class", "theme-control").appendTo(($description));
@@ -890,7 +885,7 @@
 				$("#mouse-follow").on("click", function() {
 					$(this).toggleClass('on');
 				});
-				$("#edit-button").on("click", function() {	
+				$("#edit-button").on("click", function() {
 					new Editor({"api": API});	// Nuevo editor de mensajes, opciones por defecto
 				});	
 
