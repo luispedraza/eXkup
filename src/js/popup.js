@@ -414,7 +414,11 @@
 							$description, 
 							"user-information");
 					});		
-					break;			
+					break;	
+				default:
+					title = "Hilo de comentarios";
+					$descriptionContent = $("<p>").text("Se muestran todos los comentarios de una noticia. Puedes utilizar los botones de la barra inferior para ver los comentarios en forma de árbol o lista, hacer que el texto siga los movimientos de tu ratón para facilitar la lectura, y obtener una visualización interactiva de todos los comentarios. ");
+					fillTitleAndDescription(title, $descriptionContent);	
 			};
 		};
 
