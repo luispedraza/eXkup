@@ -179,7 +179,6 @@ function EskupApi() {
 		ej.: http://eskup.elpais.com/Outeskup?t=2&f=json&id=7gTvFkSaO-pa0342AjhqMg
 	*/
 	this.loadMessages = function(board, page, callback) {
-		console.log("llamada api ", board, page);
 		var params = eskupParams({t: board, p: page, nummsg: THAT.NUMMSG});
 		apiCall("GET", OUTESKUP, params, function (r) {
 			callback(eskupParseResponse(r));
