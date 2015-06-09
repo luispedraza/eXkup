@@ -26,6 +26,7 @@
 .dlg-title {
 	font-size: 16px;
 	color:  black;
+	margin-bottom: 5px;
 }
 .dlg-content {
 	overflow-y: auto;

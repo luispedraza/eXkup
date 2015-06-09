@@ -850,7 +850,7 @@
 					showSearchForm();
 				});
 				$(document).on("keydown", function(e) {
-					if((event.ctrlKey || event.metaKey) && event.which == 70) {
+					if((e.ctrlKey || e.metaKey) && e.which == 70) {
 						showSearchForm();
 			            // event.preventDefault();
 			            // return false;
@@ -874,6 +874,20 @@
 						url: "/options.html"
 					});
 				});
+				$("#tutorial").click(function() {
+					new ModalDialog({
+						title: "Tutorial de la extensión",
+						content: "¿Quieres realizar un tutorial para aprender a usar esta extensión?",
+						buttons: ["Sí", "Ahora no"],
+						callback: function(r) {
+							if (r === "Sí") {
+								// cerrar la ventana de profile:
+								$("#profile-item").click();
+								startTutorial();
+							}
+						}
+					});
+				})
 				$("#closetree").on("click", function() {
 					loadBoard(-1);
 					// showTreeBoard(false);
@@ -887,7 +901,7 @@
 				});
 				$("#edit-button").on("click", function() {
 					new Editor({"api": API});	// Nuevo editor de mensajes, opciones por defecto
-				});	
+				});
 
 				// Mostrar secciones del perfil
 				$("#profile-section .selector-item h4").on("click", function() {

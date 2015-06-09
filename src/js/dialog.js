@@ -16,7 +16,6 @@
 	}
 */
 function ModalDialog(config) {
-	console.log(config);
 	var THAT = this;
 	this.close = function() { 
 		$modal.fadeOut(function() { 

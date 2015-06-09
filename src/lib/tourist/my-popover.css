@@ -121,3 +121,11 @@
   border-right-width: 0;
   border-left-color: #fff;
 }
+
+.popover .tour-next {
+    background-color: #f30;
+
+    border: none;
+    color: #fff;
+    height: 30px;
+}
