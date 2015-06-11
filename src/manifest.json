@@ -22,6 +22,6 @@
     "background": {"scripts": ["exe/eskupbckground.js"]},
     "icons": { "48": "img/eskupicon48.png",
     "128": "img/eskupicon128.png" },
-    "content_security_policy": "script-src 'self' https://example.com; object-src 'self' https://vimeo.com",
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self' https://vimeo.com",
     "manifest_version" : 2
   }

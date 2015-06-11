@@ -1,5 +1,4 @@
 /* Tutorial de la extensión utilizando Tourist */
-var tour;
 
 function startTutorial(){
 
@@ -131,7 +130,7 @@ function startTutorial(){
 						at: 'top center'
 					}, {
 						content: '<p>Aquí arriba puedes ver tu nombre de usuario y avatar.</p>' +
-								'<p class="action">Haz click en este elemento para seguir el tutorial</p>',
+								'<p class="action">Haz click en tu nombre de usuario para seguir el tutorial</p>',
 						highlightTarget: true,
 						target: $('#profile-item'),
 						my: 'top left',
@@ -174,7 +173,7 @@ function startTutorial(){
 						}
 					}];
 					// Código del tutorial:
-					tour = new Tourist.Tour({
+					var tour = new Tourist.Tour({
 						steps: steps
 					});
 					tour.start();
