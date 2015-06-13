@@ -395,7 +395,6 @@ function EskupApi() {
 			method = "MULTI";
 		};
 		apiCall(method, INESKUP, params, function(r) {
-			console.log(r);
 			if (callback) callback(eskupParseResponse(r));
 		});
 	};

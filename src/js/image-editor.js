@@ -30,7 +30,6 @@ window.onload = function() {
 	})
 	canvasEditor.on('object:moving', function(e){
 		var o = e.target;
-		console.log(o);
 		o.lineL && o.lineL.set({'x1': o.left, 'y1': o.top});
 		o.lineR && o.lineR.set({'x2': o.left, 'y2': o.top});
 		if (o.pointL){
@@ -199,7 +198,6 @@ window.onload = function() {
 		});
 	}
 	filters = document.getElementsByClassName("preset");
-	console.log(filters);
 	for (var f=0; f<filters.length; f++) {
 		console.log("filter");
 		filters[f].addEventListener('click', Filter);
@@ -321,7 +319,6 @@ function insertLayer(element) {
 		itemInfo.innerHTML = element.text;
 	}
 	else if (element.type == "path") {
-		console.log(element)
 		var c = document.createElement("canvas");
 		c.width = element.width;
 		c.height = element.height;
@@ -370,7 +367,6 @@ function insertLayer(element) {
 		canvasEditor.bringToFront(o);
 		if (e.target.id) {
 			for (var i=canvasEditor._objects.length-1; i>0; i--) {
-				console.log(i);
 				canvasEditor.sendBackwards(o);
 				if (canvasEditor.item(i).ts == e.target.id) break; 
 			}
@@ -598,7 +594,6 @@ function objectSelected(e) {
 }
 
 function objectModified(e) {
-	console.log("modi");
 	var element = e.target;
 	var ts = element.ts;
 	try {

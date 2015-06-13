@@ -1,3 +1,34 @@
+/* Para mostrar información contextual sobre un elemento */
+function ChartTooltip(whereMouseMoved,x,y,content,config) {
+	if (typeof config == "undefined") config = {};
+	var delay = (typeof config.delay === "undefined") ? 800 : config.delay;
+	var autoClose = (typeof config.autoClose === "undefined") ? true : config.autoClose;
+	$(whereMouseMoved).on("mouseleave",function() {
+		clearTimeout(timeout);
+		if (autoClose) close();
+		$(this).off("mouseleave");
+	});
+	var $element = $("<div>");
+	var timeout = setTimeout(initTooltip, delay);
+	if (config.duration) setTimeout(close, config.duration);	// duración determinda de la muestra del tooltip
+	function initTooltip() {
+		$element.addClass("message-detail")
+			.css({"left": x, "top": y})
+			.append($("<div>").addClass('tooltip-header'))
+			.append(content)
+			.draggable()
+			.appendTo('body');
+		if (!autoClose) {
+			$element.find(".tooltip-header")
+				.append($("<div>").addClass('close fa fa-times')
+					.on("click", close));
+		};
+	};
+	function close() {
+		$element.remove();
+	};
+};
+
 /* Obtiene el color de pintado para un mensaje dado */
 function getMsgColor(msg) {
 	return msg.selected ? msg.author.color : "#ccc";
@@ -110,11 +141,11 @@ function TalkVisualizer(containerID, processor, margin) {
 
 	// Menú contextual para los mensajes
 	function ContextMenu(element) {
-		var radius = 40,
+		var RADIUS = 40,
 			timeout = setTimeout(initContextMenu, 400),
 			d3Element = d3.select(element).classed("selected", true)
 				.on("mouseleave", function() {
-					clearTimeout(timeout);
+					clearTimeout(timeout); // para evitar que se muestre el menú si hemos abandonado el elemento
 					if (!menu) d3.select(this).classed("selected", false);
 				}),
 			data = d3Element.datum(),
@@ -123,7 +154,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		[
 			{"title": "ver mensaje", "action": "showMessage", "color": color, "data": data},
 			{"title": "ver conversación", "action": "showConversation", "color": color, "data": data},
-			{"title": "ver autor", "action": "showAuthor", "color": color, "data": data}
+			{"title": "ver autor: @" + data.author.nickname, "action": "showAuthor", "color": color, "data": data}
 		];
 		var menu, items;
 		/* Inicialización del menú contextual de mensaje */
@@ -139,13 +170,14 @@ function TalkVisualizer(containerID, processor, margin) {
 				"stroke-dasharray": "3"
 				})
 				.transition().duration(DURATION)
-					.attr("r", radius);
+					.attr("r", RADIUS);
 			
 			items = menu.selectAll(".msg-menu-item").data(menuItems);
 			var itemsEnter = items.enter().append("g")
 				.attr("class", "msg-menu-item")
 				.attr("transform",d3Translate([0,0]))
-				.on("click", clickOnItem);
+				.on("click", onMenuItemClicked)
+				.on("mouseenter", onMenuItemEnter);
 			itemsEnter.append("circle")
 				.attr({"r": 0,
 					"stroke": "#fff",
@@ -164,25 +196,30 @@ function TalkVisualizer(containerID, processor, margin) {
 				})
 				.text(function(d) {
 					switch(d.action) {
-						case "showMessage": return "\uF075";
-						case "showConversation": return "\uF086";
-						case "showAuthor": return "\uF007";
+						case "showMessage": return "\uF075";		// icono de mensaje
+						case "showConversation": return "\uF086";	// icono de conversación
+						case "showAuthor": return "\uF007";			// icono de avatar
 					};
 				});
 
 			items.transition().duration(200).ease("bounce")
 				.attr("transform", function(d,i) {
 					var angle = i * _2_PI/menuItems.length,
-						x = radius * _COS(angle)
-						y = radius * _SIN(angle);
+						x = RADIUS * _COS(angle)
+						y = RADIUS * _SIN(angle);
 					return d3Translate([x,y]);
 				});
 			items.selectAll("circle")
 				.transition().duration(200).ease("bounce")
 				.attr("r", 20);
 		};
-		// a ejecutar al hacer click en una opción del menú contextual
-		function clickOnItem(d) {
+		/* A ejecutar cuando se entra con el ratón en una opción del menú contextual */
+		function onMenuItemEnter(d) {
+			var tooltipConfig = {"autoClose": true, "delay": 500, "duration": 2000};
+			new ChartTooltip(this, d3.event.offsetX+20, d3.event.offsetY, d.title, tooltipConfig);
+		};
+		/* A ejecutar al hacer click en una opción del menú contextual */
+		function onMenuItemClicked(d) {
 			switch (d.action) {
 				case "showMessage":
 					var tooltipConfig = {"autoClose": false, "delay": 0};
@@ -192,11 +229,11 @@ function TalkVisualizer(containerID, processor, margin) {
 					dispatchConversation(d.data);
 					break;
 				case "showAuthor":
-					$("body").trigger("loadBoard", "t1-" + d.data.author.nickname);
+					$("body").trigger("loadBoard", {id: "t1-" + d.data.author.nickname});
 					break;
 			};			
 		};
-
+		/* Borrar el menú contextual */
 		function clearContextMenu() {
 			d3Element.classed("selected", false);
 			menu.transition().duration(DURATION)
@@ -206,7 +243,6 @@ function TalkVisualizer(containerID, processor, margin) {
 	};
 	var ZOOM_SCALE, ZOOM_TR;
 	function onZoomEnd() {
-		console.log("zoomend");
 		var scale = ZOOM.scale();
 		LINK_WIDTH = LINK_WIDTH_DEFAULT/scale;
 		ANTI_ZOOM_SCALE = d3Scale(1/scale);
@@ -227,7 +263,7 @@ function TalkVisualizer(containerID, processor, margin) {
 	};
 
 	function onFocusClick(d,i) {
-		console.log(d);
+
 	};
 	// var ___COUNT___ = 0;
 	var ZOOM = d3.behavior.zoom()
@@ -375,7 +411,6 @@ function TalkVisualizer(containerID, processor, margin) {
 	};
 	/* Visualización de los focos del grafo, cuandod hay agrupación */
 	function updateFocus(animate) {
-		console.log(authorFocus);
 		if (typeof animate === "undefined") animate = true;
 		var radiusValue = (LAYOUT_TYPE=="graph") ? (function(l) {return l.radius;}) : 20;
 		/* Focos de autores */
@@ -434,6 +469,7 @@ function TalkVisualizer(containerID, processor, margin) {
 			// .call(overrideZoom)	// para desactivar el zoom cuando se clickea, draggea un nodo
 			// .on("click", clickOnNode)
 			.on("mouseenter", function(d, e) {
+				// Se muestra un menú contextual para cada mensaje, con opciones: ver mensaje, ver usuario, ver conversación
 				new ContextMenu(this);
 			})
 			.call(FORCE.drag);
@@ -542,9 +578,9 @@ function TalkVisualizer(containerID, processor, margin) {
 		};
 		function createUserTooltip(d,i) {
 			var groups = CHORD.groups();
-			function nm(i) {return _ROUND(groups[i].value);};					// mensajes enviados por un usuario
+			function nm(i) {return _ROUND(groups[i].value);};						// mensajes enviados por un usuario
 			function pm(i) {return (100*nm(i)/nMessages).toFixed(1);};				// porcentaje de mensajes enviados
-			function nmr(i) {return _ROUND(d3.sum(matrix[i]));};						// número de mensajes recibidos
+			function nmr(i) {return _ROUND(d3.sum(matrix[i]));};					// número de mensajes recibidos
 			function pmr(i) {return (100*nmr(i)/nMessages).toFixed(1);};			// porcentaje de mensajes recibidos
 			var nickname = users[i].nickname;
 			var $ulSent = $("<ul>");
@@ -649,7 +685,6 @@ function TalkVisualizer(containerID, processor, margin) {
 	};
 	/* Principal función de actualización */
 	function update(source) {
-		TIC();
 		if (typeof source == "undefined") source = root;
 		// Limpieza de la actualización anterior:
 		nodes=[], links=[], authorFocus=[], authorLinks=[];
@@ -829,7 +864,6 @@ function TalkVisualizer(containerID, processor, margin) {
 			updateTreeLinks();
 		};
 		document.getElementById("svg").setCurrentTime(0);
-		TOC(true);
 	};
 	function resetZoom() {
 		TIMELINE_SCROLL=0; 

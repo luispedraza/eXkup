@@ -16,8 +16,14 @@ body {
   width: 100%;
   height: 100%;
 }
+.msg-menu-item {
+  opacity: .8;
+}
 .msg-menu-item:hover {
   cursor: pointer;
+  stroke: "#000";
+  stroke-width: 2;
+  opacity: 1;
 }
 .mask {
   pointer-events: none;
@@ -474,6 +480,7 @@ body {
 
 /* Diagramas de frecuencia */
 #d3-frequency {
+  display: none;
   position: absolute;
   right: 0;
   bottom: 0;

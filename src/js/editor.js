@@ -279,7 +279,6 @@ function Editor(config) {
 						sendButtonText = "RESPONDER";
 						$("#replying-message").html(mHTML);
 					} else if (command=="forward") {
-						console.log(msg);
 						var fwdText = "fwd @" + user + ": ";
 						// var $newMsg = $("#newmessage");
 						// $newMsg.html(msg.contenido).html(fwdText + $newMsg.text());
@@ -434,7 +433,6 @@ function Editor(config) {
 		// imagen del mensaje
 		if (newimg && newimg.width) 
 			API_CONFIG.image = dataURItoBlob(newimg.toDataURL("image/jpeg", 0.8));
-		console.log("Configuración API: ",API_CONFIG);
 		API.update(API_CONFIG, function (result) {
 			if (result.status == "error") {
 				new ModalDialog({

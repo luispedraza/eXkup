@@ -23,7 +23,6 @@
 			$list
 				.addClass("eskup-inserted")
 				.find(".ProfileTweet-action--retweet").after($button);
-			console.log("insertado");
 
 			// var info = item.getElementsByClassName("tweet")[0];
 			// tweet_id = info.getAttribute("data-item-id");

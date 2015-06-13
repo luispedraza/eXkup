@@ -943,34 +943,37 @@
 
 				// Inicialización de contenidos. Se busca si la página actual es de PRISA
 				// y se extraen los posibles comentarios de la noticia
-				chrome.tabs.executeScript({ file: "exe/search-for-comments.js" }, function(result) {
-					if (result && (result = result[0])) {
-						switch (result.type) {
-							case "thread":
-								// existe un hilo de comentarios en una noticia
-								loadBoard({
-									threadID: result.id, 
-									originalMsgID: result.id
-								});
-								break;
-							case "theme":
-								// es un tema de conversación de eskup
-								loadBoard({
-									id: "ev-" + result.id
-								});
-								break;
-							case "user":
-								// es la página de un usuario de eskup
-								loadBoard({
-									id: "t1-" + result.id
-								});
-								break;
+				if (!window.location.href.match(/^chrome-extension/))
+					chrome.tabs.executeScript({ file: "exe/search-for-comments.js" }, function(result) {
+						if (result && (result = result[0])) {
+							switch (result.type) {
+								case "thread":
+									// existe un hilo de comentarios en una noticia
+									loadBoard({
+										threadID: result.id, 
+										originalMsgID: result.id
+									});
+									break;
+								case "theme":
+									// es un tema de conversación de eskup
+									loadBoard({
+										id: "ev-" + result.id
+									});
+									break;
+								case "user":
+									// es la página de un usuario de eskup
+									loadBoard({
+										id: "t1-" + result.id
+									});
+									break;
+							};
+						} else {
+							// cargar tablón de eventos seguidos
+							$("#sigo").click();
 						};
-					} else {
-						// cargar tablón de eventos seguidos
-						$("#sigo").click();
-					};
-				});
+					})
+				else $("#sigo").click();
+
 				if (callback) callback();
 			});
 		});
@@ -979,6 +982,7 @@
 	/* 	Obtiene el popup actual y si no existe, crea uno nuevo  
 		El nuevo popup estará contenido en una ventana modal, si el ID del body no es "eskup-popup"
 		@param callback: función a ejecutar sobre el popup una vez recuperado o creado.
+		@param desiredBoard: el tablón que se quiere mostrar
 	*/
 	function getPopup(callback) {
 		if (window.popup) {
@@ -992,32 +996,26 @@
 				$container = $("<div>").attr("id", "eskup-popup");
 				new ModalDialog({
 					content: $container,
-					container: "body",
+					container: $("body"),
 					callback: function() { window.popup = null;}
 				});
-			}
+			};
 			window.popup = new Popup($container, function() {
-				// Eventos de funcionalidad del popup:
-				$("body").on("loadBoard", function(e, config) {
-					getPopup(function(popup) {
-						popup.loadBoard(config);
-					});
-				});
 				callback(window.popup);
 			});
 		};
 	};
+	window.getPopup = getPopup;
 
 	// Inicialización de la extensión
 	$(function() {
 		if (navigator.onLine) {
 			// Inicialización del popup
-			getPopup(function(popup) {
-				var message = "\n \
+			if (document.body.id == "eskup-popup") getPopup(function(popup) {
+				console.log("\n \
 Bienvenido a eXkup. \n \
 eXkup es una extensión no oficial de Chrome que permite la utilización de Eskup, la red social de ELPAIS.com \n \
-Ha sido desarrollada por Luis Pedraza (@luispedraza, luispedraza@gmail.com)";
-				console.log(message);
+Ha sido desarrollada por Luis Pedraza (@luispedraza, luispedraza@gmail.com)");
 				// Comprobación de tutorial realizado o lanzamiento del mismo (primera ejecución)
 				if (localStorage.getItem("eskupTutorial") != "done") {
 					localStorage.setItem("eskupTutorial", "done");
@@ -1031,6 +1029,12 @@ Ha sido desarrollada por Luis Pedraza (@luispedraza, luispedraza@gmail.com)";
 				.addClass("connection-error")
 				);
 		};
+		// Eventos de funcionalidad del popup:
+		$("body").on("loadBoard", function(e, config) {
+			getPopup(function(popup) {
+				popup.loadBoard(config);
+			});
+		});
 	});
 })();
 

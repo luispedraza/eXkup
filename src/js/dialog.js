@@ -16,6 +16,7 @@
 	}
 */
 function ModalDialog(config) {
+	console.log("modal config: ", config);
 	var THAT = this;
 	this.close = function() { 
 		$modal.fadeOut(function() { 
@@ -28,7 +29,7 @@ function ModalDialog(config) {
 		buttons = config.buttons,
 		callback = config.callback,
 		timeout = config.timeout,
-		$container = config.container || $("#eskup-popup");	// contenedor del popup
+		$container = config.container || ($("#eskup-popup").length ? $("#eskup-popup") : $("body"));	// contenedor del popup
 	var $modal = $("<div>")
 			.addClass("modal")
 			.on("click", function(e) {
@@ -119,34 +120,4 @@ function ModalDialog(config) {
 	};
 	// Algunos elementos del contenido pueden cerrar el diálogo (independientemente de que tengan otros eventos asociados)
 	$modal.find(".close-on-click").on("click", close);
-};
-
-/* Para mostrar información contextual sobre un elemento */
-function ChartTooltip(whereMouseMoved,x,y,content,config) {
-	if (typeof config == "undefined") config = {};
-	var delay = (typeof config.delay === "undefined") ? 800 : config.delay;
-	var autoClose = (typeof config.autoClose === "undefined") ? true : config.autoClose;
-	$(whereMouseMoved).on("mouseleave",function() {
-		clearTimeout(timeout);
-		if (autoClose) close();
-		$(this).off("mouseleave");
-	});
-	var $element = $("<div>");
-	var timeout = setTimeout(initTooltip, delay);
-	function initTooltip() {
-		$element.addClass("message-detail")
-			.css({"left": x, "top": y})
-			.append($("<div>").addClass('tooltip-header'))
-			.append(content)
-			.draggable()
-			.appendTo('body');
-		if (!autoClose) {
-			$element.find(".tooltip-header")
-				.append($("<div>").addClass('close fa fa-times')
-					.on("click", close));
-		};
-	};
-	function close() {
-		$element.remove();
-	};
 };
