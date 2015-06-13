@@ -943,37 +943,34 @@
 
 				// Inicialización de contenidos. Se busca si la página actual es de PRISA
 				// y se extraen los posibles comentarios de la noticia
-				if (!window.location.href.match(/^chrome-extension/))
-					chrome.tabs.executeScript({ file: "exe/search-for-comments.js" }, function(result) {
-						if (result && (result = result[0])) {
-							switch (result.type) {
-								case "thread":
-									// existe un hilo de comentarios en una noticia
-									loadBoard({
-										threadID: result.id, 
-										originalMsgID: result.id
-									});
-									break;
-								case "theme":
-									// es un tema de conversación de eskup
-									loadBoard({
-										id: "ev-" + result.id
-									});
-									break;
-								case "user":
-									// es la página de un usuario de eskup
-									loadBoard({
-										id: "t1-" + result.id
-									});
-									break;
-							};
-						} else {
-							// cargar tablón de eventos seguidos
-							$("#sigo").click();
+				chrome.tabs.executeScript({ file: "exe/search-for-comments.js" }, function(result) {
+					if (result && (result = result[0])) {
+						switch (result.type) {
+							case "thread":
+								// existe un hilo de comentarios en una noticia
+								loadBoard({
+									threadID: result.id, 
+									originalMsgID: result.id
+								});
+								break;
+							case "theme":
+								// es un tema de conversación de eskup
+								loadBoard({
+									id: "ev-" + result.id
+								});
+								break;
+							case "user":
+								// es la página de un usuario de eskup
+								loadBoard({
+									id: "t1-" + result.id
+								});
+								break;
 						};
-					})
-				else $("#sigo").click();
-
+					} else {
+						// cargar tablón de eventos seguidos
+						$("#sigo").click();
+					};
+				})
 				if (callback) callback();
 			});
 		});
