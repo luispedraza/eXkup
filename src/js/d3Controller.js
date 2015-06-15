@@ -66,7 +66,6 @@ function populateController(processor) {
 			});
 	};
 	// function populateVideos(theVideos) {
-
 	// };
 	function populateWords(words) {
 		var theWords = sortNumArray(makeArray(words, "word"), "n", true).slice(0,56);	// 65 primeras palabras

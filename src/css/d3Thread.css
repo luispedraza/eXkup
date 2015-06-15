@@ -107,6 +107,10 @@ body {
 #d3-chart-interaction path.chord {
   stroke: #ccc;
   opacity: .8;
+  cursor: pointer;
+}
+#d3-chart-interaction path.chord:hover {
+  stroke: #000;
 }
 #d3-chart-interaction:hover .fade {
   opacity: .1 !important;
@@ -617,4 +621,11 @@ body {
 }
 #d3-chart:not(.timeline) .range .resize, #d3-chart:not(.timeline) .range .extent, #d3-chart:not(.timeline) .resize, #d3-chart:not(.timeline) .range .background {
   cursor: auto !important;
+}
+
+
+
+/* Detalle de mensajes de interaccion entre usuarios */
+.interaction-msgs {
+  
 }

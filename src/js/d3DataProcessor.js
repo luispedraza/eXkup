@@ -354,6 +354,19 @@ function DataProcessor(data) {
 		THAT.frequencies = null;	// se limpia la info de frecuencias
 		computeFrequencies();	// recalcular frecuencias para el nuevo conjunto de mensajes
 	};
+	/* Obtiene los mensajes que son interacciones entre dos usuarios dados */
+	this.getUsersInteraction = function(user1, user2) {
+		var messagesIDs = {};
+		messages.forEach(function(m) {
+			if ((m.usuarioOrigen==user1 && m.autorMsgRespuesta==user2) || (m.usuarioOrigen==user2 && m.autorMsgRespuesta==user1)) {
+				messagesIDs[m.idMsg] = true;
+				messagesIDs[m.idMsgRespuesta] = true;
+			};
+		});
+		return messages.filter(function(m) {
+			return messagesIDs[m.idMsg];
+		});
+	};
 
 	// Procesamiento de los datos:
 	var THAT = this;

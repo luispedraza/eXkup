@@ -675,6 +675,11 @@ function TalkVisualizer(containerID, processor, margin) {
 			.style("fill", function(d) { return users[d.source.index].color; })
 			.attr("d", function(d) {
 				return d3.svg.chord().radius(innerRadius).source(this._source).target(this._target)();
+			})
+			.on("click", function(d) {
+				// se muestra la interacción entre los usuarios:
+				dispatchUsersInteraction(users[d.source.index].nickname, users[d.source.subindex].nickname);
+				// console.log(d, CHORD, users);
 			});
 		chords.transition().duration(DURATION)
 			.call(chordTween);

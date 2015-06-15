@@ -48,8 +48,15 @@ function sortUsers(sorting) {
 function dispatchSelect(type, value, add) {
 	var e = document.createEvent("CustomEvent");
 	var detail = {'add': add,'type': type,'value': value};
-	console.log(detail);
 	e.initCustomEvent("updateSelection", false, false, detail);
+	document.body.dispatchEvent(e);
+};
+
+/* Muestra la interacción entre dos usuarios desde el gráfico de interacciones */
+function dispatchUsersInteraction(user1, user2) {
+	var e = document.createEvent("CustomEvent");
+	var detail = [user1, user2];
+	e.initCustomEvent("showUsersInteraction", false, false, detail);
 	document.body.dispatchEvent(e);
 };
 
@@ -161,6 +168,23 @@ document.body.addEventListener("updateSelection", function(e) {
 	VISUALIZER.updateGraph();
 	FREQUENCIES.updateGraph();
 	CONVERSATION.update();
+});
+
+/* Muestra la interacción entre dos usuarios */
+document.body.addEventListener("showUsersInteraction", function(e) {
+	var user1 = e.detail[0],
+		user2 = e.detail[1];
+	var interactionMessages = PROCESSOR.getUsersInteraction(user1, user2);
+	var $content = $("<div>").addClass("interaction-msgs");
+	interactionMessages.forEach(function(m) {
+		$content.append(createMessage(m));
+	});
+	var dlgConfig = {
+		title: "Interacción entre los usuarios @" + user1 + " y @" + user2,
+		content: $content,
+		buttons: ["Cerrar"]
+	};
+	new ModalDialog(dlgConfig);
 });
 /* Selección de conversación */
 document.body.addEventListener("conversation", function(e) {
