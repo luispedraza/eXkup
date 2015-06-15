@@ -627,5 +627,6 @@ body {
 
 /* Detalle de mensajes de interaccion entre usuarios */
 .interaction-msgs {
-  
+  height: 400px;
+  overflow-y: auto;
 }
