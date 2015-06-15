@@ -12,7 +12,7 @@ function initThread(apiData) {
 	populateController(PROCESSOR);
 };
 
-// var TEST = 0;
+var TEST = 2;
 if ((typeof SAMPLE_DATA != "undefined") && (typeof TEST != "undefined")) {
 	if (TEST === 0) { TEST = SAMPLE_DATA._testTiny;
 	} else if (TEST === 1) { TEST = SAMPLE_DATA._testSmall;
@@ -47,7 +47,8 @@ function sortUsers(sorting) {
 /* Mensaje de cambio de selección */
 function dispatchSelect(type, value, add) {
 	var e = document.createEvent("CustomEvent");
-	var detail = {'add': add,'type': type,'value':value};
+	var detail = {'add': add,'type': type,'value': value};
+	console.log(detail);
 	e.initCustomEvent("updateSelection", false, false, detail);
 	document.body.dispatchEvent(e);
 };

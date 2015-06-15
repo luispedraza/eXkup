@@ -199,7 +199,6 @@ window.onload = function() {
 	}
 	filters = document.getElementsByClassName("preset");
 	for (var f=0; f<filters.length; f++) {
-		console.log("filter");
 		filters[f].addEventListener('click', Filter);
 	}
 }

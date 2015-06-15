@@ -335,6 +335,8 @@ function DataProcessor(data) {
 					word.selected = selector.add;
 					messages = messages.concat(word.messages);
 				});
+			} else if (selector.type=="image") {
+				messages = selector.value;
 			};
 			messages.forEach(function(m) {
 				m.selCounter+=count; // cambio de contabilidad de los mensajes

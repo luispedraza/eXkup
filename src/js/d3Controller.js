@@ -47,28 +47,28 @@ function populateController(processor) {
 			.append($("<span>").addClass("nreplies").text(user.nReplies));
 			$list.append($row);	// guardamos también el usuario correspondientes
 		});
-};
-function populateImages(images) {
-	var theImages = makeArray(images, "src");
-	var li = d3.select("#chart-control .images-list ul").selectAll("li").data(theImages);
-	li.enter().append("img")
-	.attr("src", function(d){return d.src})
-	.on("mouseover", function(d) {
-		d3.selectAll("g.node")
-		.attr("opacity", function(n) {
-			return (n.cont_adicional == d.src) ? 1 : .1;
-		});
-	})
-	.on("click", function(d) {
-		d.messages.forEach(function(id) {
+	};
+	function populateImages(images) {
+		var theImages = makeArray(images, "src");
+		var li = d3.select("#chart-control .images-list ul").selectAll("li").data(theImages);
+		li.enter().append("img")
+			.attr("src", function(d){return d.src})
+			.on("mouseover", function(d) {
+				d3.selectAll("g.node")
+				.attr("opacity", function(n) {
+					return (n.cont_adicional == d.src) ? 1 : .1;
+				});
+			})
+			.on("click", function(d) {
+				var messages = d.messages;
+				// selección de los mensajes que contienen esta imagen:
+				dispatchSelect("image", messages, $(this).toggleClass('on').hasClass('on'));
+			});
+	};
+	// function populateVideos(theVideos) {
 
-		});
-	});
-};
-function populateVideos(theVideos) {
-
-};
-function populateWords(words) {
+	// };
+	function populateWords(words) {
 		var theWords = sortNumArray(makeArray(words, "word"), "n", true).slice(0,56);	// 65 primeras palabras
 		var $list = $("#chart-control .words-list .list");
 		theWords.forEach(function(w) {
@@ -81,7 +81,7 @@ function populateWords(words) {
 		});			
 	};
 	populateUsers(processor.users);
-	populateImages(processor.images);
-	populateVideos(processor.videos);
 	populateWords(processor.words);
+	populateImages(processor.images);
+	// populateVideos(processor.videos);
 };
