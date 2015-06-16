@@ -1,0 +1,39 @@
+@import url(http://fonts.googleapis.com/css?family=PT+Sans);
+
+/* LLamada de atención para mostrar los comentarios en Eskup */
+.eskup-reminder {
+    background-color: #f30;
+    color: #fff;
+    width: 150px;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    border-radius: 5px;
+    font-size: 12px;
+    padding: 10px;
+    font-family: 'PT Sans', sans-serif;
+    z-index: 2000;
+}
+.eskup-reminder:before {
+	position: absolute;
+	display: block;
+	background-color: #f30;
+	content: "";
+	left: 120px;
+	top: -5px;
+	width: 10px;
+	height: 10px;
+	-webkit-transform: rotate(45deg);
+}
+
+.eskup-reminder-buttons div {
+	background-color: #000;
+	cursor: pointer;
+	font-size: 10px;
+	margin-top: 5px;
+	padding: 3px;
+	text-align: center;
+}
+.eskup-reminder-buttons div:hover {
+	background-color: #666;
+}
