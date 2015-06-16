@@ -13,9 +13,9 @@
     ],
     "content_scripts": [
       {
-        "matches": ["https://twitter.com/*"],
-        "css": ["css/dialog.css", "css/twitter-integration.css"],
-        "js": ["lib/jquery-2.1.1.min.js", "exe/twitter2eskup.js"]
+        "matches": ["http://*/*", "https://*/*"],
+        "css": ["exe/eskup-reminder.css"],
+        "js": ["exe/search-for-comments.js"]
       }
     ],
     "options_page": "options.html",

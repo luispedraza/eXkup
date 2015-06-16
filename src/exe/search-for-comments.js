@@ -35,5 +35,39 @@
 			}
 		}
 	};
+	if (result) {
+		if (!localStorage.getItem("eskupReminder")) {
+			// Mostrar una llamada para recordar que se pueden ver los comentarios en la extensión:
+			var reminder = document.createElement("div");
+			reminder.className = "eskup-reminder";
+			var p = document.createElement("p");
+			p.textContent = "Recuerda que puedes ver los comentarios de esta página con la extensión eXkup";
+			reminder.appendChild(p);
+			// Los botones:
+			var buttons = document.createElement("div");
+			buttons.className = "eskup-reminder-buttons";
+			// Botón de cerrar:
+			var buttonClose = document.createElement("div");
+			buttonClose.textContent = "ENTENDIDO";
+			buttonClose.addEventListener("click", removeReminder);
+			buttons.appendChild(buttonClose);
+			// Botón de no volver a mostrar:
+			var buttonNoremind = document.createElement("div");
+			buttonNoremind.textContent = "NO MOSTRAR DE NUEVO";
+			buttonNoremind.addEventListener("click", function() {
+				removeReminder();
+				localStorage.setItem("eskupReminder", 1);
+			});
+			buttons.appendChild(buttonNoremind);
+			
+			reminder.appendChild(buttons);
+			document.body.appendChild(reminder);
+
+			function removeReminder() {
+				document.body.removeChild(reminder);
+			};
+		};
+	};
+
 	return result;
 })();
