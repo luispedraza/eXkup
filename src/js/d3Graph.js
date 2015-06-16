@@ -279,7 +279,7 @@ function TalkVisualizer(containerID, processor, margin) {
 	// Para redondear imágenes:
 	var svgDefs = svgElement.append("defs");
 	svgDefs.append("clipPath").attr("id", "round-clip")
-		.append("circle").attr("r", 10);
+		.append("circle").attr("r", 15);
 
 	var svg = svgElement.append("g");
 	var chart = svg.append("g").attr("id", "chart")
@@ -427,7 +427,7 @@ function TalkVisualizer(containerID, processor, margin) {
 		f_authorEnter.append("image")
 			.attr({
 				"xlink:href": function(d) {return checkUserPhoto(d.pathfoto);},
-				"x": -10, "y": -10, "width": 20, "height": 20,
+				"x": -15, "y": -15, "width": 30, "height": 30,
 				"clip-path": "url(#round-clip)"})
 			.on("mouseenter", function (d) {
 				new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY,
