@@ -48,7 +48,9 @@ function ModalDialog(config) {
 		$dlg.append($("<div>").addClass("dlg-title").text(title)); 
 	};
 	var $content = $("<div>").addClass("dlg-content");
+	console.log(type);
 	if (type == "progress") {
+		console.log("progress");
 		var progress = config.progress;
 		var callbackItem = progress.callbackItem;	// a ejecutar sobre cada item
 		var callbackEnd = progress.callbackEnd;		// a ejecutar al final
@@ -88,8 +90,8 @@ function ModalDialog(config) {
 			.append($("<div>").text(content));
 	} else {
 		$content.append(content);
-		$dlg.append($content);
 	};
+	$dlg.append($content);
 	
 	if (buttons) {
 		$buttonsDiv = $("<div>").addClass("dlg-buttons");
@@ -110,6 +112,7 @@ function ModalDialog(config) {
 				}));
 		});
 	};
+
 	// optional timeout function
 	if (timeout) {
 		setTimeout(function() {
