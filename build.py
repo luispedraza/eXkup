@@ -150,7 +150,10 @@ for path, directories, files in os.walk(SOURCE_PATH):
 				exec_tool(JS_TOOL, file_path, dest_file_path)
 				# copy_file(file_path, dest_file_path)
 		elif ext == '.css':
-			pass
+			if relpath == "exe":	# css especiales
+				copy_file(file_path, dest_file_path)
+			else:
+				pass
 		# resto de archivos
 		else:
 			copy_file(file_path, dest_file_path)
