@@ -1,15 +1,17 @@
 ﻿{
+  "manifest_version": 2,
   "name": "eXkup",
   "version": "1.0",
   "description": "Extensión de Chrome no oficial para utilizar Eskup, la red social de EL PAÍS. (http://www.eskup.es)",
+  "default_locale": "en",
   "browser_action": {
     "default_icon": "img/icon.png",
     "default_popup": "popup.html"
   },
   "permissions": [
-  "tabs",
-  "http://*/*",
-  "https://*/*"
+    "tabs",
+    "http://*/*",
+    "https://*/*"
   ],
   "content_scripts": [
     {
@@ -18,11 +20,7 @@
       "js": ["exe/search-for-comments.js"]
     }
   ],
-  "background": {"scripts": ["exe/eskupbckground.js"]},
-  "icons": { "48": "img/eskupicon48.png",
-  "128": "img/eskupicon128.png" },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self' https://vimeo.com",
-  "manifest_version" : 2,
   "icons": {
     "16": "img/eskupicon16.png",
     "32": "img/eskupicon32.png",
