@@ -1,5 +1,5 @@
 ﻿{
-  "name": "[dev] Extensión para Eskup",
+  "name": "eXkup: extensión de Chrome para Eskup",
   "version": "1.0",
   "description": "Extensión de Chrome no oficial para utilizar Eskup, la red social de EL PAÍS. (http://www.eskup.es)",
   "browser_action": {
@@ -22,5 +22,11 @@
   "icons": { "48": "img/eskupicon48.png",
   "128": "img/eskupicon128.png" },
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self' https://vimeo.com",
-  "manifest_version" : 2
+  "manifest_version" : 2,
+  "icons": {
+    "16": "img/eskupicon16.png",
+    "32": "img/eskupicon32.png",
+    "48": "img/eskupicon48.png",
+    "128": "img/eskupicon128.png"
+  }
 }
