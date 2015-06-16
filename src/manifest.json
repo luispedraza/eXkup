@@ -1,5 +1,5 @@
 ﻿{
-  "name": "eXkup: extensión de Chrome para Eskup",
+  "name": "eXkup",
   "version": "1.0",
   "description": "Extensión de Chrome no oficial para utilizar Eskup, la red social de EL PAÍS. (http://www.eskup.es)",
   "browser_action": {
