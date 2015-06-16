@@ -503,21 +503,20 @@ body {
 
 /* Diagramas de frecuencia */
 #d3-frequency {
-  display: none;
+  /*display: none;*/
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: -250px;
   left: 0;
-  height: 250px;
-  transition: opacity .5s linear;
+  transition: opacity .5s, bottom .5s;
   opacity: 0;
-  overflow: hidden;
-  pointer-events: none;
+  height: 250px;
+  /*overflow: hidden;*/
   background: linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,1));
 }
 .timeline #d3-frequency {
   opacity: 1;
-  pointer-events: auto;
+  bottom: 0px;
 }
 
 #d3-frequency h2 {
@@ -532,7 +531,7 @@ body {
   stroke: #fff;
 }
 
-/* OPciones de visualización */
+/* Opciones de visualización */
 #chart-options {
   position: absolute;
   margin: 10px;
