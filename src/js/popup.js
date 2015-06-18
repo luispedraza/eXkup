@@ -1015,10 +1015,13 @@ Bienvenido a eXkup. \n \
 eXkup es una extensión no oficial de Chrome que permite la utilización de Eskup, la red social de ELPAIS.com \n \
 Ha sido desarrollada por Luis Pedraza (@luispedraza, luispedraza@gmail.com)");
 				// Comprobación de tutorial realizado o lanzamiento del mismo (primera ejecución)
-				if (localStorage.getItem("eskupTutorial") != "done") {
-					localStorage.setItem("eskupTutorial", "done");
-					startTutorial();
-				};
+				chrome.storage.local.get("eskupTutorial", function(o) {
+					if (o["eskupTutorial"] != "done") {
+						chrome.storage.local.set({"eskupTutorial": "done"}, function() {
+							startTutorial();
+						});
+					};
+				});
 			});
 		} else {
 			// Informar de que no hay conexión disponible
