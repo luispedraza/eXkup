@@ -1,7 +1,9 @@
 (function() {
 	var host = window.location.host;
 	var result = null;
+	var site = null;
 	if (host === "eskup.elpais.com") {
+		site = "eskup";
 		// es una página de eskup
 		var currentLocation = window.location.href;
 		var found = currentLocation.match(/eskup\.elpais\.com\/C([\w-]+)\/?.*$/);	// conversación
@@ -18,25 +20,32 @@
 				}
 			};
 		};
-	} else if (host.match(/(.+\.)?(elpais|cincodias|as|cadenaser|los40)\.com/)) {
-		// es una noticia en un medio
-		var iframes = document.querySelectorAll("iframe");
-		for (var i=0; i<iframes.length; i++) {
-			var iframeID = iframes[i].id;
-			if (iframeID) {
-				var match = iframeID.match("comentarios_noticia_(.+)");
-				if (match) {
-					result =  {
-						type: "thread",
-						id: match[1]
+	} else {
+		var siteMatch = host.match(/(^|\.)(elpais|cincodias|as|cadenaser|los40)\.com$/);
+		if (siteMatch) {
+			site = siteMatch[2];
+			// es una noticia en un medio
+			var iframes = document.querySelectorAll("iframe");
+			for (var i=0; i<iframes.length; i++) {
+				var iframeID = iframes[i].id;
+				if (iframeID) {
+					var match = iframeID.match("comentarios_noticia_(.+)");
+					if (match) {
+						result =  {
+							type: "thread",
+							id: match[1]
+						};
+						break;
 					};
-					break;
-				};
+				}
 			}
-		}
-	};
+		};
+	} 
 	if (result) {
-		if (!localStorage.getItem("eskupReminder")) {
+		chrome.storage.local.get("eskupReminder", function(o) {
+			var reminderInfo = o["eskupReminder"];
+			if (reminderInfo && reminderInfo[site]) return;
+
 			// Mostrar una llamada para recordar que se pueden ver los comentarios en la extensión:
 			var reminder = document.createElement("div");
 			reminder.className = "eskup-reminder";
@@ -56,7 +65,9 @@
 			buttonNoremind.textContent = "NO MOSTRAR DE NUEVO";
 			buttonNoremind.addEventListener("click", function() {
 				removeReminder();
-				localStorage.setItem("eskupReminder", 1);
+				reminderInfo = reminderInfo || {};
+				reminderInfo[site] = 1;
+				chrome.storage.local.set({"eskupReminder": reminderInfo});
 			});
 			buttons.appendChild(buttonNoremind);
 			
@@ -66,7 +77,7 @@
 			function removeReminder() {
 				document.body.removeChild(reminder);
 			};
-		};
+		});
 	};
 
 	return result;
