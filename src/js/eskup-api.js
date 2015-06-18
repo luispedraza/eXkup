@@ -7,8 +7,13 @@ function EskupApi() {
 		THEMES_INFO = {}, 	// información sobre eventos
 		USER_PROFILE = {},	// información de perfil de usuarios
 		LAST_THREAD = {id: null, info: null},		// guarda el último thread leído
-		FAVORITES = (typeof localStorage["msg_fav"] != "undefined") ? JSON.parse(localStorage["msg_fav"]) : [],	// lista de temas favoritos que se almacena en localStorage
+		FAVORITES = null, // lista de temas favoritos, almacenada em chrome.storage
 		INESKUP = "http://eskup.elpais.com/Ineskup";
+
+	// Carga inicial de mensajes favoritos:
+	chrome.storage.local.get("msg_fav", function(result) {
+		FAVORITES = result["msg_fav"] || [];	// lista de mensajes favoritos
+	});
 
 	this.NUMMSG = 50;		// número de mensajes que se pedirán cada vez
 
@@ -350,7 +355,16 @@ function EskupApi() {
 	};
 
 	/* Carga de mensajes favoritos, por compatibilidad con otras APIs */
-	this.loadFavorites = function(callback) { if (callback) callback(FAVORITES); };
+	this.loadFavorites = function(callback) {
+		if (callback) callback(FAVORITES);
+	};
+
+	/* Obtiene un mensaje favorito por su ID */
+	this.getFavorite = function(msgID, callback) {
+		chrome.storage.local.get(msgID, function(o) {
+			callback(o[msgID]);
+		});
+	};
 
 	/* Función para enviar un mensaje a través de la API 
 		@param config {
@@ -411,10 +425,18 @@ function EskupApi() {
 		THAT.getMessage(msgID, function(data) {
 			if (data.errorCode == 0) {
 				var msg = data.mensajes[0];	// este es el mensaje en JSON
-				localStorage[msgID] = JSON.stringify(msg);
-				FAVORITES.push(msgID);
-				localStorage["msg_fav"] = JSON.stringify(FAVORITES);
-				callback(0);
+				var msgInfo = {};
+				msgInfo[msgID] = msg;
+				chrome.storage.local.set(msgInfo, function() {
+					if (chrome.runtime.lastError) callback(-1, "No se pudo guardar el mensaje: " + chrome.runtime.lastError.message);
+					else {
+						FAVORITES.push(msgID);
+						var favInfo = {};
+						favInfo["msg_fav"] = FAVORITES;
+						chrome.storage.local.set(favInfo);
+						callback(0);
+					};
+				});
 			} else {
 				callback(-1, "Error en la API de Eskup.");
 			};
@@ -423,10 +445,12 @@ function EskupApi() {
 
 	/* Eliminar mensake de favoritos */
 	this.removeFavorite = function(msgID, callback) {
-		localStorage.removeItem(msgID);
-		FAVORITES.splice(FAVORITES.indexOf(msgID), 1);
-		localStorage["msg_fav"] = JSON.stringify(FAVORITES);
-		callback();
+		chrome.storage.local.remove(msgID, function() {
+			FAVORITES.splice(FAVORITES.indexOf(msgID), 1);
+			chrome.storage.local.set({"msg_fav": FAVORITES}, function() {
+				callback();		
+			});
+		});
 	};
 
 	/* 	Carga de una conversación completa 

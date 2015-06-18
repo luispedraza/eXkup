@@ -647,10 +647,11 @@
 			API.loadFavorites(function(data) {
 				var $favs = $("#board").empty();
 				data.forEach(function(mID) {
-					var msg = localStorage.getItem(mID);
-					if (msg) {
-						$favs.append(createMessage(JSON.parse(msg))).addClass('favorite');	
-					};
+					API.getFavorite(mID, function(msg) {
+						if (msg) {
+							$favs.append(createMessage(msg)).addClass('favorite');	
+						};
+					});
 				});
 			});
 		};
