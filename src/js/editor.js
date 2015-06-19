@@ -376,7 +376,8 @@ function Editor(config) {
 	/* Contador de caracteres del mensaje */
 	function count() {
 		var message = $("#newmessage").text()
-			.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AAAAA");
+			.replace(/\bhttps?:\/\/[^\s]+\b/g, "http://cort.as/AAAAA")
+			.replace(/\&nbsp;/g, " ");
 		var remaining = MAXCHAR - message.length;
 		var $counter = $("#counter").text(remaining.toString());
 		// coloreado del contador:
@@ -403,11 +404,12 @@ function Editor(config) {
 			allTabs.forEach(function(t) {
 				$("<li class='close-on-click' data-link='"+t.url+"'><span class='link-title'>"+t.title+"</span><span class='link-url fa fa-link'>"+t.url+"</span></div>")
 					.on("click", function() {
-						insertText($(this).attr("data-link"));		
+						insertText($(this).attr("data-link"));	
+						modal.close();
 					})
 					.appendTo(t.active ? $linkCurrent : $linkOther);
 			});
-			new ModalDialog({
+			var modal = new ModalDialog({
 				title: "Selecciona la URL que quieres insertar:", 
 				content: $links, 
 				buttons: ["Cancelar"]
@@ -422,12 +424,14 @@ function Editor(config) {
 		if ($("#send2fb").prop("checked")) social.push("facebook");
 		if ($("#send2tt").prop("checked")) social.push("twitter");
 		var newimg = $("#newimage.loaded canvas").get(0);
+		var message = $("#newmessage").html().replace(/\&nbsp;/g, " ");
+		console.log(message);
 		var API_CONFIG = {
 			command: command,
 			mID: mID,
 			users: USER_FINDER.getSelection(),		// destinatarios seleccionados
 			themes: THEME_FINDER.getSelection(),	// temas seleccionados
-			message: $("#newmessage").html()		// contenido del mensaje que será enviado
+			message: message						// contenido del mensaje que será enviado
 		};
 		if (social.length) API_CONFIG.social = social;
 		// imagen del mensaje
