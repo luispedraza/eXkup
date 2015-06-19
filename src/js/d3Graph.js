@@ -54,8 +54,6 @@ function onShowEditor() {
 
 // VISUALIZACIÓN DE MENSAJES:
 function TalkVisualizer(containerID, processor, margin) {
-	// console.log(data);
-	// console.log(JSON.stringify(data));
 	var LINK_WIDTH_DEFAULT = 0.5,
 		LINK_WIDTH = LINK_WIDTH_DEFAULT;
 	var root = processor.tree;
@@ -576,28 +574,49 @@ function TalkVisualizer(containerID, processor, margin) {
 		function unfilterUser(d,i) {
 			chartInteraction.selectAll("path.chord").classed("fade", false);
 		};
-		function createUserTooltip(d,i) {
-			var groups = CHORD.groups();
-			function nm(i) {return _ROUND(groups[i].value);};						// mensajes enviados por un usuario
-			function pm(i) {return (100*nm(i)/nMessages).toFixed(1);};				// porcentaje de mensajes enviados
-			function nmr(i) {return _ROUND(d3.sum(matrix[i]));};					// número de mensajes recibidos
-			function pmr(i) {return (100*nmr(i)/nMessages).toFixed(1);};			// porcentaje de mensajes recibidos
+		function createUserTooltip(i) {
+			// mensajes enviados por un usuario:
+			// function nm(i) {
+			// 	var sum = 0;
+			// 	matrix[i].forEach(function(element, index){
+			// 		sum += element;
+			// 	});
+			// 	return sum;
+			// };
+			// function pm(i) {return (100*nm(i)/nMessages).toFixed(1);};				// porcentaje de mensajes enviados
+			// número de mensajes recibidos:
+			// function nmr(i) {
+			// 	var sum = 0;
+			// 	matrix.forEach(function(element, index){
+			// 		sum += element[i];
+			// 	});
+			// 	return sum;
+			// };
+			// function pmr(i) {return (100*nmr(i)/nMessages).toFixed(1);};			// porcentaje de mensajes recibidos
 			var nickname = users[i].nickname;
-			var $ulSent = $("<ul>");
-			var $ulReceived = $("<ul>");
+			var $ulSent = $("<ul>"),
+				$ulReceived = $("<ul>"),
+				nSent = 0, 
+				nReceived = 0;
 			matrix[i].forEach(function(c,t) {
-				if (c!=0) $ulSent.append($("<li>").text("@" + users[t].nickname + ": " + c));
+				if (c!=0) {
+					$ulSent.append($("<li>").text("@" + users[t].nickname + " (" + c + ")"));
+					nSent += c;
+				};
 			});
 			matrix.forEach(function(r,s) {
-				if (r[i]!=0) $ulReceived.append($("<li>").text("@" + users[s].nickname + ": " + r[i]));
+				if (r[i]!=0) {
+					$ulReceived.append($("<li>").text("@" + users[s].nickname + " (" + r[i] + ")"));
+					nReceived += r[i];
+				};
 			});
 			var $tooltip = $("<div>").addClass("interaction-tooltip")
-			.append("<h2>@" + nickname + " ha enviado " + nm(i) + " mensajes ("+ pm(i) + "%) a:")
-			.append($ulSent);
-			if ($ulReceived.length) {
+				.append("<h2>@" + nickname + " ha enviado " + nSent + " mensajes a:")
+				.append($ulSent);
+			if (nReceived != 0) {
 				$tooltip
-				.append("<h2>@" + nickname + " ha recibido " + nmr(i) + " mensajes ("+ pmr(i) + "%) de:")
-				.append($ulReceived);
+					.append("<h2>@" + nickname + " ha recibido " + nReceived + " mensajes de:")
+					.append($ulReceived);
 			};
 			return $tooltip;
 		};
@@ -621,7 +640,7 @@ function TalkVisualizer(containerID, processor, margin) {
 			.on("mouseenter", function(d,i) {
 				filterUser(d,i);
 					// var configTooltip = {autoClose: "no"};
-					new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createUserTooltip(d,i));
+					new ChartTooltip(this, d3.event.offsetX, d3.event.offsetY, createUserTooltip(i));
 				});
 		// groupsEnter.append("title").text(function(d,i) {
 		// 	return users[i].nickname;
@@ -679,7 +698,6 @@ function TalkVisualizer(containerID, processor, margin) {
 			.on("click", function(d) {
 				// se muestra la interacción entre los usuarios:
 				dispatchUsersInteraction(users[d.source.index].nickname, users[d.source.subindex].nickname);
-				// console.log(d, CHORD, users);
 			});
 		chords.transition().duration(DURATION)
 			.call(chordTween);

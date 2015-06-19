@@ -340,7 +340,6 @@ function DataProcessor(data) {
 			};
 			messages.forEach(function(m) {
 				if (!m) return;
-				console.log(m);
 				m.selCounter+=count; // cambio de contabilidad de los mensajes
 			});
 		};
