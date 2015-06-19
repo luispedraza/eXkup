@@ -15,6 +15,7 @@ body {
   bottom: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 .msg-menu {
   z-index: 1000;
