@@ -636,7 +636,9 @@ function TalkVisualizer(containerID, processor, margin) {
 		var groups = chartInteraction.selectAll("g.user")
 			.data(CHORD.groups);
 		var groupsEnter = groups.enter().append("g")
-			.attr("class", "user")
+			.attr("class", function(d, i) {
+				return "user " + users[i].nickname;
+			})
 			.on("mouseenter", function(d,i) {
 				filterUser(d,i);
 					// var configTooltip = {autoClose: "no"};

@@ -35,12 +35,13 @@ function populateController(processor) {
 						var $this = $(this);
 						var newColor = $this.val();
 						$this.closest('.color-picker').css("background-color", newColor);
-							// Actualización del color en visualizaciones
-							var user = $this.closest('li').data();
-							user.color = newColor;
-							d3.selectAll("g.node.user-"+user.nickname+" .shape").attr("fill", newColor);
-							$("#chart-messages .msg-container[data-user="+user.nickname+"] .handle").css("background-color", newColor);
-						})))
+						// Actualización del color en visualizaciones
+						var user = $this.closest('li').data();
+						user.color = newColor;
+						d3.select("#chart").selectAll("g.user-"+user.nickname+" rect").style("fill", newColor);
+						d3.select("#d3-chart-interaction").selectAll("g.user." + user.nickname + " path").style("fill", newColor);
+						$("#chart-messages .msg-container[data-user="+user.nickname+"] .handle").css("background-color", newColor);
+					})))
 			.append($("<span>").addClass("nmessages").text(user.nMessages))
 			.append($("<span>").addClass("ndeleted").text(user.nDeleted))
 			.append($("<span>").addClass("nwords").text(user.nWords))
