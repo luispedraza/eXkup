@@ -1,4 +1,6 @@
 (function() {
+	// Reseteo del contador de comentarios
+	chrome.runtime.sendMessage({type: "nMessages", num: ""});
 	// Búsqueda de comentarios
 	var host = window.location.host;
 	var result = null;
@@ -32,14 +34,22 @@
 				if (iframeID) {
 					var match = iframeID.match("comentarios_noticia_(.+)");
 					if (match) {
+						var numCom = "";	// número de comentarios de esta noticia
 						var threadID = match[1];
-						var numComDiv = document.querySelector("#num_comentarios_noticia_" + threadID + " .numero") ||
-										document.querySelector("#num_comentarios_noticia_" + threadID + " .contador");
-						var counter = numComDiv ? numComDiv.textContent : null;
+						setTimeout(function() {
+							// Esperamos un poco para buscar el número de comentarios.... porque cambia al cargar la página (usuarios destacados)
+							var numComDiv = document.querySelector("#num_comentarios_noticia_" + threadID + " .numero") ||
+									document.querySelector("#num_comentarios_noticia_" + threadID + " .contador") || 
+									document.querySelector("#num_cabecera_comentarios_noticia_" + threadID + " .numero");
+							if (numComDiv) {
+								numCom = numComDiv ? numComDiv.textContent : null;
+								// Número de comentarios en el badge:
+								chrome.runtime.sendMessage({type: "nMessages", num: numCom});
+							};
+						}, 3000);
 						result =  {
 							type: "thread",
 							id: match[1],
-							num: counter
 						};
 						break;
 					};
@@ -48,9 +58,6 @@
 		};
 	} 
 	if (result) {
-		// Número de comentarios en el badge:
-		chrome.runtime.sendMessage({type: "nMessages", num: (result.num || "")});
-
 		chrome.storage.local.get("eskupReminder", function(o) {
 			var reminderInfo = o["eskupReminder"];
 			if (reminderInfo && reminderInfo[site]) return;
@@ -100,9 +107,7 @@
 				};	
 			};
 		});
-	} else {
-		chrome.runtime.sendMessage({type: "nMessages", num: ""});
-	}
+	};
 
 	return result;
 })();
