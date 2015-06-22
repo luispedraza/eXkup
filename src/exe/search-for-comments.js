@@ -31,9 +31,14 @@
 				if (iframeID) {
 					var match = iframeID.match("comentarios_noticia_(.+)");
 					if (match) {
+						var threadID = match[1];
+						var numComDiv = document.querySelector("#num_comentarios_noticia_" + threadID + " .numero") ||
+										document.querySelector("#num_comentarios_noticia_" + threadID + " .contador");
+						var counter = numComDiv ? numComDiv.textContent : null;
 						result =  {
 							type: "thread",
-							id: match[1]
+							id: match[1],
+							num: counter
 						};
 						break;
 					};
@@ -42,6 +47,9 @@
 		};
 	} 
 	if (result) {
+		// Número de comentarios en el badge:
+		if (result.num) chrome.browserAction.setBadgeText({text: result.num});
+
 		chrome.storage.local.get("eskupReminder", function(o) {
 			var reminderInfo = o["eskupReminder"];
 			if (reminderInfo && reminderInfo[site]) return;
