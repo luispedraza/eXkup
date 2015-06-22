@@ -1,4 +1,5 @@
 (function() {
+	// Búsqueda de comentarios
 	var host = window.location.host;
 	var result = null;
 	var site = null;
@@ -48,7 +49,7 @@
 	} 
 	if (result) {
 		// Número de comentarios en el badge:
-		if (result.num) chrome.browserAction.setBadgeText({text: result.num});
+		chrome.runtime.sendMessage({type: "nMessages", num: (result.num || "")});
 
 		chrome.storage.local.get("eskupReminder", function(o) {
 			var reminderInfo = o["eskupReminder"];
@@ -99,7 +100,9 @@
 				};	
 			};
 		});
-	};
+	} else {
+		chrome.runtime.sendMessage({type: "nMessages", num: ""});
+	}
 
 	return result;
 })();
