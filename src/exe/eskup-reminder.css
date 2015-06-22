@@ -9,7 +9,7 @@
     top: 20px;
     right: 20px;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 13px;
     padding: 10px 15px;
     font-family: 'PT Sans', sans-serif;
     z-index: 2000;
@@ -54,7 +54,7 @@
 	font-size: 30px;
 	position: absolute;
 	left: 5px;
-	top: 30px;
+	top: 20px;
 	background-color: #f30;
 	z-index: 50;
 }
