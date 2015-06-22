@@ -10,10 +10,10 @@
     right: 20px;
     border-radius: 5px;
     font-size: 14px;
-    padding: 10px;
+    padding: 10px 15px;
     font-family: 'PT Sans', sans-serif;
     z-index: 2000;
-    border: 3px solid #fff;
+    border: 2px solid #fff;
 }
 .eskup-reminder:before {
 	position: absolute;
@@ -29,21 +29,32 @@
 	-webkit-transform: rotate(45deg);
 }
 .eskup-reminder p {
-	margin-left: 32px;
+	padding: 5px 5px 5px 25px;
+	border: 2px dotted #fff;
+	border-radius: 5px;
 }
 .eskup-reminder-buttons div {
 	background-color: #000;
 	cursor: pointer;
 	font-size: 12px;
 	margin-top: 5px;
-	padding: 3px;
+	padding: 5px;
 	text-align: center;
+	border-radius: 5px;
 }
 .eskup-reminder-buttons div:hover {
 	background-color: #666;
 }
+.eskup-reminder-buttons div:active {
+	background-color: #ddd;
+	color: #666;
+}
 .eskup-reminder i {
 	display: block;
 	font-size: 30px;
-	float: left;
+	position: absolute;
+	left: 5px;
+	top: 30px;
+	background-color: #f30;
+	z-index: 50;
 }
