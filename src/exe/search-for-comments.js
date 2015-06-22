@@ -48,9 +48,19 @@
 
 			// Mostrar una llamada para recordar que se pueden ver los comentarios en la extensión:
 			if (!document.querySelector(".eskup-reminder")) {
-				console.log("jijiji");
+				// Cargar font-awesome:
+				var fontAwesomeCSS = document.createElement("link");
+				fontAwesomeCSS.setAttribute("rel", "stylesheet");
+				fontAwesomeCSS.setAttribute("href", "//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css");
+				document.head.appendChild(fontAwesomeCSS);
+				// el popup de recordatorio:
 				var reminder = document.createElement("div");
 				reminder.className = "eskup-reminder";
+				// el icono: 
+				var icon = document.createElement("i");
+				icon.className = "fa fa-info-circle";
+				reminder.appendChild(icon);
+				// el texto:
 				var p = document.createElement("p");
 				p.textContent = "Recuerda que puedes ver los comentarios de esta página con la extensión eXkup";
 				reminder.appendChild(p);
