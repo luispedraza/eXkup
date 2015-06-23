@@ -420,6 +420,12 @@ function TalkVisualizer(containerID, processor, margin) {
 			.on("mouseenter", filterUserInteraction)	// filtrado de interacciones
 			.on("click", onFocusClick)
 			.call(overrideZoom);	// para desactivar el zoom cuando se clickea, draggea un nodo
+		// Franjas horizontales para visualizar mejos los comentarios de cada autor:	
+		f_authorEnter.append("rect")
+			.attr({x: 0, y: -14, height: 28, width: 0, fill: getUserColor, opacity: .1});
+		f_author.selectAll("rect").transition().duration(DURATION).attr({width: (LAYOUT_TYPE == "timeline") ? WIDTH : 0});
+		
+		
 		f_authorEnter.append("circle")
 			.attr({"r": 0, "fill": getUserColor});
 		f_authorEnter.append("image")
