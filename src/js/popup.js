@@ -827,7 +827,14 @@
 			/* Obtención de la clave pública de usuario, e inicialización del perfil */
 			API.init(function(userID) {
 				if (!userID) {
-					chrome.tabs.create({url:"http://eskup.elpais.com/index.html"});
+					new ModalDialog({
+						title: "Es necesario iniciar sesión",
+						content: $("<p>Para utilizar esta extensión es necesario que inicies sesión en EL PAÍS. Serás redirigido a su web para que introduzcas tu usuario y contraseña. Esta extensión no tendrá acceso en ningún caso a tu contraseña privada.</p>"),
+						callback: function() {
+							chrome.tabs.create({url:"https://plus.elpais.com/conectar"});		
+						},
+						buttons: ["OK"]
+					})
 					return;
 				};
 				fillMainBoards(userID);

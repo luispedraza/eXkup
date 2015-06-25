@@ -8,7 +8,7 @@
 			span,					número de elementos a procesar en cada iteración
 		}
 		title (string), 			ej: "Título del modal"
-		content, 					html content ej: "<h1>Title</h1><div>Este es el contenido</div>"
+		content, 					html content ej: "<div>Este es el contenido</div>"
 		buttons (array(string)), 	ej. ["OK", "Cancel"]
 		callback (function), 		
 		timeout (int), 				Tiempo que tardará en cerrarse el modal automáticamente
