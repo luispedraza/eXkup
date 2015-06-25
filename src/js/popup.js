@@ -912,7 +912,16 @@
 					$(this).toggleClass('on');
 				});
 				$("#edit-button").on("click", function() {
-					new Editor({"api": API});	// Nuevo editor de mensajes, opciones por defecto
+					console.log(CURRENT_THEME);
+					if (CURRENT_THEME.type === "thread") {
+						new Editor({
+							"command": "reply",
+							"mID": CURRENT_THEME.id,
+					 		"api": API
+						});
+					} else {
+						new Editor({"api": API});	// Nuevo editor de mensajes, opciones por defecto	
+					}
 				});
 
 				// Mostrar secciones del perfil
@@ -980,7 +989,7 @@
 						};
 					} else {
 						// cargar tablón de eventos seguidos
-						$("#sigo").click();
+						$("#todo").click();
 					};
 				})
 				if (callback) callback();

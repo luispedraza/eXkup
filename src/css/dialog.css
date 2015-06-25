@@ -71,6 +71,8 @@
 /* Lista de enlaces para inserción */
 .links-list {
 	padding-right: 10px;
+	max-height: 300px;
+	overflow-y: auto;
 }
 .links-list ul {
 	padding: 0;

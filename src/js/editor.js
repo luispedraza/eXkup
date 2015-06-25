@@ -1,5 +1,5 @@
 
-/* Clase especial para reealizar búsquedas con selector 
+/* Clase especial para realizar búsquedas con selector 
 	@param options = {
 		title: Título del popup de búsqueda
 		container: contenedor del widget
@@ -229,7 +229,7 @@ function Editor(config) {
 			function fillTitleAndSendButton() {
 				$("#editor-title").text(title);
 				$("#send").text(sendButtonText);
-				configureMaxChar();
+				// configureMaxChar();
 			};
 			// Inicialización de eventos
 			$("#send").on("click", sendMessage);
@@ -475,7 +475,7 @@ function Editor(config) {
 			var dlg = new ModalDialog({
 				title: "Selecciona la imagen que quieras insertar", 
 				content: $selector,
-				buttons: ["Insertar", "Cancelar", "Abrir el Editor"],
+				buttons: ["Insertar", "Cancelar"/*, "Abrir el Editor"*/],
 				callback: function(r, data) {
 					if (r == "Insertar") {					// agrega la imagen al editor
 						configureImage(data[0]);	
