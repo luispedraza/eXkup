@@ -912,7 +912,6 @@
 					$(this).toggleClass('on');
 				});
 				$("#edit-button").on("click", function() {
-					console.log(CURRENT_THEME);
 					if (CURRENT_THEME.type === "thread") {
 						new Editor({
 							"command": "reply",

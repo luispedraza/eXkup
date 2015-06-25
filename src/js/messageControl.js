@@ -9,7 +9,7 @@ function createMessage(msg, themes, isPrivate) {
 	var user = msg.usuarioOrigen;
 	var tsMessage = msg.tsMensaje * 1000;	// timestamp del mensaje
 	// Creación del nuevo mensaje:
-	var msgClass = 'message ' + (API.checkFavorite(m_id) ? " favorite " : "") + (isPrivate ? " private " : "");
+	var msgClass = 'message ' + (API.checkFavorite(m_id) ? " favorite " : "") + (isPrivate ? " private " : "") + (msg.borrado == 1 ? " deleted" : "");
 	$msg = $("<div>").addClass(msgClass)
 		.attr("data-author", user)
 		.attr("data-id", m_id)

@@ -930,6 +930,15 @@ span.time-tooltip span:first-child {
 .message.favorite .fav {
     color: #f30;
 }
+.message.deleted {
+    background-color: #eee;
+}
+.message.deleted .msg_control {
+    display: none;
+}
+.message.deleted .msg_content {
+    color: #aaa;
+}
 
 .msg_content {
     line-height: 1.5em;
