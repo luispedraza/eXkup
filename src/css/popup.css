@@ -1098,6 +1098,9 @@ span.time-tooltip span:first-child {
 .selector .theme-control {
     display: none;
 }
+.selector .theme-control {
+    float: right;
+}
 .selector li:hover .theme-control {
     display: block;
 }
