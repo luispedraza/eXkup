@@ -646,6 +646,10 @@
 		function loadFavorites() {
 			API.loadFavorites(function(data) {
 				var $favs = $("#board").empty();
+				if (data.length == 0) {
+					$favs.append("<div class='no-messages'>Aún no has guardado ningún mensaje favorito desde este navegador.</div>");
+					return;
+				}
 				data.forEach(function(mID) {
 					API.getFavorite(mID, function(msg) {
 						if (msg) {
