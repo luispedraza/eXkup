@@ -1,13 +1,15 @@
-@import url(http://fonts.googleapis.com/css?family=Pathway+Gothic+One);
+@import url(http://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic);
 
 body {
-	font-family: 'Pathway Gothic One', sans-serif;
+	font-family: 'PT Sans', sans-serif;
 	font-size: 16px;
 }
-
+.canvas-container {
+	float: left;
+}
 #selector-editor {
 	width: 1200px;
-	margin-top: 200px;
+	/* margin-top: 200px; */
 	margin-left: 5px;
 }
 
@@ -15,14 +17,15 @@ body {
 	outline: 5px dotted #015965;
 }
 #canvas-controls{
-	float: right;
-	width: 550px;
+	float: left;
+	width: 500px;
 	height: 600px;
 	overflow: hidden;
 	background-color: #1b99dd;
 	color: #fff;
 	padding: 5px;
 	
+	margin-left: 10px;
 }
 #canvas-controls input[type='range'] {
 	-webkit-appearance: none;

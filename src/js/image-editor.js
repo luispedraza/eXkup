@@ -751,7 +751,7 @@ function getGoogleImages() {
 			setTimeout(function() {
 				chrome.tabs.executeScript(
 					tab.id,
-					{file: 'js/getgoogleimages.js', runAt: 'document_end'},
+					{file: 'exe/getgoogleimages.js', runAt: 'document_end'},
 					function(r){onImages(r, "google")})
 				}, 3000)
 		});

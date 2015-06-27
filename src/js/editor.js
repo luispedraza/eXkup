@@ -475,7 +475,7 @@ function Editor(config) {
 			var dlg = new ModalDialog({
 				title: "Selecciona la imagen que quieras insertar", 
 				content: $selector,
-				buttons: ["Insertar", "Cancelar"/*, "Abrir el Editor"*/],
+				buttons: ["Insertar", "Cancelar", "Abrir el Editor"],
 				callback: function(r, data) {
 					if (r == "Insertar") {					// agrega la imagen al editor
 						configureImage(data[0]);	
