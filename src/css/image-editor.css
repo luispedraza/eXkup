@@ -43,6 +43,22 @@ body {
 	width: 20px;
 }
 
+form.expandable {
+	font-size: 10px;
+}
+form.expandable input[type=text] {
+	border: 0;
+	padding: 3px;
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+	width: 100px;
+	transition: width .25s;
+}
+form.expandable input:focus {
+	width: 150px;
+	outline: none;
+}
+
 #canvas-layers .item {
 	cursor: pointer;
 	padding-bottom: 5px;
@@ -81,9 +97,8 @@ body {
 }
 
 #selector-content img {
-	max-width: 150px;
-	max-height: 150px;
-	margin: 5px;
+	height: 60px;
+	margin-right: 5px;
 }
 #selector-items {
 	overflow: auto;
@@ -94,7 +109,7 @@ body {
 }
 
 #selector-content img:hover {
-	outline: 2px solid #ff3300;
+	outline: 2px solid #f30;
 }
 
 h1 {
@@ -146,12 +161,22 @@ h1.on + div {
 }
 
 .btn {
-	width: 35px;
-	height: 35px;
-	font-size: 1.2em;
-	background-color: #FFB673;
+	font-size: 12px;
+	background-color: #000;
+	padding: 3px;
 	color: white;
+	border-radius: 5px;
+	cursor:pointer;
 }
+.btn:hover {
+	background-color: #454545;
+}
+.btn:active {
+	background-color: #ddd;
+	color: #000;
+}
+
+
 .btnon {
 	min-width: 35px;
 	min-height: 35px;

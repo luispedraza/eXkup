@@ -13,7 +13,10 @@ fabric.StaticCanvas.prototype.getObjectFromTS = function(ts) {
 var EDITOR = null;
 
 window.onload = function() {
-	EDITOR = new Editor("editor-container");
+	EDITOR = new Editor({
+		container: $("#editor-container"),
+		api: new EskupApi()
+	});
 
 	canvasEditor = new fabric.Canvas("canvas-editor");
 	canvasEditor.selection = false;		// Desactivada selección de grupo
@@ -223,61 +226,62 @@ function loadHDImage(ev1) {
 	}
 	fr.readAsDataURL(filename);
 }
-//////////////////////////////////////////////////////////
-// recibida lista de imágenes capturadas para insertar
-//////////////////////////////////////////////////////////
-// function onImages(result, source) {
-// 	var divItem;
-// 	if (source) {
-// 		divItem = document.getElementById(source);
-// 		divItem.innerHTML = "";
-// 	} else {
-// 		divItem = document.createElement("div");
-// 		divItem.className = "item";
-// 		var divTitle = document.createElement("h2");
-// 		divTitle.innerText = "… desde " + result[0].title;
-// 		divItem.appendChild(divTitle);
-// 		var divSelector = document.getElementById("selector-items");
-// 		divSelector.appendChild(divItem);
-// 	}
-// 	var divNormal = document.createElement("div");
-// 	divNormal.className = "content-normal";
-// 	var divSmall = document.createElement("div");
-// 	divSmall.className = "content-small";
-// 	divSmall.style.display = "none";
+
+/* Recepción de la lista de imágenes para insertar
+*/
+function onImages(result, source) {
+	var divItem;
+	if (source) {
+		divItem = document.getElementById(source);
+		divItem.innerHTML = "";
+	} else {
+		divItem = document.createElement("div");
+		divItem.className = "item";
+		var divTitle = document.createElement("h2");
+		divTitle.innerText = "… desde " + result[0].title;
+		divItem.appendChild(divTitle);
+		var divSelector = document.getElementById("selector-items");
+		divSelector.appendChild(divItem);
+	}
+	var divNormal = document.createElement("div");
+	divNormal.className = "content-normal";
+	var divSmall = document.createElement("div");
+	divSmall.className = "content-small";
+	divSmall.style.display = "none";
 	
-// 	var list = [];
-// 	for (var f=0; f<result.length; f++) list = list.concat(result[f].images);	// resultados de todos los frames
-// 	for (var i=0; i<list.length; i++) {
-// 		var isnew = true;
-// 		for (j=0; j<i; j++) {
-// 			if (list[i] == list[j])
-// 			{
-// 				isnew = false;
-// 				continue;
-// 			}
-// 		}
-// 		if (!isnew) continue;
+	var list = [];
+	for (var f=0; f<result.length; f++) list = list.concat(result[f].images);	// resultados de todos los frames
+	for (var i=0; i<list.length; i++) {
+		var isnew = true;
+		for (j=0; j<i; j++) {
+			if (list[i] == list[j])
+			{
+				isnew = false;
+				continue;
+			}
+		}
+		if (!isnew) continue;
 		
-// 		newimg = new Image();
-// 		newimg.src = list[i];
-// 		newimg.onclick = canvasInsertImage;
-// 		newimg.onload = function() {
-// 			if (this.width > 150) {
-// 				divNormal.appendChild(this);
-// 			}
-// 			else if (this.width > 20) {
-// 				divSmall.appendChild(this);
-// 			}
-// 		}
-// 	}
-// 	// if (divNormal.childNodes.length || divSmall.childNodes.length) {
-// 	divItem.appendChild(divNormal);
-// 	divItem.appendChild(divSmall);
-// 	// }
-// }
+		newimg = new Image();
+		newimg.src = list[i];
+		newimg.onclick = canvasInsertImage;
+		newimg.onload = function() {
+			if (this.width > 150) {
+				divNormal.appendChild(this);
+			}
+			else if (this.width > 20) {
+				divSmall.appendChild(this);
+			}
+		}
+	}
+	// if (divNormal.childNodes.length || divSmall.childNodes.length) {
+	divItem.appendChild(divNormal);
+	divItem.appendChild(divSmall);
+	// }
+}
 
 function initImageEditor() { 
+	// BUscar imágenes en las pestañas abiertas acatualmente:
 	chrome.tabs.query({'currentWindow': true}, function(tabs){
 		for (var i=0; i<tabs.length; i++) {
 			if (tabs[i].url.match(/https?:/)) {

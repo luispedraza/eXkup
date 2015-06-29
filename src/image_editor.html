@@ -19,8 +19,17 @@
 	
 </head>
 <body>
+	<div id="newimage">
+		<div id="newimage-control">
+			<div id="insert-cancel" class="button">eliminar</div>
+			<div id="insert-confirm" class="button">insertar</div>
+		</div>
+		<canvas id="canvasimage"></canvas>
+	</div>
+
+
 	<div id="masonry-container"></div>
-	<div id="editor-container"></div>
+	<div id="editor-container" style="display: none;"></div>
 	<div id="selector-editor">
 		<canvas id="canvas-editor" width="600" height="600"></canvas>
 		<div id="canvas-controls">
@@ -41,17 +50,17 @@
 					</div>
 					<div class="item">
 						<h2>Google</h2>
-						<form id="google-search-form">
-							<input id="google-search-string" placeholder="buscar una imagen…">
-							<input type="submit" value="buscar" id="google-search">
+						<form class="expandable" id="google-search-form">
+							<input type="text" id="google-search-string" placeholder="buscar una imagen…">
+							<input class="btn" type="submit" value="buscar" id="google-search">
 						</form>
 						<div id="google"></div>
 					</div>
 					<div class="item">
 						<h2>OpenClipArt Library</h2>
-						<form id="clips-search-form">
+						<form class="expandable" id="clips-search-form">
 							<input id="clips-search-string" placeholder="buscar un clip…">
-							<input type="submit" value="buscar" id="clips-search">
+							<input class="btn" type="submit" value="buscar" id="clips-search">
 						</form>
 						<div id="clips">
 							<img id="clips-loader" src="/icon/loader.gif"></img>
