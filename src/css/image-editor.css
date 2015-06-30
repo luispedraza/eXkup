@@ -2,8 +2,34 @@
 
 body {
 	font-family: 'PT Sans', sans-serif;
-	font-size: 16px;
+	font-size: 12px;
 }
+
+h1 {
+	font-size: 14px;
+	color: white;
+	cursor: pointer;
+}
+h1 {
+	/* border-bottom: 1px solid #000; */
+}
+h1 + div {
+	height: 0;
+	overflow: hidden;
+	/* border-bottom: 1px solid black; */
+	-webkit-transition: height .5s ease;
+}
+h2 {
+	font-size: 12px;
+	color: white;
+}
+
+h1.on + div {
+	height: 300px;
+	overflow: auto;
+}
+
+
 .canvas-container {
 	float: left;
 }
@@ -21,30 +47,56 @@ body {
 	width: 500px;
 	height: 600px;
 	overflow: hidden;
-	background-color: #1b99dd;
+	background-color: #f30;
 	color: #fff;
 	padding: 5px;
 	
 	margin-left: 10px;
 }
+#canvas-controls .panel {
+	clear: both;
+}
+#canvas-controls .panel:not(:first-child) {
+	border-top: 1px solid #fff;
+}
 #canvas-controls input[type='range'] {
+	height: 5px;
 	-webkit-appearance: none;
-	padding-left:2px; padding-right:2px;
+	padding-left:2px; 
+	padding-right:2px;
 	-webkit-border-radius: 3px;
-	background-image: -webkit-linear-gradient(top, #000000, #333333, #000000);
+	background-color: #ccc;
+}
+#canvas-controls input[type='range']:focus {
+	outline: none;
+}
+#canvas-controls input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: 1px solid #ccc;
+  height: 8px;
+  width: 8px;
+  border-radius: 1px;
+  background: #666;
+  cursor: pointer;
 }
 #canvas-controls input[type='file'] {
 	-webkit-appearance: none;
-    overflow: hidden;
-    width: 0;
-    height: 0;
+	overflow: hidden;
+	width: 0;
+	height: 0;
 }
-#canvas-controls input[type='text'] {
-	width: 20px;
+input[type=color] {
+	border: 0px transparent;
+	padding: 0;
+	background-color: transparent;
+	width: 30px;
+	height: 25px;
+	cursor: pointer;
 }
 
 form.expandable {
 	font-size: 10px;
+	display: inline;
 }
 form.expandable input[type=text] {
 	border: 0;
@@ -53,10 +105,17 @@ form.expandable input[type=text] {
 	border-bottom-left-radius: 3px;
 	width: 100px;
 	transition: width .25s;
+	margin-right: 0;
 }
 form.expandable input:focus {
 	width: 150px;
 	outline: none;
+}
+form.expandable input[type=submit] {
+	border: none;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	margin-left: 0;
 }
 
 #canvas-layers .item {
@@ -96,9 +155,34 @@ form.expandable input:focus {
 	outline: 1px solid red;
 }
 
-#selector-content img {
+
+/* El selector de imágenes */
+.images-selector .content-normal {
+	margin-top: 5px;
+	background-color: #fff;
+	padding: 5px;
+	border-radius: 3px;
+	max-height: 200px;
+	overflow-y: auto;
+	/* position: relative; */
+}
+.images-selector .content-normal:before {
+	content: "Imágenes encontradas:";
+	display: block;
+	color: #000;
+	margin-bottom: 3px;
+	/* position: absolute; */
+	background-color:  #fff;
+	/* width: 100%; */
+	/* right: 0; */
+	/* left: 0; */
+}
+.images-selector img {
 	height: 60px;
 	margin-right: 5px;
+}
+.images-selector img:hover {
+	outline: 2px solid #f30;
 }
 #selector-items {
 	overflow: auto;
@@ -107,19 +191,7 @@ form.expandable input:focus {
 #selector-items .item {
 	margin-bottom: 5px;
 }
-
-#selector-content img:hover {
-	outline: 2px solid #f30;
-}
-
-h1 {
-	font-size: 1em;
-	color: white;
-}
-h2 {
-	font-size: .9em;
-	color: white;
-}
+/* Fin del selector de imágenes */
 
 #draw-options {
 	-webkit-transition: all .5s ease;
@@ -136,23 +208,7 @@ h2 {
 	opacity: 1;
 }
 
-h1 {
-	cursor: pointer;
-}
-h1.off + div {
-	height: 0;
-	overflow: hidden;
-	border-bottom: 1px solid black;
-	-webkit-transition: height .5s ease;
-}
 
-h1.on + div {
-	height: 300px;
-	overflow: auto;
-	border-bottom: 1px solid black;
-	padding-bottom: 5px;
-	-webkit-transition: height .5s ease;
-}
 
 #masonry-container {
 	display: none;
