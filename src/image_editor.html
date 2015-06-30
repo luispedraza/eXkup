@@ -2,6 +2,8 @@
 <html>
 <head>
 	<meta charset="utf-8" />
+	<link href="css/font-awesome.min.css" rel="stylesheet">
+	<link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href="css/editor.css" type="text/css" />
 	<link rel="stylesheet" href="css/image-editor.css" type="text/css" />
 	
@@ -43,15 +45,18 @@
 			</div>
 			
 			<div class="panel images-selector">
-				<h1>Insertar una imagen</h1>
+				<h1><i class="fa fa-file-image-o"></i> Insertar una imagen</h1>
 				<div class="panel-content">
 					<input type="checkbox" name="show-small" id="show-small">
 					<label for="show-small">Mostrar imágenes pequeñas</label>
 					<div id="selector-items">
 						<div class="item">
-							<h2>Imagen Local</h2>
-							<label for="hd" class="btn">Selecciona Archivo</label>
-							<input type="file" id="hd" name="hd" accept="image/*">
+							<h2>Imagen Local
+								<form class="expandable">
+									<label for="hd" class="btn">Selecciona Archivo</label>
+									<input type="file" id="hd" name="hd" accept="image/*">
+								</form>
+							</h2>
 							<div id="hd_images"></div>
 						</div>
 						<div class="item">
@@ -65,7 +70,7 @@
 						<div class="item">
 							<h2>OpenClipArt Library</h2>
 							<form class="expandable" id="clips-search-form">
-								<input id="clips-search-string" placeholder="buscar un clip…">
+								<input type="text" id="clips-search-string" placeholder="buscar un clip…">
 								<input class="btn" type="submit" value="buscar" id="clips-search">
 							</form>
 							<div id="clips">
@@ -198,23 +203,26 @@
 
 			<div class="panel">
 				<!-- Panel de guardado y restauración -->
-				<h1 class="off">guardar o recuperar dibujo</h1>
+				<h1 class="off"><i class="fa fa-floppy-o"></i> Guardar o recuperar dibujo</h1>
 				<div>
-					<h2>guardar como…</h2>
-					<input id="canvas-save-name" placeholder="nombre del dibujo">
-					<input id="canvas-save" value="guardar" type=button>
+					<h2>Guardar como… 
+						<form class="expandable">
+							<input id="canvas-save-name" placeholder="nombre del dibujo">
+							<input id="canvas-save" value="guardar" type=button>
+						</form>
+					</h2>
 					<h2>cargar dibujo</h2>
 					<div id="saved-canvas">Aún no hay dibujos guardados</div>
 				</div>
 			</div>
 
 			<div class="panel">
-				<h1 class="off">capas</h1>
+				<h1 class="off"><i class="fa fa-list-ol"></i> Capas</h1>
 				<div id="canvas-layers"><div></div>
 			</div>
 
 			<div class="panel">
-				<h1 class="off">Historial</h1>
+				<h1 class="off"><i class="fa fa-history"></i> Historial</h1>
 				<div id="canvas-history"></div>
 			</div>
 		</div> <!-- canvas controls -->

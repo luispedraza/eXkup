@@ -96,7 +96,10 @@ input[type=color] {
 
 form.expandable {
 	font-size: 10px;
-	display: inline;
+	display: inline-block;
+	background-color: #666;
+	padding: 3px;
+	border-radius: 5px;
 }
 form.expandable input[type=text] {
 	border: 0;

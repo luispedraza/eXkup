@@ -50,7 +50,8 @@
 
 		// Interacción con los paneles: mostrar u ocultar
 		$('.panel h1').click(function() {
-			$(this).toggleClass("on");
+			$('.panel h1').removeClass("on");
+			$(this).addClass("on");
 		});
 		
 		populateSaved();
