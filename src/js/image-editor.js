@@ -261,7 +261,11 @@
 
 
 		/* Gestión del modal de opciones de objeto */
-		$(".options-modal-back").click(closeOptions);
+		$(".options-modal-back").click(function(e) {
+			if (e.target.className == "options-modal-back") {
+				closeOptions();
+			};
+		});
 		$("#close-options").click(closeOptions);
 	};
 
@@ -1004,11 +1008,13 @@
 		savedDiv.appendChild(savedTable);
 	}
 
+	/* Aplicación de un filtro de color a una imagen */
 	function Filter(e) {
 		console.log(e);
 		var o = canvasEditor.getActiveObject();
+		console.log(o);
 		var canvas = document.createElement("canvas");
-		Caman(o._originalImage.src, canvas, function() {
+		Caman(o._element.src, canvas, function() {
 			this[e.target.id](e.target.value).render(function(){
 				var newimg = new Image();
 				newimg.onload = function() {
