@@ -1,6 +1,40 @@
 (function() {
 	var canvasEditor;
-	var LEFT, TOP, WIDTH, HEIGHT, OBJCOLOR="#ff0000", OBJOPACITY=1.0, PADDING=2;
+	var LEFT, TOP, WIDTH, HEIGHT, OBJOPACITY=1.0, PADDING=2;
+
+	/* Obtención del color seleccionado para el fondo de objetos */
+	function getObjColor() {
+		return $("#obj-color").val();
+	};
+	/* Obtención del color seleccionado para el borde de objetos */
+	function getObjBorderColor() {
+		return $("#obj-border").is(":checked") ? $("#obj-border-color").val() : null;
+	};
+	/* Obtención del color del borde */
+	function getObjBorderWidth() {
+		return $("#obj-border").is(":checked") ? $("#obj-border-width").val()+"px" : null;
+	};
+	/* Obtención de las características comunides de un objeto */
+	function getObjDefaultOptions() {
+		return {
+	        left: LEFT,
+			top: TOP,
+	        fill: getObjColor(),
+	        padding: PADDING,
+	        opacity: OBJOPACITY,
+	        strokeWidth: getObjBorderWidth(),
+	        stroke: getObjBorderColor()
+		};
+	};
+	/* Función general para agregar nuevos elementos al dibujo */
+	function addNewObject(o) {
+		canvasEditor.add(o);
+		canvasEditor.setActiveObject(o);
+		// Cada nuevo objeto va en su propia capa,
+		// para poder reordenarlos más tarde si se quiere
+		insertLayer(o);
+		insertHistory();
+	};
 
 	fabric.Polygon.prototype.add = function(point) {
 		this.points.push(point);
@@ -20,18 +54,22 @@
 		});
 
 		canvasEditor = new fabric.Canvas("canvas-editor");
-		canvasEditor.selection = false;		// Desactivada selección de grupo
+		// canvasEditor.selection = false;		// Desactivada selección de grupo
 		WIDTH = canvasEditor.getWidth();
 		LEFT = WIDTH/2;
 		HEIGHT = canvasEditor.getHeight();
 		TOP = HEIGHT/2;
 		initImageEditor();
+		// Detección de objeto seleccionado:
 		canvasEditor.on('object:selected', objectSelected);
+		// Detección de objeto modificado: 
 		canvasEditor.on('object:modified', objectModified);
+		// Detección de trazado finalizado: 
 		canvasEditor.on('path:created', function(p) {
 			insertLayer(p.path);
 			insertHistory;
-		})
+		});
+		// Detección del movimiento de un objeto: 
 		canvasEditor.on('object:moving', function(e){
 			var o = e.target;
 			o.lineL && o.lineL.set({'x1': o.left, 'y1': o.top});
@@ -87,10 +125,12 @@
 				canvasEditor.renderAll();
 			}
 		})
-		document.getElementById("back-color").addEventListener("change", function(ev){
-			canvasEditor.backgroundColor = ev.target.value;
+
+		/* Color del fondo del lienzo */
+		$("#back-color").on("change", function(){
+			canvasEditor.backgroundColor = this.value;
 			canvasEditor.renderAll();
-		})
+		});
 		document.getElementById("insert-cancel").addEventListener("click", function() {
 			document.getElementById("selector").className = "";
 		});
@@ -103,12 +143,17 @@
 		document.getElementById("hd").addEventListener("change", loadHDImage, false);
 		document.getElementById("show-small").addEventListener("change", showSmall);
 		// Editor 
-		document.getElementById("canvas-rect").onclick = canvasInsertRect;
-		document.getElementById("canvas-circle").onclick = canvasInsertCircle;
-		document.getElementById("canvas-triangle").onclick = canvasInsertTriangle;
-		document.getElementById("canvas-line").onclick = canvasInsertLine;
-		document.getElementById("obj-opacity").addEventListener("change", canvasObjOpacity);
-		document.getElementById("obj-color").addEventListener("change", canvasObjColor);
+		// Inserción de formas básicas: cuadrado, círculo, triángulo, línea:
+		$("#canvas-rect").click(canvasInsertRect);
+		$("#canvas-circle").click(canvasInsertCircle);
+		$("#canvas-triangle").click(canvasInsertTriangle);
+		$("#canvas-line").click(canvasInsertLine);
+		// Opacidad de un objeto:
+		$("#obj-opacity").on("input", canvasObjOpacity);
+		// Colores para el fondo y para el border de los objetos:
+		$("#obj-color").on("change", canvasObjColor);
+		$("#obj-border-color").on("change", canvasObjBorderColor);
+		// Recortado de objetos:
 		document.getElementById("obj-crop").addEventListener("click", onCropImage);
 		document.getElementById("obj-crop-poly").addEventListener("click", onCropPolyImage);
 
@@ -183,10 +228,11 @@
 		}
 		document.getElementById("canvas-remove").onclick = canvasRemoveElement;
 		document.getElementById("canvas-clear").onclick = function() {canvasEditor.clear()};
-		document.getElementById("canvas-draw-on").addEventListener("change", function(ev) {
-			canvasEditor.isDrawingMode = ev.target.checked;
-			// canvasEditor.freeDrawingLineWidth = parseInt(document.getElementById("draw-width").value) || 1;
-			canvasEditor.freeDrawingColor = document.getElementById("draw-color").value;
+		/* Dibujo de una forma libre con el cursor */
+		$("#canvas-draw").click("change", function() {
+			canvasEditor.isDrawingMode = true;
+			canvasEditor.freeDrawingLineWidth = parseInt($("#draw-width").val());
+			canvasEditor.freeDrawingColor = $("#draw-color").val();
 		});
 		document.getElementById("draw-width").addEventListener("change", function(ev) {
 			canvasEditor.freeDrawingLineWidth = parseInt(document.getElementById("draw-width").value) || 1;
@@ -194,8 +240,10 @@
 		document.getElementById("draw-color").addEventListener("change", function(ev) {
 			canvasEditor.freeDrawingColor = ev.target.value;
 		});
-		document.getElementById("canvas-layout").onclick = canvasLayout;
-		document.getElementById("canvas-save").onclick = canvasSave;
+		/* Recolocación automática de imágenes, masonry */
+		$("#canvas-layout").click(canvasLayout);
+		/* Guardado del canvas */
+		$("canvas-save").click(canvasSave);
 
 		var filters = document.getElementsByClassName("filter");
 		for (var f=0; f<filters.length; f++) {
@@ -210,7 +258,22 @@
 		for (var f=0; f<filters.length; f++) {
 			filters[f].addEventListener('click', Filter);
 		}
-	}
+
+
+		/* Gestión del modal de opciones de objeto */
+		$(".options-modal-back").click(closeOptions);
+		$("#close-options").click(closeOptions);
+	};
+
+	/* Cierre del modal de opciones de objeto */
+	function closeOptions() {
+		// Se oculta el diálogo modal:
+		$(".options-modal-back").removeClass("on");
+	};
+	/* Apertura del diálogo de opcions de objeto y ajuste de su configuración */
+	function openOptions(config) {
+		$(".options-modal-back").addClass("on");
+	};
 
 	function showSmall(ev) {
 		var normal = document.getElementsByClassName("content-normal");
@@ -457,61 +520,34 @@
 			insertLayer(image);
 			insertHistory();
 		});
-	}
+	};
+
+	/* Inserción de un rectángulo */
 	function canvasInsertRect() {
-		var rect = new fabric.Rect({
-	        left: LEFT,
-			top: TOP,
-	        fill: OBJCOLOR,
-	        width: 70,
-	        height: 40,
-	        padding: PADDING,
-	        opacity: OBJOPACITY
-	        });
-		canvasEditor.add(rect);
-		canvasEditor.setActiveObject(rect);
-		insertLayer(rect);
-		insertHistory();
-	}
-
+		var rectOptions = getObjDefaultOptions();
+		rectOptions.width = 70;
+		rectOptions.height = 70;
+		addNewObject(new fabric.Rect(rectOptions));
+	};
+	/* Inserción de un nuevo círculo */
 	function canvasInsertCircle() {
-		var circ = new fabric.Circle({
-	        left: LEFT,
-			top: TOP,
-	        fill: OBJCOLOR,
-	        radius: 50,
-	        padding: PADDING,
-	        opacity: OBJOPACITY
-	        });
-		canvasEditor.add(circ);
-		canvasEditor.setActiveObject(circ);
-		insertLayer(circ);
-		insertHistory();
-	}
-
+		var circOptions = getObjDefaultOptions();
+		circOptions.radius = 50;
+		addNewObject(new fabric.Circle(circOptions));
+	};
+	/* Inserción de un objeto de forma triangular */
 	function canvasInsertTriangle() {
-		var tri = new fabric.Triangle({
-	        left: LEFT,
-			top: TOP,
-	        fill: OBJCOLOR,
-	        width: 50,
-	        height: 50,
-	        padding: PADDING,
-	        opacity: OBJOPACITY,
-	        strokeWidth: 5,
-	        stroke: '#666'
-	        });
-		canvasEditor.add(tri);
-		canvasEditor.setActiveObject(tri);
-		insertLayer(tri);
-		insertHistory();
-	}
+		var triOptions = getObjDefaultOptions();
+		triOptions.width = 50;
+		triOptions.height = 50;
+		addNewObject(new fabric.Triangle(triOptions));
+	};
 
 	function canvasInsertLine() {
 		var line = new fabric.Line(
 			[50, 50, 100, 50],
 			{
-		        fill: OBJCOLOR,
+		        fill: getObjColor(),
 		        opacity: OBJOPACITY,
 		        strokeWidth: 5,
 		        padding: 0
@@ -552,54 +588,60 @@
 		insertHistory();
 	}
 
+	/* Inserción de texto en el dibujo */
 	function canvasInsertText(e) {
-		$(this).toggleClass("on");
-			// e.target.className = e.target.className.replace(" on", "");
-			// canvasEditor.deactivateAll();
-			// canvasEditor.renderAll();
-			// return;
-		var text = new fabric.Text("", 
-			{
-				left: LEFT,
-				top: TOP,
-				padding: PADDING,
-				fontFamily: $("#canvas-text-font").val()
-			});
-		canvasEditor.add(text);
-		canvasEditor.setActiveObject(text);
-		insertLayer(text);
-		insertHistory();
+		var textOptions = getObjDefaultOptions();
+		textOptions.fontFamily = $("#canvas-text-font").val();
+		addNewObject(new fabric.Text(textOptions));
+		// Se lleva el focus al cuadro de texto para escribir:
 		$("#canvas-text-value").focus();
 	};
 
-	function canvasObjOpacity(ev) {
-		document.getElementById("obj-opacity-val").value = ev.target.value+ " %";
-		OBJOPACITY = parseInt(ev.target.value)/100;
+	function canvasObjOpacity() {
+		OBJOPACITY = parseInt(this.value)/100;
+		console.log(OBJOPACITY);
 		var activeObj = canvasEditor.getActiveObject();
 		var activeGrp = canvasEditor.getActiveGroup();
 		if (activeObj || activeGrp) {
 			(activeObj || activeGrp).opacity = OBJOPACITY;
 	        canvasEditor.renderAll();
 	    }
-	}
-	function canvasObjColor(ev) {
-		OBJCOLOR = ev.target.value;
+	};
+	/* Color del fondo de un objeto */
+	function canvasObjColor() {
+		var color = this.value;
 		var activeObj = canvasEditor.getActiveObject();
 		var activeGrp = canvasEditor.getActiveGroup();
 		if (activeObj || activeGrp) {
-			(activeObj || activeGrp).fill = OBJCOLOR;
+			(activeObj || activeGrp).fill = color;
 	        canvasEditor.renderAll();
 	        canvasEditor.fire('object:modified', {target:activeObj});
-	    }
-	}
+	    };
+	};
+	/* Color del borde de un objeto */
+	function canvasObjBorderColor() {
+		var color = this.value;
+		var activeObj = canvasEditor.getActiveObject();
+		var activeGrp = canvasEditor.getActiveGroup();
+		if (activeObj || activeGrp) {
+			(activeObj || activeGrp).fill = color;
+	        canvasEditor.renderAll();
+	        canvasEditor.fire('object:modified', {target:activeObj});
+	    };
+	};
 
+	/* Función que se ejecuta cuando se selecciona un objeto */
 	function objectSelected(e) {
 		var active = e.target;
-		document.getElementById("obj-color").value = active.fill;
-		document.getElementById("obj-opacity").value = Math.round(active.opacity*100);
-		document.getElementById("canvas-text-font").value = active.text;
-	}
+		// copiado de las propiedades del objeto a los selectores de edición: 
+		$("#obj-color").val(active.fill);
+		$("#obj-opacity").val(Math.round(active.opacity*100))
+		$("#canvas-text-font").val(active.text);
+		// Apertura del modal de opcions de objeto para su edición: 
+		openOptions(active);
+	};
 
+	/* Función que se ejecuta cuando se modifica un objeto */
 	function objectModified(e) {
 		var element = e.target;
 		var ts = element.ts;

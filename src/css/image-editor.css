@@ -5,6 +5,47 @@ body {
 	font-size: 12px;
 }
 
+.clearfix:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
+
+.mycheckbox {
+	cursor: pointer;
+	outline: none;
+	-webkit-appearance: none;
+	border: 1px solid #000;
+	width: 22px;
+	height: 16px;
+	background-color: #ddd;
+	position: relative;
+	border-radius
+}
+.mycheckbox:checked {
+	background-color: #bbb;
+}
+.mycheckbox:before {
+	display: block;
+	width: 10px;
+	height: 10px;
+	content: " ";
+	position: absolute;
+	transition: left .2s linear;
+	top: 2px;
+}
+.mycheckbox:not(:checked):before{
+	background-color: #666;
+	left: 2px;
+}
+.mycheckbox:checked:before {
+	background-color: #000;
+	left: 8px;
+}
+
 h1 {
 	font-size: 14px;
 	color: white;
@@ -52,6 +93,7 @@ h1.on + div {
 	padding: 5px;
 	
 	margin-left: 10px;
+	position: relative;
 }
 #canvas-controls .panel {
 	clear: both;
@@ -71,13 +113,13 @@ h1.on + div {
 	outline: none;
 }
 #canvas-controls input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  border: 1px solid #ccc;
-  height: 8px;
-  width: 8px;
-  border-radius: 1px;
-  background: #666;
-  cursor: pointer;
+	-webkit-appearance: none;
+	border: 1px solid #ccc;
+	height: 8px;
+	width: 8px;
+	border-radius: 1px;
+	background: #666;
+	cursor: pointer;
 }
 #canvas-controls input[type='file'] {
 	-webkit-appearance: none;
@@ -85,6 +127,53 @@ h1.on + div {
 	width: 0;
 	height: 0;
 }
+
+.options-modal-back {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(0,0,0,.7);
+	opacity: 0;
+	transition: opacity .2s;
+	pointer-events: none;
+}
+
+.options-modal-back.on {
+	opacity: 1;
+	pointer-events: auto;
+	
+}
+.options-modal {
+	background-color: #fff;
+	position: absolute;
+	top: 30px;
+	left: 30px;
+	right: 30px;
+	min-height: 100px;
+	-webkit-box-shadow: 10px 10px 50px 5px rgba(0,0,0,0.75);
+	color: #666;
+}
+.options-title {
+	font-size: 16px;
+	padding: 10px;
+	border-bottom: 1px solid #ccc;
+}
+.options-title i {
+	float: right;
+	cursor: pointer;
+}
+.options-title i:hover {
+	color: #ccc;
+}
+.options-title i:active {
+	color: #000;
+}
+.options-content {
+	padding: 10px;
+}
+
 input[type=color] {
 	border: 0px transparent;
 	padding: 0;
@@ -226,6 +315,7 @@ form.expandable input[type=submit] {
 	color: white;
 	border-radius: 5px;
 	cursor:pointer;
+	border: none;
 }
 .btn:hover {
 	background-color: #454545;
@@ -234,9 +324,23 @@ form.expandable input[type=submit] {
 	background-color: #ddd;
 	color: #000;
 }
+.shape.btn {
+	min-width: 30px;
+	height: 30px;
+	float: left;
 
+	margin-right: 5px;
+}
+.shapes-buttons {
 
-.btnon {
+}
+
+.text.btn {
+	width: 20px;
+	height: 20px;
+}
+
+.btn.on {
 	min-width: 35px;
 	min-height: 35px;
 	font-size: 1.2em;
@@ -244,7 +348,7 @@ form.expandable input[type=submit] {
 	color: white;
 }
 #canvas-rect {
-	background-image: url("/icon/square.png");
+	background-image: url("/img/icons/square.png");
 	background-repeat:  no-repeat;
 }
 #canvas-circle {
@@ -258,6 +362,21 @@ form.expandable input[type=submit] {
 #clips-loader {
 	display: none;
 }
+
+
+/* Opciones de textp */
+#text-options {
+	width: 100%;
+	clear: both;
+	padding: 5px 0;
+}
+#canvas-text-value {
+	width: 100%;
+	outline: none;
+	margin-top: 5px;
+}
+
+/* Fin opciones de textp */
 
 /* Opciones de filtrado */
 #filters_custom label {
@@ -291,3 +410,12 @@ form.expandable input[type=submit] {
 	height: 50px;
 }
 
+/* Guardado y recuperación de dibujos */
+#saved-canvas {
+	background-color: #fff;	
+	color: #333;
+}
+#saved-canvas img {
+	outline: 1px solid #ddd;
+}
+/* Find de guardado y recuperación de dibujos */
