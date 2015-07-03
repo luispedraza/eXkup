@@ -85,7 +85,7 @@
 			</div>
 			
 			<div class="panel objects">
-				<h1>Insertar un objeto</h1>
+				<h1><i class="fa fa-pencil-square-o"></i> Dibujar formas</h1>
 				<div class="panel-content">
 					<div class="clearfix shapes-buttons">
 						<input id="canvas-rect" type="button" class="shape btn"/>
@@ -113,47 +113,6 @@
 
 					<input id="canvas-remove" type="button" value="borrar"/>
 					<input id="canvas-clear" type="button" value="limpiar"/>
-
-					<div id="filters">
-						<h2>Filtros</h2>
-						<div id="filters_custom">
-							<label for="brightness">Brillo</label>
-							<input class="filter" id="brightness" type="range" min="-100" max="100" value="0"/>
-							<input id="brightness-val" value="0" type="text"><br>
-							<label for="contrast">Contrate</label>
-							<input class="filter" id="contrast" type="range" min="-100" max="100" value="0"/>
-							<input id="contrast-val" value="0" type="text"><br>
-							<label for="saturation">Saturación</label>
-							<input class="filter" id="saturation" type="range" min="-100" max="100" value="0"/>
-							<input id="saturation-val" value="0" type="text"><br>
-							<label for="hue">Tonalidad</label>
-							<input class="filter" id="hue" type="range" min="0" max="100" value="0"/>
-							<input id="hue-val" value="0" type="text"><br>
-							<label for="exposure">Exposición</label>
-							<input class="filter" id="exposure" type="range" min="-100" max="100" value="0"/>
-							<input id="exposure-val" value="0" type="text"><br>
-							<label for="sepia">Sepia</label>
-							<input class="filter" id="sepia" type="range" min="0" max="100" value="0"/>
-							<input id="sepia-val" value="0" type="text"><br>
-							<label for="gamma">Gamma</label>
-							<input class="filter" id="gamma" type="range" min="0" max="10" step="0.1" value="0"/>
-							<input id="gamma-val" value="0" type="text"><br>
-							<label for="noise">Ruido</label>
-							<input class="filter" id="noise" type="range" min="0" max="100" value="0"/>
-							<input id="noise-val" value="0" type="text"><br>
-						</div>
-						<div id="filters_preset">
-							<input class="preset" id="vintage" type="button" value="Vintage"/>
-							<input class="preset" id="lomo" type="button" value="Lomo"/>
-							<input class="preset" id="sinCity" type="button" value="SinCity"/>
-							<input class="preset" id="sunrise" type="button" value="Sunrise"/>
-							<input class="preset" id="grungy" type="button" value="Grungy"/>
-							<input class="preset" id="pinhole" type="button" value="Pinhole"/>
-							<input class="preset" id="glowingSun" type="button" value="Glowing Sun"/>
-							<input class="preset" id="nostalgia" type="button" value="Nostalgia"/>
-							<input class="preset" id="concentrate" type="button" value="Concentrate"/>
-						</div>
-					</div><!-- filters -->
 				</div>
 			</div>
 
@@ -246,6 +205,37 @@
 							<label for="obj-border-width">Grosor:</label>
 							<input type="range" id="obj-border-width" name="obj-border-width" min="1" max="20">
 						</div>
+						<div id="filters" class="options-item">
+							<div id="filters_custom">
+								<label for="brightness">Brillo</label>
+								<input class="filter" id="brightness" type="range" min="-100" max="100" value="0"/>
+								<label for="contrast">Contrate</label>
+								<input class="filter" id="contrast" type="range" min="-100" max="100" value="0"/>
+								<label for="saturation">Saturación</label>
+								<input class="filter" id="saturation" type="range" min="-100" max="100" value="0"/>
+								<label for="hue">Tonalidad</label>
+								<input class="filter" id="hue" type="range" min="0" max="100" value="0"/>
+								<label for="exposure">Exposición</label>
+								<input class="filter" id="exposure" type="range" min="-100" max="100" value="0"/>
+								<label for="sepia">Sepia</label>
+								<input class="filter" id="sepia" type="range" min="0" max="100" value="0"/>
+								<label for="gamma">Gamma</label>
+								<input class="filter" id="gamma" type="range" min="0" max="10" step="0.1" value="0"/>
+								<label for="noise">Ruido</label>
+								<input class="filter" id="noise" type="range" min="0" max="100" value="0"/>
+							</div>
+							<div id="filters_preset">
+								<input class="preset btn" id="vintage" type="button" value="Vintage"/>
+								<input class="preset btn" id="lomo" type="button" value="Lomo"/>
+								<input class="preset btn" id="sinCity" type="button" value="SinCity"/>
+								<input class="preset btn" id="sunrise" type="button" value="Sunrise"/>
+								<input class="preset btn" id="grungy" type="button" value="Grungy"/>
+								<input class="preset btn" id="pinhole" type="button" value="Pinhole"/>
+								<input class="preset btn" id="glowingSun" type="button" value="Glowing Sun"/>
+								<input class="preset btn" id="nostalgia" type="button" value="Nostalgia"/>
+								<input class="preset btn" id="concentrate" type="button" value="Concentrate"/>
+							</div>
+						</div><!-- filters -->
 					</div>
 				</div>
 			</div>

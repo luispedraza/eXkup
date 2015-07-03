@@ -240,29 +240,28 @@
 		document.getElementById("draw-color").addEventListener("change", function(ev) {
 			canvasEditor.freeDrawingColor = ev.target.value;
 		});
-		/* Recolocación automática de imágenes, masonry */
+		// Recolocación automática de imágenes, masonry
 		$("#canvas-layout").click(canvasLayout);
-		/* Guardado del canvas */
+		// Guardado del canvas
 		$("canvas-save").click(canvasSave);
-
-		var filters = document.getElementsByClassName("filter");
-		for (var f=0; f<filters.length; f++) {
-			filters[f].addEventListener('mouseup', Filter);
-			filters[f].addEventListener('change', function(e) {
-				if (e.target.type == 'range') {
-					document.getElementById(e.target.id + '-val').value = e.target.value;
-				}
-			});
-		}
-		filters = document.getElementsByClassName("preset");
-		for (var f=0; f<filters.length; f++) {
-			filters[f].addEventListener('click', Filter);
-		}
-
-
-		/* Gestión del modal de opciones de objeto */
+		// Filtros de imagen: 
+		$(".filter").on("mouseup", Filter)
+					.on("input", Filter);
+		// var filters = document.getElementsByClassName("filter");
+		// for (var f=0; f<filters.length; f++) {
+		// 	filters[f].addEventListener('mouseup', Filter);
+		// 	filters[f].addEventListener('change', function(e) {
+		// 		if (e.target.type == 'range') {
+		// 			document.getElementById(e.target.id + '-val').value = e.target.value;
+		// 		}
+		// 	});
+		// }
+		$(".preset").click(Filter);
+		// Gestión del modal de opciones de objeto.
+		// Este modal se muestra cada vez que se inserta un objeto, o al seleccionar un objeto del canvas
+		// Muestra las principales opciones de edición del objeto: color, tamaño, filtros, etc
 		$(".options-modal-back").click(function(e) {
-			if (e.target.className == "options-modal-back") {
+			if (e.target.className.match("options-modal-back")) {
 				closeOptions();
 			};
 		});
@@ -276,6 +275,8 @@
 	};
 	/* Apertura del diálogo de opcions de objeto y ajuste de su configuración */
 	function openOptions(config) {
+		// Configuración según objeto:
+		console.log(config);
 		$(".options-modal-back").addClass("on");
 	};
 
@@ -596,7 +597,7 @@
 	function canvasInsertText(e) {
 		var textOptions = getObjDefaultOptions();
 		textOptions.fontFamily = $("#canvas-text-font").val();
-		addNewObject(new fabric.Text(textOptions));
+		addNewObject(new fabric.Text("", textOptions));
 		// Se lleva el focus al cuadro de texto para escribir:
 		$("#canvas-text-value").focus();
 	};
@@ -1009,13 +1010,15 @@
 	}
 
 	/* Aplicación de un filtro de color a una imagen */
-	function Filter(e) {
-		console.log(e);
-		var o = canvasEditor.getActiveObject();
+	function Filter() {
+		var filterControl = this;				// El control de filtrado, con el nombre de filtro y valor
+		console.log(filterControl);
+		var o = canvasEditor.getActiveObject();	// La imagen activa
 		console.log(o);
 		var canvas = document.createElement("canvas");
-		Caman(o._element.src, canvas, function() {
-			this[e.target.id](e.target.value).render(function(){
+		Caman(canvas, o._originalElement.src, function() {
+			console.log(filterControl.id, filterControl.value);
+			this[filterControl.id](filterControl.value).render(function() {
 				var newimg = new Image();
 				newimg.onload = function() {
 					o.setElement(this);
@@ -1023,7 +1026,7 @@
 				}
 				newimg.src = canvas.toDataURL('png', 1.0);
 			});
-		})
+		});
 	}
 })();
 
