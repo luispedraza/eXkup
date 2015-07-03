@@ -23,7 +23,10 @@
 	        padding: PADDING,
 	        opacity: OBJOPACITY,
 	        strokeWidth: getObjBorderWidth(),
-	        stroke: getObjBorderColor()
+	        stroke: getObjBorderColor(),
+	        cornerSize: 6,
+	        cornerColor: "#000000",
+	        borderColor: "#cccccc"
 		};
 	};
 	/* Función general para agregar nuevos elementos al dibujo */
@@ -507,23 +510,14 @@
 			.removeChild(document.getElementById(ts));
 	}
 
-	function canvasInsertImage(ev) {
-		fabric.Image.fromURL(ev.target.src, function(image) {
-			image.set({
-				left: LEFT,
-				top: TOP,
-				angle: 0,
-				padding: PADDING,
-				cornersize: 8,
-			});
-			canvasEditor.add(image);
-			var im_width = image.currentWidth;
-			if (im_width > WIDTH) image.scaleToWidth(WIDTH);
-			var im_height = image.currentHeight;
-			if (im_height > HEIGHT) image.scaleToWidth(HEIGHT);
-			canvasEditor.renderAll();
-			insertLayer(image);
-			insertHistory();
+	/* Inserción de una nueva imagen */
+	function canvasInsertImage() {
+		fabric.Image.fromURL(this.src, function(image) {
+			image.set(getObjDefaultOptions());
+			// redimensionado de la imagen:
+			if (image.currentWidth > WIDTH) image.scaleToWidth(WIDTH);
+			if (image.currentHeight > HEIGHT) image.scaleToWidth(HEIGHT);
+			addNewObject(image);
 		});
 	};
 
