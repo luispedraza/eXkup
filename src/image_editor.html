@@ -5,6 +5,7 @@
 	<link href="css/font-awesome.min.css" rel="stylesheet">
 	<link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href="css/editor.css" type="text/css" />
+	<link rel="stylesheet" href="css/dialog.css" type="text/css" />
 	<link rel="stylesheet" href="css/image-editor.css" type="text/css" />
 	
 	<script type="text/javascript" src="lib/jquery-2.1.1.min.js"></script>
@@ -20,7 +21,7 @@
 	<script type="text/javascript" src="js/image-editor.js"></script>
 	
 </head>
-<body>
+<body class="image-editor">
 	<div id="newimage">
 		<div id="newimage-control">
 			<div id="insert-cancel" class="button">eliminar</div>
@@ -39,48 +40,56 @@
 			<div class="panel">
 				<h1>
 					<label for="back-color">Color de fondo del lienzo</label>
-					<input id="back-color" name="back-color" type="color" value='#ffffff'>	
+					<input id="back-color" name="back-color" type="color" value='#ffffff'>
+					<input id="canvas-clear" type="button" value="limpiar" class="btn"/>
 				</h1>
 			</div>
 			
 			<div class="panel images-selector">
 				<h1><i class="fa fa-file-image-o"></i> Insertar una imagen</h1>
+
+
+
+
 				<div class="panel-content">
 					<input type="checkbox" name="show-small" id="show-small" class="mycheckbox">
 					<label for="show-small">Mostrar imágenes pequeñas</label>
-					<div id="selector-items">
-						<div class="item">
-							<h2>Imagen Local
-								<form class="expandable">
-									<label for="hd" class="btn">Selecciona Archivo</label>
-									<input type="file" id="hd" name="hd" accept="image/*">
-								</form>
-							</h2>
-							<div id="hd_images"></div>
-						</div>
-						<div class="item">
-							<h2>Google 
-								<form class="expandable" id="google-search-form">
-									<input type="text" id="google-search-string" placeholder="buscar una imagen…">
-									<input class="btn" type="submit" value="buscar" id="google-search">
-								</form>
-							</h2>
-							
-							<div id="google"></div>
-						</div>
-						<div class="item">
-							<h2>OpenClipArt Library
-								<form class="expandable" id="clips-search-form">
-									<input type="text" id="clips-search-string" placeholder="buscar un clip…">
-									<input class="btn" type="submit" value="buscar" id="clips-search">
-								</form>
-							</h2>
-							
-							<div id="clips">
-								<img id="clips-loader" src="/icon/loader.gif" />
-							</div>
-						</div>
-					</div>	
+
+					<div class="selector-items-container">
+						<i class="fa fa-chevron-circle-down" id="selector-items-opener"></i>
+						<ul id="selector-items">
+							<li class="item on">
+								<h2>Imagen Local
+									<form class="expandable">
+										<label for="hd" class="btn">Selecciona Archivo</label>
+										<input type="file" id="hd" name="hd" accept="image/*">
+									</form>
+								</h2>
+							</li>
+							<li class="item">
+								<h2>Google 
+									<form class="expandable" id="google-search-form">
+										<input type="text" id="google-search-string" placeholder="buscar una imagen…">
+										<input class="btn" type="submit" value="buscar" id="google-search">
+									</form>
+								</h2>
+							</li>
+							<li class="item">
+								<h2>OpenClipArt Library
+									<form class="expandable" id="clips-search-form">
+										<input type="text" id="clips-search-string" placeholder="buscar un clip…">
+										<input class="btn" type="submit" value="buscar" id="clips-search">
+									</form>
+								</h2>
+							</li>
+						</ul>
+					</div>
+
+					<div id="hd_images"></div>
+					<div id="google"></div>
+					<div id="clips">
+						<img id="clips-loader" src="/icon/loader.gif" />
+					</div>
 				</div>
 			</div>
 			
@@ -96,23 +105,9 @@
 						<input id="canvas-text" type="button" class="shape btn" value="Texto">
 					</div>
 
-					<div id="draw-options">
-						<label for="draw-width">ancho:</label>
-						<input type="range" id="draw-width" name="draw-width" min="1" max="20" value="1">
-						<label for="draw-width">color:</label>
-						<input type="color" id="draw-color" name="draw-color">
-					</div>
-
-					
-
-
 					<input id="obj-crop" type="button" value="recortar">
 					<input id="obj-crop-poly" type="button" value="recorte poligonal">
-
 					
-
-					<input id="canvas-remove" type="button" value="borrar"/>
-					<input id="canvas-clear" type="button" value="limpiar"/>
 				</div>
 			</div>
 
@@ -135,8 +130,8 @@
 							<input id="canvas-save" value="guardar" type=button>
 						</form>
 					</h2>
-					<h2>cargar dibujo</h2>
-					<div id="saved-canvas">Aún no hay dibujos guardados</div>
+					<h2>Cargar un dibujo guardado:</h2>
+					<div id="saved-canvas">Aún no has guardado ningún dibujo en esta máquina</div>
 				</div>
 			</div>
 
@@ -157,7 +152,7 @@
 				<div class="options-modal">
 					<div class="options-title">Propiedades del objeto <i class="fa fa-times" id="close-options"></i></div>
 					<div class="options-content">
-						<div class="options-item">
+						<div class="options-item text">
 							<div id="text-options">
 								<div id="text-buttons">
 									<input id="canvas-text-bold" type="button" style="font-weight:bold" class="text btn" value="N">
@@ -169,7 +164,7 @@
 									<label for="canvas-text-font">Tipografía:</label>
 									<select id="canvas-text-font">
 										<option>Arial</option>
-										<option selected="">Helvetica</option>
+										<option selected="selected">Helvetica</option>
 										<option>Myriad Pro</option>
 										<option>Delicious</option>
 										<option>Verdana</option>
@@ -188,24 +183,24 @@
 							</div>
 						</div>
 
-						<div class="options-item">
+						<div class="options-item text rect image">
 							<label for="obj-opacity">Opacidad:</label>
 							<input id="obj-opacity" name="obj-opacity" type="range" min="0" max="100" value="100">
 						</div>
-						<div class="options-item">
+						<div class="options-item rect circle triangle">
 							<label for="obj-color">Color del fondo</label>
 							<input id="obj-color" name="obj-color" type="color" value="#ff0000">
 						</div>
-						<div class="options-item">
+						<div class="options-item rect circle triangle">
 							<input type="checkbox" id="obj-border" name="obj-border" class="mycheckbox">
 							<label for="obj-border-color">Color del borde</label>
 							<input id="obj-border-color" name="obj-border-color" type="color" value="#999999">
 						</div>
-						<div class="options-item">
+						<div class="options-item rect circle triangle">
 							<label for="obj-border-width">Grosor:</label>
 							<input type="range" id="obj-border-width" name="obj-border-width" min="1" max="20">
 						</div>
-						<div id="filters" class="options-item">
+						<div id="filters" class="options-item image">
 							<div id="filters_custom">
 								<label for="brightness">Brillo</label>
 								<input class="filter" id="brightness" type="range" min="-100" max="100" value="0"/>
@@ -224,7 +219,7 @@
 								<label for="noise">Ruido</label>
 								<input class="filter" id="noise" type="range" min="0" max="100" value="0"/>
 							</div>
-							<div id="filters_preset">
+							<div id="filters_preset image">
 								<input class="preset btn" id="vintage" type="button" value="Vintage"/>
 								<input class="preset btn" id="lomo" type="button" value="Lomo"/>
 								<input class="preset btn" id="sinCity" type="button" value="SinCity"/>
@@ -236,8 +231,23 @@
 								<input class="preset btn" id="concentrate" type="button" value="Concentrate"/>
 							</div>
 						</div><!-- filters -->
+
+						<div class="options-item all">
+							<input id="canvas-remove" type="button" value="Eliminar este objeto" class="btn"/>
+						</div>
+
+						<div id="draw-options" class="options-item">
+							<label for="draw-width">Ancho del trazo</label>
+							<input type="range" id="draw-width" name="draw-width" min="1" max="20" value="1">
+							<label for="draw-width">Color del trazo</label>
+							<input type="color" id="draw-color" name="draw-color">
+						</div>
 					</div>
-				</div>
+					<div class="options-modal-buttons">
+						<div id="options-accept" class="btn">Aceptar</div>
+						<div id="options-cancel" class="btn">Cancelar</div>
+					</div>
+				</div><!-- options-modal -->
 			</div>
 		</div> <!-- canvas controls -->
 	</div>
