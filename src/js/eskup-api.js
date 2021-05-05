@@ -11,9 +11,12 @@ function EskupApi() {
 		INESKUP = "http://eskup.elpais.com/Ineskup";
 
 	// Carga inicial de mensajes favoritos:
-	chrome.storage.local.get("msg_fav", function(result) {
-		FAVORITES = result["msg_fav"] || [];	// lista de mensajes favoritos
-	});
+	if (chrome.storage) {
+		chrome.storage.local.get("msg_fav", function(result) {
+			FAVORITES = result["msg_fav"] || [];	// lista de mensajes favoritos
+		});
+	}
+	
 
 	this.NUMMSG = 50;		// número de mensajes que se pedirán cada vez
 
