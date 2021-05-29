@@ -56,22 +56,22 @@ function makeRegexp(term) {
 		.replace(/[uúùü]/g, "[uúùü]")
 		.replace(/[ ,\.:;]+/g, "[ ,\.:;]+")
 		, "i");
-};
-
-/* Construcción de un link que se puede abrir desde la extensión, sin cerrarla 
+	};
+	
+	/* Construcción de un link que se puede abrir desde la extensión, sin cerrarla 
 	@parama text: texto del enlace
 	@param href: dirección del enlace
 	@param clamp: acortar el texto dejándolo en este número de caracteres (excluyendo http://www.)
 	*/
-function makeLink(text, href, clamp) {
-	return $("<a>")
-	.attr("href", "#")
-	.attr("data-url", href)
-	.attr("title", href)
-	.text((clamp) ? text.replace(/^http:\/\/[w\.]*/, "").slice(0,clamp)+"…" : text)
-	.on("click", function() {
-		chrome.tabs.update({url: this.getAttribute("data-url")
-	});
+	function makeLink(text, href, clamp) {
+		return $("<a>")
+		.attr("href", "#")
+		.attr("data-url", href)
+		.attr("title", href)
+		.text((clamp) ? text.replace(/^http:\/\/[w\.]*/, "").slice(0,clamp)+"…" : text)
+		.on("click", function() {
+			chrome.tabs.update({url: this.getAttribute("data-url")
+		});
 	});
 };
 
@@ -98,11 +98,11 @@ function dataURItoBlob(dataURI) {
 };
 
 /* Cuánto tiempo hace que el mensaje fue enviado
-	@param date: Date del mensaje
-	@param now: Date actual
-	*/
-	function getTimeAgo(date) {
-		var elapsed = (new Date() - date) / 1000;
+@param date: Date del mensaje
+@param now: Date actual
+*/
+function getTimeAgo(date) {
+	var elapsed = (new Date() - date) / 1000;
 	if (elapsed<60) {			// menos de 1 minuto
 		return _ROUND(elapsed) + " s.";
 	} else if (elapsed<3600) {	// menos de 1 horra
@@ -126,7 +126,7 @@ function formatDate(date, withYear) {
 function apiCall(method, url, data, callback) {
 	var callbackDefined = !((typeof callback == "undefined") || (callback == null));
 	if (method == "GET")
-		url = url + "?" + encodeParams(data);
+	url = url + "?" + encodeParams(data);
 	var req = new XMLHttpRequest();
 	req.open((method=="GET") ? "GET" : "POST", url, callbackDefined);
 	if(method == "POST") {
@@ -137,7 +137,7 @@ function apiCall(method, url, data, callback) {
 		//req.setRequestHeader("Content-Type", "multipart/form-data;");
 		formData = new FormData();
 		for (i in data)
-			formData.append(i, data[i]);
+		formData.append(i, data[i]);
 		data = formData;
 	}
 	if (callbackDefined) {
@@ -158,41 +158,41 @@ function checkUserPhoto(path) {
 
 
 /* Procesamiento del contenido de un mensaje:
-	- adaptación de videos
-	- adaptación de resto de links 
-	A tener en cuenta.
-	https://developer.chrome.com/apps/app_external
-	https://developers.google.com/youtube/player_parameters
-	http://developer.vimeo.com/player/embedding
-	*/
-	function processContent($content, replace) {
-		var $links = $content.find("a");
-		$links.each(function() {
-			var $this = $(this),
-			ID = null,
-			href = ($this.attr("title") || $this.attr("href"));	// esto es porque los cort.as trae la url original en el title :)
-if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
-	var videoMatch = href.match(/[?&]v=([^&]+)/);
-	if (videoMatch && (ID=videoMatch[1])) {
-		if (replace) $this.replaceWith($(VIDEO_TEMPLATES["YOUTUBE"].replace("_____ID_____", ID)));
-		else this.__video__ = {service: "YOUTUBE", id: ID};
-		return;
-	};
-} else if (href.match(/https?:\/\/[w\.]*vimeo.com/)) {
-	var videoMatch = href.match(/https?:\/\/[w\.]*vimeo.com\/(\d+)/);
-	if (videoMatch && (ID=videoMatch[1])) {
-		if (replace) $this.replaceWith($(VIDEO_TEMPLATES["VIMEO"].replace("_____ID_____", ID)));
-		else this.__video__ = {service: "VIMEO", id: ID};
-		return;
-	};
-} else if (href.match(/https?:\/\/[w\.]*zappinternet.com\/video\//)) {
-	var videoMatch = href.match(/https?:\/\/[w\.]*zappinternet.com\/video\/(.+?)\//);
-	if (videoMatch && (ID=videoMatch[1])) {
-		if (replace) $this.replaceWith($(VIDEO_TEMPLATES["ZAPPINTERNET"].replace("_____ID_____", ID)));
-		else this.__video__ = {service: "ZAPPINTERNET", id: ID};
-		return;
-	};
-} else if (href.match(/https?:\/\/[w\.]*dailymotion.com\/video\//)) {
+- adaptación de videos
+- adaptación de resto de links 
+A tener en cuenta.
+https://developer.chrome.com/apps/app_external
+https://developers.google.com/youtube/player_parameters
+http://developer.vimeo.com/player/embedding
+*/
+function processContent($content, replace) {
+	var $links = $content.find("a");
+	$links.each(function() {
+		var $this = $(this),
+		ID = null,
+		href = ($this.attr("title") || $this.attr("href"));	// esto es porque los cort.as trae la url original en el title :)
+		if (href.match(/https?:\/\/[w\.]*youtube.com\/watch/)) {
+			var videoMatch = href.match(/[?&]v=([^&]+)/);
+			if (videoMatch && (ID=videoMatch[1])) {
+				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["YOUTUBE"].replace("_____ID_____", ID)));
+				else this.__video__ = {service: "YOUTUBE", id: ID};
+				return;
+			};
+		} else if (href.match(/https?:\/\/[w\.]*vimeo.com/)) {
+			var videoMatch = href.match(/https?:\/\/[w\.]*vimeo.com\/(\d+)/);
+			if (videoMatch && (ID=videoMatch[1])) {
+				if (replace) $this.replaceWith($(VIDEO_TEMPLATES["VIMEO"].replace("_____ID_____", ID)));
+				else this.__video__ = {service: "VIMEO", id: ID};
+				return;
+			};
+		} else if (href.match(/https?:\/\/[w\.]*zappinternet.com\/video\//)) {
+		var videoMatch = href.match(/https?:\/\/[w\.]*zappinternet.com\/video\/(.+?)\//);
+		if (videoMatch && (ID=videoMatch[1])) {
+			if (replace) $this.replaceWith($(VIDEO_TEMPLATES["ZAPPINTERNET"].replace("_____ID_____", ID)));
+			else this.__video__ = {service: "ZAPPINTERNET", id: ID};
+			return;
+		};
+	} else if (href.match(/https?:\/\/[w\.]*dailymotion.com\/video\//)) {
 	var videoMatch = href.match(/https?:\/\/[w\.]*dailymotion.com\/video\/([\w-]+)/);
 	if (videoMatch && (ID=videoMatch[1])) {
 		if (replace) $this.replaceWith($(VIDEO_TEMPLATES["DAILYMOTION"].replace("_____ID_____", ID)));
@@ -387,30 +387,30 @@ function Options() {
 		if (typeof o === "undefined") o = options;
 		localStorage.setItem(OPTIONS_KEY, JSON.stringify(o));
 	}
-
+	
 	// Restores select box state to saved value from localStorage.
 	function getOptions() {
 		return JSON.parse(localStorage.getItem(OPTIONS_KEY)) || DEFAULT_OPTIONS;
 	}
-
+	
 	this.setDefaultFont = function(f) {
 		options.defaultFont = f;
 		saveOptions();
 	}
-
+	
 	this.getDefaultFont = function() {
 		return options.defaultFont;
 	}
-
+	
 	this.setDefaultBoard = function(b) {
 		options.defaultBoard = b;
 		saveOptions();
 	}
-
+	
 	this.getDefaultBoard = function() {
 		return options.defaultBoard;
 	}
-
+	
 	var options = getOptions();
 }
 
