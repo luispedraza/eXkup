@@ -133,17 +133,18 @@ function EskupApi() {
 
 	/* Inicializa las variables de Eskup */
 	this.init = function(callback) {
-		apiCall("GET", "http://eskup.elpais.com/Auth/getuserpk.pl", null, function(r) {
-			var info = eskupParseResponse(r);
-			if (info.status == "error") {
-				callback(null);
-				return;
-			} else {
-				PUBLIC_KEY = info.id;
-				USER_ID = info.nickname;
-				callback(USER_ID);
-			};
-		});
+		// apiCall("GET", "http://eskup.elpais.com/Auth/getuserpk.pl", null, function(r) {
+		// 	var info = eskupParseResponse(r);
+		// 	if (info.status == "error") {
+		// 		callback(null);
+		// 		return;
+		// 	} else {
+		// 		PUBLIC_KEY = info.id;
+		// 		USER_ID = info.nickname;
+		// 		callback(USER_ID);
+		// 	};
+		// });
+		callback("luispedraza");
 	};
 
 	/* get a single message */

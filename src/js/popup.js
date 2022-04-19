@@ -557,6 +557,7 @@
 				content: "Obteniendo datos del servidor..."
 			});
 			API.loadThread(threadID, function(info) {
+				console.log(info);
 				modal.close();
 				var $tree = $("#tree").empty();
 				var aux = {};

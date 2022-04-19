@@ -6,7 +6,7 @@
   "description": "Visualiza comentarios en elpais.com, cincodias.com, as.com, cadenaser.com y los40.com, y utiliza Eskup, la red social de EL PAÍS",
   "browser_action": {
     "default_icon": "img/icon.png",
-    "default_popup": "popup.html"
+    "default_popup": "index.html"
   },
   "permissions": [
     "storage",
