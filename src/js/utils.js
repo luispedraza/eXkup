@@ -125,8 +125,12 @@ function formatDate(date, withYear) {
 // Función general de comunicación con el servidor
 function apiCall(method, url, data, callback) {
 	var callbackDefined = !((typeof callback == "undefined") || (callback == null));
-	if (method == "GET")
-	url = url + "?" + encodeParams(data);
+	if (method == "GET") 
+	//url = url + "?" + encodeParams(data);
+	url = url + "?" + new URLSearchParams(data);
+	console.log(url);
+
+	
 	var req = new XMLHttpRequest();
 	req.open((method=="GET") ? "GET" : "POST", url, callbackDefined);
 	if(method == "POST") {
